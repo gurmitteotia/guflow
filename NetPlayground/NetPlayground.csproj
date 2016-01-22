@@ -81,6 +81,7 @@
     <Compile Include="ActivityItemTests.cs" />
     <Compile Include="ActivityName.cs" />
     <Compile Include="ActivityItem.cs" />
+    <Compile Include="DecisionAssertExtension.cs" />
     <Compile Include="SchedulableItemExtensions.cs" />
     <Compile Include="IActivityHost.cs" />
     <Compile Include="IActivityTaskPoller.cs" />

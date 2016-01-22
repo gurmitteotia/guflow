@@ -6,7 +6,7 @@ namespace NetPlayground
     {
         private readonly HashSet<SchedulableItem> _workflowSchedulableItems = new HashSet<SchedulableItem>();
  
-        public WorkflowAction WorkflowStarted(WorkflowStartedArgs workflowStartedArgs)
+        public WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
             var startupSchedulableItem = _workflowSchedulableItems.GetStartupItems();
 

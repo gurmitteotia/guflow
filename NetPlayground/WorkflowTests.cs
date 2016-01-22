@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Amazon.SimpleWorkflow;
+﻿using System.Linq;
 using Amazon.SimpleWorkflow.Model;
-using FluentValidation.Results;
 using NUnit.Framework;
 
 namespace NetPlayground
@@ -15,11 +12,11 @@ namespace NetPlayground
         {
             var workflow = new TestWorkflow();
 
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedArgs()).GetDecisions();
+            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent())).GetDecisions();
 
             Assert.That(workflowStartedDecisions.Count(),Is.EqualTo(1));
-            
-            AssertThatActivityIsScheduled(workflowStartedDecisions,"Download","1.0",string.Empty);
+
+            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0", string.Empty);
         }
 
         [Test]
@@ -27,11 +24,11 @@ namespace NetPlayground
         {
             var workflow = new TestEmptyWorkflow();
 
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedArgs()).GetDecisions();
+            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent())).GetDecisions();
 
             Assert.That(workflowStartedDecisions.Count(), Is.EqualTo(1));
 
-            AssertThatActivityIsScheduled(workflowStartedDecisions, "Download", "1.0", string.Empty);
+            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0", string.Empty);
         }
 
         [Test]
@@ -43,16 +40,7 @@ namespace NetPlayground
 
             Assert.That(decisionsOnActivityCompletion.Count(), Is.EqualTo(1));
 
-            AssertThatActivityIsScheduled(decisionsOnActivityCompletion, "Transcode", "2.0", string.Empty);
-        }
-
-
-        private void AssertThatActivityIsScheduled(IEnumerable<Decision> workflowStartedDecisions, string activityName, string activityVersion, string taskListName)
-        {
-            var activityScheduleDecision = workflowStartedDecisions.First(d => d.DecisionType == DecisionType.ScheduleActivityTask);
-            var scheduleAttributes = activityScheduleDecision.ScheduleActivityTaskDecisionAttributes;
-            Assert.AreEqual(activityName,scheduleAttributes.ActivityType.Name);
-            Assert.AreEqual(activityVersion, scheduleAttributes.ActivityType.Version);
+            decisionsOnActivityCompletion.AssertThatActivityIsScheduled("Transcode", "2.0", string.Empty);
         }
 
         private class TestWorkflow : Workflow

@@ -2,7 +2,7 @@
 {
     public interface IWorkflow
     {
-        WorkflowAction WorkflowStarted(WorkflowStartedArgs workflowStartedArgs);
+        WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent);
         WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent);
         WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent);
     }

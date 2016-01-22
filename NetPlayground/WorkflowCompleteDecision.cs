@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
@@ -7,7 +8,16 @@ namespace NetPlayground
     {
         public override IEnumerable<Decision> Decisions()
         {
-            throw new System.NotImplementedException();
+            var decision = new Decision()
+            {
+                DecisionType = DecisionType.CompleteWorkflowExecution,
+                CompleteWorkflowExecutionDecisionAttributes = new CompleteWorkflowExecutionDecisionAttributes()
+                {
+                    Result = "SomeResult"
+                }
+            };
+
+            return new[] {decision};
         }
     }
 }
