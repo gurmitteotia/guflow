@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
 {
     public class WorkflowStartedAction : WorkflowAction
     {
+        private const string _defaultCompleteResult = "Workflow completed as no schedulable item is found";
         private readonly IEnumerable<SchedulableItem> _schedulableItems;
 
         public WorkflowStartedAction(IEnumerable<SchedulableItem> schedulableItems)
@@ -16,7 +16,7 @@ namespace NetPlayground
         protected override WorkflowDecision GetDecision()
         {
             if (!_schedulableItems.Any())
-                return new WorkflowCompleteDecision();
+                return new WorkflowCompleteDecision(_defaultCompleteResult);
 
             return new ScheduleItemsDecisions(_schedulableItems);
         }

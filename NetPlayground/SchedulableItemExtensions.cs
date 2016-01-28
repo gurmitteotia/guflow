@@ -10,9 +10,14 @@ namespace NetPlayground
             return scheudleItems.Where(s => s.HasNoParents());
         }
 
-        public static IEnumerable<SchedulableItem> GetChildernOf(this HashSet<SchedulableItem> schedulableItems, ActivityName activityName)
+        public static IEnumerable<SchedulableItem> GetChildernOf(this HashSet<SchedulableItem> schedulableItems, SchedulableItem item)
         {
-            return schedulableItems.Where(s => s.IsParent(activityName));
+            return schedulableItems.Where(s => s.IsChildOf(item));
+        }
+
+        public static SchedulableItem Find(this HashSet<SchedulableItem> schedulableItems, string name, string version, string positionalName)
+        {
+            return schedulableItems.FirstOrDefault(s => s.Has(name,version,positionalName));
         }
     }
 }

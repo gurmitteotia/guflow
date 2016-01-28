@@ -16,7 +16,7 @@ namespace NetPlayground
 
             Assert.That(workflowStartedDecisions.Count(),Is.EqualTo(1));
 
-            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0", string.Empty);
+            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0");
         }
 
         [Test]
@@ -28,7 +28,7 @@ namespace NetPlayground
 
             Assert.That(workflowStartedDecisions.Count(), Is.EqualTo(1));
 
-            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0", string.Empty);
+            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0");
         }
 
         [Test]
@@ -36,11 +36,11 @@ namespace NetPlayground
         {
             var workflow = new TestWorkflow();
 
-            var decisionsOnActivityCompletion = workflow.ActivityCompleted(new ActivityCompletedEvent(new HistoryEvent())).GetDecisions();
+            var decisionsOnActivityCompletion = workflow.ActivityCompleted(new ActivityCompletedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
             Assert.That(decisionsOnActivityCompletion.Count(), Is.EqualTo(1));
 
-            decisionsOnActivityCompletion.AssertThatActivityIsScheduled("Transcode", "2.0", string.Empty);
+            decisionsOnActivityCompletion.AssertThatActivityIsScheduled("Transcode", "2.0");
         }
 
         private class TestWorkflow : Workflow

@@ -79,9 +79,11 @@
     <Compile Include="ActivityHost.cs" />
     <Compile Include="ActivityHostTests.cs" />
     <Compile Include="ActivityItemTests.cs" />
-    <Compile Include="ActivityName.cs" />
     <Compile Include="ActivityItem.cs" />
     <Compile Include="DecisionAssertExtension.cs" />
+    <Compile Include="IncompatibleWorkflowException.cs" />
+    <Compile Include="JsonExtension.cs" />
+    <Compile Include="ParentItemNotFoundException.cs" />
     <Compile Include="SchedulableItemExtensions.cs" />
     <Compile Include="IActivityHost.cs" />
     <Compile Include="IActivityTaskPoller.cs" />
@@ -90,6 +92,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RuntimeActivityConfig.cs" />
     <Compile Include="SchedulableItem.cs" />
+    <Compile Include="ScheduleData.cs" />
     <Compile Include="ScheduleItemsAction.cs" />
     <Compile Include="ScheduleItemsDecisions.cs" />
     <Compile Include="ScheduleItemWorkflowDecision.cs" />

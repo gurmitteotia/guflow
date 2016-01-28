@@ -1,29 +1,53 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
 {
     public abstract class SchedulableItem
     {
-        private readonly HashSet<ActivityName> _parentActivities = new HashSet<ActivityName>();
+        protected readonly HashSet<SchedulableItem> ParentItems = new HashSet<SchedulableItem>();
+        protected readonly string Name;
+        protected readonly string Version;
+        protected readonly string PositionalName;
 
+        protected SchedulableItem(string name, string verison, string positionalName)
+        {
+            Name = name;
+            Version = verison;
+            PositionalName = positionalName;
+        }
         internal bool HasNoParents()
         {
-            return _parentActivities.Count == 0;
+            return ParentItems.Count == 0;
         }
 
-        internal bool IsParent(ActivityName name)
+        internal bool IsChildOf(SchedulableItem schedulableItem)
         {
-            return _parentActivities.Contains(name);
+            return ParentItems.Contains(schedulableItem);
         }
 
         internal abstract Decision GetDecision();
 
-        public SchedulableItem DependsOn(string name, string version, string positionalName = "")
+        public bool Has(string name, string version, string positionalName)
         {
-            _parentActivities.Add(new ActivityName(name, version, positionalName));
+            return string.Equals(Name, name, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(Version, version, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(PositionalName, positionalName);
+        }
 
-            return this;
+        public override bool Equals(object other)
+        {
+            var otherItem = other as SchedulableItem;
+            if (otherItem == null)
+                return false;
+
+            return Has(otherItem.Name, otherItem.Version, otherItem.PositionalName);
+        }
+
+        public override int GetHashCode()
+        {
+            return string.Format("{0}{1}{2}", Name, Version, PositionalName).GetHashCode();
         }
     }
 }

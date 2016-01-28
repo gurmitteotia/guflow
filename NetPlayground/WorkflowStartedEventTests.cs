@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Amazon.SimpleWorkflow.Model;
-using Moq;
 using NUnit.Framework;
 
 namespace NetPlayground
@@ -9,14 +7,6 @@ namespace NetPlayground
     [TestFixture]
     public class WorkflowStartedEventTests
     {
-        private Mock<IWorkflow> _workflow;
-
-        [SetUp]
-        public void Setup()
-        {
-            _workflow = new Mock<IWorkflow>();
-        }
-
         [Test]
         public void Return_workflow_completed_decision_when_workflow_does_not_have_any_schedulable_items()
         {
@@ -26,7 +16,7 @@ namespace NetPlayground
             var startupDecisions = workflowEvent.Interpret(emptyWorkflow).GetDecisions();
 
             Assert.That(startupDecisions.Count(),Is.EqualTo(1));
-            startupDecisions.AssertThatWorkflowIsCompleted("SomeResult");
+            startupDecisions.AssertThatWorkflowIsCompleted("Workflow completed as no schedulable item is found");
         }
 
         [Test]
@@ -37,27 +27,26 @@ namespace NetPlayground
             var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent())).GetDecisions();
 
             Assert.That(workflowStartedDecisions.Count(), Is.EqualTo(1));
-
-            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0", string.Empty);
+            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0");
         }
 
 
-        [Test]
-        public void Return_workflow_start_up_decision()
-        {
-            var workflowAction = new TestWorkflowAction();
-            WorkflowReturnThisStartupDecision(workflowAction);
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
+        //[Test]
+        //public void Return_workflow_start_up_decision()
+        //{
+        //    var workflowAction = new TestWorkflowAction();
+        //    WorkflowReturnThisStartupDecision(workflowAction);
+        //    var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
 
-            var decision = workflowEvent.Interpret(_workflow.Object);
+        //    var decision = workflowEvent.Interpret(_workflow.Object);
 
-            Assert.That(decision, Is.EqualTo(workflowAction));
-        }
+        //    Assert.That(decision, Is.EqualTo(workflowAction));
+        //}
       
-        private void WorkflowReturnThisStartupDecision(WorkflowAction workflowAction)
-        {
-            _workflow.Setup(w => w.WorkflowStarted(It.IsAny<WorkflowStartedEvent>())).Returns(workflowAction);
-        }
+        //private void WorkflowReturnThisStartupDecision(WorkflowAction workflowAction)
+        //{
+        //    _workflow.Setup(w => w.WorkflowStarted(It.IsAny<WorkflowStartedEvent>())).Returns(workflowAction);
+        //}
 
         private class EmptyWorkflow : Workflow
         {

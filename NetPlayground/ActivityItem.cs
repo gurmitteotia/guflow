@@ -1,16 +1,25 @@
-﻿using Amazon.SimpleWorkflow;
+﻿using System.Collections.Generic;
+using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
 {
     public class ActivityItem: SchedulableItem
     {
-        private readonly ActivityName _activityName;
-        private string _taskListName;
-        
-        public ActivityItem(string name, string version)
+        private readonly HashSet<SchedulableItem> _allSchedulableItems; 
+        public ActivityItem(string name, string version, string positionalName, HashSet<SchedulableItem> allSchedulableItems):base(name,version,positionalName)
         {
-            _activityName = new ActivityName(name,version);
+            _allSchedulableItems = allSchedulableItems;
+        }
+
+        public ActivityItem DependsOn(string name, string version, string positionalName = "")
+        {
+            var parentItem = _allSchedulableItems.Find(name, version, positionalName);
+            if(parentItem==null)
+                throw new ParentItemNotFoundException(string.Format("Can not find the schedulable item by name {0}, version {1} and positional name {2}",name,version,positionalName));
+            ParentItems.Add(parentItem);
+
+            return this;
         }
 
         internal override Decision GetDecision()
@@ -19,16 +28,10 @@ namespace NetPlayground
             {
                 ScheduleActivityTaskDecisionAttributes = new ScheduleActivityTaskDecisionAttributes()
                 {
-                    ActivityType = new ActivityType() {Name = _activityName.Name, Version = _activityName.Version},
-                    TaskList = new TaskList() {  Name = _taskListName}
+                    ActivityType = new ActivityType() {Name = Name, Version = Version},
                 },
                 DecisionType = DecisionType.ScheduleActivityTask
             };
-        }
-
-        public void ScheduleOnTaskList(string taskListName)
-        {
-            _taskListName = taskListName;
         }
     }
 }

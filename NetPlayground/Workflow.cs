@@ -4,18 +4,23 @@ namespace NetPlayground
 {
     public abstract class Workflow : IWorkflow
     {
-        private readonly HashSet<SchedulableItem> _workflowSchedulableItems = new HashSet<SchedulableItem>();
+        private readonly HashSet<SchedulableItem> _allSchedulableItems = new HashSet<SchedulableItem>();
  
         public WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
-            var startupSchedulableItem = _workflowSchedulableItems.GetStartupItems();
+            var startupSchedulableItem = _allSchedulableItems.GetStartupItems();
 
             return new WorkflowStartedAction(startupSchedulableItem);
         }
 
         public WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent)
         {
-            var childItems = _workflowSchedulableItems.GetChildernOf(activityCompletedEvent.ActivityName);
+            var completedSchedulableItem = _allSchedulableItems.Find(activityCompletedEvent.Name, activityCompletedEvent.Version, activityCompletedEvent.PositionalName);
+            
+            if(completedSchedulableItem==null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.",activityCompletedEvent.Name,activityCompletedEvent.Version, activityCompletedEvent.PositionalName));
+
+            var childItems = _allSchedulableItems.GetChildernOf(completedSchedulableItem);
             return new ScheduleItemsAction(childItems);
         }
 
@@ -24,10 +29,10 @@ namespace NetPlayground
             throw new System.NotImplementedException();
         }
 
-        protected ActivityItem AddActivity(string name, string version)
+        protected ActivityItem AddActivity(string name, string version, string positionalName = "")
         {
-            var runtimeActivity = new ActivityItem(name,version);
-            _workflowSchedulableItems.Add(runtimeActivity);
+            var runtimeActivity = new ActivityItem(name,version, positionalName,_allSchedulableItems);
+            _allSchedulableItems.Add(runtimeActivity);
             return runtimeActivity;
         }
     }

@@ -6,6 +6,12 @@ namespace NetPlayground
 {
     public class WorkflowCompleteDecision : WorkflowDecision
     {
+        private readonly string _result;
+        public WorkflowCompleteDecision(string result)
+        {
+            _result = result;
+        }
+
         public override IEnumerable<Decision> Decisions()
         {
             var decision = new Decision()
@@ -13,7 +19,7 @@ namespace NetPlayground
                 DecisionType = DecisionType.CompleteWorkflowExecution,
                 CompleteWorkflowExecutionDecisionAttributes = new CompleteWorkflowExecutionDecisionAttributes()
                 {
-                    Result = "SomeResult"
+                    Result = _result
                 }
             };
 
