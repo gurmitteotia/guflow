@@ -59,7 +59,14 @@ namespace NetPlayground
         [Test]
         public void Return_empty_decision_when_no_schedulable_child_item_found()
         {
-            
+            var workflow = new TestWorkflow();
+            var activityCompletedEvent = new ActivityCompletedEvent(_completedActivityEventGraph.First(), _completedActivityEventGraph);
+
+            var decisions = activityCompletedEvent.Interpret(workflow).GetDecisions();
+
+            Assert.That(decisions.Count(), Is.EqualTo(2));
+            decisions.AssertThatActivityIsScheduled("Transcode", "2.0");
+            decisions.AssertThatActivityIsScheduled("Sync", "2.1");
         }
 
         [Test]
