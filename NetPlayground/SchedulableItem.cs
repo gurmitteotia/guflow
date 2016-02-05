@@ -17,6 +17,9 @@ namespace NetPlayground
             Version = verison;
             PositionalName = positionalName;
         }
+
+        public IEnumerable<SchedulableItem> Parents { get { return ParentItems; } }
+
         internal bool HasNoParents()
         {
             return ParentItems.Count == 0;

@@ -1,4 +1,5 @@
-﻿using Amazon.SimpleWorkflow.Model;
+﻿using System.Collections.Generic;
+using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
 {
@@ -14,6 +15,11 @@ namespace NetPlayground
         public override WorkflowAction Interpret(IWorkflow workflow)
         {
             return workflow.ActivityFailed(this);
+        }
+
+        internal override SchedulableItem FindSchedulableItemIn(HashSet<SchedulableItem> allSchedulableItems)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

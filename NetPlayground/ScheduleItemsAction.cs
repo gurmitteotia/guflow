@@ -13,7 +13,18 @@ namespace NetPlayground
 
         protected override WorkflowDecision GetDecision()
         {
-            return new ScheduleItemsDecisions(_schedulableItems);
+            
+            //foreach (var schedulableItem in _schedulableItems)
+            //{
+            //    var parentItems = schedulableItem.Parents;
+            //    foreach (var parentItem in parentItems)
+            //    {
+            //        if(parentItem.IsProcessed())
+
+            //    }
+            //}
+            //return new ScheduleItemsDecisions(_schedulableItems);
+            return null;
         }
     }
 }

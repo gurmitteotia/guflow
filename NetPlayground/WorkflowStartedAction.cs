@@ -6,19 +6,23 @@ namespace NetPlayground
     public class WorkflowStartedAction : WorkflowAction
     {
         private const string _defaultCompleteResult = "Workflow completed as no schedulable item is found";
-        private readonly IEnumerable<SchedulableItem> _schedulableItems;
+        private readonly WorkflowStartedEvent _workflowStartedEvent;
+        private readonly HashSet<SchedulableItem> _allSchedulableItems;
 
-        public WorkflowStartedAction(IEnumerable<SchedulableItem> schedulableItems)
+        public WorkflowStartedAction(WorkflowStartedEvent workflowStartedEvent, HashSet<SchedulableItem> allSchedulableItems)
         {
-            _schedulableItems = schedulableItems;
+            _workflowStartedEvent = workflowStartedEvent;
+            _allSchedulableItems = allSchedulableItems;
         }
 
         protected override WorkflowDecision GetDecision()
         {
-            if (!_schedulableItems.Any())
+            var startupSchedulableItems = _allSchedulableItems.GetStartupItems();
+            
+            if (!startupSchedulableItems.Any())
                 return new WorkflowCompleteDecision(_defaultCompleteResult);
 
-            return new ScheduleItemsDecisions(_schedulableItems);
+            return new ScheduleItemsDecisions(startupSchedulableItems);
         }
     }
 }

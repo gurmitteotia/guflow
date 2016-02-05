@@ -8,9 +8,7 @@ namespace NetPlayground
  
         public WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
-            var startupSchedulableItem = _allSchedulableItems.GetStartupItems();
-
-            return new WorkflowStartedAction(startupSchedulableItem);
+            return new WorkflowStartedAction(workflowStartedEvent,_allSchedulableItems);
         }
 
         public WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent)

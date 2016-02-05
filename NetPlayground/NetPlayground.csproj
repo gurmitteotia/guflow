@@ -80,8 +80,12 @@
     <Compile Include="ActivityHostTests.cs" />
     <Compile Include="ActivityItemTests.cs" />
     <Compile Include="ActivityItem.cs" />
+    <Compile Include="ContinueWorkflowAction.cs" />
     <Compile Include="DecisionAssertExtension.cs" />
+    <Compile Include="HistoryEventFactory.cs" />
     <Compile Include="IncompatibleWorkflowException.cs" />
+    <Compile Include="IWorkflowContext.cs" />
+    <Compile Include="IWorkflowHistoryEvents.cs" />
     <Compile Include="JsonExtension.cs" />
     <Compile Include="ParentItemNotFoundException.cs" />
     <Compile Include="SchedulableItemExtensions.cs" />
@@ -104,6 +108,7 @@
     <Compile Include="WorkflowDecision.cs" />
     <Compile Include="WorkflowEvent.cs" />
     <Compile Include="WorkflowHistoryEvents.cs" />
+    <Compile Include="WorkflowHistoryEventsTests.cs" />
     <Compile Include="WorkflowStartedAction.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />
