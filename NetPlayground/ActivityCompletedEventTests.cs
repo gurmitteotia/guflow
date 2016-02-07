@@ -11,7 +11,8 @@ namespace NetPlayground
         private const string _activityVersion = "1.0";
         private const string _positionalName = "First";
         private const string _identity = "machine name";
-        
+        private const string _siblingActivityName = "Sync";
+        private const string _siblingActivityVersion = "2.0";
         private ActivityCompletedEvent _activityCompletedEvent;
 
         [SetUp]
@@ -68,11 +69,24 @@ namespace NetPlayground
         }
 
         [Test]
-        public void Return_empty_decision_when_childern_can_not_be_scheduled()
+        public void Return_empty_decision_when_one_of_the_sibiling_is_completed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
 
             var decisions = _activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
+
+            CollectionAssert.IsEmpty(decisions);
+        }
+
+        [Test]
+        public void Return_scheduling_decision_for_child_when_all_siblings_are_processed()
+        {
+            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName,"id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityCompletedEventGraph(_siblingActivityName,_siblingActivityVersion, "","id2", "re2"));
+            var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(),allHistoryEvents);
+
+            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
             CollectionAssert.IsEmpty(decisions);
         }
@@ -93,8 +107,8 @@ namespace NetPlayground
             public WorkflowWithMultipleParents()
             {
                 AddActivity(_activityName, _activityVersion, _positionalName);
-                AddActivity("Sync", "2.0");
-                AddActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName).DependsOn("Sync", "2.0");
+                AddActivity(_siblingActivityName, _siblingActivityVersion);
+                AddActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName).DependsOn(_siblingActivityName,_siblingActivityVersion);
             }
         }
 
@@ -110,7 +124,7 @@ namespace NetPlayground
         {
             public SingleActivityWorkflow()
             {
-                AddActivity(_activityName,_activityVersion);
+                AddActivity(_activityName,_activityVersion,_positionalName);
             }
         }
 

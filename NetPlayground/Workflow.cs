@@ -19,7 +19,7 @@ namespace NetPlayground
                 throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.",activityCompletedEvent.Name,activityCompletedEvent.Version, activityCompletedEvent.PositionalName));
 
             var childItems = _allSchedulableItems.GetChildernOf(completedSchedulableItem);
-            return new ScheduleItemsAction(childItems);
+            return new ScheduleItemsAction(childItems,activityCompletedEvent.WorkflowContext);
         }
 
         public WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent)

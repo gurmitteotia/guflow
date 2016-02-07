@@ -4,17 +4,16 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
 {
-    public class ActivityCompletedEvent : WorkflowEvent
+    public class ActivityCompletedEvent : ActivityEvent
     {
+        private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly ActivityTaskCompletedEventAttributes _eventAttributes;
         public ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
+            _allHistoryEvents = allHistoryEvents;
             _eventAttributes = activityCompletedEvent.ActivityTaskCompletedEventAttributes;
             PopulateHistoryEvents(allHistoryEvents);
         }
-        public string Name { get; private set; }
-        public string Version { get; private set; }
-        public string PositionalName { get; private set; }
 
         public string Identity { get; private set; }
         public string Result { get { return _eventAttributes.Result; } }
@@ -22,6 +21,11 @@ namespace NetPlayground
         public override WorkflowAction Interpret(IWorkflow workflow)
         {
             return workflow.ActivityCompleted(this);            
+        }
+
+        public override IWorkflowContext WorkflowContext
+        {
+            get { return new WorkflowContext(_allHistoryEvents); }
         }
 
         internal override SchedulableItem FindSchedulableItemIn(HashSet<SchedulableItem> allSchedulableItems)
@@ -44,6 +48,11 @@ namespace NetPlayground
                     PositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ScheduleData>().PN;
                 }
             }
+        }
+
+        public override bool IsProcessed
+        {
+            get { return true; }
         }
     }
 }

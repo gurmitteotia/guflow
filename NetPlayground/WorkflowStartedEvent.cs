@@ -6,10 +6,12 @@ namespace NetPlayground
 {
     public class WorkflowStartedEvent : WorkflowEvent
     {
+        private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly WorkflowExecutionStartedEventAttributes _workflowStartedAttributes;
 
-        public WorkflowStartedEvent(HistoryEvent workflowStartedEvent)
+        public WorkflowStartedEvent(HistoryEvent workflowStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
+            _allHistoryEvents = allHistoryEvents;
             _workflowStartedAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
         }
 
@@ -60,6 +62,11 @@ namespace NetPlayground
         public override WorkflowAction Interpret(IWorkflow workflow)
         {
             return workflow.WorkflowStarted(this);
+        }
+
+        public override IWorkflowContext WorkflowContext
+        {
+            get { return new WorkflowContext(_allHistoryEvents); }
         }
 
         internal override SchedulableItem FindSchedulableItemIn(HashSet<SchedulableItem> allSchedulableItems)

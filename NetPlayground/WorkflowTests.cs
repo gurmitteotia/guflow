@@ -12,7 +12,7 @@ namespace NetPlayground
         {
             var workflow = new TestWorkflow();
 
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent())).GetDecisions();
+            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
             Assert.That(workflowStartedDecisions.Count(),Is.EqualTo(1));
 
@@ -24,7 +24,7 @@ namespace NetPlayground
         {
             var workflow = new TestEmptyWorkflow();
 
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent())).GetDecisions();
+            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
             Assert.That(workflowStartedDecisions.Count(), Is.EqualTo(1));
 

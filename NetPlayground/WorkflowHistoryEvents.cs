@@ -12,7 +12,7 @@ namespace NetPlayground
             _allHistoryEvents = allHistoryEvents;
         }
 
-        public WorkflowEvent GetActivityEvent(string activityName, string activityVersion, string positionalName = "")
+        public ActivityEvent GetActivityEvent(string activityName, string activityVersion, string positionalName = "")
         {
             throw new System.NotImplementedException();
         }

@@ -14,7 +14,7 @@ namespace NetPlayground
         public void Return_workflow_completed_decision_when_workflow_does_not_have_any_schedulable_items()
         {
             var emptyWorkflow = new EmptyWorkflow();
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
+            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>());
 
             var startupDecisions = workflowEvent.Interpret(emptyWorkflow).GetDecisions();
 
@@ -27,7 +27,7 @@ namespace NetPlayground
         {
             var workflow = new TestWorkflow();
 
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent())).GetDecisions();
+            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
             Assert.That(workflowStartedDecisions.Count(), Is.EqualTo(1));
             workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0");
@@ -39,7 +39,7 @@ namespace NetPlayground
             var workflowStartedEvent = CreateWorkflowStartedEvent();
             var startAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
 
-            var workflowEvent = new WorkflowStartedEvent(workflowStartedEvent);
+            var workflowEvent = new WorkflowStartedEvent(workflowStartedEvent,Enumerable.Empty<HistoryEvent>());
 
             Assert.AreEqual(startAttributes.ChildPolicy.Value, workflowEvent.ChildPolicy);
             Assert.AreEqual(startAttributes.ContinuedExecutionRunId, workflowEvent.ContinuedExecutionRunId);
@@ -59,7 +59,7 @@ namespace NetPlayground
         public void Return_workflow_started_action()
         {
             var workflow = new EmptyWorkflow();
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
+            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>());
 
             var workflowAction = workflowEvent.Interpret(workflow);
 

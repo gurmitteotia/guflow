@@ -2,6 +2,6 @@
 {
     public interface IWorkflowContext
     {
-        WorkflowEvent GetActivityEvent(string activityName, string activityVersion, string positionalName = "");
+        ActivityEvent GetActivityEvent(string activityName, string activityVersion, string positionalName = "");
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
@@ -17,8 +18,6 @@ namespace NetPlayground
             Version = verison;
             PositionalName = positionalName;
         }
-
-        public IEnumerable<SchedulableItem> Parents { get { return ParentItems; } }
 
         internal bool HasNoParents()
         {
@@ -52,5 +51,12 @@ namespace NetPlayground
         {
             return string.Format("{0}{1}{2}", Name, Version, PositionalName).GetHashCode();
         }
+
+        public bool AllParentsAreProcessed(IWorkflowContext workflowContext)
+        {
+            return ParentItems.All(p => p.IsProcessed(workflowContext));
+        }
+
+        protected abstract bool IsProcessed(IWorkflowContext workflowContext);
     }
 }

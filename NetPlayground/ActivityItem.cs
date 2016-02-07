@@ -33,5 +33,12 @@ namespace NetPlayground
                 DecisionType = DecisionType.ScheduleActivityTask
             };
         }
+
+        protected override bool IsProcessed(IWorkflowContext workflowContext)
+        {
+            var activity = workflowContext.GetActivityEvent(Name, Version, PositionalName);
+
+            return activity != null && activity.IsProcessed;
+        }
     }
 }

@@ -17,6 +17,11 @@ namespace NetPlayground
             return workflow.ActivityFailed(this);
         }
 
+        public override IWorkflowContext WorkflowContext
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
         internal override SchedulableItem FindSchedulableItemIn(HashSet<SchedulableItem> allSchedulableItems)
         {
             throw new System.NotImplementedException();
