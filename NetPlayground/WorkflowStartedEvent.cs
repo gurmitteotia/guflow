@@ -68,10 +68,5 @@ namespace NetPlayground
         {
             get { return new WorkflowContext(_allHistoryEvents); }
         }
-
-        internal override SchedulableItem FindSchedulableItemIn(HashSet<SchedulableItem> allSchedulableItems)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

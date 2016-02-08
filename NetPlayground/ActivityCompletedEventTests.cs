@@ -88,7 +88,8 @@ namespace NetPlayground
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
-            CollectionAssert.IsEmpty(decisions);
+            Assert.That(decisions.Count(),Is.EqualTo(1));
+            decisions.AssertThatActivityIsScheduled("Transcode", "2.0");
         }
 
         private class TestWorkflow : Workflow
@@ -128,12 +129,13 @@ namespace NetPlayground
             }
         }
 
-        private class EmptyWorkflow : Workflow
+        private class WorkflowWithCustomAction : Workflow
         {
-            public EmptyWorkflow()
+            public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                
+                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => workflowAction);
             }
         }
+       
     }
 }

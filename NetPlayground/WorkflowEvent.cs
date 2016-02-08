@@ -7,7 +7,5 @@ namespace NetPlayground
         public abstract WorkflowAction Interpret(IWorkflow workflow);
 
         public abstract IWorkflowContext WorkflowContext { get; }
-
-        internal abstract SchedulableItem FindSchedulableItemIn(HashSet<SchedulableItem> allSchedulableItems);
     }
 }

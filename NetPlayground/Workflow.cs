@@ -13,13 +13,12 @@ namespace NetPlayground
 
         public WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent)
         {
-            var completedSchedulableItem = _allSchedulableItems.Find(activityCompletedEvent.Name, activityCompletedEvent.Version, activityCompletedEvent.PositionalName);
+            var workflowActivity = _allSchedulableItems.FindActivity(activityCompletedEvent.Name, activityCompletedEvent.Version, activityCompletedEvent.PositionalName);
             
-            if(completedSchedulableItem==null)
+            if(workflowActivity==null)
                 throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.",activityCompletedEvent.Name,activityCompletedEvent.Version, activityCompletedEvent.PositionalName));
 
-            var childItems = _allSchedulableItems.GetChildernOf(completedSchedulableItem);
-            return new ScheduleItemsAction(childItems,activityCompletedEvent.WorkflowContext);
+            return workflowActivity.Completed(activityCompletedEvent);
         }
 
         public WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent)

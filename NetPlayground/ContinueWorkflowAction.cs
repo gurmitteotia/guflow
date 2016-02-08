@@ -1,14 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace NetPlayground
 {
     public class ContinueWorkflowAction : WorkflowAction
     {
+        private readonly SchedulableItem _completedSchedulableItem;
         private readonly WorkflowEvent _completedWorkflowEvent;
         private readonly HashSet<SchedulableItem> _allSchedulableItems;
 
-        public ContinueWorkflowAction(WorkflowEvent completedWorkflowEvent, HashSet<SchedulableItem> allSchedulableItems)
+        public ContinueWorkflowAction(SchedulableItem completedSchedulableItem, WorkflowEvent completedWorkflowEvent, HashSet<SchedulableItem> allSchedulableItems)
         {
+            _completedSchedulableItem = completedSchedulableItem;
             _completedWorkflowEvent = completedWorkflowEvent;
             _allSchedulableItems = allSchedulableItems;
         }
@@ -16,13 +19,11 @@ namespace NetPlayground
 
         protected override WorkflowDecision GetDecision()
         {
-            var completedSchedulableItem = _completedWorkflowEvent.FindSchedulableItemIn(_allSchedulableItems);
+            var childItems = _allSchedulableItems.GetChildernOf(_completedSchedulableItem);
 
-            if (completedSchedulableItem == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find schedulable item {0} in workflow.",_completedWorkflowEvent));
+            var filteredItems = childItems.Where(s => s.AllParentsAreProcessed(_completedWorkflowEvent.WorkflowContext));
 
-            var childItems = _allSchedulableItems.GetChildernOf(completedSchedulableItem);
-            return new ScheduleItemsDecisions(childItems);
+            return new ScheduleItemsDecisions(filteredItems);
         }
     }
 }

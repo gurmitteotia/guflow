@@ -21,10 +21,5 @@ namespace NetPlayground
         {
             get { throw new System.NotImplementedException(); }
         }
-
-        internal override SchedulableItem FindSchedulableItemIn(HashSet<SchedulableItem> allSchedulableItems)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

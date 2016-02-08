@@ -28,11 +28,6 @@ namespace NetPlayground
             get { return new WorkflowContext(_allHistoryEvents); }
         }
 
-        internal override SchedulableItem FindSchedulableItemIn(HashSet<SchedulableItem> allSchedulableItems)
-        {
-            return allSchedulableItems.Find(Name, Version, PositionalName);
-        }
-
         private void PopulateHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
         {
             foreach (var historyEvent in allHistoryEvents)
