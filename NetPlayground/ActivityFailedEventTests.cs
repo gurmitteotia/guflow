@@ -1,5 +1,4 @@
-﻿using Amazon.SimpleWorkflow.Model;
-using Moq;
+﻿using System.Linq;
 using NUnit.Framework;
 
 namespace NetPlayground
@@ -7,23 +6,36 @@ namespace NetPlayground
     [TestFixture]
     public class ActivityFailedEventTests
     {
-        private Mock<IWorkflow> _workflow;
+        private ActivityFailedEvent _activityFailedEvent;
+        private const string _activityName = "Download";
+        private const string _activityVersion = "1.0";
+        private const string _positionalName = "First";
+        private const string _identity = "machine name";
+        private const string _reason = "reason";
+        private const string _detail = "detail";
         [SetUp]
         public void Setup()
         {
-            _workflow = new Mock<IWorkflow>();
+            var failedActivityEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityName,_activityVersion,_positionalName,_identity,_reason,_detail);
+            _activityFailedEvent = new ActivityFailedEvent(failedActivityEventGraph.First(),failedActivityEventGraph);
         }
             
         [Test]
-        public void Return_activity_failed_decision()
+        public void Populate_event_attributes()
         {
-            var decisionOnFailedActivity = new TestWorkflowAction();
-            var activityFailedEvent = new ActivityFailedEvent(new HistoryEvent());
-            _workflow.Setup(w => w.ActivityFailed(activityFailedEvent)).Returns(decisionOnFailedActivity);
-
-            var decision = activityFailedEvent.Interpret(_workflow.Object);
-
-            Assert.That(decision,Is.EqualTo(decisionOnFailedActivity));
+            Assert.That(_activityFailedEvent.Name,Is.EqualTo(_activityName));
+            Assert.That(_activityFailedEvent.Version,Is.EqualTo(_activityVersion));
+            Assert.That(_activityFailedEvent.PositionalName,Is.EqualTo(_positionalName));
+            Assert.That(_activityFailedEvent.Identity,Is.EqualTo(_identity));
+            Assert.That(_activityFailedEvent.Reason,Is.EqualTo(_reason));
+            Assert.That(_activityFailedEvent.Detail,Is.EqualTo(_detail));
         }
+
+        [Test]
+        public void Throws_exception_when_failed_activity_is_not_found_in_workflow()
+        {
+            
+        }
+
     }
 }

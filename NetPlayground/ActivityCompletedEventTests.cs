@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
+using Moq;
 using NUnit.Framework;
 
 namespace NetPlayground
@@ -90,6 +92,17 @@ namespace NetPlayground
 
             Assert.That(decisions.Count(),Is.EqualTo(1));
             decisions.AssertThatActivityIsScheduled("Transcode", "2.0");
+        }
+
+        [Test]
+        public void Return_the_custom_completion_action()
+        {
+            var workflowAction = new Mock<WorkflowAction>();
+            var workflow = new WorkflowWithCustomAction(workflowAction.Object);
+
+            var interpretedAction = _activityCompletedEvent.Interpret(workflow);
+
+            Assert.That(interpretedAction,Is.EqualTo(workflowAction.Object));
         }
 
         private class TestWorkflow : Workflow

@@ -46,6 +46,47 @@ namespace NetPlayground
             return historyEvents;
         }
 
+        public static IEnumerable<HistoryEvent> CreateActivityFailedEventGraph(string activityName, string activityVersion, string positionalName, string identity, string reason, string detail)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskFailed,
+                EventId = eventIds.CompletedId,
+                ActivityTaskFailedEventAttributes = new ActivityTaskFailedEventAttributes()
+                {
+                    Details = detail,
+                    Reason = reason,
+                    ScheduledEventId = eventIds.ScheduledId,
+                    StartedEventId = eventIds.StartedId
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskStarted,
+                EventId = eventIds.StartedId,
+                ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
+                {
+                    Identity = identity,
+                    ScheduledEventId = eventIds.ScheduledId
+
+                }
+            });
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskScheduled,
+                EventId = eventIds.ScheduledId,
+                ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
+                {
+                    ActivityType = new ActivityType() { Name = activityName, Version = activityVersion },
+                    Control = (new ScheduleData() { PN = positionalName }).ToJson()
+                }
+            });
+            return historyEvents;
+        }
+
         private class EventIds
         {
             private static long _seed = long.MaxValue;
@@ -78,5 +119,7 @@ namespace NetPlayground
                 get { return _completedId - 2; }
             }
         }
+
+        
     }
 }

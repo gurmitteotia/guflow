@@ -22,7 +22,7 @@ namespace NetPlayground
 
         public static ActivityItem FindActivity(this HashSet<SchedulableItem> schedulableItems, string name, string version, string positionalName)
         {
-            return schedulableItems.FirstOrDefault(s => s.Has(name, version, positionalName)) as ActivityItem;
+            return schedulableItems.OfType<ActivityItem>().FirstOrDefault(s => s.Has(name, version, positionalName));
         }
     }
 }
