@@ -9,7 +9,7 @@ namespace NetPlayground
     {
         private readonly HashSet<SchedulableItem> _allSchedulableItems;
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
- 
+        private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction; 
         public ActivityItem(string name, string version, string positionalName, HashSet<SchedulableItem> allSchedulableItems):base(name,version,positionalName)
         {
             _allSchedulableItems = allSchedulableItems;
@@ -54,6 +54,11 @@ namespace NetPlayground
         {
             _onCompletionAction = onCompletionFunc;
             return this;
+        }
+
+        public WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
+        {
+            throw new NotImplementedException();
         }
     }
 }

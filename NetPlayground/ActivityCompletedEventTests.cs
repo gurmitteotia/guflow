@@ -43,7 +43,7 @@ namespace NetPlayground
         [Test]
         public void Throws_exception_when_completed_activity_is_not_found_in_workflow()
         {
-            var incompatibleWorkflow = new IncompatibleWorkflow();
+            var incompatibleWorkflow = new EmptyWorkflow();
 
             Assert.Throws<IncompatibleWorkflowException>(()=> _activityCompletedEvent.Interpret(incompatibleWorkflow));
         }
@@ -51,7 +51,7 @@ namespace NetPlayground
         [Test]
         public void Return_the_scheduling_decision_for_all_child_activities()
         {
-            var workflow = new TestWorkflow();
+            var workflow = new WorkflowWithMultipleChilds();
 
             var decisions = _activityCompletedEvent.Interpret(workflow).GetDecisions();
 
@@ -105,9 +105,9 @@ namespace NetPlayground
             Assert.That(interpretedAction,Is.EqualTo(workflowAction.Object));
         }
 
-        private class TestWorkflow : Workflow
+        private class WorkflowWithMultipleChilds : Workflow
         {
-            public TestWorkflow()
+            public WorkflowWithMultipleChilds()
             {
                 AddActivity(_activityName,_activityVersion,_positionalName);
 
@@ -126,12 +126,9 @@ namespace NetPlayground
             }
         }
 
-        private class IncompatibleWorkflow : Workflow
+        private class EmptyWorkflow : Workflow
         {
-            public IncompatibleWorkflow()
-            {
-                AddActivity("Transcode", "1.0");
-            }
+           
         }
 
         private class SingleActivityWorkflow : Workflow

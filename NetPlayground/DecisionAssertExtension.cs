@@ -17,10 +17,19 @@ namespace NetPlayground
 
         public static void AssertThatWorkflowIsCompleted(this IEnumerable<Decision> workflowStartedDecisions, string result)
         {
-            var activityScheduleDecision = workflowStartedDecisions.First(d => d.DecisionType == DecisionType.CompleteWorkflowExecution);
-            var decisionAttributes = activityScheduleDecision.CompleteWorkflowExecutionDecisionAttributes;
+            var workflowCompleted = workflowStartedDecisions.First(d => d.DecisionType == DecisionType.CompleteWorkflowExecution);
+            var decisionAttributes = workflowCompleted.CompleteWorkflowExecutionDecisionAttributes;
            
             Assert.AreEqual(result,decisionAttributes.Result);
+        }
+
+        public static void AssertThatWorkflowHasFailed(this IEnumerable<Decision> workflowStartedDecisions, string reason, string detail)
+        {
+            var workflowFailed = workflowStartedDecisions.First(d => d.DecisionType == DecisionType.FailWorkflowExecution);
+            var decisionAttributes = workflowFailed.FailWorkflowExecutionDecisionAttributes;
+
+            Assert.AreEqual(reason, decisionAttributes.Reason);
+            Assert.AreEqual(detail,decisionAttributes.Details);
         }
     }
 }

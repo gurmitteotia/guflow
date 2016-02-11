@@ -23,7 +23,12 @@ namespace NetPlayground
 
         public WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent)
         {
-            throw new System.NotImplementedException();
+            var workflowActivity = _allSchedulableItems.FindActivity(activityFailedEvent.Name, activityFailedEvent.Version, activityFailedEvent.PositionalName);
+
+            if (workflowActivity == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", activityFailedEvent.Name, activityFailedEvent.Version, activityFailedEvent.PositionalName));
+
+            return workflowActivity.Failed(activityFailedEvent);
         }
 
         protected ActivityItem AddActivity(string name, string version, string positionalName = "")

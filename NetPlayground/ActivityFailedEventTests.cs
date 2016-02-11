@@ -34,7 +34,35 @@ namespace NetPlayground
         [Test]
         public void Throws_exception_when_failed_activity_is_not_found_in_workflow()
         {
+            var incompatibleWorkflow = new EmptyWorkflow();
+
+            Assert.Throws<IncompatibleWorkflowException>(() => _activityFailedEvent.Interpret(incompatibleWorkflow));
+        }
+
+        [Test]
+        public void Return_workflow_failed_decision()
+        {
+            var workflow = new SingleActivityWorkflow();
+
+            var decisions = _activityFailedEvent.Interpret(workflow).GetDecisions();
+
+            Assert.That(decisions.Count(),Is.EqualTo(1));
+            decisions.AssertThatWorkflowHasFailed(_reason,_detail);
+
+        }
+
+
+        private class EmptyWorkflow : Workflow
+        {
             
+        }
+
+        private class SingleActivityWorkflow : Workflow
+        {
+            public SingleActivityWorkflow()
+            {
+                AddActivity(_activityName, _activityVersion, _positionalName);
+            }
         }
 
     }
