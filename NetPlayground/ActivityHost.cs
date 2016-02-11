@@ -10,6 +10,8 @@ namespace NetPlayground
         public ActivityHost(IActivityConnection activityConnection)
         {
             _activityConnection = activityConnection;
+
+
          }
 
         public void Open()
@@ -20,6 +22,8 @@ namespace NetPlayground
         public void Shutdown()
         {
             
+
+
         }
       
 
