@@ -15,14 +15,14 @@ namespace NetPlayground
             _allSchedulableItems = allSchedulableItems;
         }
 
-        protected override WorkflowDecision GetDecision()
+        public override IEnumerable<WorkflowDecision> GetDecisions()
         {
             var startupSchedulableItems = _allSchedulableItems.GetStartupItems();
-            
-            if (!startupSchedulableItems.Any())
-                return new WorkflowCompleteDecision(_defaultCompleteResult);
 
-            return new ScheduleItemsDecisions(startupSchedulableItems);
+            if (!startupSchedulableItems.Any())
+                return new []{new CompleteWorkflowDecision(_defaultCompleteResult)};
+
+            return startupSchedulableItems.Select(s => s.GetDecision());
         }
     }
 }

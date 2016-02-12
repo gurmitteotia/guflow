@@ -1,14 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace NetPlayground
 {
     public abstract class Workflow : IWorkflow
     {
         private readonly HashSet<SchedulableItem> _allSchedulableItems = new HashSet<SchedulableItem>();
- 
+        private Func<WorkflowStartedEvent, WorkflowAction> _onStartupFunc;
+
+        protected Workflow()
+        {
+            _onStartupFunc = s => new WorkflowStartedAction(s, _allSchedulableItems);
+        }
+        
+
         public WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
-            return new WorkflowStartedAction(workflowStartedEvent,_allSchedulableItems);
+            return _onStartupFunc(workflowStartedEvent);
         }
 
         public WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent)
@@ -37,5 +45,12 @@ namespace NetPlayground
             _allSchedulableItems.Add(runtimeActivity);
             return runtimeActivity;
         }
+
+        protected Workflow OnStartup(Func<WorkflowStartedEvent, WorkflowAction> workflowStartupFunc)
+        {
+            _onStartupFunc = workflowStartupFunc;
+            return this;
+        }
+       
     }
 }

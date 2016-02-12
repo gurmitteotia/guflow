@@ -68,7 +68,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActivityCompletedAction.cs" />
     <Compile Include="ActivityCompletedEvent.cs" />
     <Compile Include="ActivityCompletedEventTests.cs" />
     <Compile Include="ActivityEvent.cs" />
@@ -80,6 +79,8 @@
     <Compile Include="ActivityItem.cs" />
     <Compile Include="ContinueWorkflowAction.cs" />
     <Compile Include="DecisionAssertExtension.cs" />
+    <Compile Include="FailWorkflowAction.cs" />
+    <Compile Include="FailWorkflowDecision.cs" />
     <Compile Include="HistoryEventFactory.cs" />
     <Compile Include="HistoryEventsExtension.cs" />
     <Compile Include="IncompatibleWorkflowException.cs" />
@@ -96,17 +97,19 @@
     <Compile Include="RuntimeActivityConfig.cs" />
     <Compile Include="SchedulableItem.cs" />
     <Compile Include="ScheduleActivityDecision.cs" />
+    <Compile Include="ScheduleActivityDecisionTests.cs" />
     <Compile Include="ScheduleData.cs" />
-    <Compile Include="ScheduleItemsDecisions.cs" />
     <Compile Include="TestWorkflows\TestWorkflow.cs" />
     <Compile Include="Workflow.cs" />
     <Compile Include="WorkflowAction.cs" />
-    <Compile Include="WorkflowCompleteDecision.cs" />
+    <Compile Include="CompleteWorkflowDecision.cs" />
     <Compile Include="WorkflowContext.cs" />
     <Compile Include="WorkflowDecision.cs" />
     <Compile Include="WorkflowEvent.cs" />
     <Compile Include="WorkflowHistoryEvents.cs" />
     <Compile Include="WorkflowHistoryEventsTests.cs" />
+    <Compile Include="WorkflowItemIdentity.cs" />
+    <Compile Include="WorkflowItemIdentityTests.cs" />
     <Compile Include="WorkflowStartedAction.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />

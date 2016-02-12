@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
@@ -32,11 +31,11 @@ namespace NetPlayground
         {
             foreach (var historyEvent in allHistoryEvents)
             {
-                if (historyEvent.EventId == _eventAttributes.StartedEventId && historyEvent.EventType == EventType.ActivityTaskStarted)
+                if (historyEvent.IsActivityStartedEventFor(_eventAttributes.StartedEventId))
                 {
                      Identity = historyEvent.ActivityTaskStartedEventAttributes.Identity;
                 }
-                else if (historyEvent.EventId == _eventAttributes.ScheduledEventId && historyEvent.EventType == EventType.ActivityTaskScheduled)
+                else if (historyEvent.IsActivityScheduledEventFor(_eventAttributes.ScheduledEventId))
                 {
                     Name = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
                     Version = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;

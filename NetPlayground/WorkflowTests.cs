@@ -14,9 +14,9 @@ namespace NetPlayground
 
             var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
-            Assert.That(workflowStartedDecisions.Count(),Is.EqualTo(1));
 
-            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0");
+            Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Download", "1.0")}));
+
         }
 
         [Test]
@@ -26,9 +26,7 @@ namespace NetPlayground
 
             var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
-            Assert.That(workflowStartedDecisions.Count(), Is.EqualTo(1));
-
-            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0");
+            Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new CompleteWorkflowDecision("Workflow completed as no schedulable item is found")}));
         }
 
         [Test]
@@ -38,9 +36,8 @@ namespace NetPlayground
 
             var decisionsOnActivityCompletion = workflow.ActivityCompleted(new ActivityCompletedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
-            Assert.That(decisionsOnActivityCompletion.Count(), Is.EqualTo(1));
+            Assert.That(decisionsOnActivityCompletion, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
 
-            decisionsOnActivityCompletion.AssertThatActivityIsScheduled("Transcode", "2.0");
         }
 
         private class TestWorkflow : Workflow

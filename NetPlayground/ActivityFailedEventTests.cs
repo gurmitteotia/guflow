@@ -46,9 +46,7 @@ namespace NetPlayground
 
             var decisions = _activityFailedEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions.Count(),Is.EqualTo(1));
-            decisions.AssertThatWorkflowHasFailed(_reason,_detail);
-
+            Assert.That(decisions,Is.EquivalentTo(new []{new FailWorkflowDecision(_reason,_detail)}));
         }
 
 

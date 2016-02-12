@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
 {
@@ -29,7 +28,7 @@ namespace NetPlayground
             return ParentItems.Contains(schedulableItem);
         }
 
-        internal abstract Decision GetDecision();
+        internal abstract WorkflowDecision GetDecision();
 
         public bool Has(string name, string version, string positionalName)
         {

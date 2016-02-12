@@ -9,5 +9,15 @@ namespace NetPlayground
         {
             return historyEvent.EventType == EventType.ActivityTaskCompleted;
         }
+
+        public static bool IsActivityStartedEventFor(this HistoryEvent historyEvent, long startedEventId)
+        {
+            return historyEvent.EventType == EventType.ActivityTaskStarted && historyEvent.EventId == startedEventId;
+        }
+
+        public static bool IsActivityScheduledEventFor(this HistoryEvent historyEvent, long scheduledEventId)
+        {
+            return historyEvent.EventType == EventType.ActivityTaskScheduled && historyEvent.EventId == scheduledEventId;
+        }
     }
 }

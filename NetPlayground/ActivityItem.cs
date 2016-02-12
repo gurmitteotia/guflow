@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Amazon.SimpleWorkflow;
-using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
 {
@@ -14,6 +12,7 @@ namespace NetPlayground
         {
             _allSchedulableItems = allSchedulableItems;
             _onCompletionAction = c=>new ContinueWorkflowAction(this,c,_allSchedulableItems);
+            _onFailedAction = c=> new FailWorkflowAction(c.Reason,c.Detail);
         }
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")
@@ -26,16 +25,9 @@ namespace NetPlayground
             return this;
         }
 
-        internal override Decision GetDecision()
+        internal override WorkflowDecision GetDecision()
         {
-            return new Decision()
-            {
-                ScheduleActivityTaskDecisionAttributes = new ScheduleActivityTaskDecisionAttributes()
-                {
-                    ActivityType = new ActivityType() {Name = Name, Version = Version},
-                },
-                DecisionType = DecisionType.ScheduleActivityTask
-            };
+            return new ScheduleActivityDecision(Name, Version, PositionalName);
         }
 
         internal WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent)
@@ -58,7 +50,7 @@ namespace NetPlayground
 
         public WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
         {
-            throw new NotImplementedException();
+            return _onFailedAction(activityFailedEvent);
         }
     }
 }

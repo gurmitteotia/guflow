@@ -55,9 +55,7 @@ namespace NetPlayground
 
             var decisions = _activityCompletedEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions.Count(), Is.EqualTo(2));
-            decisions.AssertThatActivityIsScheduled("Transcode", "2.0");
-            decisions.AssertThatActivityIsScheduled("Sync", "2.1");
+            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleActivityDecision("Transcode","2.0"),new ScheduleActivityDecision("Sync","2.1")}));
         }
 
         [Test]
@@ -90,8 +88,7 @@ namespace NetPlayground
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
-            Assert.That(decisions.Count(),Is.EqualTo(1));
-            decisions.AssertThatActivityIsScheduled("Transcode", "2.0");
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0")}));
         }
 
         [Test]

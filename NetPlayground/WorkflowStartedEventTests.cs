@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
+using Moq;
 using NUnit.Framework;
 
 namespace NetPlayground
@@ -18,8 +19,7 @@ namespace NetPlayground
 
             var startupDecisions = workflowEvent.Interpret(emptyWorkflow).GetDecisions();
 
-            Assert.That(startupDecisions.Count(),Is.EqualTo(1));
-            startupDecisions.AssertThatWorkflowIsCompleted("Workflow completed as no schedulable item is found");
+            CollectionAssert.AreEqual(startupDecisions, new[] { new CompleteWorkflowDecision("Workflow completed as no schedulable item is found")});
         }
 
         [Test]
@@ -29,8 +29,7 @@ namespace NetPlayground
 
             var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
-            Assert.That(workflowStartedDecisions.Count(), Is.EqualTo(1));
-            workflowStartedDecisions.AssertThatActivityIsScheduled("Download", "1.0");
+            Assert.That(workflowStartedDecisions,Is.EquivalentTo(new []{new ScheduleActivityDecision("Download","1.0"), }));
         }
 
         [Test]
@@ -56,6 +55,18 @@ namespace NetPlayground
         }
 
         [Test]
+        public void Return_custom_workflow_startup_decision()
+        {
+            var customStartupAction = new Mock<WorkflowAction>();
+            var workflow = new WorkflowWithCustomStartupAction(customStartupAction.Object);
+            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>());
+
+            var actualStartupAction = workflowEvent.Interpret(workflow);
+
+            Assert.That(actualStartupAction,Is.EqualTo(customStartupAction.Object));
+        }
+
+        [Test]
         public void Return_workflow_started_action()
         {
             var workflow = new EmptyWorkflow();
@@ -65,24 +76,6 @@ namespace NetPlayground
 
             Assert.That(workflowAction,Is.InstanceOf<WorkflowStartedAction>());
         }
-
-
-        //[Test]
-        //public void Return_workflow_start_up_decision()
-        //{
-        //    var workflowAction = new TestWorkflowAction();
-        //    WorkflowReturnThisStartupDecision(workflowAction);
-        //    var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
-
-        //    var decision = workflowEvent.Interpret(_workflow.Object);
-
-        //    Assert.That(decision, Is.EqualTo(workflowAction));
-        //}
-      
-        //private void WorkflowReturnThisStartupDecision(WorkflowAction workflowAction)
-        //{
-        //    _workflow.Setup(w => w.WorkflowStarted(It.IsAny<WorkflowStartedEvent>())).Returns(workflowAction);
-        //}
 
         private class EmptyWorkflow : Workflow
         {
@@ -95,6 +88,14 @@ namespace NetPlayground
                 AddActivity("Download", "1.0");
 
                 AddActivity("Transcode", "2.0").DependsOn("Download", "1.0");
+            }
+        }
+
+        private class WorkflowWithCustomStartupAction : Workflow
+        {
+            public WorkflowWithCustomStartupAction(WorkflowAction workflowAction)
+            {
+                OnStartup(s => workflowAction);
             }
         }
 

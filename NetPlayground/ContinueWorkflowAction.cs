@@ -15,15 +15,15 @@ namespace NetPlayground
             _completedWorkflowEvent = completedWorkflowEvent;
             _allSchedulableItems = allSchedulableItems;
         }
+      
 
-
-        protected override WorkflowDecision GetDecision()
+        public override IEnumerable<WorkflowDecision> GetDecisions()
         {
             var childItems = _allSchedulableItems.GetChildernOf(_completedSchedulableItem);
 
             var filteredItems = childItems.Where(s => s.AllParentsAreProcessed(_completedWorkflowEvent.WorkflowContext));
 
-            return new ScheduleItemsDecisions(filteredItems);
+            return filteredItems.Select(f => f.GetDecision());
         }
     }
 }

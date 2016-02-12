@@ -1,4 +1,6 @@
-﻿namespace NetPlayground
+﻿using System.Collections.Generic;
+
+namespace NetPlayground
 {
     public interface IWorkflow
     {
