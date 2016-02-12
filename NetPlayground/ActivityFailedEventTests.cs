@@ -52,7 +52,6 @@ namespace NetPlayground
 
         private class EmptyWorkflow : Workflow
         {
-            
         }
 
         private class SingleActivityWorkflow : Workflow
