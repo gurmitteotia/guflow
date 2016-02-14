@@ -22,6 +22,20 @@ namespace NetPlayground
                     if(activityCompletedEvent.Has(activityName,activityVersion,positionalName))
                         return activityCompletedEvent;
                 }
+
+                else if (historyEvent.IsActivityFailedEvent())
+                {
+                    var activityCompletedEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
+                    if (activityCompletedEvent.Has(activityName, activityVersion, positionalName))
+                        return activityCompletedEvent;
+                }
+                else if (historyEvent.IsActivityTimedoutEvent())
+                {
+                    var activityCompletedEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
+                    if (activityCompletedEvent.Has(activityName, activityVersion, positionalName))
+                        return activityCompletedEvent;
+                }
+
             }
 
             return null;

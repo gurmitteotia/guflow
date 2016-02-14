@@ -39,6 +39,16 @@ namespace NetPlayground
             return workflowActivity.Failed(activityFailedEvent);
         }
 
+        public WorkflowAction ActivityTimedout(ActivityTimedoutEvent activityTimedoutEvent)
+        {
+            var workflowActivity = _allSchedulableItems.FindActivity(activityTimedoutEvent.Name, activityTimedoutEvent.Version, activityTimedoutEvent.PositionalName);
+
+            if (workflowActivity == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", activityTimedoutEvent.Name, activityTimedoutEvent.Version, activityTimedoutEvent.PositionalName));
+
+            return workflowActivity.Timedout(activityTimedoutEvent);
+        }
+
         protected ActivityItem AddActivity(string name, string version, string positionalName = "")
         {
             var runtimeActivity = new ActivityItem(name,version, positionalName,_allSchedulableItems);

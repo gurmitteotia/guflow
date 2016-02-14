@@ -77,6 +77,8 @@
     <Compile Include="ActivityHostTests.cs" />
     <Compile Include="ActivityItemTests.cs" />
     <Compile Include="ActivityItem.cs" />
+    <Compile Include="ActivityTimedoutEvent.cs" />
+    <Compile Include="ActivityTimedoutEventTests.cs" />
     <Compile Include="ContinueWorkflowAction.cs" />
     <Compile Include="DecisionAssertExtension.cs" />
     <Compile Include="FailWorkflowAction.cs" />

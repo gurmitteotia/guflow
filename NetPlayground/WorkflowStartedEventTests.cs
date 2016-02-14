@@ -99,7 +99,7 @@ namespace NetPlayground
             }
         }
 
-        private HistoryEvent CreateWorkflowStartedEvent()
+        private static HistoryEvent CreateWorkflowStartedEvent()
         {
             return new HistoryEvent()
             {

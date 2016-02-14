@@ -10,6 +10,16 @@ namespace NetPlayground
             return historyEvent.EventType == EventType.ActivityTaskCompleted;
         }
 
+        public static bool IsActivityFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ActivityTaskFailed;
+        }
+
+        public static bool IsActivityTimedoutEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ActivityTaskTimedOut;
+        }
+
         public static bool IsActivityStartedEventFor(this HistoryEvent historyEvent, long startedEventId)
         {
             return historyEvent.EventType == EventType.ActivityTaskStarted && historyEvent.EventId == startedEventId;

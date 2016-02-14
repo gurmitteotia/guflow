@@ -79,7 +79,7 @@ namespace NetPlayground
         }
 
         [Test]
-        public void Return_scheduling_decision_for_child_when_all_siblings_are_processed()
+        public void Return_scheduling_decision_for_child_when_sibling_is_completed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName,"id", "res")
@@ -89,6 +89,32 @@ namespace NetPlayground
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
             Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0")}));
+        }
+
+        [Test]
+        public void Return_scheduling_decision_for_child_when_sibling_activity_is_failed()
+        {
+            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityFailedEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "re2","detail"));
+            var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
+
+            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
+        }
+
+        [Test]
+        public void Return_scheduling_decision_for_child_when_sibling_activity_is_timedout()
+        {
+            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityTimedoutEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "re2", "detail"));
+            var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
+
+            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
         }
 
         [Test]

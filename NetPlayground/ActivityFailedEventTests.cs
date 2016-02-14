@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Moq;
 using NUnit.Framework;
 
 namespace NetPlayground
@@ -40,7 +42,7 @@ namespace NetPlayground
         }
 
         [Test]
-        public void Return_workflow_failed_decision()
+        public void By_default_return_workflow_failed_decision()
         {
             var workflow = new SingleActivityWorkflow();
 
@@ -49,6 +51,16 @@ namespace NetPlayground
             Assert.That(decisions,Is.EquivalentTo(new []{new FailWorkflowDecision(_reason,_detail)}));
         }
 
+        [Test]
+        public void Can_return_the_custom_workflow_action()
+        {
+            var workflowAction = new Mock<WorkflowAction>();
+            var workflow = new WorkflowWithCustomAction(workflowAction.Object);
+
+            var actualWorkflowAction = _activityFailedEvent.Interpret(workflow);
+
+            Assert.That(actualWorkflowAction,Is.EqualTo(workflowAction.Object));
+        }
 
         private class EmptyWorkflow : Workflow
         {
@@ -59,6 +71,14 @@ namespace NetPlayground
             public SingleActivityWorkflow()
             {
                 AddActivity(_activityName, _activityVersion, _positionalName);
+            }
+        }
+
+        private class WorkflowWithCustomAction : Workflow
+        {
+            public WorkflowWithCustomAction(WorkflowAction workflowAction)
+            {
+                AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(e => workflowAction);
             }
         }
 

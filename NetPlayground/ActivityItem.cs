@@ -7,12 +7,15 @@ namespace NetPlayground
     {
         private readonly HashSet<SchedulableItem> _allSchedulableItems;
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
-        private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction; 
+        private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
+        private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
+ 
         public ActivityItem(string name, string version, string positionalName, HashSet<SchedulableItem> allSchedulableItems):base(name,version,positionalName)
         {
             _allSchedulableItems = allSchedulableItems;
             _onCompletionAction = c=>new ContinueWorkflowAction(this,c,_allSchedulableItems);
             _onFailedAction = c=> new FailWorkflowAction(c.Reason,c.Detail);
+            _onTimedoutAction = t=>new FailWorkflowAction(t.TimeoutType,t.Details);
         }
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")
@@ -39,7 +42,7 @@ namespace NetPlayground
         {
             var activity = workflowContext.GetActivityEvent(Name, Version, PositionalName);
 
-            return activity != null && activity.IsProcessed;
+            return activity != null;
         }
 
         public ActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
@@ -48,9 +51,26 @@ namespace NetPlayground
             return this;
         }
 
-        public WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
+        internal WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
         {
             return _onFailedAction(activityFailedEvent);
+        }
+
+        public ActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> onFailureFunc)
+        {
+            _onFailedAction = onFailureFunc;
+            return this;
+        }
+
+        internal WorkflowAction Timedout(ActivityTimedoutEvent activityTimedoutEvent)
+        {
+            return _onTimedoutAction(activityTimedoutEvent);
+        }
+
+        public ActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> onTimedoutFunc)
+        {
+            _onTimedoutAction = onTimedoutFunc;
+            return this;
         }
     }
 }

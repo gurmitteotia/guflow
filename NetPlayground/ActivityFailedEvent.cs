@@ -13,7 +13,7 @@ namespace NetPlayground
         {
             _eventAttributes = activityFailedHistoryEvent.ActivityTaskFailedEventAttributes;
             _allHistoryEvents = allHistoryEvents;
-            PopulateHistoryEvents(allHistoryEvents);
+            PopulateAttributes(allHistoryEvents);
         }
 
         public string Identity { get; private set; }
@@ -30,12 +30,7 @@ namespace NetPlayground
             get { throw new System.NotImplementedException(); }
         }
 
-        public override bool IsProcessed
-        {
-            get { throw new System.NotImplementedException(); }
-        }
-
-        private void PopulateHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
+        private void PopulateAttributes(IEnumerable<HistoryEvent> allHistoryEvents)
         {
             foreach (var historyEvent in allHistoryEvents)
             {

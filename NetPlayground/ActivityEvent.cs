@@ -7,7 +7,6 @@ namespace NetPlayground
         public string Name { get; protected set; }
         public string Version { get; protected set; }
         public string PositionalName { get; protected set; }
-        public abstract bool IsProcessed { get; }
 
         public bool Has(string name, string version, string positionalName)
         {

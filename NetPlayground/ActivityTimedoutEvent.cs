@@ -3,38 +3,37 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace NetPlayground
 {
-    public class ActivityCompletedEvent : ActivityEvent
+    public class ActivityTimedoutEvent : ActivityEvent
     {
-        private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
-        private readonly ActivityTaskCompletedEventAttributes _eventAttributes;
-        public ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        private readonly ActivityTaskTimedOutEventAttributes _eventAttributes;
+        public ActivityTimedoutEvent(HistoryEvent activityTimedoutEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
-            _allHistoryEvents = allHistoryEvents;
-            _eventAttributes = activityCompletedEvent.ActivityTaskCompletedEventAttributes;
-            PopulateHistoryEvents(allHistoryEvents);
+            _eventAttributes = activityTimedoutEvent.ActivityTaskTimedOutEventAttributes;
+            PopulateAttributes(allHistoryEvents);
         }
 
         public string Identity { get; private set; }
-        public string Result { get { return _eventAttributes.Result; } }
+
+        public string TimeoutType { get { return _eventAttributes.TimeoutType; } }
+
+        public string Details { get { return _eventAttributes.Details; } }
 
         public override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.ActivityCompleted(this);            
+            return workflow.ActivityTimedout(this);
         }
 
         public override IWorkflowContext WorkflowContext
         {
-            get { return new WorkflowContext(_allHistoryEvents); }
+            get { throw new System.NotImplementedException(); }
         }
 
-        private void PopulateHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
+        private void PopulateAttributes(IEnumerable<HistoryEvent> allHistoryEvents)
         {
             foreach (var historyEvent in allHistoryEvents)
             {
                 if (historyEvent.IsActivityStartedEventFor(_eventAttributes.StartedEventId))
-                {
-                     Identity = historyEvent.ActivityTaskStartedEventAttributes.Identity;
-                }
+                    Identity = historyEvent.ActivityTaskStartedEventAttributes.Identity;
                 else if (historyEvent.IsActivityScheduledEventFor(_eventAttributes.ScheduledEventId))
                 {
                     Name = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
