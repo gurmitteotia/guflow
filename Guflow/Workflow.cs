@@ -49,6 +49,16 @@ namespace Guflow
             return workflowActivity.Timedout(activityTimedoutEvent);
         }
 
+        public WorkflowAction ActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
+        {
+            var workflowActivity = _allSchedulableItems.FindActivity(activityCancelledEvent.Name, activityCancelledEvent.Version, activityCancelledEvent.PositionalName);
+
+            if (workflowActivity == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", activityCancelledEvent.Name, activityCancelledEvent.Version, activityCancelledEvent.PositionalName));
+
+            return workflowActivity.Cancelled(activityCancelledEvent);
+        }
+
         protected ActivityItem AddActivity(string name, string version, string positionalName = "")
         {
             var runtimeActivity = new ActivityItem(name,version, positionalName,_allSchedulableItems);

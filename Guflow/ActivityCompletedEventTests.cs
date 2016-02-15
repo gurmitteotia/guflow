@@ -150,7 +150,6 @@ namespace Guflow
 
         private class EmptyWorkflow : Workflow
         {
-           
         }
 
         private class SingleActivityWorkflow : Workflow
@@ -165,9 +164,8 @@ namespace Guflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => workflowAction);
+                AddActivity(_activityName, _activityVersion, _positionalName).OnCompleted(c => workflowAction);
             }
         }
-       
     }
 }

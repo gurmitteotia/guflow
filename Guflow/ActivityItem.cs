@@ -9,6 +9,7 @@ namespace Guflow
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
+        private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
  
         public ActivityItem(string name, string version, string positionalName, HashSet<SchedulableItem> allSchedulableItems):base(name,version,positionalName)
         {
@@ -16,6 +17,7 @@ namespace Guflow
             _onCompletionAction = c=>new ContinueWorkflowAction(this,c,_allSchedulableItems);
             _onFailedAction = c=> new FailWorkflowAction(c.Reason,c.Detail);
             _onTimedoutAction = t=>new FailWorkflowAction(t.TimeoutType,t.Details);
+            _onCancelledAction = c=>new CancelWorkflowAction(c.Details);
         }
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")
@@ -45,7 +47,7 @@ namespace Guflow
             return activity != null;
         }
 
-        public ActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
+        public ActivityItem OnCompleted(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
         {
             _onCompletionAction = onCompletionFunc;
             return this;
@@ -70,6 +72,17 @@ namespace Guflow
         public ActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> onTimedoutFunc)
         {
             _onTimedoutAction = onTimedoutFunc;
+            return this;
+        }
+
+        public WorkflowAction Cancelled(ActivityCancelledEvent activityCancelledEvent)
+        {
+            return _onCancelledAction(activityCancelledEvent);
+        }
+
+        public ActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc)
+        {
+            _onCancelledAction = onCancelledFunc;
             return this;
         }
     }

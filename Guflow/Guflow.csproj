@@ -68,6 +68,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivityCancelledEvent.cs" />
+    <Compile Include="ActivityCancelledEventTests.cs" />
     <Compile Include="ActivityCompletedEvent.cs" />
     <Compile Include="ActivityCompletedEventTests.cs" />
     <Compile Include="ActivityEvent.cs" />
@@ -79,6 +81,8 @@
     <Compile Include="ActivityItem.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="ActivityTimedoutEventTests.cs" />
+    <Compile Include="CancelWorkflowAction.cs" />
+    <Compile Include="CancelWorkflowDecision.cs" />
     <Compile Include="ContinueWorkflowAction.cs" />
     <Compile Include="DecisionAssertExtension.cs" />
     <Compile Include="FailWorkflowAction.cs" />

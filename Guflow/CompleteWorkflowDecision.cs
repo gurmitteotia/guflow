@@ -22,7 +22,7 @@ namespace Guflow
 
         public override int GetHashCode()
         {
-            return _result == null ? base.GetHashCode() : _result.GetHashCode();
+            return _result == null ? GetType().GetHashCode() : _result.GetHashCode();
         }
 
         public override IEnumerable<Decision> Decisions()

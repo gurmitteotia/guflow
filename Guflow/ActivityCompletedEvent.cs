@@ -11,10 +11,10 @@ namespace Guflow
         {
             _allHistoryEvents = allHistoryEvents;
             _eventAttributes = activityCompletedEvent.ActivityTaskCompletedEventAttributes;
-            PopulateHistoryEvents(allHistoryEvents);
+            PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
+
         }
 
-        public string Identity { get; private set; }
         public string Result { get { return _eventAttributes.Result; } }
 
         public override WorkflowAction Interpret(IWorkflow workflow)
@@ -27,21 +27,6 @@ namespace Guflow
             get { return new WorkflowContext(_allHistoryEvents); }
         }
 
-        private void PopulateHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
-        {
-            foreach (var historyEvent in allHistoryEvents)
-            {
-                if (historyEvent.IsActivityStartedEventFor(_eventAttributes.StartedEventId))
-                {
-                     Identity = historyEvent.ActivityTaskStartedEventAttributes.Identity;
-                }
-                else if (historyEvent.IsActivityScheduledEventFor(_eventAttributes.ScheduledEventId))
-                {
-                    Name = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
-                    Version = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
-                    PositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ScheduleData>().PN;
-                }
-            }
-        }
+     
     }
 }

@@ -128,6 +128,57 @@ namespace Guflow
             return historyEvents;
         }
 
+        public static IEnumerable<HistoryEvent> CreateActivityCancelledEventGraph(string activityName, string activityVersion, string positionalName, string identity, string detail)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskCanceled,
+                EventId = eventIds.CompletedId,
+                ActivityTaskCanceledEventAttributes = new ActivityTaskCanceledEventAttributes()
+                {
+                    Details = detail,
+                    LatestCancelRequestedEventId = eventIds.CancelRequestedId,
+                    ScheduledEventId = eventIds.ScheduledId,
+                    StartedEventId = eventIds.StartedId
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskCancelRequested,
+                EventId = eventIds.CancelRequestedId,
+                ActivityTaskCancelRequestedEventAttributes = new ActivityTaskCancelRequestedEventAttributes()
+                {
+                    ActivityId = string.Empty
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskStarted,
+                EventId = eventIds.StartedId,
+                ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
+                {
+                    Identity = identity,
+                    ScheduledEventId = eventIds.ScheduledId
+
+                }
+            });
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskScheduled,
+                EventId = eventIds.ScheduledId,
+                ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
+                {
+                    ActivityType = new ActivityType() { Name = activityName, Version = activityVersion },
+                    Control = (new ScheduleData() { PN = positionalName }).ToJson()
+                }
+            });
+            return historyEvents;
+        }
+
         private class EventIds
         {
             private static long _seed = long.MaxValue;
@@ -150,14 +201,19 @@ namespace Guflow
             {
                 get { return _completedId;}
             }
+
+            public long CancelRequestedId
+            {
+                get { return _completedId-1;}
+            }
             public long StartedId
             {
-                get { return _completedId - 1; }
+                get { return _completedId - 2; }
             }
 
             public long ScheduledId
             {
-                get { return _completedId - 2; }
+                get { return _completedId - 3; }
             }
         }
 
