@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace Guflow
 {
-    public abstract class SchedulableItem
+    public abstract class WorkflowItem
     {
-        protected readonly HashSet<SchedulableItem> ParentItems = new HashSet<SchedulableItem>();
+        protected readonly HashSet<WorkflowItem> ParentItems = new HashSet<WorkflowItem>();
         protected readonly string Name;
         protected readonly string Version;
         protected readonly string PositionalName;
 
-        protected SchedulableItem(string name, string verison, string positionalName)
+        protected WorkflowItem(string name, string verison, string positionalName)
         {
             Name = name;
             Version = verison;
@@ -23,9 +23,9 @@ namespace Guflow
             return ParentItems.Count == 0;
         }
 
-        internal bool IsChildOf(SchedulableItem schedulableItem)
+        internal bool IsChildOf(WorkflowItem workflowItem)
         {
-            return ParentItems.Contains(schedulableItem);
+            return ParentItems.Contains(workflowItem);
         }
 
         internal abstract WorkflowDecision GetDecision();
@@ -39,7 +39,7 @@ namespace Guflow
 
         public override bool Equals(object other)
         {
-            var otherItem = other as SchedulableItem;
+            var otherItem = other as WorkflowItem;
             if (otherItem == null)
                 return false;
 

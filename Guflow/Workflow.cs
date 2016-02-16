@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Guflow
 {
-    public abstract class Workflow : IWorkflow
+    public abstract class Workflow : IWorkflow, IWorkflowItems
     {
-        private readonly HashSet<SchedulableItem> _allSchedulableItems = new HashSet<SchedulableItem>();
+        private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
         private Func<WorkflowStartedEvent, WorkflowAction> _onStartupFunc;
 
         protected Workflow()
         {
-            _onStartupFunc = s => new WorkflowStartedAction(s, _allSchedulableItems);
+            _onStartupFunc = s => new WorkflowStartedAction(s, this);
         }
         
 
@@ -21,48 +22,32 @@ namespace Guflow
 
         public WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent)
         {
-            var workflowActivity = _allSchedulableItems.FindActivity(activityCompletedEvent.Name, activityCompletedEvent.Version, activityCompletedEvent.PositionalName);
-            
-            if(workflowActivity==null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.",activityCompletedEvent.Name,activityCompletedEvent.Version, activityCompletedEvent.PositionalName));
-
+            var workflowActivity = ActivityFor(activityCompletedEvent);
             return workflowActivity.Completed(activityCompletedEvent);
         }
 
         public WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent)
         {
-            var workflowActivity = _allSchedulableItems.FindActivity(activityFailedEvent.Name, activityFailedEvent.Version, activityFailedEvent.PositionalName);
-
-            if (workflowActivity == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", activityFailedEvent.Name, activityFailedEvent.Version, activityFailedEvent.PositionalName));
-
+            var workflowActivity = ActivityFor(activityFailedEvent);
             return workflowActivity.Failed(activityFailedEvent);
         }
 
         public WorkflowAction ActivityTimedout(ActivityTimedoutEvent activityTimedoutEvent)
         {
-            var workflowActivity = _allSchedulableItems.FindActivity(activityTimedoutEvent.Name, activityTimedoutEvent.Version, activityTimedoutEvent.PositionalName);
-
-            if (workflowActivity == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", activityTimedoutEvent.Name, activityTimedoutEvent.Version, activityTimedoutEvent.PositionalName));
-
+            var workflowActivity = ActivityFor(activityTimedoutEvent);
             return workflowActivity.Timedout(activityTimedoutEvent);
         }
 
         public WorkflowAction ActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
         {
-            var workflowActivity = _allSchedulableItems.FindActivity(activityCancelledEvent.Name, activityCancelledEvent.Version, activityCancelledEvent.PositionalName);
-
-            if (workflowActivity == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", activityCancelledEvent.Name, activityCancelledEvent.Version, activityCancelledEvent.PositionalName));
-
+            var workflowActivity = ActivityFor(activityCancelledEvent);
             return workflowActivity.Cancelled(activityCancelledEvent);
         }
 
         protected ActivityItem AddActivity(string name, string version, string positionalName = "")
         {
-            var runtimeActivity = new ActivityItem(name,version, positionalName,_allSchedulableItems);
-            _allSchedulableItems.Add(runtimeActivity);
+            var runtimeActivity = new ActivityItem(name,version, positionalName,this);
+            _allWorkflowItems.Add(runtimeActivity);
             return runtimeActivity;
         }
 
@@ -71,6 +56,35 @@ namespace Guflow
             _onStartupFunc = workflowStartupFunc;
             return this;
         }
-       
+
+        public IEnumerable<WorkflowItem> GetStartupItems()
+        {
+            return _allWorkflowItems.Where(s => s.HasNoParents());
+        }
+
+        public  IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem item)
+        {
+            return _allWorkflowItems.Where(s => s.IsChildOf(item));
+        }
+
+        public WorkflowItem Find(string name, string version, string positionalName)
+        {
+            return _allWorkflowItems.FirstOrDefault(s => s.Has(name, version, positionalName));
+        }
+
+        public ActivityItem FindActivity(string name, string version, string positionalName)
+        {
+            return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(s => s.Has(name, version, positionalName));
+        }
+
+        private ActivityItem ActivityFor(ActivityEvent activityEvent)
+        {
+            var workflowActivity = FindActivity(activityEvent.Name, activityEvent.Version, activityEvent.PositionalName);
+
+            if (workflowActivity == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", activityEvent.Name, activityEvent.Version, activityEvent.PositionalName));
+
+            return workflowActivity;
+        }
     }
 }

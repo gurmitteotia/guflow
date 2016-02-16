@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace Guflow
 {
-    public class ActivityItem: SchedulableItem
+    public class ActivityItem: WorkflowItem
     {
-        private readonly HashSet<SchedulableItem> _allSchedulableItems;
+        private readonly IWorkflowItems _workflowItems;
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
  
-        public ActivityItem(string name, string version, string positionalName, HashSet<SchedulableItem> allSchedulableItems):base(name,version,positionalName)
+        public ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems):base(name,version,positionalName)
         {
-            _allSchedulableItems = allSchedulableItems;
-            _onCompletionAction = c=>new ContinueWorkflowAction(this,c,_allSchedulableItems);
+            _workflowItems = workflowItems;
+            _onCompletionAction = c => new ContinueWorkflowAction(this, c, _workflowItems);
             _onFailedAction = c=> new FailWorkflowAction(c.Reason,c.Detail);
             _onTimedoutAction = t=>new FailWorkflowAction(t.TimeoutType,t.Details);
             _onCancelledAction = c=>new CancelWorkflowAction(c.Details);
@@ -22,7 +22,7 @@ namespace Guflow
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")
         {
-            var parentItem = _allSchedulableItems.Find(name, version, positionalName);
+            var parentItem = _workflowItems.Find(name, version, positionalName);
             if(parentItem==null)
                 throw new ParentItemNotFoundException(string.Format("Can not find the schedulable item by name {0}, version {1} and positional name {2}",name,version,positionalName));
             ParentItems.Add(parentItem);

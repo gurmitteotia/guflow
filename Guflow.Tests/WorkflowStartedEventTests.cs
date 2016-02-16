@@ -6,7 +6,7 @@ using Amazon.SimpleWorkflow.Model;
 using Moq;
 using NUnit.Framework;
 
-namespace Guflow
+namespace Guflow.Tests
 {
     [TestFixture]
     public class WorkflowStartedEventTests

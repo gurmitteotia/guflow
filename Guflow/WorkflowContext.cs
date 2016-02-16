@@ -25,17 +25,22 @@ namespace Guflow
 
                 else if (historyEvent.IsActivityFailedEvent())
                 {
-                    var activityCompletedEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
-                    if (activityCompletedEvent.Has(activityName, activityVersion, positionalName))
-                        return activityCompletedEvent;
+                    var activityFailedEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
+                    if (activityFailedEvent.Has(activityName, activityVersion, positionalName))
+                        return activityFailedEvent;
                 }
                 else if (historyEvent.IsActivityTimedoutEvent())
                 {
-                    var activityCompletedEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
-                    if (activityCompletedEvent.Has(activityName, activityVersion, positionalName))
-                        return activityCompletedEvent;
+                    var activityTimedoutEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
+                    if (activityTimedoutEvent.Has(activityName, activityVersion, positionalName))
+                        return activityTimedoutEvent;
                 }
-
+                else if (historyEvent.IsActivityCancelledEvent())
+                {
+                    var activityCancelledEvent = new ActivityCancelledEvent(historyEvent, _allHistoryEvents);
+                    if (activityCancelledEvent.Has(activityName, activityVersion, positionalName))
+                        return activityCancelledEvent;
+                }
             }
 
             return null;

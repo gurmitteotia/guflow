@@ -2,7 +2,7 @@
 using Moq;
 using NUnit.Framework;
 
-namespace Guflow
+namespace Guflow.Tests
 {
     [TestFixture]
     public class ActivityCompletedEventTests
@@ -34,12 +34,6 @@ namespace Guflow
         }
 
         [Test]
-        public void Return_continue_workflow_action()
-        {
-            
-        }
-
-        [Test]
         public void Throws_exception_when_completed_activity_is_not_found_in_workflow()
         {
             var incompatibleWorkflow = new EmptyWorkflow();
@@ -68,7 +62,7 @@ namespace Guflow
         }
 
         [Test]
-        public void Return_empty_decision_when_one_of_the_sibiling_is_completed()
+        public void Return_empty_decision_when_one_of_the_sibiling_is_not_completed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
 
@@ -78,7 +72,7 @@ namespace Guflow
         }
 
         [Test]
-        public void Return_scheduling_decision_for_child_when_sibling_is_completed()
+        public void Return_scheduling_decision_for_child_when_all_its_parents_are_completed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName,"id", "res")
@@ -109,6 +103,19 @@ namespace Guflow
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
                                    .Concat(HistoryEventFactory.CreateActivityTimedoutEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "re2", "detail"));
+            var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
+
+            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
+        }
+
+        [Test]
+        public void Return_scheduling_decision_for_child_when_sibling_activity_is_cancelled()
+        {
+            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityCancelledEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "detail"));
             var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();

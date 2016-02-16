@@ -7,17 +7,17 @@ namespace Guflow
     {
         private const string _defaultCompleteResult = "Workflow completed as no schedulable item is found";
         private readonly WorkflowStartedEvent _workflowStartedEvent;
-        private readonly HashSet<SchedulableItem> _allSchedulableItems;
+        private readonly IWorkflowItems _workflowItems;
 
-        public WorkflowStartedAction(WorkflowStartedEvent workflowStartedEvent, HashSet<SchedulableItem> allSchedulableItems)
+        public WorkflowStartedAction(WorkflowStartedEvent workflowStartedEvent, IWorkflowItems workflowItems)
         {
             _workflowStartedEvent = workflowStartedEvent;
-            _allSchedulableItems = allSchedulableItems;
+            _workflowItems = workflowItems;
         }
 
         public override IEnumerable<WorkflowDecision> GetDecisions()
         {
-            var startupSchedulableItems = _allSchedulableItems.GetStartupItems();
+            var startupSchedulableItems = _workflowItems.GetStartupItems();
 
             if (!startupSchedulableItems.Any())
                 return new []{new CompleteWorkflowDecision(_defaultCompleteResult)};

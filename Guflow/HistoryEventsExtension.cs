@@ -20,6 +20,11 @@ namespace Guflow
             return historyEvent.EventType == EventType.ActivityTaskTimedOut;
         }
 
+        public static bool IsActivityCancelledEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ActivityTaskCanceled;
+        }
+
         public static bool IsActivityStartedEventFor(this HistoryEvent historyEvent, long startedEventId)
         {
             return historyEvent.EventType == EventType.ActivityTaskStarted && historyEvent.EventId == startedEventId;

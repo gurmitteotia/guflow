@@ -5,21 +5,21 @@ namespace Guflow
 {
     public class ContinueWorkflowAction : WorkflowAction
     {
-        private readonly SchedulableItem _completedSchedulableItem;
+        private readonly WorkflowItem _completedWorkflowItem;
         private readonly WorkflowEvent _completedWorkflowEvent;
-        private readonly HashSet<SchedulableItem> _allSchedulableItems;
+        private readonly IWorkflowItems _workflowItems;
 
-        public ContinueWorkflowAction(SchedulableItem completedSchedulableItem, WorkflowEvent completedWorkflowEvent, HashSet<SchedulableItem> allSchedulableItems)
+        public ContinueWorkflowAction(WorkflowItem completedWorkflowItem, WorkflowEvent completedWorkflowEvent, IWorkflowItems workflowItems)
         {
-            _completedSchedulableItem = completedSchedulableItem;
+            _completedWorkflowItem = completedWorkflowItem;
             _completedWorkflowEvent = completedWorkflowEvent;
-            _allSchedulableItems = allSchedulableItems;
+            _workflowItems = workflowItems;
         }
       
 
         public override IEnumerable<WorkflowDecision> GetDecisions()
         {
-            var childItems = _allSchedulableItems.GetChildernOf(_completedSchedulableItem);
+            var childItems = _workflowItems.GetChildernOf(_completedWorkflowItem);
 
             var filteredItems = childItems.Where(s => s.AllParentsAreProcessed(_completedWorkflowEvent.WorkflowContext));
 

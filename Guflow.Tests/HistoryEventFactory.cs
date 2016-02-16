@@ -2,7 +2,7 @@
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
-namespace Guflow
+namespace Guflow.Tests
 {
     public class HistoryEventFactory
     {
