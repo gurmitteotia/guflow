@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -28,9 +27,16 @@ namespace Guflow
             return string.Format("{0}{1}", _reason, _detail).GetHashCode();
         }
 
-        public override IEnumerable<Decision> Decisions()
+        public override Decision Decision()
         {
-            throw new System.NotImplementedException();
+            return new Decision
+            {
+                FailWorkflowExecutionDecisionAttributes = new FailWorkflowExecutionDecisionAttributes()
+                {
+                    Reason = _reason,
+                    Details = _detail
+                }
+            };
         }
     }
 }

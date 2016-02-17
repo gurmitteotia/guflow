@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -26,9 +24,15 @@ namespace Guflow
             return string.IsNullOrEmpty(_details) ? GetType().GetHashCode() : _details.GetHashCode();
         }
 
-        public override IEnumerable<Decision> Decisions()
+        public override Decision Decision()
         {
-           throw new NotImplementedException();
+            return new Decision
+            {
+                CancelWorkflowExecutionDecisionAttributes = new CancelWorkflowExecutionDecisionAttributes()
+                {
+                    Details = _details
+                }
+            };
         }
     }
 }

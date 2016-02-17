@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Amazon.SimpleWorkflow;
+﻿using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -25,9 +24,9 @@ namespace Guflow
             return _result == null ? GetType().GetHashCode() : _result.GetHashCode();
         }
 
-        public override IEnumerable<Decision> Decisions()
+        public override Decision Decision()
         {
-            var decision = new Decision()
+            return new Decision
             {
                 DecisionType = DecisionType.CompleteWorkflowExecution,
                 CompleteWorkflowExecutionDecisionAttributes = new CompleteWorkflowExecutionDecisionAttributes()
@@ -35,8 +34,6 @@ namespace Guflow
                     Result = _result
                 }
             };
-
-            return new[] {decision};
         }
     }
 }

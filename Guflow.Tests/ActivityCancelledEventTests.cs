@@ -32,7 +32,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Return_workflow_cancel_workflow_decision()
+        public void By_default_return_cancel_workflow_decision()
         {
             var workflow = new SingleActivityWorkflow();
 

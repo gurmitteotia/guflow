@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
     public abstract class WorkflowDecision
     {
-       public abstract IEnumerable<Decision> Decisions();
+       public abstract Decision Decision();
     }
 }

@@ -7,5 +7,6 @@
         WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent);
         WorkflowAction ActivityTimedout(ActivityTimedoutEvent activityTimedoutEvent);
         WorkflowAction ActivityCancelled(ActivityCancelledEvent activityCancelledEvent);
+        WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent);
     }
 }

@@ -34,5 +34,10 @@ namespace Guflow
         {
             return historyEvent.EventType == EventType.ActivityTaskScheduled && historyEvent.EventId == scheduledEventId;
         }
+
+        public static bool IsTimerStartedEventFor(this HistoryEvent historyEvent, long timerStartedEventId)
+        {
+            return historyEvent.EventType == EventType.TimerStarted && historyEvent.EventId == timerStartedEventId;
+        }
     }
 }

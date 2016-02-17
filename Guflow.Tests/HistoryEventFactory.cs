@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
@@ -179,6 +180,36 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
+        public static IEnumerable<HistoryEvent> CreateTimerFiredEventGraph(string timerId, TimeSpan startToFireTimeout)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerFired,
+                EventId = eventIds.CompletedId,
+                TimerFiredEventAttributes = new TimerFiredEventAttributes()
+                {
+                    StartedEventId = eventIds.StartedId,
+                    TimerId = timerId
+                },
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerStarted,
+                EventId = eventIds.StartedId,
+                TimerStartedEventAttributes = new TimerStartedEventAttributes()
+                {
+                    TimerId = timerId,
+                    StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString()
+                }
+            });
+
+            return historyEvents;
+        }
+
         private class EventIds
         {
             private static long _seed = long.MaxValue;
@@ -216,7 +247,5 @@ namespace Guflow.Tests
                 get { return _completedId - 3; }
             }
         }
-
-        
     }
 }

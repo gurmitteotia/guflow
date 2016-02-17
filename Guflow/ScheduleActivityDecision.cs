@@ -21,7 +21,7 @@ namespace Guflow
             return _identity.Equals(otherDecision._identity);
         }
 
-        public override IEnumerable<Decision> Decisions()
+        public override Decision Decision()
         {
             //return new[]
             //{
