@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Amazon.SimpleWorkflow.Model;
 using Moq;
 using NUnit.Framework;
 

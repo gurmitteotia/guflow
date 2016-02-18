@@ -6,22 +6,32 @@ namespace Guflow
     public class ContinueWorkflowAction : WorkflowAction
     {
         private readonly WorkflowItem _completedWorkflowItem;
-        private readonly WorkflowEvent _completedWorkflowEvent;
-        private readonly IWorkflowItems _workflowItems;
+        private readonly IWorkflowContext _workflowContext;
 
-        public ContinueWorkflowAction(WorkflowItem completedWorkflowItem, WorkflowEvent completedWorkflowEvent, IWorkflowItems workflowItems)
+        public ContinueWorkflowAction(WorkflowItem completedWorkflowItem, IWorkflowContext workflowContext)
         {
             _completedWorkflowItem = completedWorkflowItem;
-            _completedWorkflowEvent = completedWorkflowEvent;
-            _workflowItems = workflowItems;
+            _workflowContext = workflowContext;
         }
-      
+
+        public override bool Equals(object other)
+        {
+            var otherAction = other as ContinueWorkflowAction;
+            if (otherAction == null)
+                return false;
+            return _completedWorkflowItem.Equals(otherAction._completedWorkflowItem);
+        }
+
+        public override int GetHashCode()
+        {
+            return _completedWorkflowItem.GetHashCode();
+        }
 
         public override IEnumerable<WorkflowDecision> GetDecisions()
         {
-            var childItems = _workflowItems.GetChildernOf(_completedWorkflowItem);
+            var childItems = _completedWorkflowItem.GetChildlern();
 
-            var filteredItems = childItems.Where(s => s.AllParentsAreProcessed(_completedWorkflowEvent.WorkflowContext));
+            var filteredItems = childItems.Where(s => s.AllParentsAreProcessed(_workflowContext));
 
             return filteredItems.Select(f => f.GetDecision());
         }

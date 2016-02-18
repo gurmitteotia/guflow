@@ -42,6 +42,17 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void By_default_return_continue_workflow_action()
+        {
+            var workflow = new SingleActivityWorkflow();
+
+            var workflowAction = _activityCompletedEvent.Interpret(workflow);
+
+            Assert.That(workflowAction,Is.EqualTo(new ContinueWorkflowAction(workflow.CompletedItem,null)));
+        }
+
+
+        [Test]
         public void Return_the_scheduling_decision_for_all_child_activities()
         {
             var workflow = new WorkflowWithMultipleChilds();
@@ -163,15 +174,17 @@ namespace Guflow.Tests
         {
             public SingleActivityWorkflow()
             {
-                AddActivity(_activityName,_activityVersion,_positionalName);
+                CompletedItem= AddActivity(_activityName,_activityVersion,_positionalName);
             }
+
+            public WorkflowItem CompletedItem { get; private set; }
         }
 
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompleted(c => workflowAction);
+                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => workflowAction);
             }
         }
     }

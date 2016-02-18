@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Guflow
 {
@@ -11,7 +12,12 @@ namespace Guflow
         public TimerItem(string name, IWorkflowItems workflowItems):base(name,string.Empty,string.Empty)
         {
             _workflowItems = workflowItems;
-            _onFiredAction = f=>new ContinueWorkflowAction(this,f,_workflowItems);
+            _onFiredAction = f=>new ContinueWorkflowAction(this,f.WorkflowContext);
+        }
+
+        internal override IEnumerable<WorkflowItem> GetChildlern()
+        {
+            return _workflowItems.GetChildernOf(this);
         }
 
         internal override WorkflowDecision GetDecision()

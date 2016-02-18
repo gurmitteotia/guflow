@@ -41,6 +41,16 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void By_default_return_fail_workflow_action()
+        {
+            var workflow = new SingleActivityWorkflow();
+
+            var workflowAction = _activityFailedEvent.Interpret(workflow);
+
+            Assert.That(workflowAction,Is.EqualTo(new FailWorkflowAction(_reason,_detail)));
+        }
+
+        [Test]
         public void By_default_return_workflow_failed_decision()
         {
             var workflow = new SingleActivityWorkflow();

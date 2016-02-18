@@ -52,6 +52,16 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void By_default_return_fail_workflow_action()
+        {
+            var workflow = new SingleActivityWorkflow();
+
+            var workflowAction = _activityTimedoutEvent.Interpret(workflow);
+
+            Assert.That(workflowAction,Is.EqualTo(new FailWorkflowAction(_timeoutType,_detail)));
+        }
+
+        [Test]
         public void Can_return_the_custom_workflow_action()
         {
             var workflowAction = new Mock<WorkflowAction>();

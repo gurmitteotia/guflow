@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Guflow
 {
@@ -9,6 +10,20 @@ namespace Guflow
         public CancelWorkflowAction(string details)
         {
             _details = details;
+        }
+
+        public override bool Equals(object other)
+        {
+            var otherAction = other as CancelWorkflowAction;
+            if (otherAction == null)
+                return false;
+
+            return string.Equals(_details, otherAction._details, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode()
+        {
+            return string.IsNullOrEmpty(_details) ? GetType().GetHashCode() : _details.GetHashCode();
         }
 
         public override IEnumerable<WorkflowDecision> GetDecisions()

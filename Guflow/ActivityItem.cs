@@ -14,7 +14,7 @@ namespace Guflow
         public ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems):base(name,version,positionalName)
         {
             _workflowItems = workflowItems;
-            _onCompletionAction = c => new ContinueWorkflowAction(this, c, _workflowItems);
+            _onCompletionAction = c => new ContinueWorkflowAction(this, c.WorkflowContext);
             _onFailedAction = c=> new FailWorkflowAction(c.Reason,c.Detail);
             _onTimedoutAction = t=>new FailWorkflowAction(t.TimeoutType,t.Details);
             _onCancelledAction = c=>new CancelWorkflowAction(c.Details);
@@ -28,6 +28,11 @@ namespace Guflow
             ParentItems.Add(parentItem);
 
             return this;
+        }
+
+        internal override IEnumerable<WorkflowItem> GetChildlern()
+        {
+            return _workflowItems.GetChildernOf(this);
         }
 
         internal override WorkflowDecision GetDecision()
@@ -47,7 +52,7 @@ namespace Guflow
             return activity != null;
         }
 
-        public ActivityItem OnCompleted(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
+        public ActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
         {
             _onCompletionAction = onCompletionFunc;
             return this;

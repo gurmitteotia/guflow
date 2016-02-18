@@ -28,6 +28,8 @@ namespace Guflow
             return ParentItems.Contains(workflowItem);
         }
 
+        internal abstract IEnumerable<WorkflowItem> GetChildlern(); 
+
         internal abstract WorkflowDecision GetDecision();
 
         public bool Has(string name, string version, string positionalName)

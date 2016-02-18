@@ -42,6 +42,16 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void By_default_return_cancel_workflow_action()
+        {
+            var workflow = new SingleActivityWorkflow();
+
+            var workflowAction = _activityCancelledEvent.Interpret(workflow);
+
+            Assert.That(workflowAction, Is.EqualTo(new CancelWorkflowAction(_detail)) );
+        }
+
+        [Test]
         public void Throws_exception_when_completed_activity_is_not_found_in_workflow()
         {
             var incompatibleWorkflow = new EmptyWorkflow();
