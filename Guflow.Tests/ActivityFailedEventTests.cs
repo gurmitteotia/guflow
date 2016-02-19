@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Guflow.Tests.TestWorkflows;
 using Moq;
 using NUnit.Framework;
 
@@ -18,7 +19,7 @@ namespace Guflow.Tests
         public void Setup()
         {
             var failedActivityEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityName,_activityVersion,_positionalName,_identity,_reason,_detail);
-            _activityFailedEvent = new ActivityFailedEvent(failedActivityEventGraph.First(),failedActivityEventGraph);
+            _activityFailedEvent = new ActivityFailedEvent(failedActivityEventGraph.First(), failedActivityEventGraph);
         }
             
         [Test]
@@ -27,7 +28,7 @@ namespace Guflow.Tests
             Assert.That(_activityFailedEvent.Name,Is.EqualTo(_activityName));
             Assert.That(_activityFailedEvent.Version,Is.EqualTo(_activityVersion));
             Assert.That(_activityFailedEvent.PositionalName,Is.EqualTo(_positionalName));
-            Assert.That(_activityFailedEvent.Identity,Is.EqualTo(_identity));
+            Assert.That(_activityFailedEvent.WorkerIdentity,Is.EqualTo(_identity));
             Assert.That(_activityFailedEvent.Reason,Is.EqualTo(_reason));
             Assert.That(_activityFailedEvent.Detail,Is.EqualTo(_detail));
         }
@@ -69,10 +70,6 @@ namespace Guflow.Tests
             var actualWorkflowAction = _activityFailedEvent.Interpret(workflow);
 
             Assert.That(actualWorkflowAction,Is.EqualTo(workflowAction.Object));
-        }
-
-        private class EmptyWorkflow : Workflow
-        {
         }
 
         private class SingleActivityWorkflow : Workflow

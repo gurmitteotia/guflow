@@ -1,33 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Guflow
 {
-    public class TimerItem : WorkflowItem
+    public sealed class TimerItem : WorkflowItem
     {
-        private readonly IWorkflowItems _workflowItems;
         private TimeSpan _fireAfter= new TimeSpan();
         private Func<TimerFiredEvent, WorkflowAction> _onFiredAction;
  
-        public TimerItem(string name, IWorkflowItems workflowItems):base(name,string.Empty,string.Empty)
+        public TimerItem(string name, IWorkflowItems workflowItems):base(Identity.Timer(name),workflowItems)
         {
-            _workflowItems = workflowItems;
             _onFiredAction = f=>new ContinueWorkflowAction(this,f.WorkflowContext);
-        }
-
-        internal override IEnumerable<WorkflowItem> GetChildlern()
-        {
-            return _workflowItems.GetChildernOf(this);
         }
 
         internal override WorkflowDecision GetDecision()
         {
-            throw new System.NotImplementedException();
+            return new ScheduleTimerDecision(Identity.Name, _fireAfter);
         }
 
         protected override bool IsProcessed(IWorkflowContext workflowContext)
         {
-            throw new System.NotImplementedException();
+            var timerEvent = workflowContext.LatestTimerEventFor(Identity);
+            return timerEvent != null;
         }
 
         public TimerItem FireAfter(TimeSpan fireAfter)
@@ -44,6 +37,18 @@ namespace Guflow
         public TimerItem WhenFired(Func<TimerFiredEvent, WorkflowAction> onFiredAction)
         {
             _onFiredAction = onFiredAction;
+            return this;
+        }
+
+        public TimerItem DependsOn(string timerName)
+        {
+            AddParent(Identity.Timer(timerName));
+            return this;
+        }
+
+        public TimerItem DependsOn(string activityName, string activityVersion, string positionalName)
+        {
+            AddParent(new Identity(activityName, activityVersion, positionalName));
             return this;
         }
     }

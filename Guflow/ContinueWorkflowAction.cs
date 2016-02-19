@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Guflow
 {
-    public class ContinueWorkflowAction : WorkflowAction
+    internal class ContinueWorkflowAction : WorkflowAction
     {
         private readonly WorkflowItem _completedWorkflowItem;
         private readonly IWorkflowContext _workflowContext;

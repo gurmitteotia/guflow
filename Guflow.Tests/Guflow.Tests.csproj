@@ -63,8 +63,11 @@
     <Compile Include="ActivityTimedoutEventTests.cs" />
     <Compile Include="CancelWorkflowDecisionTests.cs" />
     <Compile Include="CompleteWorkflowDecisionTests.cs" />
+    <Compile Include="ContinueWorkflowActionTests.cs" />
+    <Compile Include="FailWorkflowActionTests.cs" />
     <Compile Include="FailWorkflowDecisionTests.cs" />
     <Compile Include="HistoryEventFactory.cs" />
+    <Compile Include="IdentityTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScheduleActivityDecisionTests.cs" />
     <Compile Include="TestWorkflows\TestWorkflow.cs" />
@@ -72,6 +75,7 @@
     <Compile Include="WorkflowHistoryEventsTests.cs" />
     <Compile Include="WorkflowItemIdentityTests.cs" />
     <Compile Include="WorkflowStartedEventTests.cs" />
+    <Compile Include="WorkflowTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

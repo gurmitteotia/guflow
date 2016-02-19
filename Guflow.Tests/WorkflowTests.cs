@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Amazon.SimpleWorkflow.Model;
+using Guflow.Tests.TestWorkflows;
 using NUnit.Framework;
 
 namespace Guflow
@@ -14,15 +15,13 @@ namespace Guflow
 
             var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
-
             Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Download", "1.0")}));
-
         }
 
         [Test]
         public void Workflow_started_return_workflow_completed_decisions_when_workflow_has_no_schedulable_items()
         {
-            var workflow = new TestEmptyWorkflow();
+            var workflow = new EmptyWorkflow();
 
             var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
@@ -37,7 +36,6 @@ namespace Guflow
             var decisionsOnActivityCompletion = workflow.ActivityCompleted(new ActivityCompletedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
             Assert.That(decisionsOnActivityCompletion, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
-
         }
 
         private class TestWorkflow : Workflow
@@ -48,10 +46,6 @@ namespace Guflow
 
                 AddActivity("Transcode", "2.0").DependsOn("Download", "1.0");
             }
-        }
-
-        private class TestEmptyWorkflow : Workflow
-        {
         }
     }
 }

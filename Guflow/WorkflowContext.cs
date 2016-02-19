@@ -3,7 +3,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public class WorkflowContext : IWorkflowContext
+    internal class WorkflowContext : IWorkflowContext
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
 
@@ -12,37 +12,51 @@ namespace Guflow
             _allHistoryEvents = allHistoryEvents;
         }
 
-        public ActivityEvent GetActivityEvent(string activityName, string activityVersion, string positionalName = "")
+        public ActivityEvent LatestActivityEventFor(Identity identity)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
                 if (historyEvent.IsActivityCompletedEvent())
                 {
-                    var activityCompletedEvent = new ActivityCompletedEvent(historyEvent,_allHistoryEvents);
-                    if(activityCompletedEvent.Has(activityName,activityVersion,positionalName))
-                        return activityCompletedEvent;
+                    var completedActivityEvent = new ActivityCompletedEvent(historyEvent,_allHistoryEvents);
+                    if(completedActivityEvent.IsFor(identity))
+                        return completedActivityEvent;
                 }
 
                 else if (historyEvent.IsActivityFailedEvent())
                 {
-                    var activityFailedEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
-                    if (activityFailedEvent.Has(activityName, activityVersion, positionalName))
-                        return activityFailedEvent;
+                    var failedActivityEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
+                    if (failedActivityEvent.IsFor(identity))
+                        return failedActivityEvent;
                 }
                 else if (historyEvent.IsActivityTimedoutEvent())
                 {
-                    var activityTimedoutEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
-                    if (activityTimedoutEvent.Has(activityName, activityVersion, positionalName))
-                        return activityTimedoutEvent;
+                    var timedoutActivityEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
+                    if (timedoutActivityEvent.IsFor(identity))
+                        return timedoutActivityEvent;
                 }
                 else if (historyEvent.IsActivityCancelledEvent())
                 {
-                    var activityCancelledEvent = new ActivityCancelledEvent(historyEvent, _allHistoryEvents);
-                    if (activityCancelledEvent.Has(activityName, activityVersion, positionalName))
-                        return activityCancelledEvent;
+                    var cancelledActivityEvent = new ActivityCancelledEvent(historyEvent, _allHistoryEvents);
+                    if (cancelledActivityEvent.IsFor(identity))
+                        return cancelledActivityEvent;
                 }
             }
 
+            return null;
+        }
+
+        public TimerFiredEvent LatestTimerEventFor(Identity identity)
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if (historyEvent.IsTimerFiredEvent())
+                {
+                    var firedTimerEvent = new TimerFiredEvent(historyEvent,_allHistoryEvents);
+                    if(firedTimerEvent.IsFor(identity))
+                        return firedTimerEvent;
+                }
+            }
             return null;
         }
     }

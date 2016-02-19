@@ -11,7 +11,7 @@ namespace Guflow
 
         protected Workflow()
         {
-            _onStartupFunc = s => new WorkflowStartedAction(s, this);
+            _onStartupFunc = s => new WorkflowStartedAction(this);
         }
 
         public WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
@@ -70,7 +70,7 @@ namespace Guflow
             return this;
         }
 
-        public IEnumerable<WorkflowItem> GetStartupItems()
+        public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());
         }
@@ -82,17 +82,32 @@ namespace Guflow
 
         public WorkflowItem Find(string name, string version, string positionalName)
         {
-            return _allWorkflowItems.FirstOrDefault(s => s.Has(name, version, positionalName));
+            return Find(new Identity(name, version, positionalName));
+        }
+
+        public WorkflowItem Find(Identity identity)
+        {
+            return _allWorkflowItems.FirstOrDefault(s => s.Has(identity));
         }
 
         public ActivityItem FindActivity(string name, string version, string positionalName)
         {
-            return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(s => s.Has(name, version, positionalName));
+            return FindActivity(new Identity(name, version, positionalName));
+        }
+
+        public ActivityItem FindActivity(Identity identity)
+        {
+            return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
+        }
+
+        public TimerItem FindTimer(Identity identity)
+        {
+            return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
         }
 
         public TimerItem FindTimer(string name)
         {
-            return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(name, string.Empty, string.Empty));
+            return FindTimer(Identity.Timer(name));
         }
 
         private ActivityItem ActivityFor(ActivityEvent activityEvent)

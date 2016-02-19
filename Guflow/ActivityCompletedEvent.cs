@@ -5,14 +5,15 @@ namespace Guflow
 {
     public class ActivityCompletedEvent : ActivityEvent
     {
-        private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
+        
         private readonly ActivityTaskCompletedEventAttributes _eventAttributes;
+        private readonly IWorkflowContext _workflowContext;
+
         public ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
-            _allHistoryEvents = allHistoryEvents;
             _eventAttributes = activityCompletedEvent.ActivityTaskCompletedEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
-
+            _workflowContext = new WorkflowContext(allHistoryEvents);
         }
 
         public string Result { get { return _eventAttributes.Result; } }
@@ -22,11 +23,6 @@ namespace Guflow
             return workflow.ActivityCompleted(this);            
         }
 
-        public override IWorkflowContext WorkflowContext
-        {
-            get { return new WorkflowContext(_allHistoryEvents); }
-        }
-
-     
+        public override IWorkflowContext WorkflowContext{get { return _workflowContext; }}
     }
 }

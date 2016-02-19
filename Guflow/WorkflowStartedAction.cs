@@ -3,26 +3,37 @@ using System.Linq;
 
 namespace Guflow
 {
-    public class WorkflowStartedAction : WorkflowAction
+    internal class WorkflowStartedAction : WorkflowAction
     {
         private const string _defaultCompleteResult = "Workflow completed as no schedulable item is found";
-        private readonly WorkflowStartedEvent _workflowStartedEvent;
         private readonly IWorkflowItems _workflowItems;
 
-        public WorkflowStartedAction(WorkflowStartedEvent workflowStartedEvent, IWorkflowItems workflowItems)
+        public WorkflowStartedAction(IWorkflowItems workflowItems)
         {
-            _workflowStartedEvent = workflowStartedEvent;
             _workflowItems = workflowItems;
+        }
+
+        public override bool Equals(object other)
+        {
+            var otherAction = other as WorkflowStartedAction;
+            if (otherAction == null)
+                return false;
+            return _workflowItems.Equals(otherAction._workflowItems);
+        }
+
+        public override int GetHashCode()
+        {
+            return _workflowItems.GetHashCode();
         }
 
         public override IEnumerable<WorkflowDecision> GetDecisions()
         {
-            var startupSchedulableItems = _workflowItems.GetStartupItems();
+            var startupWorkflowItems = _workflowItems.GetStartupWorkflowItems();
 
-            if (!startupSchedulableItems.Any())
+            if (!startupWorkflowItems.Any())
                 return new []{new CompleteWorkflowDecision(_defaultCompleteResult)};
 
-            return startupSchedulableItems.Select(s => s.GetDecision());
+            return startupWorkflowItems.Select(s => s.GetDecision());
         }
     }
 }

@@ -85,6 +85,7 @@
     <Compile Include="FailWorkflowAction.cs" />
     <Compile Include="FailWorkflowDecision.cs" />
     <Compile Include="HistoryEventsExtension.cs" />
+    <Compile Include="Identity.cs" />
     <Compile Include="IncompatibleWorkflowException.cs" />
     <Compile Include="IWorkflowContext.cs" />
     <Compile Include="IWorkflowHistoryEvents.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RuntimeActivityConfig.cs" />
+    <Compile Include="ScheduleTimerDecision.cs" />
     <Compile Include="TimerFiredEvent.cs" />
     <Compile Include="TimerItem.cs" />
     <Compile Include="WorkflowItem.cs" />
@@ -108,12 +110,10 @@
     <Compile Include="WorkflowContext.cs" />
     <Compile Include="WorkflowDecision.cs" />
     <Compile Include="WorkflowEvent.cs" />
-    <Compile Include="WorkflowHistoryEvents.cs" />
     <Compile Include="WorkflowItemIdentity.cs" />
     <Compile Include="WorkflowStartedAction.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />
-    <Compile Include="WorkflowTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

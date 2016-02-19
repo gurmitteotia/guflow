@@ -77,6 +77,17 @@ namespace Guflow.Tests
             Assert.That(workflowAction,Is.InstanceOf<WorkflowStartedAction>());
         }
 
+        [Test]
+        public void By_default_return_workflow_started_action()
+        {
+            var workflow = new EmptyWorkflow();
+            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>());
+
+            var workflowAction = workflowEvent.Interpret(workflow);
+
+            Assert.That(workflowAction, Is.EqualTo(new WorkflowStartedAction(workflow)));
+        }
+
         private class EmptyWorkflow : Workflow
         {
         }

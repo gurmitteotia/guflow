@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Guflow.Tests.TestWorkflows;
 using Moq;
 using NUnit.Framework;
 
@@ -19,7 +20,7 @@ namespace Guflow.Tests
         public void Setup()
         {
             var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(_activityName, _activityVersion, _positionalName, _identity, _timeoutType, _detail); 
-            _activityTimedoutEvent = new ActivityTimedoutEvent(activityTimedoutEventGraph.First(),activityTimedoutEventGraph);
+            _activityTimedoutEvent = new ActivityTimedoutEvent(activityTimedoutEventGraph.First(), activityTimedoutEventGraph);
         }
 
         [Test]
@@ -28,7 +29,7 @@ namespace Guflow.Tests
             Assert.That(_activityTimedoutEvent.Name, Is.EqualTo(_activityName));
             Assert.That(_activityTimedoutEvent.Version, Is.EqualTo(_activityVersion));
             Assert.That(_activityTimedoutEvent.PositionalName,Is.EqualTo(_positionalName));
-            Assert.That(_activityTimedoutEvent.Identity, Is.EqualTo(_identity));
+            Assert.That(_activityTimedoutEvent.WorkerIdentity, Is.EqualTo(_identity));
             Assert.That(_activityTimedoutEvent.TimeoutType, Is.EqualTo(_timeoutType));
             Assert.That(_activityTimedoutEvent.Details,Is.EqualTo(_detail));
         }
@@ -70,10 +71,6 @@ namespace Guflow.Tests
             var actualAction = _activityTimedoutEvent.Interpret(workflow);
 
             Assert.That(actualAction,Is.EqualTo(workflowAction.Object));
-        }
-
-        private class EmptyWorkflow : Workflow
-        {
         }
 
         private class SingleActivityWorkflow : Workflow

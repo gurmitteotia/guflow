@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
     public abstract class ActivityEvent : WorkflowEvent
     {
+        private Identity _identity;
         public string Name { get; private set; }
         public string Version { get; private set; }
         public string PositionalName { get; private set; }
-        public string Identity { get; private set; }
+        public string WorkerIdentity { get; private set; }
 
-        public bool Has(string name, string version, string positionalName)
+        public bool IsFor(Identity identity)
         {
-            return string.Equals(Name, name, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(Version, version, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(PositionalName, positionalName);
+            return _identity.Equals(identity);
         }
 
         protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
@@ -24,13 +22,14 @@ namespace Guflow
             {
                 if (historyEvent.IsActivityStartedEventFor(startedEventId))
                 {
-                    Identity = historyEvent.ActivityTaskStartedEventAttributes.Identity;
+                    WorkerIdentity = historyEvent.ActivityTaskStartedEventAttributes.Identity;
                 }
                 else if (historyEvent.IsActivityScheduledEventFor(scheduledEventId))
                 {
                     Name = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
                     Version = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
                     PositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ScheduleData>().PN;
+                    _identity = new Identity(Name,Version,PositionalName);
                 }
             }
         } 

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Guflow.Tests.TestWorkflows;
 using Moq;
 using NUnit.Framework;
 
@@ -18,7 +19,7 @@ namespace Guflow.Tests
         public void Setup()
         {
             var cancelledActivityEventGraph = HistoryEventFactory.CreateActivityCancelledEventGraph(_activityName, _activityVersion, _positionalName, _identity, _detail);
-            _activityCancelledEvent = new ActivityCancelledEvent(cancelledActivityEventGraph.First(),cancelledActivityEventGraph);
+            _activityCancelledEvent = new ActivityCancelledEvent(cancelledActivityEventGraph.First(), cancelledActivityEventGraph);
         }
 
         [Test]
@@ -28,7 +29,7 @@ namespace Guflow.Tests
             Assert.That(_activityCancelledEvent.Name, Is.EqualTo(_activityName));
             Assert.That(_activityCancelledEvent.Version, Is.EqualTo(_activityVersion));
             Assert.That(_activityCancelledEvent.PositionalName, Is.EqualTo(_positionalName));
-            Assert.That(_activityCancelledEvent.Identity, Is.EqualTo(_identity));
+            Assert.That(_activityCancelledEvent.WorkerIdentity, Is.EqualTo(_identity));
         }
 
         [Test]
@@ -68,10 +69,6 @@ namespace Guflow.Tests
             var actualAction = _activityCancelledEvent.Interpret(workflow);
 
             Assert.That(actualAction,Is.EqualTo(workflowAction.Object));
-        }
-
-        private class EmptyWorkflow : Workflow
-        {
         }
 
         private class SingleActivityWorkflow : Workflow

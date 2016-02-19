@@ -1,63 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Guflow
 {
     public abstract class WorkflowItem
     {
-        protected readonly HashSet<WorkflowItem> ParentItems = new HashSet<WorkflowItem>();
-        protected readonly string Name;
-        protected readonly string Version;
-        protected readonly string PositionalName;
+        private readonly IWorkflowItems _workflowItems;
+        private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
+        protected readonly Identity Identity;
 
-        protected WorkflowItem(string name, string verison, string positionalName)
+        protected WorkflowItem(Identity identity, IWorkflowItems workflowItems)
         {
-            Name = name;
-            Version = verison;
-            PositionalName = positionalName;
+            Identity = identity;
+            _workflowItems = workflowItems;
         }
 
         internal bool HasNoParents()
         {
-            return ParentItems.Count == 0;
+            return _parentItems.Count == 0;
         }
-
         internal bool IsChildOf(WorkflowItem workflowItem)
         {
-            return ParentItems.Contains(workflowItem);
+            return _parentItems.Contains(workflowItem);
         }
 
-        internal abstract IEnumerable<WorkflowItem> GetChildlern(); 
+        internal IEnumerable<WorkflowItem> GetChildlern()
+        {
+            return _workflowItems.GetChildernOf(this);
+        }
 
         internal abstract WorkflowDecision GetDecision();
 
-        public bool Has(string name, string version, string positionalName)
+        public bool Has(Identity identity)
         {
-            return string.Equals(Name, name, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(Version, version, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(PositionalName, positionalName);
+            return Identity.Equals(identity);
         }
-
         public override bool Equals(object other)
         {
             var otherItem = other as WorkflowItem;
             if (otherItem == null)
                 return false;
-
-            return Has(otherItem.Name, otherItem.Version, otherItem.PositionalName);
+            return Identity.Equals(otherItem.Identity);
         }
-
         public override int GetHashCode()
         {
-            return string.Format("{0}{1}{2}", Name, Version, PositionalName).GetHashCode();
+            return Identity.GetHashCode();
         }
 
         public bool AllParentsAreProcessed(IWorkflowContext workflowContext)
         {
-            return ParentItems.All(p => p.IsProcessed(workflowContext));
+            return _parentItems.All(p => p.IsProcessed(workflowContext));
         }
 
         protected abstract bool IsProcessed(IWorkflowContext workflowContext);
+
+        protected void AddParent(Identity identity)
+        {
+            var parentItem = _workflowItems.Find(identity);
+            if (parentItem == null)
+                throw new ParentItemNotFoundException(string.Format("Can not find the schedulable item for {0}", identity));
+            _parentItems.Add(parentItem);
+        }
     }
 }

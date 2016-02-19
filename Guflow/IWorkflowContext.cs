@@ -2,6 +2,7 @@
 {
     public interface IWorkflowContext
     {
-        ActivityEvent GetActivityEvent(string activityName, string activityVersion, string positionalName = "");
+        ActivityEvent LatestActivityEventFor(Identity identity);
+        TimerFiredEvent LatestTimerEventFor(Identity identity);
     }
 }

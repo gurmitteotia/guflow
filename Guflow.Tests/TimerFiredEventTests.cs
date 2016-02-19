@@ -10,6 +10,9 @@ namespace Guflow.Tests
     {
         private TimerFiredEvent _timerFiredEvent;
         private const string _timerName = "timer1";
+        private const string _childTimerName = "childTimer";
+        private const string _activityName = "Download";
+        private const string _activityVersion = "1.0";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(20);
         [SetUp]
         public void Setup()
@@ -22,7 +25,7 @@ namespace Guflow.Tests
         public void Should_populate_properties_from_timer_event_attributes()
         {
             Assert.That(_timerFiredEvent.Name,Is.EqualTo(_timerName));
-            Assert.That(_timerFiredEvent.FireAfter, Is.EqualTo(_fireAfter));
+            Assert.That(_timerFiredEvent.FiredAfter, Is.EqualTo(_fireAfter));
         }
 
         [Test]
@@ -55,9 +58,23 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Return_child_workflow_item_decision()
+        public void Return_child_workflow_timer_item_decision()
         {
-            
+            var workflow = new WorkflowWithMultipleChilds();
+
+            var decisions = _timerFiredEvent.Interpret(workflow).GetDecisions();
+
+            Assert.That(decisions,Is.EquivalentTo(new[]{new ScheduleTimerDecision(_childTimerName)}));
+        }
+
+        [Test]
+        public void Can_return_child_activity_decision()
+        {
+            var workflow = new WorkflowWithChildActivity();
+
+            var decisions = _timerFiredEvent.Interpret(workflow).GetDecisions();
+
+            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleActivityDecision(_activityName,_activityVersion)}));
         }
 
 
@@ -69,14 +86,33 @@ namespace Guflow.Tests
         {
             public WorkflowWithTimer()
             {
-                AddTimer(_timerName).FireAfter(TimeSpan.FromSeconds(20));
+                AddTimer(_timerName);
             }
         }
+
+        private class WorkflowWithMultipleChilds : Workflow
+        {
+            public WorkflowWithMultipleChilds()
+            {
+                AddTimer(_timerName);
+                AddTimer(_childTimerName).DependsOn(_timerName);
+            }
+        }
+
+        private class WorkflowWithChildActivity : Workflow
+        {
+            public WorkflowWithChildActivity()
+            {
+                AddTimer(_timerName);
+                AddActivity(_activityName, _activityVersion).DependsOn(_timerName);
+            }
+        }
+
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                AddTimer(_timerName).FireAfter(TimeSpan.FromSeconds(20)).WhenFired(e => workflowAction);
+                AddTimer(_timerName).WhenFired(e => workflowAction);
             }
         }
     }

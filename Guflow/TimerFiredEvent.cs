@@ -6,11 +6,13 @@ namespace Guflow
 {
     public class TimerFiredEvent :WorkflowEvent
     {
+        private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly TimerFiredEventAttributes _eventAttributes;
-        public TimerFiredEvent(HistoryEvent timerFiredEvent, IEnumerable<HistoryEvent> allHisotryEvents)
+        public TimerFiredEvent(HistoryEvent timerFiredEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
+            _allHistoryEvents = allHistoryEvents;
             _eventAttributes =timerFiredEvent.TimerFiredEventAttributes;
-            PopulateProperties(allHisotryEvents);
+            PopulateProperties(allHistoryEvents);
         }
 
         public override WorkflowAction Interpret(IWorkflow workflow)
@@ -20,12 +22,24 @@ namespace Guflow
 
         public override IWorkflowContext WorkflowContext
         {
-            get { throw new System.NotImplementedException(); }
+            get { return new WorkflowContext(_allHistoryEvents); }
         }
 
         public string Name { get { return _eventAttributes.TimerId; } }
-        public TimeSpan FireAfter { get; private set; }
+        public TimeSpan FiredAfter { get; private set; }
 
+        private Identity Identity
+        {
+            get
+            {
+                return Identity.Timer(Name);
+            }
+        }
+
+        internal bool IsFor(Identity identity)
+        {
+            return Identity.Equals(identity);
+        }
 
         private void PopulateProperties(IEnumerable<HistoryEvent> allHistoryEvents)
         {
@@ -33,7 +47,7 @@ namespace Guflow
             {
                 if (historyEvent.IsTimerStartedEventFor(_eventAttributes.StartedEventId))
                 {
-                    FireAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
+                    FiredAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
                 }
             }
         }

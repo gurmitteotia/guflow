@@ -1,43 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Guflow
 {
-    public class ActivityItem: WorkflowItem
+    public sealed class ActivityItem : WorkflowItem
     {
-        private readonly IWorkflowItems _workflowItems;
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
- 
-        public ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems):base(name,version,positionalName)
+
+        public ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
+            : base(new Identity(name, version, positionalName),workflowItems)
         {
-            _workflowItems = workflowItems;
             _onCompletionAction = c => new ContinueWorkflowAction(this, c.WorkflowContext);
-            _onFailedAction = c=> new FailWorkflowAction(c.Reason,c.Detail);
-            _onTimedoutAction = t=>new FailWorkflowAction(t.TimeoutType,t.Details);
-            _onCancelledAction = c=>new CancelWorkflowAction(c.Details);
+            _onFailedAction = c => new FailWorkflowAction(c.Reason, c.Detail);
+            _onTimedoutAction = t => new FailWorkflowAction(t.TimeoutType, t.Details);
+            _onCancelledAction = c => new CancelWorkflowAction(c.Details);
         }
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")
         {
-            var parentItem = _workflowItems.Find(name, version, positionalName);
-            if(parentItem==null)
-                throw new ParentItemNotFoundException(string.Format("Can not find the schedulable item by name {0}, version {1} and positional name {2}",name,version,positionalName));
-            ParentItems.Add(parentItem);
-
+            AddParent(new Identity(name, version, positionalName));
             return this;
         }
 
-        internal override IEnumerable<WorkflowItem> GetChildlern()
+        public ActivityItem DependsOn(string timerName)
         {
-            return _workflowItems.GetChildernOf(this);
-        }
+            AddParent(Identity.Timer(timerName));
 
+            return this;
+        }
+       
         internal override WorkflowDecision GetDecision()
         {
-            return new ScheduleActivityDecision(Name, Version, PositionalName);
+            return new ScheduleActivityDecision(Identity.Name, Identity.Version, Identity.PositionalName);
         }
 
         internal WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent)
@@ -47,7 +43,7 @@ namespace Guflow
 
         protected override bool IsProcessed(IWorkflowContext workflowContext)
         {
-            var activity = workflowContext.GetActivityEvent(Name, Version, PositionalName);
+            var activity = workflowContext.LatestActivityEventFor(Identity);
 
             return activity != null;
         }

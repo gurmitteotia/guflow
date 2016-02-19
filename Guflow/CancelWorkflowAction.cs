@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Guflow
 {
-    public class CancelWorkflowAction : WorkflowAction
+    internal class CancelWorkflowAction : WorkflowAction
     {
         private readonly string _details;
 
