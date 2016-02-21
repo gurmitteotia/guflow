@@ -4,7 +4,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public class TimerFiredEvent :WorkflowEvent
+    public class TimerFiredEvent :WorkflowItemEvent
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly TimerFiredEventAttributes _eventAttributes;
@@ -36,9 +36,9 @@ namespace Guflow
             }
         }
 
-        internal bool IsFor(Identity identity)
+        internal override bool IsFor(WorkflowItem workflowItem)
         {
-            return Identity.Equals(identity);
+            return workflowItem.Has(Identity);
         }
 
         private void PopulateProperties(IEnumerable<HistoryEvent> allHistoryEvents)

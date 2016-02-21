@@ -19,7 +19,7 @@ namespace Guflow
 
         protected override bool IsProcessed(IWorkflowContext workflowContext)
         {
-            var timerEvent = workflowContext.LatestTimerEventFor(Identity);
+            var timerEvent = workflowContext.LatestTimerEventFor(this);
             return timerEvent != null;
         }
 

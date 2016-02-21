@@ -70,6 +70,13 @@ namespace Guflow
             return this;
         }
 
+        protected WorkflowAction Continue(WorkflowItemEvent workflowEvent)
+        {
+            var workfowItem = WorkflowItemFor(workflowEvent);
+
+            return new ContinueWorkflowAction(workfowItem,workflowEvent.WorkflowContext);
+        }
+
         public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());
@@ -128,6 +135,16 @@ namespace Guflow
                 throw new IncompatibleWorkflowException(string.Format("Can not find timer by name {0} in workflow.", timerFiredEvent.Name));
 
             return workflowActivity;
+        }
+
+        private WorkflowItem WorkflowItemFor(WorkflowItemEvent workflowItemEvent)
+        {
+            var workflowItem = _allWorkflowItems.FirstOrDefault(workflowItemEvent.IsFor);
+
+            if (workflowItem == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find workflow item for event {0}", workflowItemEvent));
+
+            return workflowItem;
         }
     }
 }

@@ -47,6 +47,16 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void By_default_return_continue_workflow_action()
+        {
+            var workflow = new WorkflowWithTimer();
+
+            var workflowAction = _timerFiredEvent.Interpret(workflow);
+
+            Assert.That(workflowAction,Is.EqualTo(new ContinueWorkflowAction(workflow.CompletedItem,null)));
+        }
+
+        [Test]
         public void Can_return_custom_action()
         {
             var workflowAction = new Mock<WorkflowAction>();
@@ -86,8 +96,10 @@ namespace Guflow.Tests
         {
             public WorkflowWithTimer()
             {
-                AddTimer(_timerName);
+                CompletedItem = AddTimer(_timerName);
             }
+
+            public WorkflowItem CompletedItem { get; private set; }
         }
 
         private class WorkflowWithMultipleChilds : Workflow

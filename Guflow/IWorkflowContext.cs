@@ -2,7 +2,7 @@
 {
     public interface IWorkflowContext
     {
-        ActivityEvent LatestActivityEventFor(Identity identity);
-        TimerFiredEvent LatestTimerEventFor(Identity identity);
+        ActivityEvent LatestActivityEventFor(ActivityItem wrkflowItem);
+        TimerFiredEvent LatestTimerEventFor(TimerItem timerItem);
     }
 }

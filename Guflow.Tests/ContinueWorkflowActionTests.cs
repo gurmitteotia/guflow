@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Amazon.SimpleWorkflow.Model;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -22,6 +21,17 @@ namespace Guflow.Tests
             var workflowAction = new ContinueWorkflowAction(completedWorkflowItem, new WorkflowContext(completedActivityEventsGraph));
             
             var decisions = workflowAction.GetDecisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0"), new ScheduleActivityDecision("Sync", "2.1") }));
+        }
+
+        [Test]
+        public void Return_the_scheduling_decision_for_all_child_activities1()
+        {
+            var workflow = new WorkflowWithMultipleChilds();
+            var completedActivityEventsGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res");
+            var activityCompletedEvent = new ActivityCompletedEvent(completedActivityEventsGraph.First(),completedActivityEventsGraph);
+            var decisions = activityCompletedEvent.Interpret(workflow).GetDecisions();
 
             Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0"), new ScheduleActivityDecision("Sync", "2.1") }));
         }
@@ -110,7 +120,8 @@ namespace Guflow.Tests
         {
             public WorkflowWithMultipleChilds()
             {
-                CompletedItem= AddActivity(_activityName, _activityVersion, _positionalName);
+                CompletedItem =
+                    AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
 
                 AddActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName);
                 AddActivity("Sync", "2.1").DependsOn(_activityName, _activityVersion, _positionalName);

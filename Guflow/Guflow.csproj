@@ -110,6 +110,7 @@
     <Compile Include="WorkflowContext.cs" />
     <Compile Include="WorkflowDecision.cs" />
     <Compile Include="WorkflowEvent.cs" />
+    <Compile Include="WorkflowItemEvent.cs" />
     <Compile Include="WorkflowItemIdentity.cs" />
     <Compile Include="WorkflowStartedAction.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />

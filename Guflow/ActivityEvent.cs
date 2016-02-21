@@ -3,7 +3,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public abstract class ActivityEvent : WorkflowEvent
+    public abstract class ActivityEvent : WorkflowItemEvent
     {
         private Identity _identity;
         public string Name { get; private set; }
@@ -11,9 +11,9 @@ namespace Guflow
         public string PositionalName { get; private set; }
         public string WorkerIdentity { get; private set; }
 
-        public bool IsFor(Identity identity)
+        internal override bool IsFor(WorkflowItem workflowItem)
         {
-            return _identity.Equals(identity);
+            return workflowItem.Has(_identity);
         }
 
         protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)

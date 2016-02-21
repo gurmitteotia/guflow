@@ -31,9 +31,9 @@ namespace Guflow
         {
             var childItems = _completedWorkflowItem.GetChildlern();
 
-            var filteredItems = childItems.Where(s => s.AllParentsAreProcessed(_workflowContext));
+            var schedulableChildItems = childItems.Where(s => s.AllParentsAreProcessed(_workflowContext));
 
-            return filteredItems.Select(f => f.GetDecision());
+            return schedulableChildItems.Select(f => f.GetDecision());
         }
     }
 }
