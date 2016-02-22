@@ -46,7 +46,7 @@ namespace Guflow
             return this;
         }
 
-        public TimerItem DependsOn(string activityName, string activityVersion, string positionalName)
+        public TimerItem DependsOn(string activityName, string activityVersion, string positionalName="")
         {
             AddParent(new Identity(activityName, activityVersion, positionalName));
             return this;

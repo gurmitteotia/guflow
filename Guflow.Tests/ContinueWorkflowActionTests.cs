@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -26,39 +27,40 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Return_the_scheduling_decision_for_all_child_activities1()
+        public void Should_return_the_scheduling_decision_for_all_child_activities()
         {
             var workflow = new WorkflowWithMultipleChilds();
-            var completedActivityEventsGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res");
-            var activityCompletedEvent = new ActivityCompletedEvent(completedActivityEventsGraph.First(),completedActivityEventsGraph);
-            var decisions = activityCompletedEvent.Interpret(workflow).GetDecisions();
+            var activityFailedEvent = CreateFailedActivityEvent(_activityName, _activityVersion, _positionalName);
+
+            var decisions = activityFailedEvent.Interpret(workflow).GetDecisions();
 
             Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0"), new ScheduleActivityDecision("Sync", "2.1") }));
         }
 
         [Test]
-        public void Return_empty_decision_when_no_schedulable_child_item_found()
+        public void Should_return_empty_decision_when_no_schedulable_child_item_found()
         {
             var workflow = new SingleActivityWorkflow();
-            var activityCompletedEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
-            var decisions = activityCompletedEvent.Interpret(workflow).GetDecisions();
+            var activityFailedEvent = CreateFailedActivityEvent(_activityName, _activityVersion, _positionalName);
+
+            var decisions = activityFailedEvent.Interpret(workflow).GetDecisions();
 
             CollectionAssert.IsEmpty(decisions);
         }
 
         [Test]
-        public void Return_empty_decision_when_one_of_the_sibiling_is_not_completed()
+        public void Should_not_schedule_the_child_when_one_of_its_parent_is_not_completed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var activityCompletedEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var activityFailedEvent = CreateFailedActivityEvent(_activityName, _activityVersion, _positionalName);
            
-            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
+            var decisions = activityFailedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
             CollectionAssert.IsEmpty(decisions);
         }
 
         [Test]
-        public void Return_scheduling_decision_for_child_when_all_its_parents_are_completed()
+        public void Should_return_scheduling_decision_for_child_when_all_of_its_parents_are_completed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
@@ -71,7 +73,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Return_scheduling_decision_for_child_when_sibling_activity_is_failed()
+        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_failed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
@@ -84,7 +86,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Return_scheduling_decision_for_child_when_sibling_activity_is_timedout()
+        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_timedout()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
@@ -97,7 +99,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Return_scheduling_decision_for_child_when_sibling_activity_is_cancelled()
+        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_cancelled()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
@@ -109,10 +111,53 @@ namespace Guflow.Tests
             Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
         }
 
-        private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
+        [Test]
+        public void Should_return_scheduling_decision_for_child_timer_when_parent_timer_is_fired()
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(activityName, activityVersion, positionalName, "id", "res");
-            return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
+            const string parentTimer = "parent", childTimer = "child";
+            var workflow = new WorkflowWithParentChildTimers(parentTimer,childTimer);
+            var timerFiredEvent = CreateTimerFiredEvent(parentTimer);
+
+            var decisions = timerFiredEvent.Interpret(workflow).GetDecisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(childTimer) }));
+        }
+
+        [Test]
+        public void Should_return_scheduling_decision_for_activity_when_parent_timer_is_fired()
+        {
+            const string parentTimer = "parent";
+            var workflow = new WorkflowWithChildActivity(parentTimer);
+            var timerFiredEvent = CreateTimerFiredEvent(parentTimer);
+
+            var decisions = timerFiredEvent.Interpret(workflow).GetDecisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(_activityName, _activityVersion) }));
+        }
+
+        [Test]
+        public void Should_return_the_scheduling_decision_for_child_timer_when_parent_activity_is_completed()
+        {
+            const string timerName = "timer";
+            var workflow = new WorkflowWithParentActivityAndChildTimers(timerName);
+            var activityFailedEvent = CreateFailedActivityEvent(_activityName, _activityVersion, _positionalName);
+
+            var decisions = activityFailedEvent.Interpret(workflow).GetDecisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(timerName)}));
+        }
+
+
+        private ActivityFailedEvent CreateFailedActivityEvent(string activityName, string activityVersion, string positionalName)
+        {
+            var allHistoryEvents = HistoryEventFactory.CreateActivityFailedEventGraph(activityName, activityVersion, positionalName, "id", "res","detail");
+            return new ActivityFailedEvent(allHistoryEvents.First(), allHistoryEvents);
+        }
+
+        private TimerFiredEvent CreateTimerFiredEvent(string timerName)
+        {
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(timerName, TimeSpan.FromSeconds(2));
+            return new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
         }
 
 
@@ -120,21 +165,18 @@ namespace Guflow.Tests
         {
             public WorkflowWithMultipleChilds()
             {
-                CompletedItem =
-                    AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(Continue);
 
                 AddActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName);
                 AddActivity("Sync", "2.1").DependsOn(_activityName, _activityVersion, _positionalName);
             }
-
-            public WorkflowItem CompletedItem { get; private set; }
         }
 
         private class WorkflowWithMultipleParents : Workflow
         {
             public WorkflowWithMultipleParents()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName);
+                AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(Continue);
                 AddActivity(_siblingActivityName, _siblingActivityVersion);
                 AddActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName).DependsOn(_siblingActivityName, _siblingActivityVersion);
             }
@@ -144,10 +186,35 @@ namespace Guflow.Tests
         {
             public SingleActivityWorkflow()
             {
-                CompletedItem = AddActivity(_activityName, _activityVersion, _positionalName);
+                AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(Continue);
             }
+        }
 
-            public WorkflowItem CompletedItem { get; private set; }
+        private class WorkflowWithParentChildTimers : Workflow
+        {
+            public WorkflowWithParentChildTimers(string timerName, string childTimer)
+            {
+                AddTimer(timerName);
+                AddTimer(childTimer).DependsOn(timerName);
+            }
+        }
+
+        private class WorkflowWithChildActivity : Workflow
+        {
+            public WorkflowWithChildActivity(string timerName)
+            {
+                AddTimer(timerName);
+                AddActivity(_activityName, _activityVersion).DependsOn(timerName);
+            }
+        }
+
+        private class WorkflowWithParentActivityAndChildTimers : Workflow
+        {
+            public WorkflowWithParentActivityAndChildTimers(string timerName)
+            {
+                AddActivity(_activityName, _activityVersion,_positionalName).OnFailure(Continue);
+                AddTimer(timerName).DependsOn(_activityName, _activityVersion,_positionalName);
+            }
         }
     }
 }
