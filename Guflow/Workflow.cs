@@ -92,6 +92,12 @@ namespace Guflow
             return new CancelWorkflowAction(details);
         }
 
+        protected WorkflowAction Reschedule(WorkflowItemEvent workflowItemEvent)
+        {
+            var workflowItem = FindWorkflowItemFor(workflowItemEvent);
+            return new RescheduleWorkflowAction(workflowItem);
+        }
+
         public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());
