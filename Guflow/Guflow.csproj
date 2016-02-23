@@ -75,11 +75,11 @@
     <Compile Include="ActivityCompletedEvent.cs" />
     <Compile Include="ActivityEvent.cs" />
     <Compile Include="ActivityFailedEvent.cs" />
-    <Compile Include="ActivityHost.cs" />
     <Compile Include="ActivityItem.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="CancelWorkflowAction.cs" />
     <Compile Include="CancelWorkflowDecision.cs" />
+    <Compile Include="CompleteWorkflowAction.cs" />
     <Compile Include="ContinueWorkflowAction.cs" />
     <Compile Include="DecisionAssertExtension.cs" />
     <Compile Include="FailWorkflowAction.cs" />
@@ -97,6 +97,7 @@
     <Compile Include="IWorkflow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RescheduleWorkflowAction.cs" />
     <Compile Include="RuntimeActivityConfig.cs" />
     <Compile Include="ScheduleTimerDecision.cs" />
     <Compile Include="TimerFiredEvent.cs" />

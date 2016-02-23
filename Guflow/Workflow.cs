@@ -82,6 +82,11 @@ namespace Guflow
             return new FailWorkflowAction(reason, detail);
         }
 
+        protected WorkflowAction CompleteWorkflow(string result)
+        {
+            return new CompleteWorkflowAction(result);
+        }
+
         protected WorkflowAction CancelWorkflow(string details)
         {
             return new CancelWorkflowAction(details);
