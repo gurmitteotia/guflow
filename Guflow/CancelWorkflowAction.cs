@@ -18,7 +18,7 @@ namespace Guflow
             if (otherAction == null)
                 return false;
 
-            return string.Equals(_details, otherAction._details, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(_details, otherAction._details);
         }
 
         public override int GetHashCode()

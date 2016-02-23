@@ -124,7 +124,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_scheduling_decision_for_activity_when_parent_timer_is_fired()
+        public void Should_return_scheduling_decision_for_child_activity_when_parent_timer_is_fired()
         {
             const string parentTimer = "parent";
             var workflow = new WorkflowWithChildActivity(parentTimer);

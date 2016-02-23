@@ -21,31 +21,31 @@ namespace Guflow
 
         public WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent)
         {
-            var workflowActivity = ActivityFor(activityCompletedEvent);
+            var workflowActivity = FindActivityFor(activityCompletedEvent);
             return workflowActivity.Completed(activityCompletedEvent);
         }
 
         public WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent)
         {
-            var workflowActivity = ActivityFor(activityFailedEvent);
+            var workflowActivity = FindActivityFor(activityFailedEvent);
             return workflowActivity.Failed(activityFailedEvent);
         }
 
         public WorkflowAction ActivityTimedout(ActivityTimedoutEvent activityTimedoutEvent)
         {
-            var workflowActivity = ActivityFor(activityTimedoutEvent);
+            var workflowActivity = FindActivityFor(activityTimedoutEvent);
             return workflowActivity.Timedout(activityTimedoutEvent);
         }
 
         public WorkflowAction ActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
         {
-            var workflowActivity = ActivityFor(activityCancelledEvent);
+            var workflowActivity = FindActivityFor(activityCancelledEvent);
             return workflowActivity.Cancelled(activityCancelledEvent);
         }
 
         public WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
         {
-            var workflowTimer = TimerFor(timerFiredEvent);
+            var workflowTimer = FindTimerFor(timerFiredEvent);
             return workflowTimer.Fired(timerFiredEvent);
         }
 
@@ -72,9 +72,19 @@ namespace Guflow
 
         protected WorkflowAction Continue(WorkflowItemEvent workflowEvent)
         {
-            var workfowItem = WorkflowItemFor(workflowEvent);
+            var workfowItem = FindWorkflowItemFor(workflowEvent);
 
             return new ContinueWorkflowAction(workfowItem,workflowEvent.WorkflowContext);
+        }
+
+        protected WorkflowAction FailWorkflow(string reason, string detail)
+        {
+            return new FailWorkflowAction(reason, detail);
+        }
+
+        protected WorkflowAction CancelWorkflow(string details)
+        {
+            return new CancelWorkflowAction(details);
         }
 
         public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
@@ -117,7 +127,7 @@ namespace Guflow
             return FindTimer(Identity.Timer(name));
         }
 
-        private ActivityItem ActivityFor(ActivityEvent activityEvent)
+        private ActivityItem FindActivityFor(ActivityEvent activityEvent)
         {
             var workflowActivity = FindActivity(activityEvent.Name, activityEvent.Version, activityEvent.PositionalName);
 
@@ -127,7 +137,7 @@ namespace Guflow
             return workflowActivity;
         }
 
-        private TimerItem TimerFor(TimerFiredEvent timerFiredEvent)
+        private TimerItem FindTimerFor(TimerFiredEvent timerFiredEvent)
         {
             var workflowActivity = FindTimer(timerFiredEvent.Name);
 
@@ -137,7 +147,7 @@ namespace Guflow
             return workflowActivity;
         }
 
-        private WorkflowItem WorkflowItemFor(WorkflowItemEvent workflowItemEvent)
+        private WorkflowItem FindWorkflowItemFor(WorkflowItemEvent workflowItemEvent)
         {
             var workflowItem = _allWorkflowItems.FirstOrDefault(workflowItemEvent.IsFor);
 
