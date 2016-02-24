@@ -149,7 +149,7 @@ namespace Guflow.Tests
 
             var decisions = _activityCompletedEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleTimerDecision(_timerName)}));
+            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleTimerDecision(Identity.Timer(_timerName))}));
         }
 
         [Test]

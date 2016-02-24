@@ -120,7 +120,7 @@ namespace Guflow.Tests
 
             var decisions = timerFiredEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(childTimer) }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(childTimer)) }));
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace Guflow.Tests
 
             var decisions = activityFailedEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(timerName)}));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(timerName))}));
         }
 
 

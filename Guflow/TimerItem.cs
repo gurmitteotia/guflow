@@ -14,7 +14,7 @@ namespace Guflow
 
         internal override WorkflowDecision GetDecision()
         {
-            return new ScheduleTimerDecision(Identity.Name, _fireAfter);
+            return new ScheduleTimerDecision(Identity, _fireAfter);
         }
 
         protected override bool IsProcessed(IWorkflowContext workflowContext)
@@ -48,7 +48,7 @@ namespace Guflow
 
         public TimerItem DependsOn(string activityName, string activityVersion, string positionalName="")
         {
-            AddParent(new Identity(activityName, activityVersion, positionalName));
+            AddParent(Identity.New(activityName, activityVersion, positionalName));
             return this;
         }
     }

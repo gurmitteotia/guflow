@@ -8,7 +8,7 @@ namespace Guflow
         public string Version { get; private set; }
         public string PositionalName { get; private set; }
 
-        public Identity(string name, string version, string positionalName="")
+        private Identity(string name, string version, string positionalName)
         {
             Name = name;
             Version = version;
@@ -17,7 +17,12 @@ namespace Guflow
 
         public static Identity Timer(string timerName)
         {
-            return new Identity(timerName,string.Empty);
+            return new Identity(timerName,string.Empty,string.Empty);
+        }
+
+        public static Identity New(string name, string version, string positionalName="")
+        {
+            return new Identity(name, version, positionalName);
         }
 
         public override bool Equals(object other)

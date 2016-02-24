@@ -74,7 +74,7 @@ namespace Guflow.Tests
 
             var decisions = _timerFiredEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions,Is.EquivalentTo(new[]{new ScheduleTimerDecision(_childTimerName)}));
+            Assert.That(decisions,Is.EquivalentTo(new[]{new ScheduleTimerDecision(Identity.Timer(_childTimerName))}));
         }
 
         [Test]
@@ -87,6 +87,11 @@ namespace Guflow.Tests
             Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleActivityDecision(_activityName,_activityVersion)}));
         }
 
+        [Test]
+        public void Can_return_reschedule_workflow_action_if_timer_is_fired_to_reschedule_a_workflow_item()
+        {
+            
+        }
 
         private class EmptyWorkflow : Workflow
         {
@@ -125,6 +130,17 @@ namespace Guflow.Tests
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
                 AddTimer(_timerName).WhenFired(e => workflowAction);
+            }
+        }
+
+        private class SingleActivityWorkflow : Workflow
+        {
+            public const string ActivityName = "Download";
+            public const string ActivityVersion = "1.0";
+            public const string PositionalName = "First";
+            public SingleActivityWorkflow(string result)
+            {
+                AddActivity(ActivityName, ActivityVersion, PositionalName);
             }
         }
     }

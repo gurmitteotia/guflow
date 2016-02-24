@@ -98,6 +98,12 @@ namespace Guflow
             return new RescheduleWorkflowAction(workflowItem);
         }
 
+        protected WorkflowAction RescheduleAfter(WorkflowItemEvent workflowItemEvent, TimeSpan timeout)
+        {
+            var workflowItem = FindWorkflowItemFor(workflowItemEvent);
+            return new RescheduleAfterTimeoutWorkflowAction(workflowItem,timeout);            
+        }
+
         public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());
@@ -110,7 +116,7 @@ namespace Guflow
 
         public WorkflowItem Find(string name, string version, string positionalName)
         {
-            return Find(new Identity(name, version, positionalName));
+            return Find(Identity.New(name, version, positionalName));
         }
 
         public WorkflowItem Find(Identity identity)
@@ -120,7 +126,7 @@ namespace Guflow
 
         public ActivityItem FindActivity(string name, string version, string positionalName)
         {
-            return FindActivity(new Identity(name, version, positionalName));
+            return FindActivity(Identity.New(name, version, positionalName));
         }
 
         public ActivityItem FindActivity(Identity identity)

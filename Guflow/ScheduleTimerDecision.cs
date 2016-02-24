@@ -5,12 +5,12 @@ namespace Guflow
 {
     public class ScheduleTimerDecision : WorkflowDecision
     {
-        private readonly string _timerName;
+        private readonly Identity _timerIdentity;
         private readonly TimeSpan _fireAfter;
 
-        public ScheduleTimerDecision(string timerName, TimeSpan fireAfter= new TimeSpan())
+        public ScheduleTimerDecision(Identity timerIdentity, TimeSpan fireAfter= new TimeSpan())
         {
-            _timerName = timerName;
+            _timerIdentity = timerIdentity;
             _fireAfter = fireAfter;
         }
 
@@ -19,12 +19,12 @@ namespace Guflow
             var otherTimer = other as ScheduleTimerDecision;
             if (otherTimer == null)
                 return false;
-            return string.Equals(_timerName, otherTimer._timerName);
+            return string.Equals(_timerIdentity, otherTimer._timerIdentity);
         }
 
         public override int GetHashCode()
         {
-            return string.IsNullOrEmpty(_timerName) ? GetType().GetHashCode() : _timerName.GetHashCode();
+            return _timerIdentity.GetHashCode();
         }
 
         public override Decision Decision()

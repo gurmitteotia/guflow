@@ -10,7 +10,7 @@ namespace Guflow
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
 
         public ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
-            : base(new Identity(name, version, positionalName),workflowItems)
+            : base(Identity.New(name, version, positionalName), workflowItems)
         {
             _onCompletionAction = c => new ContinueWorkflowAction(this, c.WorkflowContext);
             _onFailedAction = c => new FailWorkflowAction(c.Reason, c.Detail);
@@ -20,7 +20,7 @@ namespace Guflow
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")
         {
-            AddParent(new Identity(name, version, positionalName));
+            AddParent(Identity.New(name, version, positionalName));
             return this;
         }
 

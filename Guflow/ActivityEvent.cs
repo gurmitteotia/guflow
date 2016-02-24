@@ -29,7 +29,7 @@ namespace Guflow
                     Name = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
                     Version = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
                     PositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ScheduleData>().PN;
-                    _identity = new Identity(Name,Version,PositionalName);
+                    _identity = Identity.New(Name,Version,PositionalName);
                 }
             }
         } 

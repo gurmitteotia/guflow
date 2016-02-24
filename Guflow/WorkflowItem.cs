@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Guflow
@@ -30,6 +31,11 @@ namespace Guflow
         }
 
         internal abstract WorkflowDecision GetDecision();
+
+        internal WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
+        {
+            return new ScheduleTimerDecision(Identity,afterTimeout);
+        }
 
         public bool Has(Identity identity)
         {
