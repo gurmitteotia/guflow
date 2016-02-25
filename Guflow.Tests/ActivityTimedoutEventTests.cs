@@ -59,7 +59,7 @@ namespace Guflow.Tests
 
             var workflowAction = _activityTimedoutEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(new FailWorkflowAction(_timeoutType,_detail)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.FailWorkflow(_timeoutType,_detail)));
         }
 
         [Test]

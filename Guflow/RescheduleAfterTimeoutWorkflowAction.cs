@@ -13,17 +13,14 @@ namespace Guflow
             _workflowItem = workflowItem;
             _timeout = timeout;
         }
-
-        public override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
             return new[] {_workflowItem.GetRescheduleDecision(_timeout)};
         }
-
         public bool Equals(RescheduleAfterTimeoutWorkflowAction other)
         {
             return _workflowItem.Equals(other._workflowItem) && _timeout.Equals(other._timeout);
         }
-
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -31,7 +28,6 @@ namespace Guflow
             if (obj.GetType() != this.GetType()) return false;
             return Equals((RescheduleAfterTimeoutWorkflowAction)obj);
         }
-
         public override int GetHashCode()
         {
             return _workflowItem.GetHashCode();

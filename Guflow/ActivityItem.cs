@@ -13,9 +13,9 @@ namespace Guflow
             : base(Identity.New(name, version, positionalName), workflowItems)
         {
             _onCompletionAction = c => new ContinueWorkflowAction(this, c.WorkflowContext);
-            _onFailedAction = c => new FailWorkflowAction(c.Reason, c.Detail);
-            _onTimedoutAction = t => new FailWorkflowAction(t.TimeoutType, t.Details);
-            _onCancelledAction = c => new CancelWorkflowAction(c.Details);
+            _onFailedAction = c => WorkflowAction.FailWorkflow(c.Reason, c.Detail);
+            _onTimedoutAction = t => WorkflowAction.FailWorkflow(t.TimeoutType, t.Details);
+            _onCancelledAction = c => WorkflowAction.CancelWorkflow(c.Details);
         }
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")

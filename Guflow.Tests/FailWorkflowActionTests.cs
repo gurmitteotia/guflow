@@ -6,22 +6,21 @@ namespace Guflow.Tests
     [TestFixture]
     public class FailWorkflowActionTests
     {
-
         [Test]
         public void Equality_tests()
         {
-            Assert.True(new FailWorkflowAction("reason","detail").Equals(new FailWorkflowAction("reason","detail")));
-            Assert.True(new FailWorkflowAction("", "").Equals(new FailWorkflowAction("", "")));
+            Assert.True(WorkflowAction.FailWorkflow("reason", "detail").Equals(WorkflowAction.FailWorkflow("reason", "detail")));
+            Assert.True(WorkflowAction.FailWorkflow("", "").Equals(WorkflowAction.FailWorkflow("", "")));
 
-            Assert.False(new FailWorkflowAction("reason", "detail").Equals(new FailWorkflowAction("reason1", "detail")));
-            Assert.False(new FailWorkflowAction("reason", "detail").Equals(new FailWorkflowAction("reason", "detail1")));
-            Assert.False(new FailWorkflowAction("reason", "detail").Equals(new FailWorkflowAction(null, "detail")));
+            Assert.False(WorkflowAction.FailWorkflow("reason", "detail").Equals(WorkflowAction.FailWorkflow("reason1", "detail")));
+            Assert.False(WorkflowAction.FailWorkflow("reason", "detail").Equals(WorkflowAction.FailWorkflow("reason", "detail1")));
+            Assert.False(WorkflowAction.FailWorkflow("reason", "detail").Equals(WorkflowAction.FailWorkflow(null, "detail")));
         }
 
         [Test]
         public void Should_return_fail_workflow_decision()
         {
-            var action = new FailWorkflowAction("reason", "detail");
+            var action = WorkflowAction.FailWorkflow("reason", "detail");
 
             var decision = action.GetDecisions();
 
@@ -37,7 +36,7 @@ namespace Guflow.Tests
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(new FailWorkflowAction("reason", "detail")));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.FailWorkflow("reason", "detail")));
         }
 
         private class SingleActivityWorkflow : Workflow

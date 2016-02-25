@@ -9,20 +9,20 @@ namespace Guflow.Tests
         [Test]
         public void Equality_tests()
         {
-            Assert.That(new CompleteWorkflowAction("result").Equals(new CompleteWorkflowAction("result")));
-            Assert.That(new CompleteWorkflowAction("").Equals(new CompleteWorkflowAction("")));
-            Assert.That(new CompleteWorkflowAction(null).Equals(new CompleteWorkflowAction(null)));
+            Assert.That(WorkflowAction.CompleteWorkflow("result").Equals(WorkflowAction.CompleteWorkflow("result")));
+            Assert.That(WorkflowAction.CompleteWorkflow("").Equals(WorkflowAction.CompleteWorkflow("")));
+            Assert.That(WorkflowAction.CompleteWorkflow(null).Equals(WorkflowAction.CompleteWorkflow(null)));
 
 
-            Assert.False(new CompleteWorkflowAction("result").Equals(new CompleteWorkflowAction("result1")));
-            Assert.False(new CompleteWorkflowAction("result").Equals(new CompleteWorkflowAction("")));
-            Assert.False(new CompleteWorkflowAction("result").Equals(new CompleteWorkflowAction(null)));
+            Assert.False(WorkflowAction.CompleteWorkflow("result").Equals(WorkflowAction.CompleteWorkflow("result1")));
+            Assert.False(WorkflowAction.CompleteWorkflow("result").Equals(WorkflowAction.CompleteWorkflow("")));
+            Assert.False(WorkflowAction.CompleteWorkflow("result").Equals(WorkflowAction.CompleteWorkflow(null)));
         }
 
         [Test]
-        public void Should_result_complete_workflow_decision()
+        public void Should_return_complete_workflow_decision()
         {
-            var workflowAction = new CompleteWorkflowAction("result");
+            var workflowAction = WorkflowAction.CompleteWorkflow("result");
 
             var decision = workflowAction.GetDecisions();
 
@@ -30,23 +30,23 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_be_returned_as_custom_action()
+        public void Can_be_returned_as_custom_action_in_workflow()
         {
-            var workflow = new SingleActivityWorkflow("result");
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName, "id", "res");
+            var workflow = new WorkflowReturningCompleteWorkflowAction("result");
+            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(WorkflowReturningCompleteWorkflowAction.ActivityName, WorkflowReturningCompleteWorkflowAction.ActivityVersion, WorkflowReturningCompleteWorkflowAction.PositionalName, "id", "res");
             var completedActivityEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(new CompleteWorkflowAction("result")));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CompleteWorkflow("result")));
         }
 
-        private class SingleActivityWorkflow : Workflow
+        private class WorkflowReturningCompleteWorkflowAction : Workflow
         {
             public const string ActivityName = "Download";
             public const string ActivityVersion = "1.0";
             public const string PositionalName = "First";
-            public SingleActivityWorkflow(string result)
+            public WorkflowReturningCompleteWorkflowAction(string result)
             {
                 AddActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => CompleteWorkflow(result));
             }

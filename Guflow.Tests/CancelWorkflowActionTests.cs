@@ -9,18 +9,18 @@ namespace Guflow.Tests
         [Test]
         public void Equality_tests()
         {
-            Assert.True(new CancelWorkflowAction("detail").Equals(new CancelWorkflowAction("detail")));
-            Assert.True(new CancelWorkflowAction("").Equals(new CancelWorkflowAction("")));
+            Assert.True(WorkflowAction.CancelWorkflow("detail").Equals(WorkflowAction.CancelWorkflow("detail")));
+            Assert.True(WorkflowAction.CancelWorkflow("").Equals(WorkflowAction.CancelWorkflow("")));
 
-            Assert.False(new CancelWorkflowAction("detail").Equals(new CancelWorkflowAction("detail1")));
-            Assert.False(new CancelWorkflowAction("detail").Equals(new CancelWorkflowAction("DETAIL")));
-            Assert.False(new CancelWorkflowAction("detail").Equals(new CancelWorkflowAction(null)));
+            Assert.False(WorkflowAction.CancelWorkflow("detail").Equals(WorkflowAction.CancelWorkflow("detail1")));
+            Assert.False(WorkflowAction.CancelWorkflow("detail").Equals(WorkflowAction.CancelWorkflow("DETAIL")));
+            Assert.False(WorkflowAction.CancelWorkflow("detail").Equals(WorkflowAction.CancelWorkflow(null)));
         }
 
         [Test]
         public void Should_return_cancel_workflow_decision()
         {
-            var action = new CancelWorkflowAction("detail");
+            var action = WorkflowAction.CancelWorkflow("detail");
 
             var decision = action.GetDecisions();
 
@@ -28,7 +28,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_be_returned_as_custom_action()
+        public void Can_be_returned_as_custom_action_in_workflow()
         {
             var workflow = new SingleActivityWorkflow("detail");
             var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName, "id", "res");
@@ -36,7 +36,7 @@ namespace Guflow.Tests
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(new CancelWorkflowAction("detail")));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelWorkflow("detail")));
         }
 
         private class SingleActivityWorkflow : Workflow

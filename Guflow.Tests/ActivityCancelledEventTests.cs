@@ -49,7 +49,7 @@ namespace Guflow.Tests
 
             var workflowAction = _activityCancelledEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(new CancelWorkflowAction(_detail)) );
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelWorkflow(_detail)) );
         }
 
         [Test]

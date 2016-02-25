@@ -12,7 +12,6 @@ namespace Guflow
         {
             _workflowItems = workflowItems;
         }
-
         public override bool Equals(object other)
         {
             var otherAction = other as WorkflowStartedAction;
@@ -20,13 +19,11 @@ namespace Guflow
                 return false;
             return _workflowItems.Equals(otherAction._workflowItems);
         }
-
         public override int GetHashCode()
         {
             return _workflowItems.GetHashCode();
         }
-
-        public override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
             var startupWorkflowItems = _workflowItems.GetStartupWorkflowItems();
 

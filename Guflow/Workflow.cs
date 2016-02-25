@@ -79,23 +79,23 @@ namespace Guflow
 
         protected WorkflowAction FailWorkflow(string reason, string detail)
         {
-            return new FailWorkflowAction(reason, detail);
+            return WorkflowAction.FailWorkflow(reason, detail);
         }
 
         protected WorkflowAction CompleteWorkflow(string result)
         {
-            return new CompleteWorkflowAction(result);
+            return WorkflowAction.CompleteWorkflow(result);
         }
 
         protected WorkflowAction CancelWorkflow(string details)
         {
-            return new CancelWorkflowAction(details);
+            return WorkflowAction.CancelWorkflow(details);
         }
 
         protected WorkflowAction Reschedule(WorkflowItemEvent workflowItemEvent)
         {
             var workflowItem = FindWorkflowItemFor(workflowItemEvent);
-            return new RescheduleWorkflowAction(workflowItem);
+            return WorkflowAction.Reschedule(workflowItem);
         }
 
         protected WorkflowAction RescheduleAfter(WorkflowItemEvent workflowItemEvent, TimeSpan timeout)

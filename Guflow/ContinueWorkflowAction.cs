@@ -13,7 +13,6 @@ namespace Guflow
             _completedWorkflowItem = completedWorkflowItem;
             _workflowContext = workflowContext;
         }
-
         public override bool Equals(object other)
         {
             var otherAction = other as ContinueWorkflowAction;
@@ -21,13 +20,11 @@ namespace Guflow
                 return false;
             return _completedWorkflowItem.Equals(otherAction._completedWorkflowItem);
         }
-
         public override int GetHashCode()
         {
             return _completedWorkflowItem.GetHashCode();
         }
-
-        public override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
             var childItems = _completedWorkflowItem.GetChildlern();
 

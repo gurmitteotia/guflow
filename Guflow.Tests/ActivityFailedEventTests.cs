@@ -48,7 +48,7 @@ namespace Guflow.Tests
 
             var workflowAction = _activityFailedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(new FailWorkflowAction(_reason,_detail)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.FailWorkflow(_reason,_detail)));
         }
 
         [Test]
