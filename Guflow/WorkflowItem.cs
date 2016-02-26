@@ -37,7 +37,7 @@ namespace Guflow
             return new ScheduleTimerDecision(Identity,afterTimeout);
         }
 
-        public bool Has(Identity identity)
+        internal bool Has(Identity identity)
         {
             return Identity.Equals(identity);
         }
@@ -53,7 +53,7 @@ namespace Guflow
             return Identity.GetHashCode();
         }
 
-        public bool AllParentsAreProcessed(IWorkflowContext workflowContext)
+        internal bool AllParentsAreProcessed(IWorkflowContext workflowContext)
         {
             return _parentItems.All(p => p.IsProcessed(workflowContext));
         }

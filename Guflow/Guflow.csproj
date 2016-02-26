@@ -81,8 +81,10 @@
     <Compile Include="ContinueWorkflowAction.cs" />
     <Compile Include="DecisionAssertExtension.cs" />
     <Compile Include="FailWorkflowDecision.cs" />
+    <Compile Include="GenericWorkflowAction.cs" />
     <Compile Include="HistoryEventsExtension.cs" />
     <Compile Include="Identity.cs" />
+    <Compile Include="IdentityExtensions.cs" />
     <Compile Include="IncompatibleWorkflowException.cs" />
     <Compile Include="IWorkflowContext.cs" />
     <Compile Include="IWorkflowHistoryEvents.cs" />
@@ -95,13 +97,15 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RescheduleAfterTimeoutWorkflowAction.cs" />
+    <Compile Include="RescheduleWorkflowAction.cs" />
     <Compile Include="RuntimeActivityConfig.cs" />
     <Compile Include="ScheduleTimerDecision.cs" />
     <Compile Include="TimerFiredEvent.cs" />
     <Compile Include="TimerItem.cs" />
+    <Compile Include="TimerScheduleData.cs" />
     <Compile Include="WorkflowItem.cs" />
     <Compile Include="ScheduleActivityDecision.cs" />
-    <Compile Include="ScheduleData.cs" />
+    <Compile Include="ActivityScheduleData.cs" />
     <Compile Include="Workflow.cs" />
     <Compile Include="WorkflowAction.cs" />
     <Compile Include="CompleteWorkflowDecision.cs" />

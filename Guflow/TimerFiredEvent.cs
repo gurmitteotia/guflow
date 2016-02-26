@@ -8,6 +8,8 @@ namespace Guflow
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly TimerFiredEventAttributes _eventAttributes;
+        private Identity _timerIdentity;
+        private bool _isATimeoutTimer;
         public TimerFiredEvent(HistoryEvent timerFiredEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             _allHistoryEvents = allHistoryEvents;

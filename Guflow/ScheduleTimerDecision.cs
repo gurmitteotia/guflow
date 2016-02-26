@@ -3,12 +3,12 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public class ScheduleTimerDecision : WorkflowDecision
+    internal class ScheduleTimerDecision : WorkflowDecision
     {
         private readonly Identity _timerIdentity;
         private readonly TimeSpan _fireAfter;
 
-        public ScheduleTimerDecision(Identity timerIdentity, TimeSpan fireAfter= new TimeSpan())
+        public ScheduleTimerDecision(Identity timerIdentity, TimeSpan fireAfter)
         {
             _timerIdentity = timerIdentity;
             _fireAfter = fireAfter;
@@ -19,7 +19,7 @@ namespace Guflow
             var otherTimer = other as ScheduleTimerDecision;
             if (otherTimer == null)
                 return false;
-            return string.Equals(_timerIdentity, otherTimer._timerIdentity);
+            return string.Equals(_timerIdentity, otherTimer._timerIdentity) && _fireAfter.Equals(otherTimer._fireAfter);
         }
 
         public override int GetHashCode()

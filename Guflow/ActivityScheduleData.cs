@@ -3,7 +3,7 @@
 namespace Guflow
 {
     [DataContract]
-    internal class ScheduleData
+    internal class ActivityScheduleData
     {
         [DataMember]
         public string PN { get; set; }

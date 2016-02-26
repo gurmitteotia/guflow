@@ -6,8 +6,8 @@ namespace Guflow
     {
         private TimeSpan _fireAfter= new TimeSpan();
         private Func<TimerFiredEvent, WorkflowAction> _onFiredAction;
- 
-        public TimerItem(string name, IWorkflowItems workflowItems):base(Identity.Timer(name),workflowItems)
+
+        internal TimerItem(string name, IWorkflowItems workflowItems):base(Identity.Timer(name),workflowItems)
         {
             _onFiredAction = f=>new ContinueWorkflowAction(this,f.WorkflowContext);
         }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Guflow.Tests.TestWorkflows;
 using Moq;
 using NUnit.Framework;
@@ -145,11 +146,12 @@ namespace Guflow.Tests
         [Test]
         public void Can_return_the_decision_for_child_timer_item()
         {
-            var workflow = new WorkflowWithChildTimer();
+            var timeout = TimeSpan.FromSeconds(2);
+            var workflow = new WorkflowWithChildTimer(timeout);
 
             var decisions = _activityCompletedEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleTimerDecision(Identity.Timer(_timerName))}));
+            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleTimerDecision(Identity.Timer(_timerName),timeout)}));
         }
 
         [Test]
@@ -176,10 +178,10 @@ namespace Guflow.Tests
 
         private class WorkflowWithChildTimer : Workflow
         {
-            public WorkflowWithChildTimer()
+            public WorkflowWithChildTimer(TimeSpan fireAfter)
             {
                 AddActivity(_activityName, _activityVersion, _positionalName);
-                AddTimer(_timerName).DependsOn(_activityName, _activityVersion, _positionalName);
+                AddTimer(_timerName).DependsOn(_activityName, _activityVersion, _positionalName).FireAfter(fireAfter);
             }
         }
 

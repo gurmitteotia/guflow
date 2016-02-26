@@ -28,7 +28,7 @@ namespace Guflow
                 {
                     Name = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
                     Version = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
-                    PositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ScheduleData>().PN;
+                    PositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ActivityScheduleData>().PN;
                     _identity = Identity.New(Name,Version,PositionalName);
                 }
             }

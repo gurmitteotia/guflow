@@ -7,13 +7,16 @@ namespace Guflow
         public string Name { get; private set; }
         public string Version { get; private set; }
         public string PositionalName { get; private set; }
-
+        private readonly string _id;
         private Identity(string name, string version, string positionalName)
         {
             Name = name;
             Version = version;
             PositionalName = positionalName;
+            _id = string.Format("{0}{1}{2}", Name, Version, PositionalName);
         }
+        
+        internal string Id{get { return _id; }}
 
         public static Identity Timer(string timerName)
         {
@@ -30,16 +33,12 @@ namespace Guflow
             var otherIdentity = other as Identity;
             if (otherIdentity == null)
                 return false;
-            return string.Equals(Name, otherIdentity.Name, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(Version, otherIdentity.Version, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(PositionalName, otherIdentity.PositionalName, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(_id, otherIdentity.Id, StringComparison.OrdinalIgnoreCase);
         }
-
         public override int GetHashCode()
         {
-            return Name.GetHashCode() ^ Version.GetHashCode();
+            return _id.GetHashCode();
         }
-
         public override string ToString()
         {
             return string.Format("Name {0}, Version {1} and PositionalName {2}", Name, Version, PositionalName);

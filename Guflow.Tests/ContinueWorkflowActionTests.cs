@@ -115,12 +115,13 @@ namespace Guflow.Tests
         public void Should_return_scheduling_decision_for_child_timer_when_parent_timer_is_fired()
         {
             const string parentTimer = "parent", childTimer = "child";
-            var workflow = new WorkflowWithParentChildTimers(parentTimer,childTimer);
+            var childTimeout = TimeSpan.FromSeconds(2);
+            var workflow = new WorkflowWithParentChildTimers(parentTimer, childTimer,childTimeout);
             var timerFiredEvent = CreateTimerFiredEvent(parentTimer);
 
             var decisions = timerFiredEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(childTimer)) }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(childTimer), childTimeout) }));
         }
 
         [Test]
@@ -144,7 +145,7 @@ namespace Guflow.Tests
 
             var decisions = activityFailedEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(timerName))}));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(timerName),new TimeSpan())}));
         }
 
 
@@ -156,7 +157,7 @@ namespace Guflow.Tests
 
         private TimerFiredEvent CreateTimerFiredEvent(string timerName)
         {
-            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(timerName, TimeSpan.FromSeconds(2));
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer(timerName), TimeSpan.FromSeconds(2));
             return new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
         }
 
@@ -192,10 +193,10 @@ namespace Guflow.Tests
 
         private class WorkflowWithParentChildTimers : Workflow
         {
-            public WorkflowWithParentChildTimers(string timerName, string childTimer)
+            public WorkflowWithParentChildTimers(string timerName, string childTimer,TimeSpan childTimeout)
             {
                 AddTimer(timerName);
-                AddTimer(childTimer).DependsOn(timerName);
+                AddTimer(childTimer).DependsOn(timerName).FireAfter(childTimeout);
             }
         }
 

@@ -17,7 +17,7 @@ namespace Guflow.Tests
         [SetUp]
         public void Setup()
         {
-            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(_timerName,_fireAfter);
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer(_timerName),_fireAfter);
             _timerFiredEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
         }
 
@@ -57,7 +57,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_return_custom_action()
+        public void Workflow_can_return_custom_action()
         {
             var workflowAction = new Mock<WorkflowAction>();
             var workflow = new WorkflowWithCustomAction(workflowAction.Object);
@@ -74,7 +74,7 @@ namespace Guflow.Tests
 
             var decisions = _timerFiredEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions,Is.EquivalentTo(new[]{new ScheduleTimerDecision(Identity.Timer(_childTimerName))}));
+            Assert.That(decisions,Is.EquivalentTo(new[]{new ScheduleTimerDecision(Identity.Timer(_childTimerName),new TimeSpan())}));
         }
 
         [Test]
@@ -90,9 +90,16 @@ namespace Guflow.Tests
         [Test]
         public void Can_return_reschedule_workflow_action_if_timer_is_fired_to_reschedule_a_workflow_item()
         {
+            var workflow = new SingleActivityWorkflow();
             
         }
 
+
+        private TimerFiredEvent CreateTimerFiredEvent(string name, TimeSpan fireAfter, bool isATimeoutTimer)
+        {
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer(_timerName), _fireAfter,isATimeoutTimer);
+            return new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
+        }
         private class EmptyWorkflow : Workflow
         {
         }
@@ -138,7 +145,7 @@ namespace Guflow.Tests
             public const string ActivityName = "Download";
             public const string ActivityVersion = "1.0";
             public const string PositionalName = "First";
-            public SingleActivityWorkflow(string result)
+            public SingleActivityWorkflow()
             {
                 AddActivity(ActivityName, ActivityVersion, PositionalName);
             }
