@@ -34,7 +34,7 @@ namespace Guflow.Tests
 
             var decisions = workflowAction.GetDecisions();
 
-            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleTimerDecision(Identity.New("name","ver","pos"),TimeSpan.FromSeconds(2))}));
+            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleTimerDecision(Identity.New("name","ver","pos"),TimeSpan.FromSeconds(2),true)}));
         }
 
         [Test]

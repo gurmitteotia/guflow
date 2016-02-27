@@ -17,8 +17,7 @@ namespace Guflow.Tests
         [SetUp]
         public void Setup()
         {
-            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer(_timerName),_fireAfter);
-            _timerFiredEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
+            _timerFiredEvent = CreateTimerFiredEvent(Identity.Timer(_timerName), _fireAfter);
         }
 
         [Test]
@@ -91,15 +90,35 @@ namespace Guflow.Tests
         public void Can_return_reschedule_workflow_action_if_timer_is_fired_to_reschedule_a_workflow_item()
         {
             var workflow = new SingleActivityWorkflow();
-            
+            var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.New(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName), _fireAfter);
+
+            var workflowAction = rescheduleTimer.Interpret(workflow);
+
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Reschedule(workflow.RescheduleItem)));
+        }
+
+        [Test]
+        public void Throws_exception_when_rescheduled_item_is_not_found_in_workflow()
+        {
+            var workflow = new SingleActivityWorkflow();
+            var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.New("NotIntWorkflow", string.Empty,string.Empty ), _fireAfter);
+
+            Assert.Throws<IncompatibleWorkflowException>(()=> rescheduleTimer.Interpret(workflow));
         }
 
 
-        private TimerFiredEvent CreateTimerFiredEvent(string name, TimeSpan fireAfter, bool isATimeoutTimer)
+        private TimerFiredEvent CreateTimerFiredEvent(Identity identity, TimeSpan fireAfter)
         {
-            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer(_timerName), _fireAfter,isATimeoutTimer);
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(identity, fireAfter);
             return new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
         }
+
+        private TimerFiredEvent CreateRescheduleTimerFiredEvent(Identity identity, TimeSpan fireAfter)
+        {
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(identity, fireAfter, true);
+            return new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
+        }
+
         private class EmptyWorkflow : Workflow
         {
         }
@@ -147,8 +166,10 @@ namespace Guflow.Tests
             public const string PositionalName = "First";
             public SingleActivityWorkflow()
             {
-                AddActivity(ActivityName, ActivityVersion, PositionalName);
+                RescheduleItem = AddActivity(ActivityName, ActivityVersion, PositionalName);
             }
+
+            public WorkflowItem RescheduleItem { get; private set; }
         }
     }
 }

@@ -180,7 +180,7 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateTimerFiredEventGraph(Identity timerId, TimeSpan startToFireTimeout, bool isATimeoutTimer=false)
+        public static IEnumerable<HistoryEvent> CreateTimerFiredEventGraph(Identity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer=false)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;
@@ -204,7 +204,7 @@ namespace Guflow.Tests
                 {
                     TimerId = timerId.Id,
                     StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
-                    Control = (new TimerScheduleData() { Identity = timerId.ToJson(),IsATimeoutTimer = isATimeoutTimer}).ToJson()
+                    Control = (new TimerScheduleData() { Identity = timerId.ToJson(),IsARescheduleTimer = isARescheduleTimer}).ToJson()
                 }
             });
 

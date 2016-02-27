@@ -9,7 +9,7 @@ namespace Guflow
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly TimerFiredEventAttributes _eventAttributes;
         private Identity _timerIdentity;
-        private bool _isATimeoutTimer;
+        private bool _isARescheduledTimer;
         public TimerFiredEvent(HistoryEvent timerFiredEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             _allHistoryEvents = allHistoryEvents;
@@ -27,20 +27,17 @@ namespace Guflow
             get { return new WorkflowContext(_allHistoryEvents); }
         }
 
-        public string Name { get { return _eventAttributes.TimerId; } }
+        public string Name { get { return _timerIdentity.Name; } }
         public TimeSpan FiredAfter { get; private set; }
-
-        private Identity Identity
-        {
-            get
-            {
-                return Identity.Timer(Name);
-            }
-        }
 
         internal override bool IsFor(WorkflowItem workflowItem)
         {
-            return workflowItem.Has(Identity);
+            return workflowItem.Has(_timerIdentity) && !_isARescheduledTimer;
+        }
+
+        internal bool IsRescheduleTimerFor(WorkflowItem workflowItem)
+        {
+            return workflowItem.Has(_timerIdentity) && _isARescheduledTimer;
         }
 
         private void PopulateProperties(IEnumerable<HistoryEvent> allHistoryEvents)
@@ -50,6 +47,9 @@ namespace Guflow
                 if (historyEvent.IsTimerStartedEventFor(_eventAttributes.StartedEventId))
                 {
                     FiredAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
+                    var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.FromJson<TimerScheduleData>();
+                    _timerIdentity = timerScheduleData.Identity.FromJson();
+                    _isARescheduledTimer = timerScheduleData.IsARescheduleTimer;
                 }
             }
         }

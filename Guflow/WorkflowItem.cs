@@ -34,7 +34,7 @@ namespace Guflow
 
         internal WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
         {
-            return new ScheduleTimerDecision(Identity,afterTimeout);
+            return new ScheduleTimerDecision(Identity,afterTimeout,true);
         }
 
         internal bool Has(Identity identity)

@@ -6,6 +6,6 @@ namespace Guflow
     internal class TimerScheduleData
     {
         [DataMember] public string Identity;
-        [DataMember] public bool IsATimeoutTimer;
+        [DataMember] public bool IsARescheduleTimer;
     }
 }
