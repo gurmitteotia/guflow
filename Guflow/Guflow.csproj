@@ -96,10 +96,12 @@
     <Compile Include="IWorkflow.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RescheduleAfterTimeoutWorkflowAction.cs" />
     <Compile Include="RescheduleWorkflowAction.cs" />
     <Compile Include="RuntimeActivityConfig.cs" />
     <Compile Include="ScheduleTimerDecision.cs" />
+    <Compile Include="TimerCancelledEvent.cs" />
+    <Compile Include="TimerEvent.cs" />
+    <Compile Include="TimerFailedEvent.cs" />
     <Compile Include="TimerFiredEvent.cs" />
     <Compile Include="TimerItem.cs" />
     <Compile Include="TimerScheduleData.cs" />

@@ -9,11 +9,12 @@ namespace Guflow
         private readonly IWorkflowItems _workflowItems;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
         protected readonly Identity Identity;
-
+        protected Func<TimerCancelledEvent, WorkflowAction> OnTimerCancelledAction; 
         protected WorkflowItem(Identity identity, IWorkflowItems workflowItems)
         {
             Identity = identity;
             _workflowItems = workflowItems;
+            OnTimerCancelledAction = c=>WorkflowAction.CancelWorkflow("TIMER_CANCELLED");
         }
 
         internal bool HasNoParents()
@@ -36,10 +37,13 @@ namespace Guflow
         {
             return new ScheduleTimerDecision(Identity,afterTimeout,true);
         }
-
         internal bool Has(Identity identity)
         {
             return Identity.Equals(identity);
+        }
+        internal WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        {
+            return OnTimerCancelledAction(timerCancelledEvent);
         }
         public override bool Equals(object other)
         {
@@ -67,5 +71,6 @@ namespace Guflow
                 throw new ParentItemNotFoundException(string.Format("Can not find the schedulable item for {0}", identity));
             _parentItems.Add(parentItem);
         }
+
     }
 }

@@ -8,7 +8,6 @@ namespace Guflow
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
-
         public ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
             : base(Identity.New(name, version, positionalName), workflowItems)
         {
@@ -84,6 +83,12 @@ namespace Guflow
         public ActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc)
         {
             _onCancelledAction = onCancelledFunc;
+            return this;
+        }
+
+        public ActivityItem OnTimerCancelled(Func<TimerCancelledEvent, WorkflowAction> onTimerCancelledAction)
+        {
+            OnTimerCancelledAction = onTimerCancelledAction;
             return this;
         }
     }

@@ -211,6 +211,56 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
+        public static IEnumerable<HistoryEvent> CreateTimerCancelledEventGraph(Identity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerCanceled,
+                EventId = eventIds.CompletedId,
+                TimerCanceledEventAttributes = new TimerCanceledEventAttributes()
+                {
+                    StartedEventId = eventIds.StartedId,
+                    TimerId = timerId.Id,
+                },
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerStarted,
+                EventId = eventIds.StartedId,
+                TimerStartedEventAttributes = new TimerStartedEventAttributes()
+                {
+                    TimerId = timerId.Id,
+                    StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
+                    Control = (new TimerScheduleData() { Identity = timerId.ToJson(), IsARescheduleTimer = isARescheduleTimer }).ToJson()
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public static IEnumerable<HistoryEvent> CreateTimerFailedEventGraph(Identity timerId, string cause)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.StartTimerFailed,
+                EventId = eventIds.CompletedId,
+                StartTimerFailedEventAttributes = new StartTimerFailedEventAttributes()
+                {
+                    TimerId = timerId.Id,
+                    Cause = cause
+                },
+            });
+
+            return historyEvents;
+        }
+
         private class EventIds
         {
             private static long _seed = long.MaxValue;

@@ -16,7 +16,6 @@ namespace Guflow
         {
             return new ScheduleTimerDecision(Identity, _fireAfter);
         }
-
         protected override bool IsProcessed(IWorkflowContext workflowContext)
         {
             var timerEvent = workflowContext.LatestTimerEventFor(this);
@@ -39,7 +38,6 @@ namespace Guflow
             _onFiredAction = onFiredAction;
             return this;
         }
-
         public TimerItem DependsOn(string timerName)
         {
             AddParent(Identity.Timer(timerName));
@@ -49,6 +47,12 @@ namespace Guflow
         public TimerItem DependsOn(string activityName, string activityVersion, string positionalName="")
         {
             AddParent(Identity.New(activityName, activityVersion, positionalName));
+            return this;
+        }
+
+        public TimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> onCancelledAction)
+        {
+            OnTimerCancelledAction = onCancelledAction;
             return this;
         }
     }

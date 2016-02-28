@@ -52,6 +52,20 @@ namespace Guflow
             return WorkflowAction.Reschedule(rescheduleWorkflowItem);
         }
 
+        public WorkflowAction TimerFailed(TimerFailedEvent timerFailedEvent)
+        {
+            return WorkflowAction.FailWorkflow("START_TIMER_FAILED", timerFailedEvent.Cause);
+        }
+
+        public WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        {
+            var workflowTimer = FindTimer(timerCancelledEvent);
+            if (workflowTimer != null)
+                return workflowTimer.TimerCancelled(timerCancelledEvent);
+            var rescheduleWorkflowItem = FindRescheduledItemFor(timerCancelledEvent);
+            return rescheduleWorkflowItem.TimerCancelled(timerCancelledEvent);
+        }
+
         protected ActivityItem AddActivity(string name, string version, string positionalName = "")
         {
             var activityItem = new ActivityItem(name,version, positionalName,this);
@@ -94,19 +108,11 @@ namespace Guflow
         {
             return WorkflowAction.CancelWorkflow(details);
         }
-
         protected RescheduleWorkflowAction Reschedule(WorkflowItemEvent workflowItemEvent)
         {
             var workflowItem = FindWorkflowItemFor(workflowItemEvent);
             return WorkflowAction.Reschedule(workflowItem);
         }
-
-        protected WorkflowAction RescheduleAfter(WorkflowItemEvent workflowItemEvent, TimeSpan timeout)
-        {
-            var workflowItem = FindWorkflowItemFor(workflowItemEvent);
-            return new RescheduleAfterTimeoutWorkflowAction(workflowItem,timeout);            
-        }
-
         public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());
@@ -147,7 +153,7 @@ namespace Guflow
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
         }
 
-        private TimerItem FindTimer(TimerFiredEvent timerFiredEvent)
+        private TimerItem FindTimer(TimerEvent timerFiredEvent)
         {
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(timerFiredEvent.IsFor);
         }
@@ -162,7 +168,7 @@ namespace Guflow
             return workflowActivity;
         }
 
-        private WorkflowItem FindRescheduledItemFor(TimerFiredEvent timerFiredEvent)
+        private WorkflowItem FindRescheduledItemFor(TimerEvent timerFiredEvent)
         {
             var workflowItem = _allWorkflowItems.FirstOrDefault(timerFiredEvent.IsRescheduleTimerFor);
 
