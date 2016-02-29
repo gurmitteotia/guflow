@@ -18,11 +18,14 @@ namespace Guflow
 
         protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
         {
+            bool foundActivityStartedEvent=false;
+            bool foundActivityScheduledEvent=false;
             foreach (var historyEvent in allHistoryEvents)
             {
                 if (historyEvent.IsActivityStartedEventFor(startedEventId))
                 {
                     WorkerIdentity = historyEvent.ActivityTaskStartedEventAttributes.Identity;
+                    foundActivityStartedEvent = true;
                 }
                 else if (historyEvent.IsActivityScheduledEventFor(scheduledEventId))
                 {
@@ -30,8 +33,13 @@ namespace Guflow
                     Version = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
                     PositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ActivityScheduleData>().PN;
                     _identity = Identity.New(Name,Version,PositionalName);
+                    foundActivityScheduledEvent = true;
                 }
             }
+            if(!foundActivityStartedEvent)
+                throw new IncompleteEventGraphException(string.Format("Can not found activity started event id {0}.", startedEventId));
+            if (!foundActivityScheduledEvent)
+                throw new IncompleteEventGraphException(string.Format("Can not found activity scheduled event id {0}.", scheduledEventId));
         } 
     }
 }

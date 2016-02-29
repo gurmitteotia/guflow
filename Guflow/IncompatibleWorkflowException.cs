@@ -6,7 +6,6 @@ namespace Guflow
     {
         public IncompatibleWorkflowException(string message):base(message)
         {
-            
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Amazon.SimpleWorkflow;
 using Guflow.Tests.TestWorkflows;
 using Moq;
 using NUnit.Framework;
@@ -14,11 +15,6 @@ namespace Guflow.Tests
         private const string _activityVersion = "1.0";
         private const string _positionalName = "First";
         private const string _identity = "machine name";
-        private const string _siblingActivityName = "Sync";
-        private const string _siblingActivityVersion = "2.0";
-
-        private const string _timerName = "timer1";
-
         private ActivityCompletedEvent _activityCompletedEvent;
 
         [SetUp]
@@ -47,6 +43,21 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void Throws_exception_when_activity_started_event_not_found_in_event_graph()
+        {
+            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, _identity, _result);
+            
+            Assert.Throws<IncompleteEventGraphException>(()=> new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h=>h.EventType!=EventType.ActivityTaskStarted)));
+        }
+        [Test]
+        public void Throws_exception_when_activity_scheduled_event_not_found_in_event_graph()
+        {
+            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, _identity, _result);
+
+            Assert.Throws<IncompleteEventGraphException>(() => new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h => h.EventType != EventType.ActivityTaskScheduled)));
+        }
+
+        [Test]
         public void By_default_return_continue_workflow_action()
         {
             var workflow = new SingleActivityWorkflow();
@@ -56,106 +67,8 @@ namespace Guflow.Tests
             Assert.That(workflowAction,Is.EqualTo(new ContinueWorkflowAction(workflow.CompletedItem,null)));
         }
 
-
         [Test]
-        public void Return_the_scheduling_decision_for_all_child_activities()
-        {
-            var workflow = new WorkflowWithMultipleChilds();
-
-            var decisions = _activityCompletedEvent.Interpret(workflow).GetDecisions();
-
-            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleActivityDecision("Transcode","2.0"),new ScheduleActivityDecision("Sync","2.1")}));
-        }
-
-        [Test]
-        public void Return_empty_decision_when_no_schedulable_child_item_found()
-        {
-            var workflow = new SingleActivityWorkflow();
-
-            var decisions = _activityCompletedEvent.Interpret(workflow).GetDecisions();
-
-            CollectionAssert.IsEmpty(decisions);
-        }
-
-        [Test]
-        public void Return_empty_decision_when_one_of_the_sibiling_is_not_completed()
-        {
-            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-
-            var decisions = _activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
-
-            CollectionAssert.IsEmpty(decisions);
-        }
-
-        [Test]
-        public void Return_scheduling_decision_for_child_when_all_its_parents_are_completed()
-        {
-            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName,"id", "res")
-                                   .Concat(HistoryEventFactory.CreateActivityCompletedEventGraph(_siblingActivityName,_siblingActivityVersion, "","id2", "re2"));
-
-            var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
-
-            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
-
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0")}));
-        }
-
-        [Test]
-        public void Return_scheduling_decision_for_child_when_sibling_activity_is_failed()
-        {
-            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
-                                   .Concat(HistoryEventFactory.CreateActivityFailedEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "re2","detail"));
-
-            var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
-
-            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
-
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
-        }
-
-        [Test]
-        public void Return_scheduling_decision_for_child_when_sibling_activity_is_timedout()
-        {
-            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
-                                   .Concat(HistoryEventFactory.CreateActivityTimedoutEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "re2", "detail"));
-
-            var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
-
-            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
-
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
-        }
-
-        [Test]
-        public void Return_scheduling_decision_for_child_when_sibling_activity_is_cancelled()
-        {
-            var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
-                                   .Concat(HistoryEventFactory.CreateActivityCancelledEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "detail"));
-
-            var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
-
-            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
-
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
-        }
-
-        [Test]
-        public void Can_return_the_decision_for_child_timer_item()
-        {
-            var timeout = TimeSpan.FromSeconds(2);
-            var workflow = new WorkflowWithChildTimer(timeout);
-
-            var decisions = _activityCompletedEvent.Interpret(workflow).GetDecisions();
-
-            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleTimerDecision(Identity.Timer(_timerName),timeout)}));
-        }
-
-        [Test]
-        public void Return_the_custom_completion_action()
+        public void Can_return_custom_workflow_action()
         {
             var workflowAction = new Mock<WorkflowAction>();
             var workflow = new WorkflowWithCustomAction(workflowAction.Object);
@@ -163,36 +76,6 @@ namespace Guflow.Tests
             var interpretedAction = _activityCompletedEvent.Interpret(workflow);
 
             Assert.That(interpretedAction,Is.EqualTo(workflowAction.Object));
-        }
-
-        private class WorkflowWithMultipleChilds : Workflow
-        {
-            public WorkflowWithMultipleChilds()
-            {
-                AddActivity(_activityName,_activityVersion,_positionalName);
-
-                AddActivity("Transcode", "2.0").DependsOn(_activityName,_activityVersion,_positionalName);
-                AddActivity("Sync", "2.1").DependsOn(_activityName, _activityVersion, _positionalName);
-            }
-        }
-
-        private class WorkflowWithChildTimer : Workflow
-        {
-            public WorkflowWithChildTimer(TimeSpan fireAfter)
-            {
-                AddActivity(_activityName, _activityVersion, _positionalName);
-                AddTimer(_timerName).DependsOn(_activityName, _activityVersion, _positionalName).FireAfter(fireAfter);
-            }
-        }
-
-        private class WorkflowWithMultipleParents : Workflow
-        {
-            public WorkflowWithMultipleParents()
-            {
-                AddActivity(_activityName, _activityVersion, _positionalName);
-                AddActivity(_siblingActivityName, _siblingActivityVersion);
-                AddActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName).DependsOn(_siblingActivityName,_siblingActivityVersion);
-            }
         }
 
         private class SingleActivityWorkflow : Workflow

@@ -86,6 +86,7 @@
     <Compile Include="Identity.cs" />
     <Compile Include="IdentityExtensions.cs" />
     <Compile Include="IncompatibleWorkflowException.cs" />
+    <Compile Include="IncompleteEventGraphException.cs" />
     <Compile Include="IWorkflowContext.cs" />
     <Compile Include="IWorkflowHistoryEvents.cs" />
     <Compile Include="IWorkflowItems.cs" />
@@ -116,7 +117,7 @@
     <Compile Include="WorkflowEvent.cs" />
     <Compile Include="WorkflowItemEvent.cs" />
     <Compile Include="WorkflowItemIdentity.cs" />
-    <Compile Include="WorkflowStartedAction.cs" />
+    <Compile Include="StartWorkflowAction.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />
   </ItemGroup>

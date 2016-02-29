@@ -261,6 +261,27 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
+        public static HistoryEvent CreateWorkflowStartedEvent()
+        {
+            return new HistoryEvent()
+            {
+                WorkflowExecutionStartedEventAttributes = new WorkflowExecutionStartedEventAttributes()
+                {
+                    ChildPolicy = ChildPolicy.TERMINATE,
+                    ContinuedExecutionRunId = "continue run id",
+                    ExecutionStartToCloseTimeout = "100",
+                    Input = "workflow input",
+                    LambdaRole = "some role",
+                    ParentInitiatedEventId = 10,
+                    ParentWorkflowExecution = new WorkflowExecution() { RunId = "parent runid", WorkflowId = "parent workflow id" },
+                    TagList = new List<string>() { "First", "Second" },
+                    TaskList = new TaskList() { Name = "task name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "30",
+                }
+            };
+        }
+
         private class EventIds
         {
             private static long _seed = long.MaxValue;

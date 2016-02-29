@@ -50,17 +50,6 @@ namespace Guflow.Tests
 
             Assert.That(workflowAction,Is.EqualTo(WorkflowAction.FailWorkflow(_reason,_detail)));
         }
-
-        [Test]
-        public void By_default_return_workflow_failed_decision()
-        {
-            var workflow = new SingleActivityWorkflow();
-
-            var decisions = _activityFailedEvent.Interpret(workflow).GetDecisions();
-
-            Assert.That(decisions,Is.EquivalentTo(new []{new FailWorkflowDecision(_reason,_detail)}));
-        }
-
         [Test]
         public void Can_return_the_custom_workflow_action()
         {
@@ -79,7 +68,6 @@ namespace Guflow.Tests
                 AddActivity(_activityName, _activityVersion, _positionalName);
             }
         }
-
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
@@ -87,6 +75,5 @@ namespace Guflow.Tests
                 AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(e => workflowAction);
             }
         }
-
     }
 }

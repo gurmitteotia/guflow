@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Amazon.SimpleWorkflow;
 using Moq;
 using NUnit.Framework;
 
@@ -10,10 +11,8 @@ namespace Guflow.Tests
     {
         private TimerFiredEvent _timerFiredEvent;
         private const string _timerName = "timer1";
-        private const string _childTimerName = "childTimer";
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(20);
+
         [SetUp]
         public void Setup()
         {
@@ -31,18 +30,14 @@ namespace Guflow.Tests
         public void Throws_exception_when_fired_timer_is_not_found_in_workflow()
         {
             var workflow = new EmptyWorkflow();
-
             Assert.Throws<IncompatibleWorkflowException>(() => _timerFiredEvent.Interpret(workflow));
         }
 
         [Test]
-        public void Return_empty_decision_when_no_schedulable_child_item_found()
+        public void Throws_exception_when_timer_start_event_is_missing()
         {
-            var workflow = new WorkflowWithTimer();
-
-            var decisions = _timerFiredEvent.Interpret(workflow).GetDecisions();
-
-            CollectionAssert.IsEmpty(decisions);
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer(_timerName), _fireAfter);
+            Assert.Throws<IncompleteEventGraphException>(()=> new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph.Where(h=>h.EventType!=EventType.TimerStarted)));
         }
 
         [Test]
@@ -67,26 +62,6 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Return_child_workflow_timer_item_decision()
-        {
-            var workflow = new WorkflowWithMultipleChilds();
-
-            var decisions = _timerFiredEvent.Interpret(workflow).GetDecisions();
-
-            Assert.That(decisions,Is.EquivalentTo(new[]{new ScheduleTimerDecision(Identity.Timer(_childTimerName),new TimeSpan())}));
-        }
-
-        [Test]
-        public void Can_return_child_activity_decision()
-        {
-            var workflow = new WorkflowWithChildActivity();
-
-            var decisions = _timerFiredEvent.Interpret(workflow).GetDecisions();
-
-            Assert.That(decisions,Is.EquivalentTo(new []{new ScheduleActivityDecision(_activityName,_activityVersion)}));
-        }
-
-        [Test]
         public void Can_return_reschedule_workflow_action_if_timer_is_fired_to_reschedule_a_workflow_item()
         {
             var workflow = new SingleActivityWorkflow();
@@ -105,7 +80,6 @@ namespace Guflow.Tests
 
             Assert.Throws<IncompatibleWorkflowException>(()=> rescheduleTimer.Interpret(workflow));
         }
-
 
         private TimerFiredEvent CreateTimerFiredEvent(Identity identity, TimeSpan fireAfter)
         {
@@ -132,25 +106,6 @@ namespace Guflow.Tests
 
             public WorkflowItem CompletedItem { get; private set; }
         }
-
-        private class WorkflowWithMultipleChilds : Workflow
-        {
-            public WorkflowWithMultipleChilds()
-            {
-                AddTimer(_timerName);
-                AddTimer(_childTimerName).DependsOn(_timerName);
-            }
-        }
-
-        private class WorkflowWithChildActivity : Workflow
-        {
-            public WorkflowWithChildActivity()
-            {
-                AddTimer(_timerName);
-                AddActivity(_activityName, _activityVersion).DependsOn(_timerName);
-            }
-        }
-
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
@@ -158,7 +113,6 @@ namespace Guflow.Tests
                 AddTimer(_timerName).WhenFired(e => workflowAction);
             }
         }
-
         private class SingleActivityWorkflow : Workflow
         {
             public const string ActivityName = "Download";
@@ -168,7 +122,6 @@ namespace Guflow.Tests
             {
                 RescheduleItem = AddActivity(ActivityName, ActivityVersion, PositionalName);
             }
-
             public WorkflowItem RescheduleItem { get; private set; }
         }
     }

@@ -38,7 +38,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_be_returned_as_custom_action()
+        public void Can_be_returned_as_custom_action_in_workflow()
         {
             var workflow = new WorkflowToReturnRescheduleAction();
             var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(WorkflowToReturnRescheduleAction.ActivityName, WorkflowToReturnRescheduleAction.ActivityVersion, WorkflowToReturnRescheduleAction.PositionalName, "id", "res");

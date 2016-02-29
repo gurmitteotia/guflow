@@ -41,17 +41,7 @@ namespace Guflow.Tests
 
             Assert.Throws<IncompatibleWorkflowException>(() => _activityTimedoutEvent.Interpret(workflow));
         }
-
-        [Test]
-        public void Return_workflow_failed_decision()
-        {
-            var workflow = new SingleActivityWorkflow();
-
-            var decisions = _activityTimedoutEvent.Interpret(workflow).GetDecisions();
-
-            Assert.That(decisions,Is.EquivalentTo(new []{new FailWorkflowDecision(_timeoutType,_detail)}));
-        }
-
+     
         [Test]
         public void By_default_return_fail_workflow_action()
         {
@@ -80,7 +70,6 @@ namespace Guflow.Tests
                 AddActivity(_activityName, _activityVersion, _positionalName);
             }
         }
-
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)

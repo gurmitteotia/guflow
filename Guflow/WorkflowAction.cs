@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Guflow
 {
     public abstract class WorkflowAction
     {
+        private static readonly WorkflowAction _emptyWorkflowAction = new EmptyWorkflowAction();
         internal abstract IEnumerable<WorkflowDecision> GetDecisions();
 
         internal static WorkflowAction FailWorkflow(string reason, string detail)
@@ -21,6 +23,23 @@ namespace Guflow
         internal static RescheduleWorkflowAction Reschedule(WorkflowItem workflowItem)
         {
             return new RescheduleWorkflowAction(workflowItem);
+        }
+        internal static WorkflowAction ContinueWorkflow(WorkflowItem workflowItem,IWorkflowContext workflowContext)
+        {
+            return new ContinueWorkflowAction(workflowItem,workflowContext);
+        }
+        internal static WorkflowAction StartWorkflow(IWorkflowItems workflowItems)
+        {
+            return new StartWorkflowAction(workflowItems);
+        }
+        internal static WorkflowAction Ignore { get{return _emptyWorkflowAction;} }
+
+        private class EmptyWorkflowAction : WorkflowAction
+        {
+            internal override IEnumerable<WorkflowDecision> GetDecisions()
+            {
+                return Enumerable.Empty<WorkflowDecision>();
+            }
         }
     }
 }

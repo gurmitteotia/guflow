@@ -11,7 +11,7 @@ namespace Guflow
 
         protected Workflow()
         {
-            _onStartupFunc = s => new WorkflowStartedAction(this);
+            _onStartupFunc = s => WorkflowAction.StartWorkflow(this);
         }
 
         public WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
@@ -112,6 +112,14 @@ namespace Guflow
         {
             var workflowItem = FindWorkflowItemFor(workflowItemEvent);
             return WorkflowAction.Reschedule(workflowItem);
+        }
+        protected WorkflowAction StartWorkflow()
+        {
+            return WorkflowAction.StartWorkflow(this);
+        }
+        protected WorkflowAction Ignore()
+        {
+            return WorkflowAction.Ignore;
         }
         public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ServiceModel.Configuration;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -23,6 +24,7 @@ namespace Guflow
         }
         protected void PopulateProperties(long timerStartedEventId, IEnumerable<HistoryEvent> allHistoryEvents)
         {
+            bool foundTimerStartedEvent = false;
             foreach (var historyEvent in allHistoryEvents)
             {
                 if (historyEvent.IsTimerStartedEventFor(timerStartedEventId))
@@ -31,8 +33,12 @@ namespace Guflow
                     var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.FromJson<TimerScheduleData>();
                     TimerIdentity = timerScheduleData.Identity.FromJson();
                     IsARescheduledTimer = timerScheduleData.IsARescheduleTimer;
+                    foundTimerStartedEvent = true;
+                    break;
                 }
             }
+            if(!foundTimerStartedEvent)
+                throw new IncompleteEventGraphException(string.Format("Can not find the timer started event id {0}",timerStartedEventId));
         }
     }
 }

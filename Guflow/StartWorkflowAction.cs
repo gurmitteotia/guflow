@@ -3,18 +3,18 @@ using System.Linq;
 
 namespace Guflow
 {
-    internal class WorkflowStartedAction : WorkflowAction
+    internal class StartWorkflowAction : WorkflowAction
     {
         private const string _defaultCompleteResult = "Workflow completed as no schedulable item is found";
         private readonly IWorkflowItems _workflowItems;
 
-        public WorkflowStartedAction(IWorkflowItems workflowItems)
+        public StartWorkflowAction(IWorkflowItems workflowItems)
         {
             _workflowItems = workflowItems;
         }
         public override bool Equals(object other)
         {
-            var otherAction = other as WorkflowStartedAction;
+            var otherAction = other as StartWorkflowAction;
             if (otherAction == null)
                 return false;
             return _workflowItems.Equals(otherAction._workflowItems);
