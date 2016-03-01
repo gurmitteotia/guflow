@@ -31,12 +31,13 @@ namespace Guflow
             return _workflowItems.GetChildernOf(this);
         }
 
-        internal abstract WorkflowDecision GetDecision();
-
+        internal abstract WorkflowDecision GetScheduleDecision();
         internal WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
         {
             return new ScheduleTimerDecision(Identity,afterTimeout,true);
         }
+        internal abstract WorkflowDecision GetCancelDecision();
+
         internal bool Has(Identity identity)
         {
             return Identity.Equals(identity);
@@ -71,6 +72,5 @@ namespace Guflow
                 throw new ParentItemNotFoundException(string.Format("Can not find the schedulable item for {0}", identity));
             _parentItems.Add(parentItem);
         }
-
     }
 }

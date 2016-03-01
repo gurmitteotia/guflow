@@ -10,7 +10,7 @@ namespace Guflow
         public ScheduleWorkflowItemAction(WorkflowItem workflowItem)
         {
             _workflowItem = workflowItem;
-            _workflowAction = new GenericWorkflowAction(_workflowItem.GetDecision());
+            _workflowAction = new GenericWorkflowAction(_workflowItem.GetScheduleDecision());
         }
 
         public WorkflowAction After(TimeSpan afterTimeout)

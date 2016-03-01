@@ -30,9 +30,14 @@ namespace Guflow
             return this;
         }
        
-        internal override WorkflowDecision GetDecision()
+        internal override WorkflowDecision GetScheduleDecision()
         {
             return new ScheduleActivityDecision(Identity.Name, Identity.Version, Identity.PositionalName);
+        }
+
+        internal override WorkflowDecision GetCancelDecision()
+        {
+            return new CancelActivityDecision(Identity);
         }
 
         internal WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent)

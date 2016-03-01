@@ -9,28 +9,32 @@ namespace Guflow.Tests
     public class ScheduleWorkflowItemActionTest
     {
         private readonly Mock<IWorkflowItems> _workflowItems = new Mock<IWorkflowItems>();
+        private const string _activityName = "Download";
+        private const string _activityVersion = "1.0";
+        private const string _positionalName = "First";
+
         [Test]
         public void Equality_tests()
         {
-            Assert.True(WorkflowAction.Reschedule(new TimerItem("Somename",_workflowItems.Object)).Equals(WorkflowAction.Reschedule(new TimerItem("Somename",_workflowItems.Object))));
-            Assert.False(WorkflowAction.Reschedule(new TimerItem("Somename", _workflowItems.Object)).Equals(WorkflowAction.Reschedule(new TimerItem("Somename1", _workflowItems.Object))));
+            Assert.True(WorkflowAction.Schedule(new TimerItem("Somename",_workflowItems.Object)).Equals(WorkflowAction.Schedule(new TimerItem("Somename",_workflowItems.Object))));
+            Assert.False(WorkflowAction.Schedule(new TimerItem("Somename", _workflowItems.Object)).Equals(WorkflowAction.Schedule(new TimerItem("Somename1", _workflowItems.Object))));
         }
         [Test]
         public void Should_return_the_scheduling_decision_for_workflow_item()
         {
             var workflowItem = new TimerItem("Somename",_workflowItems.Object);
-            var workflowAction = WorkflowAction.Reschedule(workflowItem);
+            var workflowAction = WorkflowAction.Schedule(workflowItem);
 
             var decisions = workflowAction.GetDecisions();
 
-            Assert.That(decisions,Is.EquivalentTo(new []{workflowItem.GetDecision()}));
+            Assert.That(decisions,Is.EquivalentTo(new []{workflowItem.GetScheduleDecision()}));
         }
 
         [Test]
         public void Should_return_timer_decision_when_rescheduled_after_a_timeout()
         {
             var workflowItem = new ActivityItem("name","ver","pos",_workflowItems.Object);
-            var workflowAction = WorkflowAction.Reschedule(workflowItem).After(TimeSpan.FromSeconds(2));
+            var workflowAction = WorkflowAction.Schedule(workflowItem).After(TimeSpan.FromSeconds(2));
 
             var decisions = workflowAction.GetDecisions();
 
@@ -41,22 +45,33 @@ namespace Guflow.Tests
         public void Can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnRescheduleAction();
-            var completedActivityEvent = CreateCompletedActivityEvent(WorkflowToReturnRescheduleAction.ActivityName, WorkflowToReturnRescheduleAction.ActivityVersion, WorkflowToReturnRescheduleAction.PositionalName);
+            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Reschedule(workflow.CompletedWorkflowItem)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(workflow.CompletedWorkflowItem)));
         }
 
         [Test]
-        public void Should_be_returned_as_workflow_action_when_scheduling_the_activity()
+        public void Can_be_returned_as_workflow_action_when_scheduling_the_activity()
         {
-            var workflow = new WorkflowToReturnScheduleAction();
-            var completedActivityEvent = CreateCompletedActivityEvent(WorkflowToReturnRescheduleAction.ActivityName, WorkflowToReturnRescheduleAction.ActivityVersion, WorkflowToReturnRescheduleAction.PositionalName);
+            var workflow = new WorkflowToReturnScheduleActivityAction();
+            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Reschedule(workflow.CompletedWorkflowItem)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(workflow.CompletedWorkflowItem)));
+        }
+
+        [Test]
+        public void Can_be_returned_as_workflow_action_when_scheduling_the_timer()
+        {
+            var workflow = new WorkflowToReturnScheduleTimerAction();
+            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+
+            var workflowAction = completedActivityEvent.Interpret(workflow);
+
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(workflow.ScheduledTimer)));
         }
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
@@ -66,26 +81,28 @@ namespace Guflow.Tests
         }
         private class WorkflowToReturnRescheduleAction : Workflow
         {
-            public const string ActivityName = "Download";
-            public const string ActivityVersion = "1.0";
-            public const string PositionalName = "First";
             public WorkflowToReturnRescheduleAction()
             {
-                CompletedWorkflowItem = AddActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(Reschedule);
+                CompletedWorkflowItem = AddActivity(_activityName, _activityVersion,_positionalName).OnCompletion(Reschedule);
             }
             public WorkflowItem CompletedWorkflowItem { get; private set; }
         }
-
-        private class WorkflowToReturnScheduleAction : Workflow
+        private class WorkflowToReturnScheduleActivityAction : Workflow
         {
-            public const string ActivityName = "Download";
-            public const string ActivityVersion = "1.0";
-            public const string PositionalName = "First";
-            public WorkflowToReturnScheduleAction()
+            public WorkflowToReturnScheduleActivityAction()
             {
-                CompletedWorkflowItem = AddActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c=>ScheduleActivity(ActivityName,ActivityVersion,ActivityVersion));
+                CompletedWorkflowItem = AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => ScheduleActivity(_activityName, _activityVersion, _positionalName));
             }
             public WorkflowItem CompletedWorkflowItem { get; private set; }
+        }
+        private class WorkflowToReturnScheduleTimerAction : Workflow
+        {
+            public WorkflowToReturnScheduleTimerAction()
+            {
+                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => ScheduleTimer("SomeTimer"));
+                ScheduledTimer = AddTimer("SomeTimer");
+            }
+            public WorkflowItem ScheduledTimer { get; private set; }
         }
     }
 }

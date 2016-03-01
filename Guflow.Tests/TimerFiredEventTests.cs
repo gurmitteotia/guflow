@@ -69,7 +69,7 @@ namespace Guflow.Tests
 
             var workflowAction = rescheduleTimer.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Reschedule(workflow.RescheduleItem)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Schedule(workflow.RescheduleItem)));
         }
 
         [Test]

@@ -49,7 +49,7 @@ namespace Guflow
             if(workflowTimer!=null)
                 return workflowTimer.Fired(timerFiredEvent);
             var rescheduleWorkflowItem = FindRescheduledItemFor(timerFiredEvent);
-            return WorkflowAction.Reschedule(rescheduleWorkflowItem);
+            return WorkflowAction.Schedule(rescheduleWorkflowItem);
         }
 
         public WorkflowAction TimerFailed(TimerFailedEvent timerFailedEvent)
@@ -111,7 +111,7 @@ namespace Guflow
         protected ScheduleWorkflowItemAction Reschedule(WorkflowItemEvent workflowItemEvent)
         {
             var workflowItem = FindWorkflowItemFor(workflowItemEvent);
-            return WorkflowAction.Reschedule(workflowItem);
+            return WorkflowAction.Schedule(workflowItem);
         }
         protected WorkflowAction StartWorkflow()
         {
@@ -123,8 +123,23 @@ namespace Guflow
         }
         protected ScheduleWorkflowItemAction ScheduleActivity(string name, string version, string position)
         {
-            var workflowItem = FindWorkflowItemFor(workflowItemEvent);
-            return WorkflowAction.Reschedule(workflowItem);
+            var activityItem = FindActivityFor(Identity.New(name,version,position));
+            return WorkflowAction.Schedule(activityItem);
+        }
+        protected WorkflowAction ScheduleTimer(string name)
+        {
+            var activityItem = FindTimerFor(Identity.Timer(name));
+            return WorkflowAction.Schedule(activityItem);
+        }
+        protected WorkflowAction CancelActivity(string name, string version, string position)
+        {
+            var activityItem = FindActivityFor(Identity.New(name, version, position));
+            return WorkflowAction.Cancel(activityItem);
+        }
+        protected WorkflowAction CancelTimer(string name)
+        {
+            var activityItem = FindTimerFor(Identity.Timer(name));
+            return WorkflowAction.Cancel(activityItem);
         }
         public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
         {
@@ -181,6 +196,21 @@ namespace Guflow
             return workflowActivity;
         }
 
+        private ActivityItem FindActivityFor(Identity identity)
+        {
+            var workflowActivity = FindActivity(identity);
+
+            if (workflowActivity == null)
+                throw new WorkflowItemNotFoundException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", identity.Name, identity.Version, identity.PositionalName));
+            return workflowActivity;
+        }
+        private TimerItem FindTimerFor(Identity identity)
+        {
+            var workflowTimer = FindTimer(identity);
+            if (workflowTimer == null)
+                throw new WorkflowItemNotFoundException(string.Format("Can not find timer by name {0}.", identity.Name));
+            return workflowTimer;
+        }
         private WorkflowItem FindRescheduledItemFor(TimerEvent timerFiredEvent)
         {
             var workflowItem = _allWorkflowItems.FirstOrDefault(timerFiredEvent.IsRescheduleTimerFor);

@@ -12,10 +12,16 @@ namespace Guflow
             _onFiredAction = f=>new ContinueWorkflowAction(this,f.WorkflowContext);
         }
 
-        internal override WorkflowDecision GetDecision()
+        internal override WorkflowDecision GetScheduleDecision()
         {
             return new ScheduleTimerDecision(Identity, _fireAfter);
         }
+
+        internal override WorkflowDecision GetCancelDecision()
+        {
+            return new CancelTimerDecision(Identity);
+        }
+
         protected override bool IsProcessed(IWorkflowContext workflowContext)
         {
             var timerEvent = workflowContext.LatestTimerEventFor(this);

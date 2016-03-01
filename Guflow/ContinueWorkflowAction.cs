@@ -30,7 +30,7 @@ namespace Guflow
 
             var schedulableChildItems = childItems.Where(s => s.AllParentsAreProcessed(_workflowContext));
 
-            return schedulableChildItems.Select(f => f.GetDecision());
+            return schedulableChildItems.Select(f => f.GetScheduleDecision());
         }
     }
 }

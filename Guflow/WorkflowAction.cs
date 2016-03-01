@@ -20,7 +20,7 @@ namespace Guflow
         {
             return new GenericWorkflowAction(new CancelWorkflowDecision(detail));
         }
-        internal static ScheduleWorkflowItemAction Reschedule(WorkflowItem workflowItem)
+        internal static ScheduleWorkflowItemAction Schedule(WorkflowItem workflowItem)
         {
             return new ScheduleWorkflowItemAction(workflowItem);
         }
@@ -33,7 +33,10 @@ namespace Guflow
             return new StartWorkflowAction(workflowItems);
         }
         internal static WorkflowAction Ignore { get{return _emptyWorkflowAction;} }
-
+        internal static WorkflowAction Cancel(WorkflowItem workflowItem)
+        {
+            return new GenericWorkflowAction(workflowItem.GetCancelDecision());
+        }
         private class EmptyWorkflowAction : WorkflowAction
         {
             internal override IEnumerable<WorkflowDecision> GetDecisions()
@@ -68,7 +71,7 @@ namespace Guflow
                 if (!startupWorkflowItems.Any())
                     return new[] { new CompleteWorkflowDecision(_defaultCompleteResult) };
 
-                return startupWorkflowItems.Select(s => s.GetDecision());
+                return startupWorkflowItems.Select(s => s.GetScheduleDecision());
             }
         }
     }
