@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Guflow
 {
-    public sealed class RescheduleWorkflowAction : WorkflowAction
+    public sealed class ScheduleWorkflowItemAction : WorkflowAction
     {
         private readonly WorkflowItem _workflowItem;
         private readonly WorkflowAction _workflowAction;
-        public RescheduleWorkflowAction(WorkflowItem workflowItem)
+        public ScheduleWorkflowItemAction(WorkflowItem workflowItem)
         {
             _workflowItem = workflowItem;
             _workflowAction = new GenericWorkflowAction(_workflowItem.GetDecision());
@@ -22,7 +22,7 @@ namespace Guflow
         {
             return _workflowAction.GetDecisions();
         }
-        private bool Equals(RescheduleWorkflowAction other)
+        private bool Equals(ScheduleWorkflowItemAction other)
         {
             return _workflowItem.Equals(other._workflowItem);
         }
@@ -31,7 +31,7 @@ namespace Guflow
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is RescheduleWorkflowAction && Equals((RescheduleWorkflowAction)obj);
+            return obj is ScheduleWorkflowItemAction && Equals((ScheduleWorkflowItemAction)obj);
         }
 
         public override int GetHashCode()

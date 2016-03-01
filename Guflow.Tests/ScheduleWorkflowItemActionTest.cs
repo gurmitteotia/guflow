@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Guflow.Tests
 {
     [TestFixture]
-    public class RescheduleWorkflowActionTest
+    public class ScheduleWorkflowItemActionTest
     {
         private readonly Mock<IWorkflowItems> _workflowItems = new Mock<IWorkflowItems>();
         [Test]
@@ -38,15 +38,31 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_be_returned_as_custom_action_in_workflow()
+        public void Can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnRescheduleAction();
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(WorkflowToReturnRescheduleAction.ActivityName, WorkflowToReturnRescheduleAction.ActivityVersion, WorkflowToReturnRescheduleAction.PositionalName, "id", "res");
-            var completedActivityEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
+            var completedActivityEvent = CreateCompletedActivityEvent(WorkflowToReturnRescheduleAction.ActivityName, WorkflowToReturnRescheduleAction.ActivityVersion, WorkflowToReturnRescheduleAction.PositionalName);
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
             Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Reschedule(workflow.CompletedWorkflowItem)));
+        }
+
+        [Test]
+        public void Should_be_returned_as_workflow_action_when_scheduling_the_activity()
+        {
+            var workflow = new WorkflowToReturnScheduleAction();
+            var completedActivityEvent = CreateCompletedActivityEvent(WorkflowToReturnRescheduleAction.ActivityName, WorkflowToReturnRescheduleAction.ActivityVersion, WorkflowToReturnRescheduleAction.PositionalName);
+
+            var workflowAction = completedActivityEvent.Interpret(workflow);
+
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Reschedule(workflow.CompletedWorkflowItem)));
+        }
+
+        private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
+        {
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(activityName, activityVersion, positionalName, "id", "res");
+            return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class WorkflowToReturnRescheduleAction : Workflow
         {
@@ -56,6 +72,18 @@ namespace Guflow.Tests
             public WorkflowToReturnRescheduleAction()
             {
                 CompletedWorkflowItem = AddActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(Reschedule);
+            }
+            public WorkflowItem CompletedWorkflowItem { get; private set; }
+        }
+
+        private class WorkflowToReturnScheduleAction : Workflow
+        {
+            public const string ActivityName = "Download";
+            public const string ActivityVersion = "1.0";
+            public const string PositionalName = "First";
+            public WorkflowToReturnScheduleAction()
+            {
+                CompletedWorkflowItem = AddActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c=>ScheduleActivity(ActivityName,ActivityVersion,ActivityVersion));
             }
             public WorkflowItem CompletedWorkflowItem { get; private set; }
         }

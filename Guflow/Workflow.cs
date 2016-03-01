@@ -108,7 +108,7 @@ namespace Guflow
         {
             return WorkflowAction.CancelWorkflow(details);
         }
-        protected RescheduleWorkflowAction Reschedule(WorkflowItemEvent workflowItemEvent)
+        protected ScheduleWorkflowItemAction Reschedule(WorkflowItemEvent workflowItemEvent)
         {
             var workflowItem = FindWorkflowItemFor(workflowItemEvent);
             return WorkflowAction.Reschedule(workflowItem);
@@ -120,6 +120,11 @@ namespace Guflow
         protected WorkflowAction Ignore()
         {
             return WorkflowAction.Ignore;
+        }
+        protected ScheduleWorkflowItemAction ScheduleActivity(string name, string version, string position)
+        {
+            var workflowItem = FindWorkflowItemFor(workflowItemEvent);
+            return WorkflowAction.Reschedule(workflowItem);
         }
         public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
         {
