@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ServiceModel.Configuration;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow

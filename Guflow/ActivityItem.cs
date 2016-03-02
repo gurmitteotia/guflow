@@ -8,6 +8,7 @@ namespace Guflow
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
+        private Func<ActivityCancellationFailedEvent, WorkflowAction> _onFailedCancellationAction; 
         public ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
             : base(Identity.New(name, version, positionalName), workflowItems)
         {
@@ -15,6 +16,7 @@ namespace Guflow
             _onFailedAction = c => WorkflowAction.FailWorkflow(c.Reason, c.Detail);
             _onTimedoutAction = t => WorkflowAction.FailWorkflow(t.TimeoutType, t.Details);
             _onCancelledAction = c => WorkflowAction.CancelWorkflow(c.Details);
+            _onFailedCancellationAction = c => WorkflowAction.FailWorkflow("ACTIVITY_CANCELLATION_FAILED", c.Cause);
         }
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")
@@ -80,7 +82,7 @@ namespace Guflow
             return this;
         }
 
-        public WorkflowAction Cancelled(ActivityCancelledEvent activityCancelledEvent)
+        internal WorkflowAction Cancelled(ActivityCancelledEvent activityCancelledEvent)
         {
             return _onCancelledAction(activityCancelledEvent);
         }
@@ -94,6 +96,16 @@ namespace Guflow
         public ActivityItem OnTimerCancelled(Func<TimerCancelledEvent, WorkflowAction> onTimerCancelledAction)
         {
             OnTimerCancelledAction = onTimerCancelledAction;
+            return this;
+        }
+
+        internal WorkflowAction CancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
+        {
+            return _onFailedCancellationAction(activityCancellationFailedEvent);
+        }
+        public ActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationAction)
+        {
+            _onFailedCancellationAction = onFailedCancellationAction;
             return this;
         }
     }

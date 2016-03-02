@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivityCancellationFailedEventTests.cs" />
     <Compile Include="ActivityCancelledEventTests.cs" />
     <Compile Include="ActivityCompletedEventTests.cs" />
     <Compile Include="ActivityFailedEventTests.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="ScheduleActivityDecisionTests.cs" />
     <Compile Include="StartWorkflowActionTests.cs" />
     <Compile Include="TestWorkflows\TestWorkflow.cs" />
+    <Compile Include="TimerCancellationFailedEventTests.cs" />
     <Compile Include="TimerCancelledEventTests.cs" />
     <Compile Include="TimerFailedEventTests.cs" />
     <Compile Include="TimerFiredEventTests.cs" />

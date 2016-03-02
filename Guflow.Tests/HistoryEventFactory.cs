@@ -281,7 +281,42 @@ namespace Guflow.Tests
                 }
             };
         }
+        public static IEnumerable<HistoryEvent> CreateActivityCancellationFailedEventGraph(Identity activityId, string cause)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
 
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.RequestCancelActivityTaskFailed,
+                EventId = eventIds.CompletedId,
+                RequestCancelActivityTaskFailedEventAttributes = new RequestCancelActivityTaskFailedEventAttributes()
+                {
+                    ActivityId = activityId.Id,
+                    Cause = cause
+                }
+            });
+
+            return historyEvents;
+        }
+        public static IEnumerable<HistoryEvent> CreateTimerCancellationFailedEventGraph(Identity timerId, string cause)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.CancelTimerFailed,
+                EventId = eventIds.CompletedId,
+                CancelTimerFailedEventAttributes = new CancelTimerFailedEventAttributes()
+                {
+                    TimerId = timerId.Id,
+                    Cause = cause
+                }
+            });
+
+            return historyEvents;
+        }
         private class EventIds
         {
             private static long _seed = long.MaxValue;

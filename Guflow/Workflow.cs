@@ -66,6 +66,18 @@ namespace Guflow
             return rescheduleWorkflowItem.TimerCancelled(timerCancelledEvent);
         }
 
+        public WorkflowAction ActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
+        {
+            var workflowActivity = FindActivityFor(activityCancellationFailedEvent);
+            return workflowActivity.CancellationFailed(activityCancellationFailedEvent);
+        }
+
+        public WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        {
+            var workflowTimer = FindTimerFor(timerCancellationFailedEvent);
+            return workflowTimer.CancellationFailed(timerCancellationFailedEvent);
+        }
+
         protected ActivityItem AddActivity(string name, string version, string positionalName = "")
         {
             var activityItem = new ActivityItem(name,version, positionalName,this);
@@ -171,11 +183,14 @@ namespace Guflow
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
         }
 
-        public ActivityItem FindActivity(ActivityEvent activityEvent)
+        private ActivityItem FindActivity(WorkflowItemEvent activityEvent)
         {
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(activityEvent.IsFor);
         }
-
+        private TimerItem FindTimer(WorkflowItemEvent activityEvent)
+        {
+            return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(activityEvent.IsFor);
+        }
         public TimerItem FindTimer(Identity identity)
         {
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
@@ -195,7 +210,22 @@ namespace Guflow
 
             return workflowActivity;
         }
+        private ActivityItem FindActivityFor(WorkflowItemEvent workflowItemEvent)
+        {
+            var workflowActivity = FindActivity(workflowItemEvent);
 
+            if (workflowActivity == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find activity for event {0}.", workflowItemEvent ));
+
+            return workflowActivity;
+        }
+        private TimerItem FindTimerFor(WorkflowItemEvent workflowItemEvent)
+        {
+            var workflowTimer = FindTimer(workflowItemEvent);
+            if (workflowTimer == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find timer for event {0}.", workflowItemEvent));
+            return workflowTimer;
+        }
         private ActivityItem FindActivityFor(Identity identity)
         {
             var workflowActivity = FindActivity(identity);
