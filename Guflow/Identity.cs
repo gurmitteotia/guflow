@@ -12,6 +12,7 @@ namespace Guflow
         public string PositionalName { get; private set; }
         private readonly string _id;
         private const char _idSeparator = ';';
+        private const int _allowedLengthOfId = 256;
         private Identity(string name, string version, string positionalName)
         {
             if(name.Contains(_idSeparator))
@@ -24,6 +25,8 @@ namespace Guflow
             Version = version;
             PositionalName = positionalName;
             _id = string.Format("{1}{0}{2}{0}{3}",_idSeparator, Name, Version, PositionalName);
+            if(_id.Length>_allowedLengthOfId)
+                throw new NameTooLongException(string.Format(Resources.Name_too_long,_allowedLengthOfId-2));
         }
         
         internal string Id{get { return _id; }}

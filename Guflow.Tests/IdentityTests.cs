@@ -47,7 +47,6 @@ namespace Guflow.Tests
 
             Assert.That(recreatedFromId, Is.EqualTo(originalIdentity));
         }
-
         [Test]
         public void Throws_exception_when_id_is_invalid()
         {
@@ -59,6 +58,20 @@ namespace Guflow.Tests
             Assert.Throws<ArgumentException>(()=>Identity.New("shouldnothave;", "version", "first"));
             Assert.Throws<ArgumentException>(() => Identity.New("download", "shouldnothave;", "first"));
             Assert.Throws<ArgumentException>(() => Identity.New("download", "version", "shouldnothave;"));
+            Assert.Throws<NameTooLongException>(() => Identity.New(GetStringWithLength(200), GetStringWithLength(50), GetStringWithLength(5)));
+        }
+        [Test]
+        public void Allowed_length_test()
+        {
+            Assert.DoesNotThrow(() => Identity.New(GetStringWithLength(200), GetStringWithLength(50), GetStringWithLength(4)));
+        }
+
+        private string GetStringWithLength(int length)
+        {
+            var data = new char[length];
+            for (int i = 0; i < data.Length; i++)
+                data[i] = 'a';
+            return new string(data);
         }
     }
 }

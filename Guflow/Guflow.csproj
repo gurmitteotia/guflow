@@ -115,6 +115,7 @@
     <Compile Include="TimerFiredEvent.cs" />
     <Compile Include="TimerItem.cs" />
     <Compile Include="TimerScheduleData.cs" />
+    <Compile Include="NameTooLongException.cs" />
     <Compile Include="WorkflowItem.cs" />
     <Compile Include="ScheduleActivityDecision.cs" />
     <Compile Include="ActivityScheduleData.cs" />
