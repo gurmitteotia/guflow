@@ -31,7 +31,7 @@ namespace Guflow.Tests
         public void Can_be_returned_as_custom_action_in_workflow()
         {
             var workflow = new SingleActivityWorkflow("reason","detail");
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName, "id", "res");
+            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName), "id", "res");
             var completedActivityEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
 
             var workflowAction = completedActivityEvent.Interpret(workflow);

@@ -19,7 +19,7 @@ namespace Guflow.Tests
         [SetUp]
         public void Setup()
         {
-            var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(_activityName, _activityVersion, _positionalName, _identity, _timeoutType, _detail); 
+            var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _timeoutType, _detail); 
             _activityTimedoutEvent = new ActivityTimedoutEvent(activityTimedoutEventGraph.First(), activityTimedoutEventGraph);
         }
 

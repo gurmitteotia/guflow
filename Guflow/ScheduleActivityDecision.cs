@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
     public class ScheduleActivityDecision : WorkflowDecision
     {
-        private readonly WorkflowItemIdentity _identity;
+        private readonly Identity _identity;
 
         public ScheduleActivityDecision(string activityName, string activityVersion, string positionalName="")
         {
-            _identity = new WorkflowItemIdentity(activityName,activityVersion,positionalName);
+            _identity = Identity.New(activityName,activityVersion,positionalName);
         }
 
         public override bool Equals(object other)

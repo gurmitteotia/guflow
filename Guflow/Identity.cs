@@ -1,35 +1,20 @@
-﻿using System;
-using System.Linq;
-using Amazon.Auth.AccessControlPolicy;
-using Guflow.Properties;
-
-namespace Guflow
+﻿namespace Guflow
 {
     public class Identity
     {
         public string Name { get; private set; }
         public string Version { get; private set; }
         public string PositionalName { get; private set; }
-        private readonly string _id;
-        private const char _idSeparator = ';';
-        private const int _allowedLengthOfId = 256;
+        private readonly AwsIdentity _id;
         private Identity(string name, string version, string positionalName)
         {
-            if(name.Contains(_idSeparator))
-                throw new ArgumentException(string.Format(Resources.Character_not_allowed, _idSeparator), name);
-            if(version.Contains(_idSeparator))
-                throw new ArgumentException(string.Format(Resources.Character_not_allowed, _idSeparator), version);
-            if (positionalName.Contains(_idSeparator))
-                throw new ArgumentException(string.Format(Resources.Character_not_allowed, _idSeparator), positionalName);
             Name = name;
             Version = version;
             PositionalName = positionalName;
-            _id = string.Format("{1}{0}{2}{0}{3}",_idSeparator, Name, Version, PositionalName);
-            if(_id.Length>_allowedLengthOfId)
-                throw new NameTooLongException(string.Format(Resources.Name_too_long,_allowedLengthOfId-2));
+            _id = AwsIdentity.Create(Name,Version,PositionalName);
         }
         
-        internal string Id{get { return _id; }}
+        internal AwsIdentity Id{get { return _id; }}
 
         internal static Identity Timer(string timerName)
         {
@@ -39,19 +24,13 @@ namespace Guflow
         {
             return new Identity(name, version, positionalName);
         }
-        internal static Identity FromId(string id)
-        {
-            var splitedParts = id.Split(_idSeparator);
-            if(splitedParts.Length<3)
-                throw new ArgumentException(string.Format("Invalid id {0}",id));
-            return new Identity(splitedParts[0],splitedParts[1],splitedParts[2]);
-        }
+        
         public override bool Equals(object other)
         {
             var otherIdentity = other as Identity;
             if (otherIdentity == null)
                 return false;
-            return string.Equals(_id, otherIdentity.Id, StringComparison.OrdinalIgnoreCase);
+            return _id.Equals(otherIdentity.Id);
         }
         public override int GetHashCode()
         {

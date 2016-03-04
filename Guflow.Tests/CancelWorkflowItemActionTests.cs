@@ -65,7 +65,7 @@ namespace Guflow.Tests
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(activityName, activityVersion, positionalName, "id", "res");
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class WorkflowToReturnCancelActivityAction : Workflow

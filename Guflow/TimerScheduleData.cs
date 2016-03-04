@@ -5,7 +5,7 @@ namespace Guflow
     [DataContract]
     internal class TimerScheduleData
     {
-        [DataMember] public string Identity;
+        [DataMember] public string TimerName;
         [DataMember] public bool IsARescheduleTimer;
     }
 }

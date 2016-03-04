@@ -7,7 +7,7 @@ namespace Guflow.Tests
 {
     public class HistoryEventFactory
     {
-        public static IEnumerable<HistoryEvent> CreateActivityCompletedEventGraph(string activityName, string version, string positionalName, string identity, string result)
+        public static IEnumerable<HistoryEvent> CreateActivityCompletedEventGraph(Identity activityIdentity, string identity, string result)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;
@@ -40,14 +40,15 @@ namespace Guflow.Tests
                 EventId = eventIds.ScheduledId,
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
-                    ActivityType = new ActivityType() { Name = activityName, Version = version },
-                    Control = (new ActivityScheduleData() { PN = positionalName }).ToJson()
+                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
+                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    ActivityId = activityIdentity.Id
                 }
             });
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityFailedEventGraph(string activityName, string activityVersion, string positionalName, string identity, string reason, string detail)
+        public static IEnumerable<HistoryEvent> CreateActivityFailedEventGraph(Identity activityIdentity, string identity, string reason, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;
@@ -81,14 +82,15 @@ namespace Guflow.Tests
                 EventId = eventIds.ScheduledId,
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
-                    ActivityType = new ActivityType() { Name = activityName, Version = activityVersion },
-                    Control = (new ActivityScheduleData() { PN = positionalName }).ToJson()
+                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
+                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    ActivityId = activityIdentity.Id
                 }
             });
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityTimedoutEventGraph(string activityName, string activityVersion, string positionalName, string identity, string timeoutType, string detail)
+        public static IEnumerable<HistoryEvent> CreateActivityTimedoutEventGraph(Identity activityIdentity, string identity, string timeoutType, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;
@@ -122,14 +124,15 @@ namespace Guflow.Tests
                 EventId = eventIds.ScheduledId,
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
-                    ActivityType = new ActivityType() { Name = activityName, Version = activityVersion },
-                    Control = (new ActivityScheduleData() { PN = positionalName }).ToJson()
+                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
+                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    ActivityId = activityIdentity.Id
                 }
             });
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityCancelledEventGraph(string activityName, string activityVersion, string positionalName, string identity, string detail)
+        public static IEnumerable<HistoryEvent> CreateActivityCancelledEventGraph(Identity activityIdentity, string identity, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;
@@ -173,8 +176,9 @@ namespace Guflow.Tests
                 EventId = eventIds.ScheduledId,
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
-                    ActivityType = new ActivityType() { Name = activityName, Version = activityVersion },
-                    Control = (new ActivityScheduleData() { PN = positionalName }).ToJson()
+                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
+                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    ActivityId = activityIdentity.Id
                 }
             });
             return historyEvents;
@@ -204,7 +208,7 @@ namespace Guflow.Tests
                 {
                     TimerId = timerId.Id,
                     StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
-                    Control = (new TimerScheduleData() { Identity = timerId.ToJson(),IsARescheduleTimer = isARescheduleTimer}).ToJson()
+                    Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = isARescheduleTimer}).ToJson()
                 }
             });
 
@@ -235,7 +239,7 @@ namespace Guflow.Tests
                 {
                     TimerId = timerId.Id,
                     StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
-                    Control = (new TimerScheduleData() { Identity = timerId.ToJson(), IsARescheduleTimer = isARescheduleTimer }).ToJson()
+                    Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = isARescheduleTimer }).ToJson()
                 }
             });
 

@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
-using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
     public class ActivityCancellationFailedEvent : WorkflowItemEvent
     {
         private readonly RequestCancelActivityTaskFailedEventAttributes _eventAttributes;
-        private readonly Identity _activityIdentity;
+        private readonly AwsIdentity _awsIdentity;
         internal ActivityCancellationFailedEvent(HistoryEvent activityCancellationFailedEvent)
         {
             _eventAttributes = activityCancellationFailedEvent.RequestCancelActivityTaskFailedEventAttributes;
-            _activityIdentity = Identity.FromId(_eventAttributes.ActivityId);
+            _awsIdentity = AwsIdentity.Raw(_eventAttributes.ActivityId);
         }
         public string Cause { get { return _eventAttributes.Cause.Value; } }
 
@@ -26,7 +25,7 @@ namespace Guflow
 
         internal override bool IsFor(WorkflowItem workflowItem)
         {
-            return workflowItem.Has(_activityIdentity);
+            return workflowItem.Has(_awsIdentity);
         }
     }
 }

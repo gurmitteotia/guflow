@@ -61,8 +61,8 @@ namespace Guflow.Tests
         public void Should_return_scheduling_decision_for_child_when_all_of_its_parents_are_completed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
-                                   .Concat(HistoryEventFactory.CreateActivityCompletedEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "re2"));
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2"));
             var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
@@ -74,8 +74,8 @@ namespace Guflow.Tests
         public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_failed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
-                                   .Concat(HistoryEventFactory.CreateActivityFailedEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "re2", "detail"));
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2", "detail"));
             var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
@@ -87,8 +87,8 @@ namespace Guflow.Tests
         public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_timedout()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
-                                   .Concat(HistoryEventFactory.CreateActivityTimedoutEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "re2", "detail"));
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityTimedoutEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2", "detail"));
             var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
@@ -100,8 +100,8 @@ namespace Guflow.Tests
         public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_cancelled()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, "id", "res")
-                                   .Concat(HistoryEventFactory.CreateActivityCancelledEventGraph(_siblingActivityName, _siblingActivityVersion, "", "id2", "detail"));
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityCancelledEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "detail"));
             var activityCompletedEvent = new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
@@ -159,12 +159,12 @@ namespace Guflow.Tests
 
         private ActivityFailedEvent CreateFailedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityFailedEventGraph(activityName, activityVersion, positionalName, "id", "res","detail");
+            var allHistoryEvents = HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res", "detail");
             return new ActivityFailedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(activityName, activityVersion, positionalName, "id", "res");
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private TimerFiredEvent CreateTimerFiredEvent(string timerName)

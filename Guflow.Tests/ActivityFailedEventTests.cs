@@ -18,7 +18,7 @@ namespace Guflow.Tests
         [SetUp]
         public void Setup()
         {
-            var failedActivityEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityName,_activityVersion,_positionalName,_identity,_reason,_detail);
+            var failedActivityEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _reason, _detail);
             _activityFailedEvent = new ActivityFailedEvent(failedActivityEventGraph.First(), failedActivityEventGraph);
         }
             

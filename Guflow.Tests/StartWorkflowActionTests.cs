@@ -50,7 +50,7 @@ namespace Guflow.Tests
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(activityName, activityVersion, string.Empty, "id", "res");
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class TestWorkflow : Workflow

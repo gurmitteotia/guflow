@@ -78,6 +78,7 @@
     <Compile Include="ActivityFailedEvent.cs" />
     <Compile Include="ActivityItem.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
+    <Compile Include="AwsIdentity.cs" />
     <Compile Include="CancelActivityDecision.cs" />
     <Compile Include="CancelTimerDecision.cs" />
     <Compile Include="CancelWorkflowDecision.cs" />
@@ -126,7 +127,6 @@
     <Compile Include="WorkflowDecision.cs" />
     <Compile Include="WorkflowEvent.cs" />
     <Compile Include="WorkflowItemEvent.cs" />
-    <Compile Include="WorkflowItemIdentity.cs" />
     <Compile Include="WorkflowItemNotFoundException.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />

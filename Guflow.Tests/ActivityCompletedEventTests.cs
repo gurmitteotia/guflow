@@ -20,7 +20,7 @@ namespace Guflow.Tests
         [SetUp]
         public void Setup()
         {
-            var completedActivityEventGraph =  HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, _identity , _result);
+            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
             _activityCompletedEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
         }
 
@@ -45,14 +45,14 @@ namespace Guflow.Tests
         [Test]
         public void Throws_exception_when_activity_started_event_not_found_in_event_graph()
         {
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, _identity, _result);
+            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
             
             Assert.Throws<IncompleteEventGraphException>(()=> new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h=>h.EventType!=EventType.ActivityTaskStarted)));
         }
         [Test]
         public void Throws_exception_when_activity_scheduled_event_not_found_in_event_graph()
         {
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityName, _activityVersion, _positionalName, _identity, _result);
+            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
 
             Assert.Throws<IncompleteEventGraphException>(() => new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h => h.EventType != EventType.ActivityTaskScheduled)));
         }

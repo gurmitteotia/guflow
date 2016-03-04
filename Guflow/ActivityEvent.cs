@@ -5,7 +5,7 @@ namespace Guflow
 {
     public abstract class ActivityEvent : WorkflowItemEvent
     {
-        private Identity _identity;
+        private AwsIdentity _identity;
         public string Name { get; private set; }
         public string Version { get; private set; }
         public string PositionalName { get; private set; }
@@ -32,7 +32,7 @@ namespace Guflow
                     Name = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
                     Version = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
                     PositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ActivityScheduleData>().PN;
-                    _identity = Identity.New(Name,Version,PositionalName);
+                    _identity = AwsIdentity.Raw(historyEvent.ActivityTaskScheduledEventAttributes.ActivityId);
                     foundActivityScheduledEvent = true;
                 }
             }

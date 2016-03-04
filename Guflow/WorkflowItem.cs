@@ -38,6 +38,10 @@ namespace Guflow
         }
         internal abstract WorkflowDecision GetCancelDecision();
 
+        internal bool Has(AwsIdentity identity)
+        {
+            return Identity.Id == identity;
+        }
         internal bool Has(Identity identity)
         {
             return Identity.Equals(identity);

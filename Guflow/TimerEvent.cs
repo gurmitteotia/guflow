@@ -6,10 +6,10 @@ namespace Guflow
 {
     public abstract class TimerEvent : WorkflowItemEvent
     {
-        protected Identity TimerIdentity;
+        protected AwsIdentity TimerIdentity;
         protected bool IsARescheduledTimer;
 
-        public string Name { get { return TimerIdentity.Name; } }
+        public string Name { get; private set; }
         public TimeSpan FiredAfter { get; private set; }
 
 
@@ -29,9 +29,10 @@ namespace Guflow
                 if (historyEvent.IsTimerStartedEventFor(timerStartedEventId))
                 {
                     FiredAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
+                    TimerIdentity = AwsIdentity.Raw(historyEvent.TimerStartedEventAttributes.TimerId);
                     var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.FromJson<TimerScheduleData>();
-                    TimerIdentity = timerScheduleData.Identity.FromJson();
                     IsARescheduledTimer = timerScheduleData.IsARescheduleTimer;
+                    Name = timerScheduleData.TimerName;
                     foundTimerStartedEvent = true;
                     break;
                 }

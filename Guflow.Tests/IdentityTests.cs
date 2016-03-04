@@ -30,37 +30,6 @@ namespace Guflow.Tests
             Assert.That(recreatedFromJson,Is.EqualTo(originalIdentity));
         }
         [Test]
-        public void Activity_id_test()
-        {
-            var originalIdentity = Identity.New("transcode", "1.0", "first");
-            string id = originalIdentity.Id;
-            var recreatedFromId = Identity.FromId(id);
-
-            Assert.That(recreatedFromId,Is.EqualTo(originalIdentity));
-        }
-        [Test]
-        public void Timer_id_test()
-        {
-            var originalIdentity = Identity.Timer("transcode");
-            string id = originalIdentity.Id;
-            var recreatedFromId = Identity.FromId(id);
-
-            Assert.That(recreatedFromId, Is.EqualTo(originalIdentity));
-        }
-        [Test]
-        public void Throws_exception_when_id_is_invalid()
-        {
-            Assert.Throws<ArgumentException>(() => Identity.FromId("somename"));
-        }
-        [Test]
-        public void Invalid_arguments_tests()
-        {
-            Assert.Throws<ArgumentException>(()=>Identity.New("shouldnothave;", "version", "first"));
-            Assert.Throws<ArgumentException>(() => Identity.New("download", "shouldnothave;", "first"));
-            Assert.Throws<ArgumentException>(() => Identity.New("download", "version", "shouldnothave;"));
-            Assert.Throws<NameTooLongException>(() => Identity.New(GetStringWithLength(200), GetStringWithLength(50), GetStringWithLength(5)));
-        }
-        [Test]
         public void Allowed_length_test()
         {
             Assert.DoesNotThrow(() => Identity.New(GetStringWithLength(200), GetStringWithLength(50), GetStringWithLength(4)));

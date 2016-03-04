@@ -5,11 +5,11 @@ namespace Guflow
     public class TimerCancellationFailedEvent : WorkflowItemEvent
     {
         private readonly CancelTimerFailedEventAttributes _eventAttributes;
-        private readonly Identity _identity;
+        private readonly AwsIdentity _identity;
         internal TimerCancellationFailedEvent(HistoryEvent timerCancellationFailedEvent)
         {
             _eventAttributes = timerCancellationFailedEvent.CancelTimerFailedEventAttributes;
-            _identity = Identity.FromId(_eventAttributes.TimerId);
+            _identity = AwsIdentity.Raw(_eventAttributes.TimerId);
         }
         public string Cause { get { return _eventAttributes.Cause; } }
         public override WorkflowAction Interpret(IWorkflow workflow)
