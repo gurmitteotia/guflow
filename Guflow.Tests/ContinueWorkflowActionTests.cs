@@ -32,7 +32,7 @@ namespace Guflow.Tests
 
             var decisions = activityFailedEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0"), new ScheduleActivityDecision("Sync", "2.1") }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0")), new ScheduleActivityDecision(Identity.New("Sync", "2.1")) }));
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace Guflow.Tests
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0")) }));
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace Guflow.Tests
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0")) }));
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace Guflow.Tests
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0")) }));
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace Guflow.Tests
 
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Transcode", "2.0") }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0")) }));
         }
 
         [Test]
@@ -131,7 +131,7 @@ namespace Guflow.Tests
 
             var decisions = timerFiredEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(_activityName, _activityVersion) }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New(_activityName, _activityVersion)) }));
         }
 
         [Test]

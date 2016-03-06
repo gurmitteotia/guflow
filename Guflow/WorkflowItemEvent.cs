@@ -2,6 +2,10 @@
 {
     public abstract class WorkflowItemEvent : WorkflowEvent
     {
-        internal abstract bool IsFor(WorkflowItem workflowItem);
+        protected AwsIdentity AwsIdentity;
+        internal bool IsFor(WorkflowItem workflowItem)
+        {
+            return workflowItem.Has(AwsIdentity);
+        }
     }
 }

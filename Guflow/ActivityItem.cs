@@ -9,7 +9,8 @@ namespace Guflow
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
         private Func<ActivityCancellationFailedEvent, WorkflowAction> _onFailedCancellationAction; 
-        public ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
+        
+        internal ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
             : base(Identity.New(name, version, positionalName), workflowItems)
         {
             _onCompletionAction = c => new ContinueWorkflowAction(this, c.WorkflowContext);
@@ -28,18 +29,22 @@ namespace Guflow
         public ActivityItem DependsOn(string timerName)
         {
             AddParent(Identity.Timer(timerName));
-
             return this;
         }
        
         internal override WorkflowDecision GetScheduleDecision()
         {
-            return new ScheduleActivityDecision(Identity.Name, Identity.Version, Identity.PositionalName);
+            return new ScheduleActivityDecision(Identity);
         }
 
         internal override WorkflowDecision GetCancelDecision()
         {
             return new CancelActivityDecision(Identity);
+        }
+
+        internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
+        {
+            return WorkflowAction.Schedule(this);
         }
 
         internal WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent)

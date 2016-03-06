@@ -7,20 +7,27 @@ namespace Guflow
         private TimeSpan _fireAfter= new TimeSpan();
         private Func<TimerFiredEvent, WorkflowAction> _onFiredAction;
         private Func<TimerCancellationFailedEvent, WorkflowAction> _onCanellationFailedAction; 
+        
         internal TimerItem(string name, IWorkflowItems workflowItems):base(Identity.Timer(name),workflowItems)
         {
             _onFiredAction = f=>WorkflowAction.ContinueWorkflow(this,f.WorkflowContext);
             _onCanellationFailedAction = c => WorkflowAction.FailWorkflow("TIMER_CANCELLATION_FAILED", c.Cause);
         }
-
         internal override WorkflowDecision GetScheduleDecision()
         {
             return new ScheduleTimerDecision(Identity, _fireAfter);
         }
-
         internal override WorkflowDecision GetCancelDecision()
         {
             return new CancelTimerDecision(Identity);
+        }
+
+        internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
+        {
+            if (timerFiredEvent.IsARescheduledTimer)
+                return WorkflowAction.Schedule(this);
+
+            return _onFiredAction(timerFiredEvent);
         }
 
         protected override bool IsProcessed(IWorkflowContext workflowContext)
@@ -28,18 +35,11 @@ namespace Guflow
             var timerEvent = workflowContext.LatestTimerEventFor(this);
             return timerEvent != null;
         }
-
         public TimerItem FireAfter(TimeSpan fireAfter)
         {
             _fireAfter = fireAfter;
             return this;
         }
-
-        internal WorkflowAction Fired(TimerFiredEvent timerFiredEvent)
-        {
-            return _onFiredAction(timerFiredEvent);
-        }
-
         public TimerItem WhenFired(Func<TimerFiredEvent, WorkflowAction> onFiredAction)
         {
             _onFiredAction = onFiredAction;

@@ -8,7 +8,7 @@ namespace Guflow
         private readonly ActivityTaskFailedEventAttributes _eventAttributes;
         private readonly IWorkflowContext _workflowContext;
 
-        public ActivityFailedEvent(HistoryEvent activityFailedHistoryEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        internal ActivityFailedEvent(HistoryEvent activityFailedHistoryEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             _eventAttributes = activityFailedHistoryEvent.ActivityTaskFailedEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);

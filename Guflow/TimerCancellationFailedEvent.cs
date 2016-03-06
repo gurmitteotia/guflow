@@ -5,11 +5,10 @@ namespace Guflow
     public class TimerCancellationFailedEvent : WorkflowItemEvent
     {
         private readonly CancelTimerFailedEventAttributes _eventAttributes;
-        private readonly AwsIdentity _identity;
         internal TimerCancellationFailedEvent(HistoryEvent timerCancellationFailedEvent)
         {
             _eventAttributes = timerCancellationFailedEvent.CancelTimerFailedEventAttributes;
-            _identity = AwsIdentity.Raw(_eventAttributes.TimerId);
+            AwsIdentity = AwsIdentity.Raw(_eventAttributes.TimerId);
         }
         public string Cause { get { return _eventAttributes.Cause; } }
         public override WorkflowAction Interpret(IWorkflow workflow)
@@ -20,10 +19,6 @@ namespace Guflow
         public override IWorkflowContext WorkflowContext
         {
             get { throw new System.NotImplementedException(); }
-        }
-        internal override bool IsFor(WorkflowItem workflowItem)
-        {
-            return workflowItem.Has(_identity);
         }
     }
 }

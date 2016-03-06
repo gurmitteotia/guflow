@@ -46,6 +46,7 @@ namespace Guflow
         {
             return Identity.Equals(identity);
         }
+        internal abstract WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent);
         internal WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
         {
             return OnTimerCancelledAction(timerCancelledEvent);
@@ -76,5 +77,7 @@ namespace Guflow
                 throw new ParentItemNotFoundException(string.Format("Can not find the schedulable item for {0}", identity));
             _parentItems.Add(parentItem);
         }
+
+      
     }
 }

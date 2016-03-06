@@ -35,7 +35,7 @@ namespace Guflow.Tests
 
             var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>())).GetDecisions();
 
-            Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision("Download", "1.0"), }));
+            Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Download", "1.0")) }));
         }
 
         [Test]

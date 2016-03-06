@@ -6,10 +6,9 @@ namespace Guflow
     public class ScheduleActivityDecision : WorkflowDecision
     {
         private readonly Identity _identity;
-
-        public ScheduleActivityDecision(string activityName, string activityVersion, string positionalName="")
+        internal ScheduleActivityDecision(Identity identity)
         {
-            _identity = Identity.New(activityName,activityVersion,positionalName);
+            _identity = identity;
         }
 
         public override bool Equals(object other)

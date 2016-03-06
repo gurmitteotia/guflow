@@ -62,7 +62,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_return_reschedule_workflow_action_if_timer_is_fired_to_reschedule_a_workflow_item()
+        public void Can_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_activity_item()
         {
             var workflow = new SingleActivityWorkflow();
             var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.New(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName), _fireAfter);
@@ -70,6 +70,17 @@ namespace Guflow.Tests
             var workflowAction = rescheduleTimer.Interpret(workflow);
 
             Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Schedule(workflow.RescheduleItem)));
+        }
+
+        [Test]
+        public void Can_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_timer_item()
+        {
+            var workflow = new WorkflowWithTimer();
+            var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.Timer(_timerName), _fireAfter);
+
+            var workflowAction = rescheduleTimer.Interpret(workflow);
+
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(workflow.CompletedItem)));
         }
 
         [Test]
