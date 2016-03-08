@@ -84,6 +84,7 @@
     <Compile Include="CancelWorkflowDecision.cs" />
     <Compile Include="ContinueWorkflowAction.cs" />
     <Compile Include="DecisionAssertExtension.cs" />
+    <Compile Include="DuplicateItemException.cs" />
     <Compile Include="FailWorkflowDecision.cs" />
     <Compile Include="GenericWorkflowAction.cs" />
     <Compile Include="HistoryEventsExtension.cs" />
@@ -95,7 +96,7 @@
     <Compile Include="IWorkflowHistoryEvents.cs" />
     <Compile Include="IWorkflowItems.cs" />
     <Compile Include="JsonExtension.cs" />
-    <Compile Include="ParentItemNotFoundException.cs" />
+    <Compile Include="ParentItemMissingException.cs" />
     <Compile Include="IActivityHost.cs" />
     <Compile Include="IActivityTaskPoller.cs" />
     <Compile Include="IWorkflow.cs" />

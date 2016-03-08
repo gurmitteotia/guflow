@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Guflow.Properties;
 
 namespace Guflow
 {
@@ -74,7 +75,7 @@ namespace Guflow
         {
             var parentItem = _workflowItems.Find(identity);
             if (parentItem == null)
-                throw new ParentItemNotFoundException(string.Format("Can not find the schedulable item for {0}", identity));
+                throw new ParentItemMissingException(string.Format(Resources.Schedulable_item_missing, identity));
             _parentItems.Add(parentItem);
         }
 

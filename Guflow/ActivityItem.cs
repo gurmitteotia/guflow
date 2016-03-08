@@ -55,7 +55,6 @@ namespace Guflow
         protected override bool IsProcessed(IWorkflowContext workflowContext)
         {
             var activity = workflowContext.LatestActivityEventFor(this);
-
             return activity != null;
         }
 

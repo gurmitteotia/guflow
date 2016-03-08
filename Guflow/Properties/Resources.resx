@@ -117,10 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Character_not_allowed" xml:space="preserve">
-    <value>{0} character is not allowed as it is used internally by Guflow.</value>
+  <data name="Duplicate_activity" xml:space="preserve">
+    <value>Activity with name {0}, version {1} and positional name {2} is already added to workflow.</value>
   </data>
-  <data name="Name_too_long" xml:space="preserve">
-    <value>Combined length of name, version and positional name should not be more than {0} characters.</value>
+  <data name="Duplicate_timer" xml:space="preserve">
+    <value>Timer with name {0} is already added to workflow.</value>
+  </data>
+  <data name="Schedulable_item_missing" xml:space="preserve">
+    <value>Can not find the schedulable item for {0}.</value>
   </data>
 </root>

@@ -61,20 +61,29 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} character is not allowed as it is used internally by Guflow..
+        ///   Looks up a localized string similar to Activity with name {0}, version {1} and positional name {2} is already added to workflow..
         /// </summary>
-        internal static string Character_not_allowed {
+        internal static string Duplicate_activity {
             get {
-                return ResourceManager.GetString("Character_not_allowed", resourceCulture);
+                return ResourceManager.GetString("Duplicate_activity", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Combined length of name, version and positional name should not be more than {0} characters..
+        ///   Looks up a localized string similar to Timer with name {0} is already added to workflow..
         /// </summary>
-        internal static string Name_too_long {
+        internal static string Duplicate_timer {
             get {
-                return ResourceManager.GetString("Name_too_long", resourceCulture);
+                return ResourceManager.GetString("Duplicate_timer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not find the schedulable item for {0}..
+        /// </summary>
+        internal static string Schedulable_item_missing {
+            get {
+                return ResourceManager.GetString("Schedulable_item_missing", resourceCulture);
             }
         }
     }

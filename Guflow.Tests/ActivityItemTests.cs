@@ -5,6 +5,6 @@ namespace Guflow.Tests
     [TestFixture]
     public class ActivityItemTests
     {
-        
+
     }
 }

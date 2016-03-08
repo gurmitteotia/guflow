@@ -1,50 +1,53 @@
-﻿using System.Linq;
-using Amazon.SimpleWorkflow.Model;
-using Guflow.Tests.TestWorkflows;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
-namespace Guflow
+namespace Guflow.Tests
 {
     [TestFixture]
     public class WorkflowTests
     {
         [Test]
-        public void Workflow_started_return_schedule_decisions_for_startup_items()
+        public void Throws_exception_when_adding_the_same_item_again()
         {
-            var workflow = new TestWorkflow();
-
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
-
-            Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Download", "1.0"))}));
+            Assert.Throws<DuplicateItemException>(()=>new WorkflowWithSameActivity());
+            Assert.Throws<DuplicateItemException>(() => new WorkflowWithSameTimer());
         }
 
         [Test]
-        public void Workflow_started_return_workflow_completed_decisions_when_workflow_has_no_schedulable_items()
+        public void Throws_exception_when_parent_item_is_not_found()
         {
-            var workflow = new EmptyWorkflow();
-
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>())).GetDecisions();
-
-            Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new CompleteWorkflowDecision("Workflow completed as no schedulable item is found")}));
+            Assert.Throws<ParentItemMissingException>(() => new WorkflowWithNonExistentParentActivityItem());
+            Assert.Throws<ParentItemMissingException>(()=>new WorkflowWithNonExistentParentTimerItem());
         }
 
-        [Test]
-        public void On_activity_completion_return_schedule_decision_for_child_dependent_activities()
+        private class WorkflowWithSameActivity : Workflow
         {
-            var workflow = new TestWorkflow();
-
-            var decisionsOnActivityCompletion = workflow.ActivityCompleted(new ActivityCompletedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>())).GetDecisions();
-
-            Assert.That(decisionsOnActivityCompletion, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0"))}));
-        }
-
-        private class TestWorkflow : Workflow
-        {
-            public TestWorkflow()
+            public WorkflowWithSameActivity()
             {
                 AddActivity("Download", "1.0");
+                AddActivity("Download", "1.0");
+            }
+        }
+        private class WorkflowWithSameTimer : Workflow
+        {
+            public WorkflowWithSameTimer()
+            {
+                AddTimer("Download");
+                AddTimer("Download");
+            }
+        }
 
-                AddActivity("Transcode", "2.0").DependsOn("Download", "1.0");
+        private class WorkflowWithNonExistentParentActivityItem : Workflow
+        {
+            public WorkflowWithNonExistentParentActivityItem()
+            {
+                AddActivity("Name", "version").DependsOn("ParentName", "parentVer");
+            }
+        }
+        private class WorkflowWithNonExistentParentTimerItem : Workflow
+        {
+            public WorkflowWithNonExistentParentTimerItem()
+            {
+                AddActivity("Name", "version").DependsOn("ParentName");
             }
         }
     }

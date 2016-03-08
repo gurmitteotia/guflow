@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Guflow.Properties;
 
 namespace Guflow
 {
@@ -75,14 +76,16 @@ namespace Guflow
         protected ActivityItem AddActivity(string name, string version, string positionalName = "")
         {
             var activityItem = new ActivityItem(name,version, positionalName,this);
-            _allWorkflowItems.Add(activityItem);
+            if(!_allWorkflowItems.Add(activityItem))
+                throw new DuplicateItemException(string.Format(Resources.Duplicate_activity,name,version,positionalName));
             return activityItem;
         }
 
         protected TimerItem AddTimer(string name)
         {
             var timerItem = new TimerItem(name,this);
-            _allWorkflowItems.Add(timerItem);
+            if(!_allWorkflowItems.Add(timerItem))
+                throw new DuplicateItemException(string.Format(Resources.Duplicate_timer,name));
 
             return timerItem;
         }
