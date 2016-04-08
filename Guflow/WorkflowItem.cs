@@ -64,12 +64,12 @@ namespace Guflow
             return Identity.GetHashCode();
         }
 
-        internal bool AllParentsAreProcessed(IWorkflowContext workflowContext)
+        internal bool AllParentsAreProcessed(IWorkflowHistoryEvents workflowHistoryEvents)
         {
-            return _parentItems.All(p => p.IsProcessed(workflowContext));
+            return _parentItems.All(p => p.IsProcessed(workflowHistoryEvents));
         }
 
-        protected abstract bool IsProcessed(IWorkflowContext workflowContext);
+        protected abstract bool IsProcessed(IWorkflowHistoryEvents workflowHistoryEvents);
 
         protected void AddParent(Identity identity)
         {

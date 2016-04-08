@@ -92,7 +92,6 @@
     <Compile Include="IdentityExtensions.cs" />
     <Compile Include="IncompatibleWorkflowException.cs" />
     <Compile Include="IncompleteEventGraphException.cs" />
-    <Compile Include="IWorkflowContext.cs" />
     <Compile Include="IWorkflowHistoryEvents.cs" />
     <Compile Include="IWorkflowItems.cs" />
     <Compile Include="JsonExtension.cs" />
@@ -124,7 +123,7 @@
     <Compile Include="Workflow.cs" />
     <Compile Include="WorkflowAction.cs" />
     <Compile Include="CompleteWorkflowDecision.cs" />
-    <Compile Include="WorkflowContext.cs" />
+    <Compile Include="WorkflowHistoryEvents.cs" />
     <Compile Include="WorkflowDecision.cs" />
     <Compile Include="WorkflowEvent.cs" />
     <Compile Include="WorkflowItemEvent.cs" />

@@ -24,9 +24,9 @@ namespace Guflow
         {
             return new ScheduleWorkflowItemAction(workflowItem);
         }
-        internal static WorkflowAction ContinueWorkflow(WorkflowItem workflowItem,IWorkflowContext workflowContext)
+        internal static WorkflowAction ContinueWorkflow(WorkflowItem workflowItem,IWorkflowHistoryEvents workflowHistoryEvents)
         {
-            return new ContinueWorkflowAction(workflowItem,workflowContext);
+            return new ContinueWorkflowAction(workflowItem,workflowHistoryEvents);
         }
         internal static WorkflowAction StartWorkflow(IWorkflowItems workflowItems)
         {

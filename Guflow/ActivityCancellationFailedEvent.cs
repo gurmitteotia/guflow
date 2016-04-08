@@ -17,7 +17,7 @@ namespace Guflow
             return workflow.ActivityCancellationFailed(this);
         }
 
-        public override IWorkflowContext WorkflowContext
+        public override IWorkflowHistoryEvents WorkflowHistoryEvents
         {
             get { throw new System.NotImplementedException(); }
         }

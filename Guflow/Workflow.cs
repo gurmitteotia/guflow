@@ -99,8 +99,7 @@ namespace Guflow
         protected WorkflowAction Continue(WorkflowItemEvent workflowEvent)
         {
             var workfowItem = FindWorkflowItemFor(workflowEvent);
-
-            return new ContinueWorkflowAction(workfowItem,workflowEvent.WorkflowContext);
+            return new ContinueWorkflowAction(workfowItem,workflowEvent.WorkflowHistoryEvents);
         }
 
         protected WorkflowAction FailWorkflow(string reason, string detail)
@@ -140,7 +139,7 @@ namespace Guflow
             var activityItem = FindTimerFor(Identity.Timer(name));
             return WorkflowAction.Schedule(activityItem);
         }
-        protected WorkflowAction CancelActivity(string name, string version, string position)
+        protected WorkflowAction CancelActivity(string name, string version, string position="")
         {
             var activityItem = FindActivityFor(Identity.New(name, version, position));
             return WorkflowAction.Cancel(activityItem);

@@ -6,12 +6,12 @@ namespace Guflow
     public class ActivityCancelledEvent : ActivityEvent
     {
         private readonly ActivityTaskCanceledEventAttributes _eventAttributes;
-        private readonly IWorkflowContext _workflowContext;
+        private readonly IWorkflowHistoryEvents _workflowHistoryEvents;
         public ActivityCancelledEvent(HistoryEvent cancelledActivityEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             _eventAttributes = cancelledActivityEvent.ActivityTaskCanceledEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
-            _workflowContext = new WorkflowContext(allHistoryEvents);
+            _workflowHistoryEvents = new WorkflowHistoryEvents(allHistoryEvents);
         }
 
         public string Details{get { return _eventAttributes.Details; }}
@@ -21,6 +21,6 @@ namespace Guflow
             return workflow.ActivityCancelled(this);
         }
 
-        public override IWorkflowContext WorkflowContext{get { return _workflowContext; }}
+        public override IWorkflowHistoryEvents WorkflowHistoryEvents{get { return _workflowHistoryEvents; }}
     }
 }

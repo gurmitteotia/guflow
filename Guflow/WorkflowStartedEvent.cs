@@ -64,9 +64,9 @@ namespace Guflow
             return workflow.WorkflowStarted(this);
         }
 
-        public override IWorkflowContext WorkflowContext
+        public override IWorkflowHistoryEvents WorkflowHistoryEvents
         {
-            get { return new WorkflowContext(_allHistoryEvents); }
+            get { return new WorkflowHistoryEvents(_allHistoryEvents); }
         }
     }
 }

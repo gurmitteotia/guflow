@@ -14,7 +14,7 @@ namespace Guflow
         {
             return workflow.TimerCancelled(this);
         }
-        public override IWorkflowContext WorkflowContext
+        public override IWorkflowHistoryEvents WorkflowHistoryEvents
         {
             get { throw new System.NotImplementedException(); }
         }

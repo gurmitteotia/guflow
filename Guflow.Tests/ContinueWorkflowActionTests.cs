@@ -20,17 +20,17 @@ namespace Guflow.Tests
             var workflowItem1 = new ActivityItem(_activityName, _activityVersion, _positionalName, new Mock<IWorkflowItems>().Object);
             var workflowItem2 = new ActivityItem("DifferentName", _activityVersion, _positionalName, new Mock<IWorkflowItems>().Object);
 
-            Assert.True(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowContext>().Object).Equals(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowContext>().Object)));
-            Assert.False(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowContext>().Object).Equals(WorkflowAction.ContinueWorkflow(workflowItem2, new Mock<IWorkflowContext>().Object)));
+            Assert.True(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowHistoryEvents>().Object).Equals(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowHistoryEvents>().Object)));
+            Assert.False(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowHistoryEvents>().Object).Equals(WorkflowAction.ContinueWorkflow(workflowItem2, new Mock<IWorkflowHistoryEvents>().Object)));
         }
 
         [Test]
         public void Should_return_the_scheduling_decision_for_all_child_activities()
         {
             var workflow = new WorkflowWithMultipleChilds();
-            var activityFailedEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
-            var decisions = activityFailedEvent.Interpret(workflow).GetDecisions();
+            var decisions = completedActivityEvent.Interpret(workflow).GetDecisions();
 
             Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0")), new ScheduleActivityDecision(Identity.New("Sync", "2.1")) }));
         }
@@ -39,9 +39,9 @@ namespace Guflow.Tests
         public void Should_return_empty_decision_when_no_schedulable_child_item_found()
         {
             var workflow = new SingleActivityWorkflow();
-            var activityFailedEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
-            var decisions = activityFailedEvent.Interpret(workflow).GetDecisions();
+            var decisions = completedActivityEvent.Interpret(workflow).GetDecisions();
 
             CollectionAssert.IsEmpty(decisions);
         }
@@ -50,9 +50,9 @@ namespace Guflow.Tests
         public void Should_not_schedule_the_child_when_one_of_its_parent_is_not_completed()
         {
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var activityFailedEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var activityCompletedEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
            
-            var decisions = activityFailedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
+            var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
             CollectionAssert.IsEmpty(decisions);
         }
@@ -153,7 +153,7 @@ namespace Guflow.Tests
             var activityFailedEvent = CreateFailedActivityEvent(_activityName, _activityVersion, _positionalName);
 
             var workflowAction = activityFailedEvent.Interpret(workflow);
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(workflow.FailedItem,new Mock<IWorkflowContext>().Object)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(workflow.FailedItem,new Mock<IWorkflowHistoryEvents>().Object)));
         }
 
 

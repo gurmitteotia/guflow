@@ -72,7 +72,8 @@ namespace Guflow.Tests
         {
             public WorkflowToReturnCancelActivityAction()
             {
-                CancelledActivityItem = AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelActivity(_activityName, _activityVersion, _positionalName));
+                CancelledActivityItem = AddActivity("ActivityToCancel", "1.2");
+                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelActivity("ActivityToCancel", "1.2"));
             }
             public WorkflowItem CancelledActivityItem { get; private set; }
         }

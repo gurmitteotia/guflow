@@ -3,11 +3,11 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal class WorkflowContext : IWorkflowContext
+    internal class WorkflowHistoryEvents : IWorkflowHistoryEvents
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
 
-        public WorkflowContext(IEnumerable<HistoryEvent> allHistoryEvents)
+        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
         {
             _allHistoryEvents = allHistoryEvents;
         }
@@ -58,6 +58,19 @@ namespace Guflow
                 }
             }
             return null;
+        }
+
+        internal IEnumerable<WorkflowAction> InterpretNewEventsFor(IWorkflow workflow)
+        {
+            var workflowActions = new List<WorkflowAction>();
+
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if(historyEvent.IsActivityCompletedEvent())
+                    workflowActions.Add(workflow.ActivityCompleted(new ActivityCompletedEvent(historyEvent,_allHistoryEvents)));
+            }
+ 
+            return workflowActions;
         }
     }
 }

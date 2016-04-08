@@ -4,6 +4,6 @@
     {
         public abstract WorkflowAction Interpret(IWorkflow workflow);
 
-        public abstract IWorkflowContext WorkflowContext { get; }
+        public abstract IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
     }
 }

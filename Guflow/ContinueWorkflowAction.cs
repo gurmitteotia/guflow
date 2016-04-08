@@ -6,12 +6,12 @@ namespace Guflow
     internal class ContinueWorkflowAction : WorkflowAction
     {
         private readonly WorkflowItem _completedWorkflowItem;
-        private readonly IWorkflowContext _workflowContext;
+        private readonly IWorkflowHistoryEvents _workflowHistoryEvents;
 
-        public ContinueWorkflowAction(WorkflowItem completedWorkflowItem, IWorkflowContext workflowContext)
+        public ContinueWorkflowAction(WorkflowItem completedWorkflowItem, IWorkflowHistoryEvents workflowHistoryEvents)
         {
             _completedWorkflowItem = completedWorkflowItem;
-            _workflowContext = workflowContext;
+            _workflowHistoryEvents = workflowHistoryEvents;
         }
         public override bool Equals(object other)
         {
@@ -28,7 +28,7 @@ namespace Guflow
         {
             var childItems = _completedWorkflowItem.GetChildlern();
 
-            var schedulableChildItems = childItems.Where(s => s.AllParentsAreProcessed(_workflowContext));
+            var schedulableChildItems = childItems.Where(s => s.AllParentsAreProcessed(_workflowHistoryEvents));
 
             return schedulableChildItems.Select(f => f.GetScheduleDecision());
         }

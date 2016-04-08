@@ -13,7 +13,7 @@ namespace Guflow
         internal ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
             : base(Identity.New(name, version, positionalName), workflowItems)
         {
-            _onCompletionAction = c => new ContinueWorkflowAction(this, c.WorkflowContext);
+            _onCompletionAction = c => new ContinueWorkflowAction(this, c.WorkflowHistoryEvents);
             _onFailedAction = c => WorkflowAction.FailWorkflow(c.Reason, c.Detail);
             _onTimedoutAction = t => WorkflowAction.FailWorkflow(t.TimeoutType, t.Details);
             _onCancelledAction = c => WorkflowAction.CancelWorkflow(c.Details);
@@ -52,9 +52,9 @@ namespace Guflow
             return _onCompletionAction(activityCompletedEvent);
         }
 
-        protected override bool IsProcessed(IWorkflowContext workflowContext)
+        protected override bool IsProcessed(IWorkflowHistoryEvents workflowHistoryEvents)
         {
-            var activity = workflowContext.LatestActivityEventFor(this);
+            var activity = workflowHistoryEvents.LatestActivityEventFor(this);
             return activity != null;
         }
 
