@@ -9,6 +9,7 @@ namespace Guflow
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
         private Func<WorkflowStartedEvent, WorkflowAction> _onStartupFunc;
+        private IWorkflowHistoryEvents _currentworkflowHistoryEvents;
 
         protected Workflow()
         {
@@ -99,7 +100,7 @@ namespace Guflow
         protected WorkflowAction Continue(WorkflowItemEvent workflowEvent)
         {
             var workfowItem = FindWorkflowItemFor(workflowEvent);
-            return new ContinueWorkflowAction(workfowItem,workflowEvent.WorkflowHistoryEvents);
+            return WorkflowAction.ContinueWorkflow(workfowItem);
         }
 
         protected WorkflowAction FailWorkflow(string reason, string detail)
@@ -162,6 +163,21 @@ namespace Guflow
         public WorkflowItem Find(Identity identity)
         {
             return _allWorkflowItems.FirstOrDefault(s => s.Has(identity));
+        }
+
+        public IWorkflowHistoryEvents CurrentHistoryEvents
+        {
+            get
+            {
+                if(_currentworkflowHistoryEvents==null)
+                    throw new InvalidOperationException("Current history events can be accessed when workflow is executing.");
+                return _currentworkflowHistoryEvents;
+            }
+        }
+
+        internal void UseWorkflowHistoryEvents(IWorkflowHistoryEvents currentWorkflowHistoryEvents)
+        {
+            _currentworkflowHistoryEvents = currentWorkflowHistoryEvents;
         }
 
         private ActivityItem FindActivity(Identity identity)

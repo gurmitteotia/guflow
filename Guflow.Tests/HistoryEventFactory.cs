@@ -265,10 +265,16 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
+        public static IEnumerable<HistoryEvent> CreateWorkflowStartedEventGraph()
+        {
+            return new[] {CreateWorkflowStartedEvent()};
+        }
+
         public static HistoryEvent CreateWorkflowStartedEvent()
         {
             return new HistoryEvent()
             {
+                EventType =  EventType.WorkflowExecutionStarted,
                 WorkflowExecutionStartedEventAttributes = new WorkflowExecutionStartedEventAttributes()
                 {
                     ChildPolicy = ChildPolicy.TERMINATE,

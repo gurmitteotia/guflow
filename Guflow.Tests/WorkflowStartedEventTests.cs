@@ -15,7 +15,7 @@ namespace Guflow.Tests
             var workflowStartedEvent = HistoryEventFactory.CreateWorkflowStartedEvent();
             var startAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
 
-            var workflowEvent = new WorkflowStartedEvent(workflowStartedEvent,Enumerable.Empty<HistoryEvent>());
+            var workflowEvent = new WorkflowStartedEvent(workflowStartedEvent);
 
             Assert.AreEqual(startAttributes.ChildPolicy.Value, workflowEvent.ChildPolicy);
             Assert.AreEqual(startAttributes.ContinuedExecutionRunId, workflowEvent.ContinuedExecutionRunId);
@@ -36,7 +36,7 @@ namespace Guflow.Tests
         {
             var customStartupAction = new Mock<WorkflowAction>();
             var workflow = new WorkflowWithCustomStartupAction(customStartupAction.Object);
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>());
+            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
 
             var actualStartupAction = workflowEvent.Interpret(workflow);
 
@@ -47,7 +47,7 @@ namespace Guflow.Tests
         public void Return_workflow_started_action()
         {
             var workflow = new EmptyWorkflow();
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent(),Enumerable.Empty<HistoryEvent>());
+            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
 
             var workflowAction = workflowEvent.Interpret(workflow);
 

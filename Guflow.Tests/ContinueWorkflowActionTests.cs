@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Moq;
 using NUnit.Framework;
 
@@ -20,8 +22,8 @@ namespace Guflow.Tests
             var workflowItem1 = new ActivityItem(_activityName, _activityVersion, _positionalName, new Mock<IWorkflowItems>().Object);
             var workflowItem2 = new ActivityItem("DifferentName", _activityVersion, _positionalName, new Mock<IWorkflowItems>().Object);
 
-            Assert.True(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowHistoryEvents>().Object).Equals(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowHistoryEvents>().Object)));
-            Assert.False(WorkflowAction.ContinueWorkflow(workflowItem1, new Mock<IWorkflowHistoryEvents>().Object).Equals(WorkflowAction.ContinueWorkflow(workflowItem2, new Mock<IWorkflowHistoryEvents>().Object)));
+            Assert.True(WorkflowAction.ContinueWorkflow(workflowItem1).Equals(WorkflowAction.ContinueWorkflow(workflowItem1)));
+            Assert.False(WorkflowAction.ContinueWorkflow(workflowItem1).Equals(WorkflowAction.ContinueWorkflow(workflowItem2)));
         }
 
         [Test]
@@ -49,8 +51,10 @@ namespace Guflow.Tests
         [Test]
         public void Should_not_schedule_the_child_when_one_of_its_parent_is_not_completed()
         {
+            var completedActivityEventGraph = CreateCompletedActivityEventGraph();
             var workflowWithMultipleParents = new WorkflowWithMultipleParents();
-            var activityCompletedEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            workflowWithMultipleParents.UseWorkflowHistoryEvents(new WorkflowHistoryEvents(completedActivityEventGraph));
+            var activityCompletedEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(),completedActivityEventGraph);
            
             var decisions = activityCompletedEvent.Interpret(workflowWithMultipleParents).GetDecisions();
 
@@ -153,7 +157,7 @@ namespace Guflow.Tests
             var activityFailedEvent = CreateFailedActivityEvent(_activityName, _activityVersion, _positionalName);
 
             var workflowAction = activityFailedEvent.Interpret(workflow);
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(workflow.FailedItem,new Mock<IWorkflowHistoryEvents>().Object)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(workflow.FailedItem)));
         }
 
 
@@ -166,6 +170,11 @@ namespace Guflow.Tests
         {
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
+        }
+
+        private HistoryEvent [] CreateCompletedActivityEventGraph()
+        {
+            return HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res").ToArray();
         }
         private TimerFiredEvent CreateTimerFiredEvent(string timerName)
         {

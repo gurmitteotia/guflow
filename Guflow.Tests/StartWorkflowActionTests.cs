@@ -21,7 +21,7 @@ namespace Guflow.Tests
         public void Return_workflow_completed_decision_when_workflow_does_not_have_any_schedulable_items()
         {
             var emptyWorkflow = new EmptyWorkflow();
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>());
+            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
 
             var startupDecisions = workflowEvent.Interpret(emptyWorkflow).GetDecisions();
 
@@ -33,7 +33,7 @@ namespace Guflow.Tests
         {
             var workflow = new TestWorkflow();
 
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent(), Enumerable.Empty<HistoryEvent>())).GetDecisions();
+            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent())).GetDecisions();
 
             Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Download", "1.0")) }));
         }

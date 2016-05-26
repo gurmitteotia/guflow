@@ -8,16 +8,16 @@ namespace Guflow
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
-        private Func<ActivityCancellationFailedEvent, WorkflowAction> _onFailedCancellationAction; 
+        private Func<ActivityCancellationFailedEvent, WorkflowAction> _onCancellationFailedAction; 
         
         internal ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
             : base(Identity.New(name, version, positionalName), workflowItems)
         {
-            _onCompletionAction = c => new ContinueWorkflowAction(this, c.WorkflowHistoryEvents);
+            _onCompletionAction = c => WorkflowAction.ContinueWorkflow(this);
             _onFailedAction = c => WorkflowAction.FailWorkflow(c.Reason, c.Detail);
             _onTimedoutAction = t => WorkflowAction.FailWorkflow(t.TimeoutType, t.Details);
             _onCancelledAction = c => WorkflowAction.CancelWorkflow(c.Details);
-            _onFailedCancellationAction = c => WorkflowAction.FailWorkflow("ACTIVITY_CANCELLATION_FAILED", c.Cause);
+            _onCancellationFailedAction = c => WorkflowAction.FailWorkflow("ACTIVITY_CANCELLATION_FAILED", c.Cause);
         }
 
         public ActivityItem DependsOn(string name, string version, string positionalName = "")
@@ -52,9 +52,9 @@ namespace Guflow
             return _onCompletionAction(activityCompletedEvent);
         }
 
-        protected override bool IsProcessed(IWorkflowHistoryEvents workflowHistoryEvents)
+        protected override bool IsProcessed()
         {
-            var activity = workflowHistoryEvents.LatestActivityEventFor(this);
+            var activity = WorkflowHistoryEvents.LatestActivityEventFor(this);
             return activity != null;
         }
 
@@ -105,11 +105,11 @@ namespace Guflow
 
         internal WorkflowAction CancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
         {
-            return _onFailedCancellationAction(activityCancellationFailedEvent);
+            return _onCancellationFailedAction(activityCancellationFailedEvent);
         }
         public ActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationAction)
         {
-            _onFailedCancellationAction = onFailedCancellationAction;
+            _onCancellationFailedAction = onFailedCancellationAction;
             return this;
         }
     }

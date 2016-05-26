@@ -7,7 +7,7 @@ namespace Guflow
     {
         private readonly WorkflowItem _workflowItem;
         private readonly WorkflowAction _workflowAction;
-        public ScheduleWorkflowItemAction(WorkflowItem workflowItem)
+        internal ScheduleWorkflowItemAction(WorkflowItem workflowItem)
         {
             _workflowItem = workflowItem;
             _workflowAction = new GenericWorkflowAction(_workflowItem.GetScheduleDecision());
@@ -38,6 +38,5 @@ namespace Guflow
         {
             return _workflowItem.GetHashCode();
         }
-
     }
 }

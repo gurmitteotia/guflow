@@ -6,12 +6,9 @@ namespace Guflow
 {
     public class WorkflowStartedEvent : WorkflowEvent
     {
-        private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly WorkflowExecutionStartedEventAttributes _workflowStartedAttributes;
-
-        public WorkflowStartedEvent(HistoryEvent workflowStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public WorkflowStartedEvent(HistoryEvent workflowStartedEvent)
         {
-            _allHistoryEvents = allHistoryEvents;
             _workflowStartedAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
         }
 
@@ -59,14 +56,9 @@ namespace Guflow
             get { return TimeSpan.FromSeconds(Convert.ToInt32(_workflowStartedAttributes.TaskStartToCloseTimeout)); }
         }
 
-        public override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
             return workflow.WorkflowStarted(this);
-        }
-
-        public override IWorkflowHistoryEvents WorkflowHistoryEvents
-        {
-            get { return new WorkflowHistoryEvents(_allHistoryEvents); }
         }
     }
 }

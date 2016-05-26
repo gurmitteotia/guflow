@@ -64,7 +64,7 @@ namespace Guflow.Tests
 
             var workflowAction = _activityCompletedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(new ContinueWorkflowAction(workflow.CompletedItem,null)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(workflow.CompletedItem)));
         }
 
         [Test]

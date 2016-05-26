@@ -10,13 +10,9 @@ namespace Guflow
             var eventAttributes = timerCancelledEvent.TimerCanceledEventAttributes;
             PopulateProperties(eventAttributes.StartedEventId, allHistoryEvents);
         }
-        public override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
             return workflow.TimerCancelled(this);
-        }
-        public override IWorkflowHistoryEvents WorkflowHistoryEvents
-        {
-            get { throw new System.NotImplementedException(); }
         }
     }
 }

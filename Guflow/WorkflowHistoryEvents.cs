@@ -66,8 +66,9 @@ namespace Guflow
 
             foreach (var historyEvent in _allHistoryEvents)
             {
-                if(historyEvent.IsActivityCompletedEvent())
-                    workflowActions.Add(workflow.ActivityCompleted(new ActivityCompletedEvent(historyEvent,_allHistoryEvents)));
+                var workflowEvent = historyEvent.CreateEventFor(_allHistoryEvents);
+                if(workflowEvent!=null)
+                    workflowActions.Add(workflowEvent.Interpret(workflow));
             }
  
             return workflowActions;
