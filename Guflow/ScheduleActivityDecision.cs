@@ -49,6 +49,11 @@ namespace Guflow
             };
         }
 
+        public override string ToString()
+        {
+            return _identity.ToString();
+        }
+
         private string ToAwsTaskPriority(int? taskPriority)
         {
             if (!taskPriority.HasValue)

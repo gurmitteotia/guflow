@@ -72,7 +72,7 @@ namespace Guflow
                     workflowActions.Add(workflowEvent.Interpret(workflow));
             }
 
-            return workflowActions.SelectMany(a => a.GetDecisions());
+            return workflowActions.SelectMany(a => a.GetDecisions()).Distinct();
         }
     }
 }
