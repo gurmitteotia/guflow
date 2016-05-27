@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -60,7 +61,7 @@ namespace Guflow
             return null;
         }
 
-        internal IEnumerable<WorkflowAction> InterpretNewEventsFor(IWorkflow workflow)
+        public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow)
         {
             var workflowActions = new List<WorkflowAction>();
 
@@ -70,8 +71,8 @@ namespace Guflow
                 if(workflowEvent!=null)
                     workflowActions.Add(workflowEvent.Interpret(workflow));
             }
- 
-            return workflowActions;
+
+            return workflowActions.SelectMany(a => a.GetDecisions());
         }
     }
 }

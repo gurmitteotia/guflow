@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Properties;
 
 namespace Guflow
@@ -175,9 +176,17 @@ namespace Guflow
             }
         }
 
-        internal void UseWorkflowHistoryEvents(IWorkflowHistoryEvents currentWorkflowHistoryEvents)
+        internal IEnumerable<WorkflowDecision> ExecuteFor(IWorkflowHistoryEvents workflowHistoryEvents)
         {
-            _currentworkflowHistoryEvents = currentWorkflowHistoryEvents;
+            try
+            {
+                _currentworkflowHistoryEvents = workflowHistoryEvents;
+                return workflowHistoryEvents.InterpretNewEventsFor(this).ToArray();
+            }
+            finally
+            {
+                _currentworkflowHistoryEvents = null;
+            }
         }
 
         private ActivityItem FindActivity(Identity identity)
