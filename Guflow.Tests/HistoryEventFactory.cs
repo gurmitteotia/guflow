@@ -307,6 +307,26 @@ namespace Guflow.Tests
                 }
             });
 
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskStarted,
+                EventId = eventIds.StartedId,
+                ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
+                {
+                   Identity = "someid"
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskScheduled,
+                EventId = eventIds.ScheduledId,
+                ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
+                {
+                    
+                }
+            });
+
             return historyEvents;
         }
         public static IEnumerable<HistoryEvent> CreateTimerCancellationFailedEventGraph(Identity timerId, string cause)

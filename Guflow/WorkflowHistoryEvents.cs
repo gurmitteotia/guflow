@@ -7,10 +7,19 @@ namespace Guflow
     internal class WorkflowHistoryEvents : IWorkflowHistoryEvents
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
+        private readonly long _newEventsStartId;
+        private readonly long _newEventsEndId;
 
-        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
+        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long newEventsStartId, long newEventsEndId)
         {
             _allHistoryEvents = allHistoryEvents;
+            _newEventsStartId = newEventsStartId;
+            _newEventsEndId = newEventsEndId;
+        }
+
+        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
+            :this(allHistoryEvents,allHistoryEvents.First().EventId, allHistoryEvents.Last().EventId)
+        {
         }
 
         public ActivityEvent LatestActivityEventFor(ActivityItem activityItem)
@@ -65,8 +74,11 @@ namespace Guflow
         {
             var workflowActions = new List<WorkflowAction>();
 
-            foreach (var historyEvent in _allHistoryEvents)
+            for (var eventId = _newEventsStartId;eventId>=_newEventsEndId;eventId--)
             {
+                var historyEvent = _allHistoryEvents.FirstOrDefault(h => h.EventId == eventId);
+                if (historyEvent == null)
+                    continue;
                 var workflowEvent = historyEvent.CreateEventFor(_allHistoryEvents);
                 if(workflowEvent!=null)
                     workflowActions.Add(workflowEvent.Interpret(workflow));

@@ -28,6 +28,11 @@ namespace Guflow
             return _identity.Equals(otherDecision._identity);
         }
 
+        public override int GetHashCode()
+        {
+            return _identity.GetHashCode();
+        }
+
         public override Decision Decision()
         {
             return new Decision()

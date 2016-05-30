@@ -28,9 +28,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.ActivityCompleted(It.IsAny<ActivityCompletedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityCompletedEventGraph();
 
-            var workflowAction =historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions =historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] {_expectedWorkflowDecision.Object}));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] {_expectedWorkflowDecision.Object}));
         }
 
         [Test]
@@ -39,9 +39,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.ActivityFailed(It.IsAny<ActivityFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityFailedEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -50,9 +50,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.ActivityTimedout(It.IsAny<ActivityTimedoutEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityTimedoutEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -61,9 +61,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.ActivityCancelled(It.IsAny<ActivityCancelledEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityCancelledEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -72,9 +72,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.ActivityCancellationFailed(It.IsAny<ActivityCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityCancellationFailedEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -83,9 +83,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.WorkflowStarted(It.IsAny<WorkflowStartedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateWorkflowStartedEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -94,9 +94,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.TimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerFiredEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -105,9 +105,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.TimerFailed(It.IsAny<TimerFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerFailedEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -116,9 +116,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.TimerCancelled(It.IsAny<TimerCancelledEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerCancelledEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -127,9 +127,9 @@ namespace Guflow.Tests
             _workflow.Setup(w => w.TimerCancellationFailed(It.IsAny<TimerCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerCancellationFailedEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
         [Test]
@@ -137,27 +137,40 @@ namespace Guflow.Tests
         {
             var historyEvents = CreateNotInterpretingEventGraph();
 
-            var workflowAction = historyEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowAction, Is.Empty);
+            Assert.That(workflowDecisions, Is.Empty);
         }
 
         [Test]
         public void Should_accumulate_the_interpreted_actions()
         {
+            var timerFailedDecision = new Mock<WorkflowDecision>();
+            var timerFailedAction = new TestWorkflowAction(timerFailedDecision.Object);
+            _workflow.Setup(w => w.TimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.TimerFailed(It.IsAny<TimerFailedEvent>())).Returns(timerFailedAction);
+            var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
+
+            var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
+
+            Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision.Object, timerFailedDecision.Object }));
+        }
+
+        [Test]
+        public void Should_filter_out_duplicate_workflow_decisions()
+        {
             _workflow.Setup(w => w.TimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
             _workflow.Setup(w => w.TimerFailed(It.IsAny<TimerFailedEvent>())).Returns(_interpretedWorkflowAction);
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
 
-            var workflowActions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
+            var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowActions, Is.EquivalentTo(new[] { _expectedWorkflowDecision.Object, _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision.Object }));
         }
-        
 
         private WorkflowHistoryEvents CreateActivityCompletedEventGraph()
         {
-            var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "result");
+            var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "result").ToArray();
             return new WorkflowHistoryEvents(activityCompletedEventGraph);
         }
         private WorkflowHistoryEvents CreateActivityFailedEventGraph()

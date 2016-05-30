@@ -171,7 +171,7 @@ namespace Guflow
             get
             {
                 if(_currentworkflowHistoryEvents==null)
-                    throw new InvalidOperationException("Current history events can be accessed when workflow is executing.");
+                    throw new InvalidOperationException("Current history events can be accessed only when workflow is executing.");
                 return _currentworkflowHistoryEvents;
             }
         }
