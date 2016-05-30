@@ -86,5 +86,15 @@ namespace Guflow
 
             return workflowActions.SelectMany(a => a.GetDecisions()).Distinct();
         }
+
+        public WorkflowStartedEvent WorkflowStartedEvent()
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if(historyEvent.IsWorkflowStartedEvent())
+                    return new WorkflowStartedEvent(historyEvent);
+            }
+            throw new IncompleteEventGraphException("Can not find workflow started event.");
+        }
     }
 }

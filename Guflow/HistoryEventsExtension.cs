@@ -34,8 +34,7 @@ namespace Guflow
         {
             return historyEvent.EventType == EventType.TimerFired;
         }
-
-        private static bool IsWorkflowStartedEvent(this HistoryEvent historyEvent)
+        public static bool IsWorkflowStartedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.WorkflowExecutionStarted;
         }

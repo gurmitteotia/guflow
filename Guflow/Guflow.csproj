@@ -106,6 +106,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ScheduleActivityTimeouts.cs" />
     <Compile Include="ScheduleWorkflowItemAction.cs" />
     <Compile Include="RuntimeActivityConfig.cs" />
     <Compile Include="ScheduleTimerDecision.cs" />

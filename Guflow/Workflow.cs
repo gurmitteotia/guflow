@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Amazon.SimpleWorkflow.Model;
 using Guflow.Properties;
 
 namespace Guflow
@@ -131,9 +130,9 @@ namespace Guflow
         {
             return WorkflowAction.Ignore;
         }
-        protected ScheduleWorkflowItemAction ScheduleActivity(string name, string version, string position)
+        protected ScheduleWorkflowItemAction ScheduleActivity(string name, string version, string positionalName)
         {
-            var activityItem = FindActivityFor(Identity.New(name,version,position));
+            var activityItem = FindActivityFor(Identity.New(name,version,positionalName));
             return WorkflowAction.Schedule(activityItem);
         }
         protected WorkflowAction ScheduleTimer(string name)
@@ -141,9 +140,9 @@ namespace Guflow
             var activityItem = FindTimerFor(Identity.Timer(name));
             return WorkflowAction.Schedule(activityItem);
         }
-        protected WorkflowAction CancelActivity(string name, string version, string position="")
+        protected WorkflowAction CancelActivity(string name, string version, string positionalName="")
         {
-            var activityItem = FindActivityFor(Identity.New(name, version, position));
+            var activityItem = FindActivityFor(Identity.New(name, version, positionalName));
             return WorkflowAction.Cancel(activityItem);
         }
         protected WorkflowAction CancelTimer(string name)

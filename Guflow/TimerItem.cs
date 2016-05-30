@@ -29,11 +29,14 @@ namespace Guflow
 
             return _onFiredAction(timerFiredEvent);
         }
-
         protected override bool IsProcessed()
         {
-            var timerEvent = WorkflowHistoryEvents.LatestTimerEventFor(this);
+            var timerEvent = LatestEvent;
             return timerEvent != null;
+        }
+        public TimerEvent LatestEvent
+        {
+            get { return WorkflowHistoryEvents.LatestTimerEventFor(this); }
         }
         public TimerItem FireAfter(TimeSpan fireAfter)
         {

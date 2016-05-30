@@ -12,10 +12,7 @@ namespace Guflow
             _identity = identity;
         }
 
-        public TimeSpan? HeartbeatTimeout { get; set; }
-        public TimeSpan? ScheduleToCloseTimeout { get; set; }
-        public TimeSpan? ScheduleToStartTimeout { get; set; }
-        public TimeSpan? StartToCloseTimeout { get; set; }
+        public ScheduleActivityTimeouts Timeouts { get; internal set; }
         public string Input { get; set; }
         public string TaskList { get; set; }
         public int? TaskPriority { get; set; }
@@ -42,10 +39,10 @@ namespace Guflow
                     ActivityType = new ActivityType() { Name = _identity.Name, Version = _identity.Version },
                     ActivityId = _identity.Id,
                     Control = (new ActivityScheduleData() { PN = _identity.PositionalName}).ToJson(),
-                    HeartbeatTimeout = ToAwsTimeout(HeartbeatTimeout),
-                    ScheduleToCloseTimeout = ToAwsTimeout(ScheduleToCloseTimeout),
-                    ScheduleToStartTimeout = ToAwsTimeout(ScheduleToStartTimeout),
-                    StartToCloseTimeout = ToAwsTimeout(StartToCloseTimeout),
+                    HeartbeatTimeout = ToAwsTimeout(Timeouts.HeartbeatTimeout),
+                    ScheduleToCloseTimeout = ToAwsTimeout(Timeouts.ScheduleToCloseTimeout),
+                    ScheduleToStartTimeout = ToAwsTimeout(Timeouts.ScheduleToStartTimeout),
+                    StartToCloseTimeout = ToAwsTimeout(Timeouts.StartToCloseTimeout),
                     Input = Input,
                     TaskList = ToAwsTaskList(TaskList),
                     TaskPriority = ToAwsTaskPriority(TaskPriority)

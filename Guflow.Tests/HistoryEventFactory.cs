@@ -265,12 +265,12 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateWorkflowStartedEventGraph()
+        public static IEnumerable<HistoryEvent> CreateWorkflowStartedEventGraph(string input ="workflowinput")
         {
-            return new[] {CreateWorkflowStartedEvent()};
+            return new[] {CreateWorkflowStartedEvent(input)};
         }
 
-        public static HistoryEvent CreateWorkflowStartedEvent()
+        public static HistoryEvent CreateWorkflowStartedEvent(string input="some input")
         {
             return new HistoryEvent()
             {
@@ -280,7 +280,7 @@ namespace Guflow.Tests
                     ChildPolicy = ChildPolicy.TERMINATE,
                     ContinuedExecutionRunId = "continue run id",
                     ExecutionStartToCloseTimeout = "100",
-                    Input = "workflow input",
+                    Input = input,
                     LambdaRole = "some role",
                     ParentInitiatedEventId = 10,
                     ParentWorkflowExecution = new WorkflowExecution() { RunId = "parent runid", WorkflowId = "parent workflow id" },

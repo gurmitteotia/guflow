@@ -48,10 +48,12 @@ namespace Guflow.Tests
         [Test]
         public void Can_set_the_optional_attribute_on_aws_decision_to_finit_limit()
         {
-            _scheduleActivityDecision.HeartbeatTimeout = TimeSpan.FromSeconds(20);
-            _scheduleActivityDecision.ScheduleToCloseTimeout = TimeSpan.FromSeconds(30);
-            _scheduleActivityDecision.ScheduleToStartTimeout = TimeSpan.FromSeconds(40);
-            _scheduleActivityDecision.StartToCloseTimeout = TimeSpan.FromSeconds(50);
+            var timeouts = new ScheduleActivityTimeouts();
+            timeouts.HeartbeatTimeout = TimeSpan.FromSeconds(20);
+            timeouts.ScheduleToCloseTimeout = TimeSpan.FromSeconds(30);
+            timeouts.ScheduleToStartTimeout = TimeSpan.FromSeconds(40);
+            timeouts.StartToCloseTimeout = TimeSpan.FromSeconds(50);
+            _scheduleActivityDecision.Timeouts = timeouts;
 
             var swfDecision = _scheduleActivityDecision.Decision();
 
@@ -64,10 +66,12 @@ namespace Guflow.Tests
         [Test]
         public void Can_set_the_timeouts_on_aws_decision_to_maximum_limit()
         {
-            _scheduleActivityDecision.HeartbeatTimeout = TimeSpan.MaxValue;
-            _scheduleActivityDecision.ScheduleToCloseTimeout = TimeSpan.MaxValue;
-            _scheduleActivityDecision.ScheduleToStartTimeout = TimeSpan.MaxValue;
-            _scheduleActivityDecision.StartToCloseTimeout = TimeSpan.MaxValue;
+            var timeouts = new ScheduleActivityTimeouts();
+            timeouts.HeartbeatTimeout = TimeSpan.MaxValue;
+            timeouts.ScheduleToCloseTimeout = TimeSpan.MaxValue;
+            timeouts.ScheduleToStartTimeout = TimeSpan.MaxValue;
+            timeouts.StartToCloseTimeout = TimeSpan.MaxValue;
+            _scheduleActivityDecision.Timeouts = timeouts;
 
             var swfDecision = _scheduleActivityDecision.Decision();
 
