@@ -2,18 +2,18 @@
 
 namespace Guflow
 {
-    public sealed class ActivityItem : WorkflowItem
+    internal sealed class ActivityItem : WorkflowItem, IFluentActivityItem, IActivityItem
     {
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
         private Func<ActivityCancellationFailedEvent, WorkflowAction> _onCancellationFailedAction;
-        private Func<ActivityItem, string> _inputFunc;
-        private Func<ActivityItem, string> _taskListFunc;
-        private Func<ActivityItem, bool> _whenFunc;
-        private Func<ActivityItem, int?> _priorityFunc;
-        private Func<ActivityItem, ScheduleActivityTimeouts> _timeoutsFunc; 
+        private Func<IActivityItem, string> _inputFunc;
+        private Func<IActivityItem, string> _taskListFunc;
+        private Func<IActivityItem, bool> _whenFunc;
+        private Func<IActivityItem, int?> _priorityFunc;
+        private Func<IActivityItem, ScheduleActivityTimeouts> _timeoutsFunc; 
         internal ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
             : base(Identity.New(name, version, positionalName), workflowItems)
         {
@@ -29,75 +29,85 @@ namespace Guflow
             _timeoutsFunc = a =>new ScheduleActivityTimeouts();
         }
 
-        public ActivityItem DependsOn(string name, string version, string positionalName = "")
+        public ActivityEvent LatestEvent
+        {
+            get { return WorkflowHistoryEvents.LatestActivityEventFor(this); }
+        }
+        public string Version
+        {
+            get { return Identity.Version; }
+        }
+
+        public string PositionalName
+        {
+            get { return Identity.PositionalName; }
+        }
+
+        public IFluentActivityItem DependsOn(string name, string version, string positionalName = "")
         {
             AddParent(Identity.New(name, version, positionalName));
             return this;
         }
 
-        public ActivityItem DependsOn(string timerName)
+        public IFluentActivityItem DependsOn(string timerName)
         {
             AddParent(Identity.Timer(timerName));
             return this;
         }
-        public ActivityEvent LatestEvent
-        {
-            get { return WorkflowHistoryEvents.LatestActivityEventFor(this); }
-        }
-
-        public ActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
+    
+        public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
         {
             _onCompletionAction = onCompletionFunc;
             return this;
         }
-        public ActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> onFailureFunc)
+        public IFluentActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> onFailureFunc)
         {
             _onFailedAction = onFailureFunc;
             return this;
         }
-        public ActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> onTimedoutFunc)
+        public IFluentActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> onTimedoutFunc)
         {
             _onTimedoutAction = onTimedoutFunc;
             return this;
         }
-        public ActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc)
+        public IFluentActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc)
         {
             _onCancelledAction = onCancelledFunc;
             return this;
         }
 
-        public ActivityItem OnTimerCancelled(Func<TimerCancelledEvent, WorkflowAction> onTimerCancelledAction)
+        public IFluentActivityItem OnTimerCancelled(Func<TimerCancelledEvent, WorkflowAction> onTimerCancelledAction)
         {
             OnTimerCancelledAction = onTimerCancelledAction;
             return this;
         }
-        public ActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationAction)
+        public IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationAction)
         {
             _onCancellationFailedAction = onFailedCancellationAction;
             return this;
         }
-        public ActivityItem WithInput(Func<ActivityItem, string> inputFunc)
+        public IFluentActivityItem WithInput(Func<IActivityItem, string> inputFunc)
         {
             _inputFunc = inputFunc;
             return this;
         }
-        public ActivityItem OnTaskList(Func<ActivityItem, string> taskListFunc)
+        public IFluentActivityItem OnTaskList(Func<IActivityItem, string> taskListFunc)
         {
             _taskListFunc = taskListFunc;
             return this;
         }
-        public ActivityItem When(Func<ActivityItem, bool> whenFunc)
+        public IFluentActivityItem When(Func<IActivityItem, bool> whenFunc)
         {
             _whenFunc = whenFunc;
             return this;
         }
-        public ActivityItem WithPriority(Func<ActivityItem, int?> priorityFunc)
+        public IFluentActivityItem WithPriority(Func<IActivityItem, int?> priorityFunc)
         {
             _priorityFunc = priorityFunc;
             return this;
         }
 
-        public ActivityItem WithTimeouts(Func<ActivityItem, ScheduleActivityTimeouts> timeoutsFunc)
+        public IFluentActivityItem WithTimeouts(Func<IActivityItem, ScheduleActivityTimeouts> timeoutsFunc)
         {
             _timeoutsFunc = timeoutsFunc;
             return this;
@@ -108,7 +118,7 @@ namespace Guflow
                 return WorkflowDecision.Empty;
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
-            scheduleActivityDecision.Input = _inputFunc(this);
+            scheduleActivityDecision.UseInputFunc(()=>_inputFunc(this));
             scheduleActivityDecision.TaskList = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);
             scheduleActivityDecision.Timeouts = _timeoutsFunc(this);

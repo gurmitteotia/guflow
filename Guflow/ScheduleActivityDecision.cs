@@ -4,19 +4,25 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public class ScheduleActivityDecision : WorkflowDecision
+    internal class ScheduleActivityDecision : WorkflowDecision
     {
         private readonly Identity _identity;
-        internal ScheduleActivityDecision(Identity identity)
+        private Func<string> _inputFunc;
+        public ScheduleActivityDecision(Identity identity)
         {
             _identity = identity;
+            _inputFunc = () => null;
         }
 
         public ScheduleActivityTimeouts Timeouts { get; internal set; }
-        public string Input { get; set; }
+        public string Input { get { return _inputFunc(); } }
         public string TaskList { get; set; }
         public int? TaskPriority { get; set; }
 
+        internal void UseInputFunc(Func<string> inputFunc)
+        {
+            _inputFunc = inputFunc;
+        }
         public override bool Equals(object other)
         {
             var otherDecision = other as ScheduleActivityDecision;

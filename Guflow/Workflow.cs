@@ -74,7 +74,7 @@ namespace Guflow
             return workflowTimer.CancellationFailed(timerCancellationFailedEvent);
         }
 
-        protected ActivityItem AddActivity(string name, string version, string positionalName = "")
+        protected IFluentActivityItem AddActivity(string name, string version, string positionalName = "")
         {
             var activityItem = new ActivityItem(name,version, positionalName,this);
             if(!_allWorkflowItems.Add(activityItem))
@@ -82,7 +82,7 @@ namespace Guflow
             return activityItem;
         }
 
-        protected TimerItem AddTimer(string name)
+        protected IFluentTimerItem AddTimer(string name)
         {
             var timerItem = new TimerItem(name,this);
             if(!_allWorkflowItems.Add(timerItem))
@@ -150,22 +150,22 @@ namespace Guflow
             var activityItem = FindTimerFor(Identity.Timer(name));
             return WorkflowAction.Cancel(activityItem);
         }
-        public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
+        IEnumerable<WorkflowItem> IWorkflowItems.GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());
         }
 
-        public  IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem item)
+        IEnumerable<WorkflowItem> IWorkflowItems.GetChildernOf(WorkflowItem item)
         {
             return _allWorkflowItems.Where(s => s.IsChildOf(item));
         }
 
-        public WorkflowItem Find(Identity identity)
+        WorkflowItem IWorkflowItems.Find(Identity identity)
         {
             return _allWorkflowItems.FirstOrDefault(s => s.Has(identity));
         }
 
-        public IWorkflowHistoryEvents CurrentHistoryEvents
+        IWorkflowHistoryEvents IWorkflowItems.CurrentHistoryEvents
         {
             get
             {

@@ -46,10 +46,10 @@ namespace Guflow.Tests
         {
             var workflow = new WorkflowToReturnRescheduleAction();
             var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
-
+            
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(workflow.CompletedWorkflowItem)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(_activityName, _activityVersion, _positionalName,null))));
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace Guflow.Tests
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(workflow.CompletedWorkflowItem)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(_activityName, _activityVersion, _positionalName, null))));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace Guflow.Tests
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(workflow.ScheduledTimer)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new TimerItem("SomeTimer",null))));
         }
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
@@ -83,26 +83,23 @@ namespace Guflow.Tests
         {
             public WorkflowToReturnRescheduleAction()
             {
-                CompletedWorkflowItem = AddActivity(_activityName, _activityVersion,_positionalName).OnCompletion(Reschedule);
+                AddActivity(_activityName, _activityVersion,_positionalName).OnCompletion(Reschedule);
             }
-            public WorkflowItem CompletedWorkflowItem { get; private set; }
         }
         private class WorkflowToReturnScheduleActivityAction : Workflow
         {
             public WorkflowToReturnScheduleActivityAction()
             {
-                CompletedWorkflowItem = AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => ScheduleActivity(_activityName, _activityVersion, _positionalName));
+                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => ScheduleActivity(_activityName, _activityVersion, _positionalName));
             }
-            public WorkflowItem CompletedWorkflowItem { get; private set; }
         }
         private class WorkflowToReturnScheduleTimerAction : Workflow
         {
             public WorkflowToReturnScheduleTimerAction()
             {
                 AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => ScheduleTimer("SomeTimer"));
-                ScheduledTimer = AddTimer("SomeTimer");
+                AddTimer("SomeTimer");
             }
-            public WorkflowItem ScheduledTimer { get; private set; }
         }
     }
 }

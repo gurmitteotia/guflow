@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Amazon.SimpleWorkflow.Model;
 using Guflow.Tests.TestWorkflows;
 using Moq;
 using NUnit.Framework;
@@ -21,9 +20,9 @@ namespace Guflow.Tests
         public void Return_workflow_completed_decision_when_workflow_does_not_have_any_schedulable_items()
         {
             var emptyWorkflow = new EmptyWorkflow();
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
+            var startWorkflowAction = WorkflowAction.StartWorkflow(emptyWorkflow);
 
-            var startupDecisions = workflowEvent.Interpret(emptyWorkflow).GetDecisions();
+            var startupDecisions = startWorkflowAction.GetDecisions();
 
             CollectionAssert.AreEqual(startupDecisions, new[] { new CompleteWorkflowDecision("Workflow completed as no schedulable item is found") });
         }
@@ -32,8 +31,9 @@ namespace Guflow.Tests
         public void Return_schedule_decisions_for_startup_items()
         {
             var workflow = new TestWorkflow();
+            var startWorkflowAction = WorkflowAction.StartWorkflow(workflow);
 
-            var workflowStartedDecisions = workflow.WorkflowStarted(new WorkflowStartedEvent(new HistoryEvent())).GetDecisions();
+            var workflowStartedDecisions = startWorkflowAction.GetDecisions();
 
             Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Download", "1.0")) }));
         }

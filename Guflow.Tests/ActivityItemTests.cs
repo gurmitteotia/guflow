@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -117,6 +118,21 @@ namespace Guflow.Tests
             Assert.That(decision.Timeouts.StartToCloseTimeout, Is.EqualTo(TimeSpan.FromSeconds(5)));
         }
 
+        [Test]
+        public void Parent_activity_test()
+        {
+            var workflowWithParentActivity = new TestWorkflow("parent1","1.0","pos");
+            var childActivity = new ActivityItem("child","1.0",string.Empty,workflowWithParentActivity);
+            childActivity.DependsOn("parent1", "1.0","pos");
+
+            var parentActivities = childActivity.ParentActivities;
+            
+            Assert.That(parentActivities,Is.EquivalentTo(new []{new ActivityItem("parent1","1.0","pos",null)}));
+            Assert.That(parentActivities.First().Name, Is.EqualTo("parent1"));
+            Assert.That(parentActivities.First().Version, Is.EqualTo("1.0"));
+            Assert.That(parentActivities.First().PositionalName, Is.EqualTo("pos"));
+        }
+
         private class TestWorkflowItems : IWorkflowItems
         {
             public TestWorkflowItems(string workflowInput="")
@@ -139,6 +155,14 @@ namespace Guflow.Tests
             }
 
             public IWorkflowHistoryEvents CurrentHistoryEvents { get; private set; }
+        }
+
+        private class TestWorkflow : Workflow
+        {
+            public TestWorkflow(string parentActivityName,string parentActivityVersion, string postionalName)
+            {
+                AddActivity(parentActivityName, parentActivityVersion, postionalName);
+            }
         }
     }
 }

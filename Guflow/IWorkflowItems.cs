@@ -2,7 +2,7 @@
 
 namespace Guflow
 {
-    public interface IWorkflowItems
+    internal interface IWorkflowItems
     {
         IEnumerable<WorkflowItem> GetStartupWorkflowItems();
 

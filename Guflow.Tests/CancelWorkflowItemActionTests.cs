@@ -49,7 +49,7 @@ namespace Guflow.Tests
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Cancel(workflow.CancelledActivityItem)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Cancel(new ActivityItem("ActivityToCancel","1.2",string.Empty,null))));
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace Guflow.Tests
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Cancel(workflow.CancelledTimer)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Cancel(new TimerItem("SomeTimer",null))));
         }
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
@@ -72,19 +72,17 @@ namespace Guflow.Tests
         {
             public WorkflowToReturnCancelActivityAction()
             {
-                CancelledActivityItem = AddActivity("ActivityToCancel", "1.2");
+                AddActivity("ActivityToCancel", "1.2");
                 AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelActivity("ActivityToCancel", "1.2"));
             }
-            public WorkflowItem CancelledActivityItem { get; private set; }
         }
         private class WorkflowToReturnCancelledTimerAction : Workflow
         {
             public WorkflowToReturnCancelledTimerAction()
             {
                 AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelTimer("SomeTimer"));
-                CancelledTimer = AddTimer("SomeTimer");
+                AddTimer("SomeTimer");
             }
-            public WorkflowItem CancelledTimer { get; private set; }
         }
     }
 }

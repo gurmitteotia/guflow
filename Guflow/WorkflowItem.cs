@@ -5,7 +5,7 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    public abstract class WorkflowItem
+    internal abstract class WorkflowItem
     {
         private readonly IWorkflowItems _workflowItems;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
@@ -16,6 +16,15 @@ namespace Guflow
             Identity = identity;
             _workflowItems = workflowItems;
             OnTimerCancelledAction = c=>WorkflowAction.CancelWorkflow("TIMER_CANCELLED");
+        }
+
+        public IEnumerable<IActivityItem> ParentActivities { get { return _parentItems.OfType<IActivityItem>(); } }
+
+        public IEnumerable<IActivityItem> ParentTimers { get { return _parentItems.OfType<IActivityItem>(); } }
+
+        public string Name
+        {
+            get { return Identity.Name; }
         }
 
         internal bool HasNoParents()

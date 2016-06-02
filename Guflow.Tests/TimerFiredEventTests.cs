@@ -47,7 +47,7 @@ namespace Guflow.Tests
 
             var workflowAction = _timerFiredEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(workflow.CompletedItem)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(new TimerItem(_timerName,null))));
         }
 
         [Test]
@@ -62,25 +62,25 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_activity_item()
+        public void Should_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_activity_item()
         {
             var workflow = new SingleActivityWorkflow();
             var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.New(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName), _fireAfter);
 
             var workflowAction = rescheduleTimer.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Schedule(workflow.RescheduleItem)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName, null))));
         }
 
         [Test]
-        public void Can_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_timer_item()
+        public void Should_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_timer_item()
         {
             var workflow = new WorkflowWithTimer();
             var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.Timer(_timerName), _fireAfter);
 
             var workflowAction = rescheduleTimer.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(workflow.CompletedItem)));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new TimerItem(_timerName,null))));
         }
 
         [Test]
@@ -112,16 +112,14 @@ namespace Guflow.Tests
         {
             public WorkflowWithTimer()
             {
-                CompletedItem = AddTimer(_timerName);
+                AddTimer(_timerName);
             }
-
-            public WorkflowItem CompletedItem { get; private set; }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                AddTimer(_timerName).WhenFired(e => workflowAction);
+                AddTimer(_timerName).OnFired(e => workflowAction);
             }
         }
         private class SingleActivityWorkflow : Workflow
@@ -131,9 +129,8 @@ namespace Guflow.Tests
             public const string PositionalName = "First";
             public SingleActivityWorkflow()
             {
-                RescheduleItem = AddActivity(ActivityName, ActivityVersion, PositionalName);
+                AddActivity(ActivityName, ActivityVersion, PositionalName);
             }
-            public WorkflowItem RescheduleItem { get; private set; }
-        }
+       }
     }
 }

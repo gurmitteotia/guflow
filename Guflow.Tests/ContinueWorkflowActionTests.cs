@@ -150,7 +150,7 @@ namespace Guflow.Tests
 
             var decisions = workflow.ExecuteFor(activityFailedEvent);
 
-            Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(workflow.FailedItem).GetDecisions()));
+            Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(new ActivityItem(_activityName,_activityVersion,_positionalName,workflow)).GetDecisions()));
         }
 
 
@@ -217,9 +217,8 @@ namespace Guflow.Tests
         {
             public WorkflowWithCustomContinue()
             {
-                FailedItem = AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(Continue);
+                AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(Continue);
             }
-            public WorkflowItem FailedItem { get; private set; }
         }
 
         private class WorkflowWithParentChildTimers : Workflow

@@ -88,11 +88,16 @@
     <Compile Include="FailWorkflowDecision.cs" />
     <Compile Include="GenericWorkflowAction.cs" />
     <Compile Include="HistoryEventsExtension.cs" />
+    <Compile Include="IActivityItem.cs" />
     <Compile Include="Identity.cs" />
     <Compile Include="IdentityExtensions.cs" />
+    <Compile Include="IFluentActivityItem.cs" />
+    <Compile Include="IFluentTimerItem.cs" />
     <Compile Include="IncompatibleWorkflowException.cs" />
     <Compile Include="IncompleteEventGraphException.cs" />
+    <Compile Include="ITimerItem.cs" />
     <Compile Include="IWorkflowHistoryEvents.cs" />
+    <Compile Include="IWorkflowItem.cs" />
     <Compile Include="IWorkflowItems.cs" />
     <Compile Include="JsonExtension.cs" />
     <Compile Include="ParentItemMissingException.cs" />

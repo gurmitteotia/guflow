@@ -64,7 +64,7 @@ namespace Guflow.Tests
 
             var workflowAction = _activityCompletedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(workflow.CompletedItem)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(new ActivityItem(_activityName,_activityVersion,_positionalName,null))));
         }
 
         [Test]
@@ -82,10 +82,8 @@ namespace Guflow.Tests
         {
             public SingleActivityWorkflow()
             {
-                CompletedItem= AddActivity(_activityName,_activityVersion,_positionalName);
+                AddActivity(_activityName,_activityVersion,_positionalName);
             }
-
-            public WorkflowItem CompletedItem { get; private set; }
         }
 
         private class WorkflowWithCustomAction : Workflow

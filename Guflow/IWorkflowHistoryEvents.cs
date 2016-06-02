@@ -2,7 +2,7 @@
 
 namespace Guflow
 {
-    public interface IWorkflowHistoryEvents
+    internal interface IWorkflowHistoryEvents
     {
         ActivityEvent LatestActivityEventFor(ActivityItem wrkflowItem);
         TimerFiredEvent LatestTimerEventFor(TimerItem timerItem);
