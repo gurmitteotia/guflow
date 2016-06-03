@@ -1,8 +1,9 @@
-﻿using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public class CancelWorkflowDecision : WorkflowDecision
+    internal class CancelWorkflowDecision : WorkflowDecision
     {
         private readonly string _details;
 
@@ -28,6 +29,7 @@ namespace Guflow
         {
             return new Decision
             {
+                DecisionType = DecisionType.CancelWorkflowExecution,
                 CancelWorkflowExecutionDecisionAttributes = new CancelWorkflowExecutionDecisionAttributes()
                 {
                     Details = _details

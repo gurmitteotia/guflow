@@ -2,7 +2,7 @@
 
 namespace Guflow
 {
-    public class FailWorkflowDecision : WorkflowDecision
+    internal class FailWorkflowDecision : WorkflowDecision
     {
         private readonly string _reason;
         private readonly string _detail;

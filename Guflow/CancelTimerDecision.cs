@@ -1,4 +1,5 @@
-﻿using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -12,7 +13,14 @@ namespace Guflow
 
         public override Decision Decision()
         {
-            throw new System.NotImplementedException();
+            return new Decision()
+            {
+                DecisionType = DecisionType.CancelTimer,
+                CancelTimerDecisionAttributes = new CancelTimerDecisionAttributes()
+                {
+                    TimerId = _timerIdentity.Id.ToString()
+                }
+            };
         }
 
         private bool Equals(CancelTimerDecision other)

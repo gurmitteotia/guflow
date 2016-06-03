@@ -26,9 +26,6 @@ namespace Guflow.Tests
         [Test]
         public void Attributes_are_populated_from_history_attributes()
         {
-            Assert.That(_activityTimedoutEvent.Name, Is.EqualTo(_activityName));
-            Assert.That(_activityTimedoutEvent.Version, Is.EqualTo(_activityVersion));
-            Assert.That(_activityTimedoutEvent.PositionalName,Is.EqualTo(_positionalName));
             Assert.That(_activityTimedoutEvent.WorkerIdentity, Is.EqualTo(_identity));
             Assert.That(_activityTimedoutEvent.TimeoutType, Is.EqualTo(_timeoutType));
             Assert.That(_activityTimedoutEvent.Details,Is.EqualTo(_detail));

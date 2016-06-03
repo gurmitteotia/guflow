@@ -3,7 +3,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public class CompleteWorkflowDecision : WorkflowDecision
+    internal class CompleteWorkflowDecision : WorkflowDecision
     {
         private readonly string _result;
         public CompleteWorkflowDecision(string result)

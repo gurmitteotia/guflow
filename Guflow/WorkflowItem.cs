@@ -20,7 +20,7 @@ namespace Guflow
 
         public IEnumerable<IActivityItem> ParentActivities { get { return _parentItems.OfType<IActivityItem>(); } }
 
-        public IEnumerable<IActivityItem> ParentTimers { get { return _parentItems.OfType<IActivityItem>(); } }
+        public IEnumerable<ITimerItem> ParentTimers { get { return _parentItems.OfType<ITimerItem>(); } }
 
         public string Name
         {

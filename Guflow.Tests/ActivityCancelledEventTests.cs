@@ -26,9 +26,6 @@ namespace Guflow.Tests
         public void Should_populate_properties_from_event_attributes()
         {
             Assert.That(_activityCancelledEvent.Details, Is.EqualTo(_detail));
-            Assert.That(_activityCancelledEvent.Name, Is.EqualTo(_activityName));
-            Assert.That(_activityCancelledEvent.Version, Is.EqualTo(_activityVersion));
-            Assert.That(_activityCancelledEvent.PositionalName, Is.EqualTo(_positionalName));
             Assert.That(_activityCancelledEvent.WorkerIdentity, Is.EqualTo(_identity));
         }
 

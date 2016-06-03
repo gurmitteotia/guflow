@@ -1,4 +1,5 @@
-﻿using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -13,7 +14,14 @@ namespace Guflow
 
         public override Decision Decision()
         {
-            throw new System.NotImplementedException();
+            return new Decision()
+            {
+                DecisionType = DecisionType.RequestCancelActivityTask,
+                RequestCancelActivityTaskDecisionAttributes = new RequestCancelActivityTaskDecisionAttributes()
+                {
+                    ActivityId = _activityIdentiy.Id.ToString()
+                }
+            };
         }
         private bool Equals(CancelActivityDecision other)
         {

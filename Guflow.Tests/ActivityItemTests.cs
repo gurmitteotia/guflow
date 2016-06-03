@@ -119,9 +119,9 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Parent_activity_test()
+        public void Parent_activities_test()
         {
-            var workflowWithParentActivity = new TestWorkflow("parent1","1.0","pos");
+            var workflowWithParentActivity = new WorkflowWithParentActivity("parent1","1.0","pos");
             var childActivity = new ActivityItem("child","1.0",string.Empty,workflowWithParentActivity);
             childActivity.DependsOn("parent1", "1.0","pos");
 
@@ -131,6 +131,19 @@ namespace Guflow.Tests
             Assert.That(parentActivities.First().Name, Is.EqualTo("parent1"));
             Assert.That(parentActivities.First().Version, Is.EqualTo("1.0"));
             Assert.That(parentActivities.First().PositionalName, Is.EqualTo("pos"));
+        }
+
+        [Test]
+        public void Parent_timers_test()
+        {
+            var workflowWithParentActivity = new WorkflowWithParentTimer("parent1");
+            var childActivity = new ActivityItem("child", "1.0", string.Empty, workflowWithParentActivity);
+            childActivity.DependsOn("parent1");
+
+            var parentActivities = childActivity.ParentTimers;
+
+            Assert.That(parentActivities, Is.EquivalentTo(new[] { new TimerItem("parent1", null),  }));
+            Assert.That(parentActivities.First().Name, Is.EqualTo("parent1"));
         }
 
         private class TestWorkflowItems : IWorkflowItems
@@ -157,11 +170,18 @@ namespace Guflow.Tests
             public IWorkflowHistoryEvents CurrentHistoryEvents { get; private set; }
         }
 
-        private class TestWorkflow : Workflow
+        private class WorkflowWithParentActivity : Workflow
         {
-            public TestWorkflow(string parentActivityName,string parentActivityVersion, string postionalName)
+            public WorkflowWithParentActivity(string parentActivityName,string parentActivityVersion, string postionalName)
             {
                 AddActivity(parentActivityName, parentActivityVersion, postionalName);
+            }
+        }
+        private class WorkflowWithParentTimer : Workflow
+        {
+            public WorkflowWithParentTimer(string parentTimerName)
+            {
+                AddTimer(parentTimerName);
             }
         }
     }

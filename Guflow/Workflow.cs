@@ -216,7 +216,7 @@ namespace Guflow
             var workflowActivity = FindActivity(activityEvent);
 
             if (workflowActivity == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", activityEvent.Name, activityEvent.Version, activityEvent.PositionalName));
+                throw new IncompatibleWorkflowException(string.Format("Can not find activity for {0}.", activityEvent));
 
             return workflowActivity;
         }

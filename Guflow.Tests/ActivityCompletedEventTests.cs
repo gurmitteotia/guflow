@@ -28,9 +28,6 @@ namespace Guflow.Tests
         public void Populate_activity_details_from_history_events()
         {
             Assert.That(_activityCompletedEvent.Result, Is.EqualTo(_result));
-            Assert.That(_activityCompletedEvent.Name, Is.EqualTo(_activityName));
-            Assert.That(_activityCompletedEvent.Version, Is.EqualTo(_activityVersion));
-            Assert.That(_activityCompletedEvent.PositionalName, Is.EqualTo(_positionalName));
             Assert.That(_activityCompletedEvent.WorkerIdentity, Is.EqualTo(_identity));
         }
 

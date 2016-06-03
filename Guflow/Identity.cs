@@ -38,7 +38,7 @@
         }
         public override string ToString()
         {
-            return string.Format("Name {0}, Version {1} and Positional Name {2}", Name, Version, PositionalName);
+            return string.Format("_timerName {0}, Version {1} and Positional _activityName {2}", Name, Version, PositionalName);
         }
     }
 }

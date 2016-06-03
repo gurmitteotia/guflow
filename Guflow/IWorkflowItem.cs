@@ -6,7 +6,7 @@ namespace Guflow
     {
         IEnumerable<IActivityItem> ParentActivities { get; }
 
-        IEnumerable<IActivityItem> ParentTimers{ get; }
+        IEnumerable<ITimerItem> ParentTimers{ get; }
 
         string Name { get; }
     }

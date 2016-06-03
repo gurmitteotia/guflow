@@ -33,12 +33,12 @@ namespace Guflow.Tests
         [Test]
         public void Should_return_cancel_activity_decision_for_activity_item()
         {
-            var activityItem = new ActivityItem("Name","ver","pos", new Mock<IWorkflowItems>().Object);
+            var activityItem = new ActivityItem("_timerName","ver","pos", new Mock<IWorkflowItems>().Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
             var decisions = workflowAction.GetDecisions();
 
-            Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("Name", "ver", "pos")) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("_timerName", "ver", "pos")) }));
         }
 
         [Test]

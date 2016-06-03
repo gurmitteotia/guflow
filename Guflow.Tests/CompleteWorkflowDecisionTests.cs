@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
+using NUnit.Framework;
 
 namespace Guflow.Tests
 {
@@ -24,9 +26,10 @@ namespace Guflow.Tests
         {
             var completeDecision = new CompleteWorkflowDecision("result");
             
-            var decision = completeDecision.Decision();
+            Decision decision = completeDecision.Decision();
 
             Assert.That(decision.CompleteWorkflowExecutionDecisionAttributes,Is.Not.Null);
+            Assert.That(decision.DecisionType,Is.EqualTo(DecisionType.CompleteWorkflowExecution));
             Assert.That(decision.CompleteWorkflowExecutionDecisionAttributes.Result,Is.EqualTo("result"));
         }
     }

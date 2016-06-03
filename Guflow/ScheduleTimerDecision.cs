@@ -1,4 +1,5 @@
 using System;
+using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -31,7 +32,16 @@ namespace Guflow
 
         public override Decision Decision()
         {
-            throw new NotImplementedException();
+            return new Decision()
+            {
+                DecisionType = DecisionType.StartTimer,
+                StartTimerDecisionAttributes = new StartTimerDecisionAttributes()
+                {
+                    TimerId = _timerIdentity.Id.ToString(),
+                    StartToFireTimeout = Math.Round(_fireAfter.TotalSeconds).ToString(),
+                    Control = (new TimerScheduleData() {IsARescheduleTimer = _isRescheduleTimer, TimerName = _timerIdentity.Name}).ToJson()
+                }
+            };
         }
     }
 }

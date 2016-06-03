@@ -6,8 +6,8 @@ namespace Guflow
 {
     public abstract class TimerEvent : WorkflowItemEvent
     {
-        public string Name { get; private set; }
-        public TimeSpan FiredAfter { get; private set; }
+        private string _timerName;
+        private TimeSpan _firedAfter;
         internal bool IsARescheduledTimer { get; private set; }
         protected void PopulateProperties(long timerStartedEventId, IEnumerable<HistoryEvent> allHistoryEvents)
         {
@@ -16,17 +16,22 @@ namespace Guflow
             {
                 if (historyEvent.IsTimerStartedEventFor(timerStartedEventId))
                 {
-                    FiredAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
+                    _firedAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
                     AwsIdentity = AwsIdentity.Raw(historyEvent.TimerStartedEventAttributes.TimerId);
                     var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.FromJson<TimerScheduleData>();
                     IsARescheduledTimer = timerScheduleData.IsARescheduleTimer;
-                    Name = timerScheduleData.TimerName;
+                    _timerName = timerScheduleData.TimerName;
                     foundTimerStartedEvent = true;
                     break;
                 }
             }
             if(!foundTimerStartedEvent)
                 throw new IncompleteEventGraphException(string.Format("Can not find the timer started event id {0}",timerStartedEventId));
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0} for timer {1}, fired after {2}",GetType().Name,_timerName,_firedAfter);
         }
     }
 }

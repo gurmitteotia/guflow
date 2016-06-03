@@ -25,9 +25,6 @@ namespace Guflow.Tests
         [Test]
         public void Populate_event_attributes()
         {
-            Assert.That(_activityFailedEvent.Name,Is.EqualTo(_activityName));
-            Assert.That(_activityFailedEvent.Version,Is.EqualTo(_activityVersion));
-            Assert.That(_activityFailedEvent.PositionalName,Is.EqualTo(_positionalName));
             Assert.That(_activityFailedEvent.WorkerIdentity,Is.EqualTo(_identity));
             Assert.That(_activityFailedEvent.Reason,Is.EqualTo(_reason));
             Assert.That(_activityFailedEvent.Detail,Is.EqualTo(_detail));

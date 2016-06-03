@@ -20,13 +20,6 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_populate_properties_from_timer_event_attributes()
-        {
-            Assert.That(_timerFiredEvent.Name,Is.EqualTo(_timerName));
-            Assert.That(_timerFiredEvent.FiredAfter, Is.EqualTo(_fireAfter));
-        }
-
-        [Test]
         public void Throws_exception_when_fired_timer_is_not_found_in_workflow()
         {
             var workflow = new EmptyWorkflow();

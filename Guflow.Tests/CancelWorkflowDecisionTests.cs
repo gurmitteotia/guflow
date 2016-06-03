@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
+using NUnit.Framework;
 
 namespace Guflow.Tests
 {
@@ -23,9 +25,11 @@ namespace Guflow.Tests
         public void Should_return_aws_decision_to_cancel_workflow()
         {
             var cancelWorkflow = new CancelWorkflowDecision("details");
-            var decision = cancelWorkflow.Decision();
+            
+            Decision decision = cancelWorkflow.Decision();
 
             Assert.That(decision.CancelWorkflowExecutionDecisionAttributes,Is.Not.Null);
+            Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.CancelWorkflowExecution));
             Assert.That(decision.CancelWorkflowExecutionDecisionAttributes.Details,Is.EqualTo("details"));
         }
     }
