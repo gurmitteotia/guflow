@@ -23,16 +23,16 @@ namespace Guflow.Tests
         {
             public WorkflowWithSameActivity()
             {
-                AddActivity("Download", "1.0");
-                AddActivity("Download", "1.0");
+                ScheduleActivity("Download", "1.0");
+                ScheduleActivity("Download", "1.0");
             }
         }
         private class WorkflowWithSameTimer : Workflow
         {
             public WorkflowWithSameTimer()
             {
-                AddTimer("Download");
-                AddTimer("Download");
+                ScheudleTimer("Download");
+                ScheudleTimer("Download");
             }
         }
 
@@ -40,14 +40,14 @@ namespace Guflow.Tests
         {
             public WorkflowWithNonExistentParentActivityItem()
             {
-                AddActivity("_timerName", "version").DependsOn("ParentName", "parentVer");
+                ScheduleActivity("_timerName", "version").DependsOn("ParentName", "parentVer");
             }
         }
         private class WorkflowWithNonExistentParentTimerItem : Workflow
         {
             public WorkflowWithNonExistentParentTimerItem()
             {
-                AddActivity("_timerName", "version").DependsOn("ParentName");
+                ScheduleActivity("_timerName", "version").DependsOn("ParentName");
             }
         }
     }

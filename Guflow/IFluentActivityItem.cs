@@ -2,10 +2,8 @@ using System;
 
 namespace Guflow
 {
-    public interface IFluentActivityItem
+    public interface IFluentActivityItem: IFluentWorkflowItem<IFluentActivityItem>
     {
-        IFluentActivityItem DependsOn(string name, string version, string positionalName = "");
-        IFluentActivityItem DependsOn(string timerName);
         IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc);
         IFluentActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> onFailureFunc);
         IFluentActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> onTimedoutFunc);

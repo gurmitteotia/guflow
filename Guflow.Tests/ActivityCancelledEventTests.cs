@@ -62,7 +62,7 @@ namespace Guflow.Tests
         {
             public SingleActivityWorkflow()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName);
             }
         }
 
@@ -70,7 +70,7 @@ namespace Guflow.Tests
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCancelled(c => workflowAction);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCancelled(c => workflowAction);
             }
         }
     }

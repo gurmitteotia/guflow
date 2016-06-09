@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Amazon.SimpleWorkflow;
+using NUnit.Framework;
 
 namespace Guflow.Tests
 {
@@ -28,6 +29,7 @@ namespace Guflow.Tests
 
             var decision = failWorkflowDecision.Decision();
 
+            Assert.That(decision.DecisionType,Is.EqualTo(DecisionType.FailWorkflowExecution));
             Assert.That(decision.FailWorkflowExecutionDecisionAttributes,Is.Not.Null);
             Assert.That(decision.FailWorkflowExecutionDecisionAttributes.Reason,Is.EqualTo("reason"));
             Assert.That(decision.FailWorkflowExecutionDecisionAttributes.Details, Is.EqualTo("detail"));

@@ -1,4 +1,5 @@
-﻿using Amazon.SimpleWorkflow.Model;
+﻿using System;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -12,7 +13,7 @@ namespace Guflow
         {
             public override Decision Decision()
             {
-                throw new System.NotImplementedException();
+                throw new NotSupportedException();
             }
         }
     }

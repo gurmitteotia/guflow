@@ -57,9 +57,9 @@ namespace Guflow.Tests
         {
             public TestWorkflow()
             {
-                AddActivity("Download", "1.0");
+                ScheduleActivity("Download", "1.0");
 
-                AddActivity("Transcode", "2.0").DependsOn("Download", "1.0");
+                ScheduleActivity("Transcode", "2.0").DependsOn("Download", "1.0");
             }
         }
         private class WorkflowReturningStartWorkflowAction : Workflow
@@ -68,7 +68,7 @@ namespace Guflow.Tests
             public const string ActivityVersion = "1.0";
             public WorkflowReturningStartWorkflowAction()
             {
-                AddActivity(ActivityName, ActivityVersion).OnCompletion(e=>StartWorkflow());
+                ScheduleActivity(ActivityName, ActivityVersion).OnCompletion(e=>StartWorkflow());
             }
         }
     }

@@ -62,14 +62,14 @@ namespace Guflow.Tests
         {
             public SingleActivityWorkflow()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(e => workflowAction);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnFailure(e => workflowAction);
             }
         }
     }

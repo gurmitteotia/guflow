@@ -191,33 +191,33 @@ namespace Guflow.Tests
         {
             public WorkflowWithMultipleChilds()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
 
-                AddActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName);
-                AddActivity("Sync", "2.1").DependsOn(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity("Sync", "2.1").DependsOn(_activityName, _activityVersion, _positionalName);
             }
         }
         private class WorkflowWithMultipleParents : Workflow
         {
             public WorkflowWithMultipleParents()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
-                AddActivity(_siblingActivityName, _siblingActivityVersion);
-                AddActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName).DependsOn(_siblingActivityName, _siblingActivityVersion);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheduleActivity(_siblingActivityName, _siblingActivityVersion);
+                ScheduleActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName).DependsOn(_siblingActivityName, _siblingActivityVersion);
             }
         }
         private class SingleActivityWorkflow : Workflow
         {
             public SingleActivityWorkflow()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
             }
         }
         private class WorkflowWithCustomContinue : Workflow
         {
             public WorkflowWithCustomContinue()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnFailure(Continue);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnFailure(Continue);
             }
         }
 
@@ -225,24 +225,24 @@ namespace Guflow.Tests
         {
             public WorkflowWithParentChildTimers(string timerName, string childTimer,TimeSpan childTimeout)
             {
-                AddTimer(timerName);
-                AddTimer(childTimer).DependsOn(timerName).FireAfter(childTimeout);
+                ScheudleTimer(timerName);
+                ScheudleTimer(childTimer).DependsOn(timerName).FireAfter(childTimeout);
             }
         }
         private class WorkflowWithChildActivity : Workflow
         {
             public WorkflowWithChildActivity(string timerName)
             {
-                AddTimer(timerName);
-                AddActivity(_activityName, _activityVersion).DependsOn(timerName);
+                ScheudleTimer(timerName);
+                ScheduleActivity(_activityName, _activityVersion).DependsOn(timerName);
             }
         }
         private class WorkflowWithParentActivityAndChildTimers : Workflow
         {
             public WorkflowWithParentActivityAndChildTimers(string timerName)
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
-                AddTimer(timerName).DependsOn(_activityName, _activityVersion,_positionalName);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheudleTimer(timerName).DependsOn(_activityName, _activityVersion,_positionalName);
             }
         }
     }

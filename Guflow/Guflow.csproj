@@ -93,6 +93,7 @@
     <Compile Include="IdentityExtensions.cs" />
     <Compile Include="IFluentActivityItem.cs" />
     <Compile Include="IFluentTimerItem.cs" />
+    <Compile Include="IFluentWorkflowItem.cs" />
     <Compile Include="IncompatibleWorkflowException.cs" />
     <Compile Include="IncompleteEventGraphException.cs" />
     <Compile Include="ITimerItem.cs" />

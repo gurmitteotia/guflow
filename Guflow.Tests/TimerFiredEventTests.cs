@@ -105,14 +105,14 @@ namespace Guflow.Tests
         {
             public WorkflowWithTimer()
             {
-                AddTimer(_timerName);
+                ScheudleTimer(_timerName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                AddTimer(_timerName).OnFired(e => workflowAction);
+                ScheudleTimer(_timerName).OnFired(e => workflowAction);
             }
         }
         private class SingleActivityWorkflow : Workflow
@@ -122,7 +122,7 @@ namespace Guflow.Tests
             public const string PositionalName = "First";
             public SingleActivityWorkflow()
             {
-                AddActivity(ActivityName, ActivityVersion, PositionalName);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName);
             }
        }
     }

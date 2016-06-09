@@ -174,14 +174,14 @@ namespace Guflow.Tests
         {
             public WorkflowWithParentActivity(string parentActivityName,string parentActivityVersion, string postionalName)
             {
-                AddActivity(parentActivityName, parentActivityVersion, postionalName);
+                ScheduleActivity(parentActivityName, parentActivityVersion, postionalName);
             }
         }
         private class WorkflowWithParentTimer : Workflow
         {
             public WorkflowWithParentTimer(string parentTimerName)
             {
-                AddTimer(parentTimerName);
+                ScheudleTimer(parentTimerName);
             }
         }
     }

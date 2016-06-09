@@ -39,7 +39,7 @@ namespace Guflow.Tests
             public const string ActivityVersion = "1.0";
             public WorkflowReturningStartWorkflowAction()
             {
-                AddActivity(ActivityName, ActivityVersion).OnCompletion(e => Ignore());
+                ScheduleActivity(ActivityName, ActivityVersion).OnCompletion(e => Ignore());
             }
         }
     }

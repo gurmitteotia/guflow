@@ -74,7 +74,7 @@ namespace Guflow
             return workflowTimer.CancellationFailed(timerCancellationFailedEvent);
         }
 
-        protected IFluentActivityItem AddActivity(string name, string version, string positionalName = "")
+        protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
             var activityItem = new ActivityItem(name,version, positionalName,this);
             if(!_allWorkflowItems.Add(activityItem))
@@ -82,7 +82,7 @@ namespace Guflow
             return activityItem;
         }
 
-        protected IFluentTimerItem AddTimer(string name)
+        protected IFluentTimerItem ScheudleTimer(string name)
         {
             var timerItem = new TimerItem(name,this);
             if(!_allWorkflowItems.Add(timerItem))
@@ -130,12 +130,12 @@ namespace Guflow
         {
             return WorkflowAction.Ignore;
         }
-        protected ScheduleWorkflowItemAction ScheduleActivity(string name, string version, string positionalName)
+        protected ScheduleWorkflowItemAction JumpToActivity(string name, string version, string positionalName)
         {
             var activityItem = FindActivityFor(Identity.New(name,version,positionalName));
             return WorkflowAction.Schedule(activityItem);
         }
-        protected WorkflowAction ScheduleTimer(string name)
+        protected WorkflowAction JumpToTimer(string name)
         {
             var activityItem = FindTimerFor(Identity.Timer(name));
             return WorkflowAction.Schedule(activityItem);

@@ -84,7 +84,7 @@ namespace Guflow
                     workflowActions.Add(workflowEvent.Interpret(workflow));
             }
 
-            return workflowActions.SelectMany(a => a.GetDecisions()).Distinct();
+            return workflowActions.SelectMany(a => a.GetDecisions()).Distinct().Where(d=>d!=WorkflowDecision.Empty);
         }
 
         public WorkflowStartedEvent WorkflowStartedEvent()
@@ -95,6 +95,11 @@ namespace Guflow
                     return new WorkflowStartedEvent(historyEvent);
             }
             throw new IncompleteEventGraphException("Can not find workflow started event.");
+        }
+
+        public bool IsActive()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

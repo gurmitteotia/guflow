@@ -83,22 +83,22 @@ namespace Guflow.Tests
         {
             public WorkflowToReturnRescheduleAction()
             {
-                AddActivity(_activityName, _activityVersion,_positionalName).OnCompletion(Reschedule);
+                ScheduleActivity(_activityName, _activityVersion,_positionalName).OnCompletion(Reschedule);
             }
         }
         private class WorkflowToReturnScheduleActivityAction : Workflow
         {
             public WorkflowToReturnScheduleActivityAction()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => ScheduleActivity(_activityName, _activityVersion, _positionalName));
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => JumpToActivity(_activityName, _activityVersion, _positionalName));
             }
         }
         private class WorkflowToReturnScheduleTimerAction : Workflow
         {
             public WorkflowToReturnScheduleTimerAction()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => ScheduleTimer("SomeTimer"));
-                AddTimer("SomeTimer");
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => JumpToTimer("SomeTimer"));
+                ScheudleTimer("SomeTimer");
             }
         }
     }

@@ -72,16 +72,16 @@ namespace Guflow.Tests
         {
             public WorkflowToReturnCancelActivityAction()
             {
-                AddActivity("ActivityToCancel", "1.2");
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelActivity("ActivityToCancel", "1.2"));
+                ScheduleActivity("ActivityToCancel", "1.2");
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelActivity("ActivityToCancel", "1.2"));
             }
         }
         private class WorkflowToReturnCancelledTimerAction : Workflow
         {
             public WorkflowToReturnCancelledTimerAction()
             {
-                AddActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelTimer("SomeTimer"));
-                AddTimer("SomeTimer");
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelTimer("SomeTimer"));
+                ScheudleTimer("SomeTimer");
             }
         }
     }

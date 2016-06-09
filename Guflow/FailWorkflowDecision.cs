@@ -1,4 +1,5 @@
-﻿using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -31,6 +32,7 @@ namespace Guflow
         {
             return new Decision
             {
+                DecisionType = DecisionType.FailWorkflowExecution,
                 FailWorkflowExecutionDecisionAttributes = new FailWorkflowExecutionDecisionAttributes()
                 {
                     Reason = _reason,

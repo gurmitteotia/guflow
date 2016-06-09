@@ -46,7 +46,7 @@ namespace Guflow.Tests
             public const string PositionalName = "First";
             public SingleActivityWorkflow(string detail)
             {
-                AddActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => CancelWorkflow(detail));
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => CancelWorkflow(detail));
             }
         }
     }

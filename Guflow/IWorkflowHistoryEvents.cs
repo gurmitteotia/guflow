@@ -8,5 +8,6 @@ namespace Guflow
         TimerFiredEvent LatestTimerEventFor(TimerItem timerItem);
         IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow);
         WorkflowStartedEvent WorkflowStartedEvent();
+        bool IsActive();
     }
 }

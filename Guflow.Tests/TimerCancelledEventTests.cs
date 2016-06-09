@@ -92,14 +92,14 @@ namespace Guflow.Tests
         {
             public WorkflowWithTimer()
             {
-                AddTimer(_timerName);
+                ScheudleTimer(_timerName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                AddTimer(_timerName).OnCancelled(c => workflowAction);
+                ScheudleTimer(_timerName).OnCancelled(c => workflowAction);
             }
         }
         private class SingleActivityWorkflow : Workflow
@@ -108,7 +108,7 @@ namespace Guflow.Tests
             public const string ActivityVersion = "1.0";
             public SingleActivityWorkflow()
             {
-                AddActivity(ActivityName, ActivityVersion);
+                ScheduleActivity(ActivityName, ActivityVersion);
             }
         }
         private class WorkflowWithCustomTimerAction : Workflow
@@ -117,7 +117,7 @@ namespace Guflow.Tests
             public const string ActivityVersion = "1.0";
             public WorkflowWithCustomTimerAction(WorkflowAction workflowAction)
             {
-                AddActivity(ActivityName, ActivityVersion).OnTimerCancelled(c => workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion).OnTimerCancelled(c => workflowAction);
             }
         }
     }
