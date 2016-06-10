@@ -36,7 +36,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_empty_decision_when_no_schedulable_child_item_found()
+        public void Should_return_empty_decision_when_no_schedulable_child_item_found_and_workflow_is_active()
         {
             var workflow = new SingleActivityWorkflow();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);

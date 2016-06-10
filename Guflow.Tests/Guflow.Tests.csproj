@@ -60,6 +60,8 @@
     <Compile Include="ActivityCompletedEventTests.cs" />
     <Compile Include="ActivityFailedEventTests.cs" />
     <Compile Include="ActivityItemTests.cs" />
+    <Compile Include="ActivityScheduledEventTests.cs" />
+    <Compile Include="ActivitySchedulingFailedEventTests.cs" />
     <Compile Include="ActivityTimedoutEventTests.cs" />
     <Compile Include="AwsIdentityTests.cs" />
     <Compile Include="CancelActivityDecisionTests.cs" />
@@ -86,7 +88,6 @@
     <Compile Include="TimerFailedEventTests.cs" />
     <Compile Include="TimerFiredEventTests.cs" />
     <Compile Include="TimerItemTests.cs" />
-    <Compile Include="When_workflow_executing.cs" />
     <Compile Include="WorkflowHistoryEventsTests.cs" />
     <Compile Include="WorkflowStartedEventTests.cs" />
     <Compile Include="WorkflowTests.cs" />

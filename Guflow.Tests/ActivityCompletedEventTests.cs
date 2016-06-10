@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Amazon.SimpleWorkflow;
 using Guflow.Tests.TestWorkflows;
 using Moq;
@@ -40,11 +39,13 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Throws_exception_when_activity_started_event_not_found_in_event_graph()
+        public void Does_not_populate_worker_id_when_activity_started_event_not_found_in_event_graph()
         {
             var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
             
-            Assert.Throws<IncompleteEventGraphException>(()=> new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h=>h.EventType!=EventType.ActivityTaskStarted)));
+            var activityCompletedEvent= new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h=>h.EventType!=EventType.ActivityTaskStarted));
+
+            Assert.That(activityCompletedEvent.WorkerIdentity,Is.Null);
         }
         [Test]
         public void Throws_exception_when_activity_scheduled_event_not_found_in_event_graph()

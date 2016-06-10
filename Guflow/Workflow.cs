@@ -74,6 +74,12 @@ namespace Guflow
             return workflowTimer.CancellationFailed(timerCancellationFailedEvent);
         }
 
+        public WorkflowAction ActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
+        {
+            var workflowActivity = FindActivityFor(activitySchedulingFailedEvent);
+            return workflowActivity.SchedulingFailed(activitySchedulingFailedEvent);
+        }
+
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
             var activityItem = new ActivityItem(name,version, positionalName,this);

@@ -12,5 +12,6 @@
         WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent);
         WorkflowAction ActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent);
         WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);
+        WorkflowAction ActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);
     }
 }

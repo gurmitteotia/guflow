@@ -77,6 +77,8 @@
     <Compile Include="ActivityEvent.cs" />
     <Compile Include="ActivityFailedEvent.cs" />
     <Compile Include="ActivityItem.cs" />
+    <Compile Include="ActivityScheduledEvent.cs" />
+    <Compile Include="ActivitySchedulingFailedEvent.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="AwsIdentity.cs" />
     <Compile Include="CancelActivityDecision.cs" />

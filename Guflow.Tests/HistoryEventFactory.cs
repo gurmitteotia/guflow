@@ -347,6 +347,45 @@ namespace Guflow.Tests
 
             return historyEvents;
         }
+
+        public static IEnumerable<HistoryEvent> CreateActivitySchedulingFailedEventGraph(Identity activityIdentity, string cause)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ScheduleActivityTaskFailed,
+                EventId = eventIds.CompletedId,
+                ScheduleActivityTaskFailedEventAttributes = new ScheduleActivityTaskFailedEventAttributes()
+                {
+                    ActivityId = activityIdentity.Id,
+                    ActivityType = new ActivityType() {  Name = activityIdentity.Name, Version = activityIdentity.Version},
+                    Cause = cause
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public static IEnumerable<HistoryEvent> CreateActivityScheduledEventGraph(Identity activityIdentity)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskScheduled,
+                EventId = eventIds.ScheduledId,
+                ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
+                {
+                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
+                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    ActivityId = activityIdentity.Id
+                }
+            });
+
+            return historyEvents;
+        }
         private class EventIds
         {
             private static long _seed = long.MaxValue;
@@ -384,5 +423,7 @@ namespace Guflow.Tests
                 get { return _completedId - 3; }
             }
         }
+
+      
     }
 }

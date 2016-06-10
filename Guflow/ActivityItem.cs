@@ -9,6 +9,7 @@ namespace Guflow
         private Func<ActivityTimedoutEvent, WorkflowAction> _onTimedoutAction;
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
         private Func<ActivityCancellationFailedEvent, WorkflowAction> _onCancellationFailedAction;
+        private Func<ActivitySchedulingFailedEvent, WorkflowAction> _onFailedSchedulingAction;
         private Func<IActivityItem, string> _inputFunc;
         private Func<IActivityItem, string> _taskListFunc;
         private Func<IActivityItem, bool> _whenFunc;
@@ -22,6 +23,7 @@ namespace Guflow
             _onTimedoutAction = t => WorkflowAction.FailWorkflow(t.TimeoutType, t.Details);
             _onCancelledAction = c => WorkflowAction.CancelWorkflow(c.Details);
             _onCancellationFailedAction = c => WorkflowAction.FailWorkflow("ACTIVITY_CANCELLATION_FAILED", c.Cause);
+            _onFailedSchedulingAction =c=> WorkflowAction.FailWorkflow("ACTIVITY_SCHEDULING_FAILED",c.Cause);
             _inputFunc = a => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _taskListFunc = a => null;
             _whenFunc = a => true;
@@ -70,6 +72,13 @@ namespace Guflow
             _onTimedoutAction = onTimedoutFunc;
             return this;
         }
+
+        public IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> onFailedSchedulingAction)
+        {
+            _onFailedSchedulingAction = onFailedSchedulingAction;
+            return this;
+        }
+
         public IFluentActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc)
         {
             _onCancelledAction = onCancelledFunc;
@@ -159,6 +168,10 @@ namespace Guflow
         internal WorkflowAction CancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
         {
             return _onCancellationFailedAction(activityCancellationFailedEvent);
+        }
+        internal WorkflowAction SchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
+        {
+            return _onFailedSchedulingAction(activitySchedulingFailedEvent);
         }
     }
 }
