@@ -28,6 +28,7 @@ namespace Guflow.Tests
         {
             Assert.That(_activityCompletedEvent.Result, Is.EqualTo(_result));
             Assert.That(_activityCompletedEvent.WorkerIdentity, Is.EqualTo(_identity));
+            Assert.That(_activityCompletedEvent.IsActive,Is.False);
         }
 
         [Test]

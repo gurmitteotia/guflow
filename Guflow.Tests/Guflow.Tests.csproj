@@ -62,6 +62,7 @@
     <Compile Include="ActivityItemTests.cs" />
     <Compile Include="ActivityScheduledEventTests.cs" />
     <Compile Include="ActivitySchedulingFailedEventTests.cs" />
+    <Compile Include="ActivityStartedEventTests.cs" />
     <Compile Include="ActivityTimedoutEventTests.cs" />
     <Compile Include="AwsIdentityTests.cs" />
     <Compile Include="CancelActivityDecisionTests.cs" />

@@ -23,6 +23,7 @@ namespace Guflow.Tests
         public void Should_populate_properties_from_event_attributes()
         {
             Assert.That(_activitySchedulingFailedEvent.Cause, Is.EqualTo(_cause));
+            Assert.That(_activitySchedulingFailedEvent.IsActive,Is.False);
         }
 
         [Test]

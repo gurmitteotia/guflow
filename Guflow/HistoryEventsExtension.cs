@@ -29,7 +29,15 @@ namespace Guflow
         {
             return historyEvent.EventType == EventType.RequestCancelActivityTaskFailed;
         }
+        public static bool IsActivityScheduledEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ActivityTaskScheduled;
+        }
 
+        public static bool IsActivityStartedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ActivityTaskStarted;
+        }
         public static bool IsTimerFiredEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.TimerFired;

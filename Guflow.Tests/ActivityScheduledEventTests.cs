@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using Guflow.Tests.TestWorkflows;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -15,13 +17,21 @@ namespace Guflow.Tests
         public void Setup()
         {
             var scheduledActivityEventGraph = HistoryEventFactory.CreateActivityScheduledEventGraph(Identity.New(_activityName, _activityVersion, _positionalName));
-            _activityScheduledEvent = new ActivityScheduledEvent(scheduledActivityEventGraph.First());
+            _activityScheduledEvent = new ActivityScheduledEvent(scheduledActivityEventGraph.First(),scheduledActivityEventGraph);
+        }
+
+        [Test]
+        public void Should_populate_attributes()
+        {
+            Assert.That(_activityScheduledEvent.IsActive,Is.True);
         }
 
         [Test]
         public void Can_not_be_interpreted()
         {
-            var activityScheduledEvent = new ActivityScheduledEvent();
+            var workflow = new EmptyWorkflow();
+
+            Assert.That(()=>_activityScheduledEvent.Interpret(workflow), Throws.TypeOf<NotSupportedException>());
         }
     }
 }

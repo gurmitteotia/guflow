@@ -30,6 +30,7 @@ namespace Guflow.Tests
         public void Should_populate_the_properties_from_event_attributes()
         {
             Assert.That(_activityCancellationFailedEvent.Cause,Is.EqualTo(_cause));
+            Assert.That(_activityCancellationFailedEvent.IsActive,Is.False);
         }
 
         [Test]

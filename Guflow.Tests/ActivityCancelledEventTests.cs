@@ -27,6 +27,7 @@ namespace Guflow.Tests
         {
             Assert.That(_activityCancelledEvent.Details, Is.EqualTo(_detail));
             Assert.That(_activityCancelledEvent.WorkerIdentity, Is.EqualTo(_identity));
+            Assert.That(_activityCancelledEvent.IsActive,Is.False);
         }
 
         [Test]

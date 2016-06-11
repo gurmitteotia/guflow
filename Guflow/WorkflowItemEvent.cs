@@ -7,5 +7,6 @@
         {
             return workflowItem.Has(AwsIdentity);
         }
+        public bool IsActive { get; protected set; }
     }
 }

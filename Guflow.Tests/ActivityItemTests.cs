@@ -12,7 +12,7 @@ namespace Guflow.Tests
         public void By_default_workflow_input_is_passed_as_activity_input()
         {
             const string workflowInput = "actvity";
-            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(workflowInput));
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(new WorkflowHistoryEvents(HistoryEventFactory.CreateWorkflowStartedEventGraph(workflowInput))));
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -34,7 +34,7 @@ namespace Guflow.Tests
         [Test]
         public void By_default_schedule_activity_with_empty_task_list()
         {
-            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems());
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(null));
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -45,7 +45,7 @@ namespace Guflow.Tests
         public void Can_be_configured_to_schedule_activity_with_custom_task_list()
         {
             const string taskList = "taskList";
-            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems());
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(null));
             activityItem.OnTaskList(a => taskList);
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
@@ -56,7 +56,7 @@ namespace Guflow.Tests
         [Test]
         public void Does_not_schedule_activity_when_when_func_is_evaluated_to_false()
         {
-            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems());
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(null));
             activityItem.When(a => false);
 
             var decision = activityItem.GetScheduleDecision();
@@ -67,7 +67,7 @@ namespace Guflow.Tests
         [Test]
         public void By_default_schedule_activity_without_priority()
         {
-            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems());
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(null));
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -77,7 +77,7 @@ namespace Guflow.Tests
         [Test]
         public void Can_be_configured_to_schedule_activity_with_priority()
         {
-            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems());
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(null));
             activityItem.WithPriority(a => 10);
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -87,7 +87,7 @@ namespace Guflow.Tests
         [Test]
         public void By_default_schedule_activity_with_empty_timeouts()
         {
-            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems());
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(null));
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -100,7 +100,7 @@ namespace Guflow.Tests
         [Test]
         public void Can_be_configured_to_schedule_activity_with_timeouts()
         {
-            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems());
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(null));
             activityItem.WithTimeouts(
                 a =>
                     new ScheduleActivityTimeouts()
@@ -146,11 +146,33 @@ namespace Guflow.Tests
             Assert.That(parentActivities.First().Name, Is.EqualTo("parent1"));
         }
 
+        [Test]
+        public void Latest_event_can_be_activity_started_event()
+        {
+            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New("somename","1.0","name"),"id"));
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(workflowHistoryEvents));
+
+            var latestEvent = activityItem.LatestEvent as ActivityStartedEvent;
+
+            Assert.NotNull(latestEvent,"Activity Item should have returned latest event");
+        }
+
+        [Test]
+        public void Latest_event_can_be_activity_scheduled_event()
+        {
+            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityScheduledEventGraph(Identity.New("somename", "1.0", "name")));
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(workflowHistoryEvents));
+
+            var latestEvent = activityItem.LatestEvent as ActivityScheduledEvent;
+
+            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+        }
+
         private class TestWorkflowItems : IWorkflowItems
         {
-            public TestWorkflowItems(string workflowInput="")
+            public TestWorkflowItems(IWorkflowHistoryEvents workflowHistoryEvents)
             {
-                CurrentHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateWorkflowStartedEventGraph(workflowInput));
+                CurrentHistoryEvents = workflowHistoryEvents;
             }
             public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
             {

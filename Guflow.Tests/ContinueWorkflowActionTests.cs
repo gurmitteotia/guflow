@@ -48,12 +48,24 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_not_schedule_the_child_when_one_of_its_parent_is_not_completed()
+        public void Should_not_schedule_the_child_when_one_of_its_parent_activity_is_not_completed()
         {
             var workflow = new WorkflowWithMultipleParents();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
             var decisions = workflow.ExecuteFor(workflowHistoryEvents);
+
+            CollectionAssert.IsEmpty(decisions);
+        }
+
+        [Test]
+        public void Should_not_schedule_the_child_when_one_of_its_parent_activity_is_active()
+        {
+            var workflow = new WorkflowWithMultipleParents();
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
+                                 .Concat(HistoryEventFactory.CreateActivityScheduledEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion)));
+
+            var decisions = workflow.ExecuteFor(new WorkflowHistoryEvents(allHistoryEvents));
 
             CollectionAssert.IsEmpty(decisions);
         }

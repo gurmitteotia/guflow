@@ -1,17 +1,20 @@
-﻿using Amazon.SimpleWorkflow.Model;
+﻿using System;
+using System.Collections.Generic;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
     public class ActivityScheduledEvent : ActivityEvent
     {
-        public ActivityScheduledEvent(HistoryEvent scheduledActivityEvent)
+        internal ActivityScheduledEvent(HistoryEvent scheduledActivityEvent,IEnumerable<HistoryEvent> allHistoryEvents)
         {
-            PopulateActivityFrom();
+            PopulateActivityFrom(allHistoryEvents, 0, scheduledActivityEvent.EventId);
+            IsActive = true;
         }
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            throw new System.NotImplementedException();
+            throw new NotSupportedException("Can not interpret activity scheduled event.");
         }
     }
 }

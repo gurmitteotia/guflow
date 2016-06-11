@@ -29,6 +29,7 @@ namespace Guflow.Tests
             Assert.That(_activityTimedoutEvent.WorkerIdentity, Is.EqualTo(_identity));
             Assert.That(_activityTimedoutEvent.TimeoutType, Is.EqualTo(_timeoutType));
             Assert.That(_activityTimedoutEvent.Details,Is.EqualTo(_detail));
+            Assert.That(_activityTimedoutEvent.IsActive,Is.False);
         }
 
         [Test]

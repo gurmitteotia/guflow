@@ -151,7 +151,7 @@ namespace Guflow
         protected override bool IsProcessed()
         {
             var activity = LatestEvent;
-            return activity != null;
+            return activity != null && !activity.IsActive ;
         }
         internal WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
         {

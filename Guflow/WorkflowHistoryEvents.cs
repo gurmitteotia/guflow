@@ -51,6 +51,18 @@ namespace Guflow
                     if (cancelledActivityEvent.IsFor(activityItem))
                         return cancelledActivityEvent;
                 }
+                else if (historyEvent.IsActivityScheduledEvent())
+                {
+                    var activityScheduledEvent = new ActivityScheduledEvent(historyEvent,_allHistoryEvents);
+                    if (activityScheduledEvent.IsFor(activityItem))
+                        return activityScheduledEvent;
+                }
+                else if (historyEvent.IsActivityStartedEvent())
+                {
+                    var activityStartedEvent = new ActivityStartedEvent(historyEvent,_allHistoryEvents);
+                    if (activityStartedEvent.IsFor(activityItem))
+                        return activityStartedEvent;
+                }
             }
 
             return null;
