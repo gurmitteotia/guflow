@@ -31,8 +31,8 @@ namespace Guflow.Tests
         {
             public WorkflowWithSameTimer()
             {
-                ScheudleTimer("Download");
-                ScheudleTimer("Download");
+                ScheduleTimer("Download");
+                ScheduleTimer("Download");
             }
         }
 

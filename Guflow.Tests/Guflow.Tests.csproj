@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="ActivityCancellationFailedEventTests.cs" />
     <Compile Include="ActivityCancelledEventTests.cs" />
+    <Compile Include="ActivityCancelRequestedEventTests.cs" />
     <Compile Include="ActivityCompletedEventTests.cs" />
     <Compile Include="ActivityFailedEventTests.cs" />
     <Compile Include="ActivityItemTests.cs" />
@@ -86,7 +87,7 @@
     <Compile Include="TestWorkflows\TestWorkflow.cs" />
     <Compile Include="TimerCancellationFailedEventTests.cs" />
     <Compile Include="TimerCancelledEventTests.cs" />
-    <Compile Include="TimerFailedEventTests.cs" />
+    <Compile Include="TimerStartFailedEventTests.cs" />
     <Compile Include="TimerFiredEventTests.cs" />
     <Compile Include="TimerItemTests.cs" />
     <Compile Include="WorkflowHistoryEventsTests.cs" />

@@ -51,9 +51,10 @@ namespace Guflow
             return workflowItem.TimerFired(timerFiredEvent);
         }
 
-        public WorkflowAction TimerFailed(TimerFailedEvent timerFailedEvent)
+        public WorkflowAction TimerFailed(TimerStartFailedEvent timerStartFailedEvent)
         {
-            return WorkflowAction.FailWorkflow("START_TIMER_FAILED", timerFailedEvent.Cause);
+            var workflowItem = FindWorkflowItemFor(timerStartFailedEvent);
+            return workflowItem.TimerFired(timerFiredEvent);
         }
 
         public WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
@@ -88,7 +89,7 @@ namespace Guflow
             return activityItem;
         }
 
-        protected IFluentTimerItem ScheudleTimer(string name)
+        protected IFluentTimerItem ScheduleTimer(string name)
         {
             var timerItem = new TimerItem(name,this);
             if(!_allWorkflowItems.Add(timerItem))

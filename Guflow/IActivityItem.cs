@@ -2,7 +2,7 @@
 {
     public interface IActivityItem : IWorkflowItem
     {
-        ActivityEvent LatestEvent { get; }
+        WorkflowItemEvent LatestEvent { get; }
         string Version { get; }
         string PositionalName { get; }
     }

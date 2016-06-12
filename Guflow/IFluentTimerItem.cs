@@ -9,5 +9,6 @@ namespace Guflow
         IFluentTimerItem OnFired(Func<TimerFiredEvent, WorkflowAction> onFiredAction);
         IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> onCancelledAction);
         IFluentTimerItem OnFailedCancellation(Func<TimerCancellationFailedEvent, WorkflowAction> onCancellationFailedAction);
+        IFluentTimerItem OnStartFailure(Func<TimerStartFailedEvent, WorkflowAction> onStartFailureAction);
     }
 }

@@ -168,6 +168,39 @@ namespace Guflow.Tests
             Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
         }
 
+        [Test]
+        public void Latest_event_can_be_activity_cancel_requested_event()
+        {
+            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityCancelRequestedGraph(Identity.New("somename", "1.0", "name"),"workerid"));
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(workflowHistoryEvents));
+
+            var latestEvent = activityItem.LatestEvent as ActivityCancelRequestedEvent;
+
+            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+        }
+
+        [Test]
+        public void Latest_event_can_be_activity_cancellation_failed_event()
+        {
+            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityCancellationFailedEventGraph(Identity.New("somename", "1.0", "name"), "workerid"));
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(workflowHistoryEvents));
+
+            var latestEvent = activityItem.LatestEvent as ActivityCancellationFailedEvent;
+
+            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+        }
+
+        [Test]
+        public void Latest_event_can_be_activity_scheduling_failed_event()
+        {
+            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateActivitySchedulingFailedEventGraph(Identity.New("somename", "1.0", "name"), "workerid"));
+            var activityItem = new ActivityItem("somename", "1.0", "name", new TestWorkflowItems(workflowHistoryEvents));
+
+            var latestEvent = activityItem.LatestEvent as ActivitySchedulingFailedEvent;
+
+            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+        }
+
         private class TestWorkflowItems : IWorkflowItems
         {
             public TestWorkflowItems(IWorkflowHistoryEvents workflowHistoryEvents)
@@ -203,7 +236,7 @@ namespace Guflow.Tests
         {
             public WorkflowWithParentTimer(string parentTimerName)
             {
-                ScheudleTimer(parentTimerName);
+                ScheduleTimer(parentTimerName);
             }
         }
     }

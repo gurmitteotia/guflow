@@ -31,9 +31,9 @@ namespace Guflow
             _timeoutsFunc = a =>new ScheduleActivityTimeouts();
         }
 
-        public ActivityEvent LatestEvent
+        public WorkflowItemEvent LatestEvent
         {
-            get { return WorkflowHistoryEvents.LatestActivityEventFor(this); }
+            get { return WorkflowHistoryEvents.LatestEventFor(this); }
         }
         public string Version
         {

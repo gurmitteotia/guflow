@@ -313,7 +313,8 @@ namespace Guflow.Tests
                 EventId = eventIds.StartedId,
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
-                   Identity = "someid"
+                   Identity = "someid",
+                   ScheduledEventId = eventIds.ScheduledId
                 }
             });
 
@@ -323,7 +324,9 @@ namespace Guflow.Tests
                 EventId = eventIds.ScheduledId,
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
-                    
+                    ActivityType = new ActivityType() {  Name = activityId.Name, Version = activityId.Version},
+                    ActivityId = activityId.Id,
+                    Control = (new ActivityScheduleData() { PN = activityId.PositionalName }).ToJson(),
                 }
             });
 
@@ -391,6 +394,46 @@ namespace Guflow.Tests
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskStarted,
+                EventId = eventIds.StartedId,
+                ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
+                {
+                    Identity = identity,
+                    ScheduledEventId = eventIds.ScheduledId
+
+                }
+            });
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskScheduled,
+                EventId = eventIds.ScheduledId,
+                ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
+                {
+                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
+                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    ActivityId = activityIdentity.Id
+                }
+            });
+            return historyEvents;
+        }
+
+        public static IEnumerable<HistoryEvent> CreateActivityCancelRequestedGraph(Identity activityIdentity, string identity)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.ActivityTaskCancelRequested,
+                EventId = eventIds.CancelRequestedId,
+                ActivityTaskCancelRequestedEventAttributes = new ActivityTaskCancelRequestedEventAttributes()
+                {
+                        ActivityId = activityIdentity.Id,
+                }
+            });
+
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskStarted,

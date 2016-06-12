@@ -49,14 +49,14 @@ namespace Guflow.Tests
         {
             public TestWorkflow()
             {
-                ScheudleTimer(_timerName);
+                ScheduleTimer(_timerName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheudleTimer(_timerName).OnFailedCancellation(c => workflowAction);
+                ScheduleTimer(_timerName).OnFailedCancellation(c => workflowAction);
             }
         }
     }

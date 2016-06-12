@@ -237,15 +237,15 @@ namespace Guflow.Tests
         {
             public WorkflowWithParentChildTimers(string timerName, string childTimer,TimeSpan childTimeout)
             {
-                ScheudleTimer(timerName);
-                ScheudleTimer(childTimer).DependsOn(timerName).FireAfter(childTimeout);
+                ScheduleTimer(timerName);
+                ScheduleTimer(childTimer).DependsOn(timerName).FireAfter(childTimeout);
             }
         }
         private class WorkflowWithChildActivity : Workflow
         {
             public WorkflowWithChildActivity(string timerName)
             {
-                ScheudleTimer(timerName);
+                ScheduleTimer(timerName);
                 ScheduleActivity(_activityName, _activityVersion).DependsOn(timerName);
             }
         }
@@ -254,7 +254,7 @@ namespace Guflow.Tests
             public WorkflowWithParentActivityAndChildTimers(string timerName)
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
-                ScheudleTimer(timerName).DependsOn(_activityName, _activityVersion,_positionalName);
+                ScheduleTimer(timerName).DependsOn(_activityName, _activityVersion,_positionalName);
             }
         }
     }

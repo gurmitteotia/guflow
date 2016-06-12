@@ -34,9 +34,18 @@ namespace Guflow
             return historyEvent.EventType == EventType.ActivityTaskScheduled;
         }
 
+        public static bool IsActivitySchedulingFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ScheduleActivityTaskFailed;
+        }
         public static bool IsActivityStartedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ActivityTaskStarted;
+        }
+
+        public static bool IsActivityCancelRequestedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ActivityTaskCancelRequested;
         }
         public static bool IsTimerFiredEvent(this HistoryEvent historyEvent)
         {
@@ -91,7 +100,7 @@ namespace Guflow
             if(historyEvent.IsTimerFiredEvent())
                 return new TimerFiredEvent(historyEvent,allHistoryEvents);
             if(historyEvent.IsTimerFailedEvent())
-                return new TimerFailedEvent(historyEvent,allHistoryEvents);
+                return new TimerStartFailedEvent(historyEvent);
             if (historyEvent.IsTimerCancelledEvent())
                 return new TimerCancelledEvent(historyEvent,allHistoryEvents);
             if (historyEvent.IsTimerCancellationFailedEvent())

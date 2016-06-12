@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="ActivityCancellationFailedEvent.cs" />
     <Compile Include="ActivityCancelledEvent.cs" />
+    <Compile Include="ActivityCancelRequestedEvent.cs" />
     <Compile Include="ActivityCompletedEvent.cs" />
     <Compile Include="ActivityEvent.cs" />
     <Compile Include="ActivityFailedEvent.cs" />
@@ -122,7 +123,7 @@
     <Compile Include="TimerCancellationFailedEvent.cs" />
     <Compile Include="TimerCancelledEvent.cs" />
     <Compile Include="TimerEvent.cs" />
-    <Compile Include="TimerFailedEvent.cs" />
+    <Compile Include="TimerStartFailedEvent.cs" />
     <Compile Include="TimerFiredEvent.cs" />
     <Compile Include="TimerItem.cs" />
     <Compile Include="TimerScheduleData.cs" />

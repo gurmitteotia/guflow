@@ -20,6 +20,12 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void Should_not_be_active()
+        {
+            Assert.That(_timerFiredEvent.IsActive,Is.False);
+        }
+
+        [Test]
         public void Throws_exception_when_fired_timer_is_not_found_in_workflow()
         {
             var workflow = new EmptyWorkflow();
@@ -105,14 +111,14 @@ namespace Guflow.Tests
         {
             public WorkflowWithTimer()
             {
-                ScheudleTimer(_timerName);
+                ScheduleTimer(_timerName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheudleTimer(_timerName).OnFired(e => workflowAction);
+                ScheduleTimer(_timerName).OnFired(e => workflowAction);
             }
         }
         private class SingleActivityWorkflow : Workflow

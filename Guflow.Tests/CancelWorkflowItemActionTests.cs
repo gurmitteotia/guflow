@@ -81,7 +81,7 @@ namespace Guflow.Tests
             public WorkflowToReturnCancelledTimerAction()
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelTimer("SomeTimer"));
-                ScheudleTimer("SomeTimer");
+                ScheduleTimer("SomeTimer");
             }
         }
     }

@@ -98,7 +98,7 @@ namespace Guflow.Tests
             public WorkflowToReturnScheduleTimerAction()
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => JumpToTimer("SomeTimer"));
-                ScheudleTimer("SomeTimer");
+                ScheduleTimer("SomeTimer");
             }
         }
     }

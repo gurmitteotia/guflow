@@ -22,7 +22,7 @@ namespace Guflow
         {
         }
 
-        public ActivityEvent LatestActivityEventFor(ActivityItem activityItem)
+        public WorkflowItemEvent LatestEventFor(ActivityItem activityItem)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
@@ -51,24 +51,42 @@ namespace Guflow
                     if (cancelledActivityEvent.IsFor(activityItem))
                         return cancelledActivityEvent;
                 }
+                else if (historyEvent.IsActivityCancelRequestedEvent())
+                {
+                    var activityCancelRequestedEvent = new ActivityCancelRequestedEvent(historyEvent);
+                    if (activityCancelRequestedEvent.IsFor(activityItem))
+                        return activityCancelRequestedEvent;
+                }
+                else if (historyEvent.IsActivityCancellationFailedEvent())
+                {
+                    var activityCancellationFailedEvent = new ActivityCancellationFailedEvent(historyEvent);
+                    if(activityCancellationFailedEvent.IsFor(activityItem))
+                        return activityCancellationFailedEvent;
+                }
+                else if (historyEvent.IsActivityStartedEvent())
+                {
+                    var activityStartedEvent = new ActivityStartedEvent(historyEvent, _allHistoryEvents);
+                    if (activityStartedEvent.IsFor(activityItem))
+                        return activityStartedEvent;
+                }
                 else if (historyEvent.IsActivityScheduledEvent())
                 {
                     var activityScheduledEvent = new ActivityScheduledEvent(historyEvent,_allHistoryEvents);
                     if (activityScheduledEvent.IsFor(activityItem))
                         return activityScheduledEvent;
                 }
-                else if (historyEvent.IsActivityStartedEvent())
+                else if (historyEvent.IsActivitySchedulingFailedEvent())
                 {
-                    var activityStartedEvent = new ActivityStartedEvent(historyEvent,_allHistoryEvents);
-                    if (activityStartedEvent.IsFor(activityItem))
-                        return activityStartedEvent;
+                    var activitySchedulingFailedEvent = new ActivitySchedulingFailedEvent(historyEvent);
+                    if (activitySchedulingFailedEvent.IsFor(activityItem))
+                        return activitySchedulingFailedEvent;
                 }
             }
 
             return null;
         }
 
-        public TimerFiredEvent LatestTimerEventFor(TimerItem timerItem)
+        public TimerFiredEvent LatestEventFor(TimerItem timerItem)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {

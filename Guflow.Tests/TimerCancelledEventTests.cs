@@ -92,14 +92,14 @@ namespace Guflow.Tests
         {
             public WorkflowWithTimer()
             {
-                ScheudleTimer(_timerName);
+                ScheduleTimer(_timerName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheudleTimer(_timerName).OnCancelled(c => workflowAction);
+                ScheduleTimer(_timerName).OnCancelled(c => workflowAction);
             }
         }
         private class SingleActivityWorkflow : Workflow

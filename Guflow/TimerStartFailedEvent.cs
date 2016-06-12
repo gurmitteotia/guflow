@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public class TimerFailedEvent : WorkflowEvent
+    public class TimerStartFailedEvent : WorkflowItemEvent
     {
         private readonly StartTimerFailedEventAttributes _startTimerFailedAttributes;
-        public TimerFailedEvent(HistoryEvent startTimerFailedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public TimerStartFailedEvent(HistoryEvent startTimerFailedEvent)
         {
             _startTimerFailedAttributes = startTimerFailedEvent.StartTimerFailedEventAttributes;
+            AwsIdentity =  AwsIdentity.Raw(_startTimerFailedAttributes.TimerId);
         }
 
         internal string Cause { get { return _startTimerFailedAttributes.Cause; } }
