@@ -59,7 +59,7 @@ namespace Guflow
 
         public override string ToString()
         {
-            return _identity.ToString();
+            return string.Format("{0} for {1}", GetType().Name, _identity);
         }
 
         private string ToAwsTaskPriority(int? taskPriority)

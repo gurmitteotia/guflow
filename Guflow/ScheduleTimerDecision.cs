@@ -43,5 +43,10 @@ namespace Guflow
                 }
             };
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} for {1} and reschedulable timer is {2}",GetType().Name,_timerIdentity,_isRescheduleTimer);
+        }
     }
 }

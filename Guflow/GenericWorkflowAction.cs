@@ -28,5 +28,10 @@ namespace Guflow
         {
             return _workflowDecision.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return _workflowDecision.ToString();
+        }
     }
 }

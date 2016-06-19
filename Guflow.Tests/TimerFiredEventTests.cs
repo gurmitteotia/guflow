@@ -11,6 +11,9 @@ namespace Guflow.Tests
     {
         private TimerFiredEvent _timerFiredEvent;
         private const string _timerName = "timer1";
+        private const string _activityName = "Download";
+        private const string _activityVersion = "1.0";
+        private const string _positionalName = "First";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(20);
 
         [SetUp]
@@ -46,7 +49,7 @@ namespace Guflow.Tests
 
             var workflowAction = _timerFiredEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(new TimerItem(_timerName,null))));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(new TimerItem(Identity.Timer(_timerName),null))));
         }
 
         [Test]
@@ -64,11 +67,11 @@ namespace Guflow.Tests
         public void Should_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_activity_item()
         {
             var workflow = new SingleActivityWorkflow();
-            var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.New(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName), _fireAfter);
+            var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.New(_activityName, _activityVersion, _positionalName), _fireAfter);
 
             var workflowAction = rescheduleTimer.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName, null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(Identity.New(_activityName, _activityVersion, _positionalName), null))));
         }
 
         [Test]
@@ -79,7 +82,7 @@ namespace Guflow.Tests
 
             var workflowAction = rescheduleTimer.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new TimerItem(_timerName,null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new TimerItem(Identity.Timer(_timerName),null))));
         }
 
         [Test]
@@ -123,12 +126,9 @@ namespace Guflow.Tests
         }
         private class SingleActivityWorkflow : Workflow
         {
-            public const string ActivityName = "Download";
-            public const string ActivityVersion = "1.0";
-            public const string PositionalName = "First";
             public SingleActivityWorkflow()
             {
-                ScheduleActivity(ActivityName, ActivityVersion, PositionalName);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName);
             }
        }
     }

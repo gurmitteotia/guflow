@@ -17,8 +17,8 @@ namespace Guflow.Tests
         [Test]
         public void Equality_tests()
         {
-            var workflowItem1 = new ActivityItem(_activityName, _activityVersion, _positionalName, new Mock<IWorkflowItems>().Object);
-            var workflowItem2 = new ActivityItem("DifferentName", _activityVersion, _positionalName, new Mock<IWorkflowItems>().Object);
+            var workflowItem1 = new ActivityItem(Identity.New( _activityName, _activityVersion, _positionalName), new Mock<IWorkflowItems>().Object);
+            var workflowItem2 = new ActivityItem(Identity.New("DifferentName", _activityVersion, _positionalName), new Mock<IWorkflowItems>().Object);
 
             Assert.True(WorkflowAction.ContinueWorkflow(workflowItem1).Equals(WorkflowAction.ContinueWorkflow(workflowItem1)));
             Assert.False(WorkflowAction.ContinueWorkflow(workflowItem1).Equals(WorkflowAction.ContinueWorkflow(workflowItem2)));
@@ -162,7 +162,7 @@ namespace Guflow.Tests
 
             var decisions = workflow.ExecuteFor(activityFailedEvent);
 
-            Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(new ActivityItem(_activityName,_activityVersion,_positionalName,workflow)).GetDecisions()));
+            Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(new ActivityItem(Identity.New(_activityName,_activityVersion,_positionalName),workflow)).GetDecisions()));
         }
 
 

@@ -35,5 +35,9 @@ namespace Guflow
                 }
             };
         }
+        public override string ToString()
+        {
+            return string.Format("{0} with result {1}", GetType().Name, _result);
+        }
     }
 }

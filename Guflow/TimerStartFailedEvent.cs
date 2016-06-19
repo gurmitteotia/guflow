@@ -15,7 +15,7 @@ namespace Guflow
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.TimerFailed(this);
+            return workflow.TimerStartFailed(this);
         }
     }
 }

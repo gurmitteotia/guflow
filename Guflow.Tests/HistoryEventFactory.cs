@@ -246,7 +246,7 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateTimerFailedEventGraph(Identity timerId, string cause)
+        public static IEnumerable<HistoryEvent> CreateTimerStartFailedEventGraph(Identity timerId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;

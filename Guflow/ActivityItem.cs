@@ -14,21 +14,22 @@ namespace Guflow
         private Func<IActivityItem, string> _taskListFunc;
         private Func<IActivityItem, bool> _whenFunc;
         private Func<IActivityItem, int?> _priorityFunc;
-        private Func<IActivityItem, ScheduleActivityTimeouts> _timeoutsFunc; 
-        internal ActivityItem(string name, string version, string positionalName, IWorkflowItems workflowItems)
-            : base(Identity.New(name, version, positionalName), workflowItems)
+        private Func<IActivityItem, ScheduleActivityTimeouts> _timeoutsFunc;
+
+        internal ActivityItem(Identity identity, IWorkflowItems workflowItems)
+            : base(identity, workflowItems)
         {
             _onCompletionAction = c => WorkflowAction.ContinueWorkflow(this);
             _onFailedAction = c => WorkflowAction.FailWorkflow(c.Reason, c.Detail);
             _onTimedoutAction = t => WorkflowAction.FailWorkflow(t.TimeoutType, t.Details);
             _onCancelledAction = c => WorkflowAction.CancelWorkflow(c.Details);
             _onCancellationFailedAction = c => WorkflowAction.FailWorkflow("ACTIVITY_CANCELLATION_FAILED", c.Cause);
-            _onFailedSchedulingAction =c=> WorkflowAction.FailWorkflow("ACTIVITY_SCHEDULING_FAILED",c.Cause);
+            _onFailedSchedulingAction = c => WorkflowAction.FailWorkflow("ACTIVITY_SCHEDULING_FAILED", c.Cause);
             _inputFunc = a => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _taskListFunc = a => null;
             _whenFunc = a => true;
             _priorityFunc = a => null;
-            _timeoutsFunc = a =>new ScheduleActivityTimeouts();
+            _timeoutsFunc = a => new ScheduleActivityTimeouts();
         }
 
         public WorkflowItemEvent LatestEvent
@@ -85,11 +86,6 @@ namespace Guflow
             return this;
         }
 
-        public IFluentActivityItem OnTimerCancelled(Func<TimerCancelledEvent, WorkflowAction> onTimerCancelledAction)
-        {
-            OnTimerCancelledAction = onTimerCancelledAction;
-            return this;
-        }
         public IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationAction)
         {
             _onCancellationFailedAction = onFailedCancellationAction;
@@ -121,6 +117,12 @@ namespace Guflow
             _timeoutsFunc = timeoutsFunc;
             return this;
         }
+
+        public IFluentTimerItem RescheduleTimer
+        {
+            get { return RescheduleTimerItem; }
+        }
+
         internal override WorkflowDecision GetScheduleDecision()
         {
             if(!_whenFunc(this))
@@ -141,7 +143,17 @@ namespace Guflow
 
         internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
         {
-            return WorkflowAction.Schedule(this);
+            return RescheduleTimerItem.TimerFired(timerFiredEvent);
+        }
+
+        internal override WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        {
+            return RescheduleTimerItem.TimerCancelled(timerCancelledEvent);
+        }
+
+        internal override WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        {
+            return RescheduleTimerItem.TimerStartFailed(timerStartFailedEvent);
         }
 
         internal WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent)

@@ -62,7 +62,7 @@ namespace Guflow.Tests
 
             var workflowAction = timerCancelledEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelWorkflow("TIMER_CANCELLED")));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelWorkflow("RESCHEDULE_TIMER_CANCELLED")));
         }
 
         [Test]
@@ -117,7 +117,7 @@ namespace Guflow.Tests
             public const string ActivityVersion = "1.0";
             public WorkflowWithCustomTimerAction(WorkflowAction workflowAction)
             {
-                ScheduleActivity(ActivityName, ActivityVersion).OnTimerCancelled(c => workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion).RescheduleTimer.OnCancelled(c => workflowAction);
             }
         }
     }

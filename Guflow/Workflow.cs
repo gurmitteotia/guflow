@@ -51,10 +51,10 @@ namespace Guflow
             return workflowItem.TimerFired(timerFiredEvent);
         }
 
-        public WorkflowAction TimerFailed(TimerStartFailedEvent timerStartFailedEvent)
+        public WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerStartFailedEvent);
-            return workflowItem.TimerFired(timerFiredEvent);
+            return workflowItem.TimerStartFailed(timerStartFailedEvent);
         }
 
         public WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
@@ -83,7 +83,7 @@ namespace Guflow
 
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
-            var activityItem = new ActivityItem(name,version, positionalName,this);
+            var activityItem = new ActivityItem(Identity.New(name,version, positionalName),this);
             if(!_allWorkflowItems.Add(activityItem))
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_activity,name,version,positionalName));
             return activityItem;
@@ -91,7 +91,7 @@ namespace Guflow
 
         protected IFluentTimerItem ScheduleTimer(string name)
         {
-            var timerItem = new TimerItem(name,this);
+            var timerItem = new TimerItem(Identity.Timer(name),this);
             if(!_allWorkflowItems.Add(timerItem))
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_timer,name));
 

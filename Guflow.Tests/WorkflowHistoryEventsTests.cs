@@ -102,7 +102,7 @@ namespace Guflow.Tests
         [Test]
         public void Can_interpret_timer_failed_event()
         {
-            _workflow.Setup(w => w.TimerFailed(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.TimerStartFailed(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerFailedEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -148,7 +148,7 @@ namespace Guflow.Tests
             var timerFailedDecision = new Mock<WorkflowDecision>();
             var timerFailedAction = new TestWorkflowAction(timerFailedDecision.Object);
             _workflow.Setup(w => w.TimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
-            _workflow.Setup(w => w.TimerFailed(It.IsAny<TimerStartFailedEvent>())).Returns(timerFailedAction);
+            _workflow.Setup(w => w.TimerStartFailed(It.IsAny<TimerStartFailedEvent>())).Returns(timerFailedAction);
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
 
             var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
@@ -160,7 +160,7 @@ namespace Guflow.Tests
         public void Should_filter_out_duplicate_workflow_decisions()
         {
             _workflow.Setup(w => w.TimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
-            _workflow.Setup(w => w.TimerFailed(It.IsAny<TimerStartFailedEvent>())).Returns(new TestWorkflowAction(WorkflowDecision.Empty));
+            _workflow.Setup(w => w.TimerStartFailed(It.IsAny<TimerStartFailedEvent>())).Returns(new TestWorkflowAction(WorkflowDecision.Empty));
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
 
             var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
@@ -172,7 +172,7 @@ namespace Guflow.Tests
         public void Should_filter_out_empty_workflow_decisions()
         {
             _workflow.Setup(w => w.TimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
-            _workflow.Setup(w => w.TimerFailed(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.TimerStartFailed(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
 
             var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
@@ -218,7 +218,7 @@ namespace Guflow.Tests
         }
         private WorkflowHistoryEvents CreateTimerFailedEventGraph()
         {
-            var timerFailedEventGraph = HistoryEventFactory.CreateTimerFailedEventGraph(Identity.Timer("timer"), "cause");
+            var timerFailedEventGraph = HistoryEventFactory.CreateTimerStartFailedEventGraph(Identity.Timer("timer"), "cause");
             return new WorkflowHistoryEvents(timerFailedEventGraph);
         }
         private WorkflowHistoryEvents CreateTimerCancelledEventGraph()
@@ -240,7 +240,7 @@ namespace Guflow.Tests
       
         private WorkflowHistoryEvents CreateTimerFireAndFailedEventGraph()
         {
-            var combinedEventGraph = HistoryEventFactory.CreateTimerFailedEventGraph(Identity.Timer("timer"), "cause")
+            var combinedEventGraph = HistoryEventFactory.CreateTimerStartFailedEventGraph(Identity.Timer("timer"), "cause")
                 .Concat(HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer"), TimeSpan.FromSeconds(4)));
             return new WorkflowHistoryEvents(combinedEventGraph);
         }

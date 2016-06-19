@@ -40,5 +40,10 @@ namespace Guflow
                 }
             };
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} with reason {1} and detail {2}", GetType().Name, _reason, _detail);
+        }
     }
 }

@@ -7,13 +7,17 @@ namespace Guflow
         private TimeSpan _fireAfter= new TimeSpan();
         private Func<TimerFiredEvent, WorkflowAction> _onFiredAction;
         private Func<TimerCancellationFailedEvent, WorkflowAction> _onCanellationFailedAction;
-        private Func<TimerStartFailedEvent, WorkflowAction> _onStartFailureAction; 
+        private Func<TimerStartFailedEvent, WorkflowAction> _onStartFailureAction;
+        private Func<TimerCancelledEvent, WorkflowAction> _onTimerCancelledAction; 
         private Func<TimerItem, bool> _whenFunc;
-        internal TimerItem(string name, IWorkflowItems workflowItems):base(Identity.Timer(name),workflowItems)
+        private readonly bool _isRescheduleTimer;
+        internal TimerItem(Identity identity, IWorkflowItems workflowItems, bool isRescheduleTimer=false):base(identity,workflowItems)
         {
+            _isRescheduleTimer = isRescheduleTimer;
             _onFiredAction = f=>WorkflowAction.ContinueWorkflow(this);
             _onCanellationFailedAction = c => WorkflowAction.FailWorkflow("TIMER_CANCELLATION_FAILED", c.Cause);
-            _onStartFailureAction = c => WorkflowAction.FailWorkflow("START_TIMER_FAILED", c.Cause);
+            _onStartFailureAction = c => WorkflowAction.FailWorkflow("TIMER_START_FAILED", c.Cause);
+            _onTimerCancelledAction = c => WorkflowAction.CancelWorkflow("TIMER_CANCELLED");
             _whenFunc = t => true;
         }
         public TimerEvent LatestEvent
@@ -49,7 +53,7 @@ namespace Guflow
 
         public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> onCancelledAction)
         {
-            OnTimerCancelledAction = onCancelledAction;
+            _onTimerCancelledAction = onCancelledAction;
             return this;
         }
         public IFluentTimerItem OnFailedCancellation(Func<TimerCancellationFailedEvent, WorkflowAction> onCancellationFailedAction)
@@ -69,7 +73,7 @@ namespace Guflow
             if(!_whenFunc(this))
                 return WorkflowDecision.Empty;
 
-            return new ScheduleTimerDecision(Identity, _fireAfter);
+            return new ScheduleTimerDecision(Identity, _fireAfter,_isRescheduleTimer);
         }
         internal override WorkflowDecision GetCancelDecision()
         {
@@ -79,10 +83,21 @@ namespace Guflow
         internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
         {
             if (timerFiredEvent.IsARescheduledTimer)
-                return WorkflowAction.Schedule(this);
+                return RescheduleTimerItem.TimerFired(timerFiredEvent);
 
             return _onFiredAction(timerFiredEvent);
         }
+
+        internal override WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        {
+            return _onTimerCancelledAction(timerCancelledEvent);
+        }
+
+        internal override WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        {
+            return _onStartFailureAction(timerStartFailedEvent);
+        }
+
         protected override bool IsProcessed()
         {
             var timerEvent = LatestEvent;

@@ -40,5 +40,10 @@ namespace Guflow
         {
             return _timerIdentity.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} for {1}", GetType().Name, _timerIdentity);
+        }
     }
 }

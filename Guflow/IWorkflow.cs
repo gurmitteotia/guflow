@@ -8,7 +8,7 @@
         WorkflowAction ActivityTimedout(ActivityTimedoutEvent activityTimedoutEvent);
         WorkflowAction ActivityCancelled(ActivityCancelledEvent activityCancelledEvent);
         WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent);
-        WorkflowAction TimerFailed(TimerStartFailedEvent timerStartFailedEvent);
+        WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent);
         WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent);
         WorkflowAction ActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent);
         WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);

@@ -16,13 +16,13 @@ namespace Guflow.Tests
         [Test]
         public void Equality_tests()
         {
-            Assert.True(WorkflowAction.Schedule(new TimerItem("Somename",_workflowItems.Object)).Equals(WorkflowAction.Schedule(new TimerItem("Somename",_workflowItems.Object))));
-            Assert.False(WorkflowAction.Schedule(new TimerItem("Somename", _workflowItems.Object)).Equals(WorkflowAction.Schedule(new TimerItem("Somename1", _workflowItems.Object))));
+            Assert.True(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"),_workflowItems.Object)).Equals(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"),_workflowItems.Object))));
+            Assert.False(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"), _workflowItems.Object)).Equals(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename1"), _workflowItems.Object))));
         }
         [Test]
         public void Should_return_the_scheduling_decision_for_workflow_item()
         {
-            var workflowItem = new TimerItem("Somename",_workflowItems.Object);
+            var workflowItem = new TimerItem(Identity.Timer("Somename"),_workflowItems.Object);
             var workflowAction = WorkflowAction.Schedule(workflowItem);
 
             var decisions = workflowAction.GetDecisions();
@@ -33,7 +33,7 @@ namespace Guflow.Tests
         [Test]
         public void Should_return_timer_decision_when_rescheduled_after_a_timeout()
         {
-            var workflowItem = new ActivityItem("name","ver","pos",_workflowItems.Object);
+            var workflowItem = new ActivityItem(Identity.New("name","ver","pos"),_workflowItems.Object);
             var workflowAction = WorkflowAction.Schedule(workflowItem).After(TimeSpan.FromSeconds(2));
 
             var decisions = workflowAction.GetDecisions();
@@ -49,7 +49,7 @@ namespace Guflow.Tests
             
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(_activityName, _activityVersion, _positionalName,null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(Identity.New(_activityName, _activityVersion, _positionalName),null))));
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace Guflow.Tests
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(_activityName, _activityVersion, _positionalName, null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(Identity.New(_activityName, _activityVersion, _positionalName), null))));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace Guflow.Tests
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new TimerItem("SomeTimer",null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new TimerItem(Identity.Timer("SomeTimer"),null))));
         }
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
