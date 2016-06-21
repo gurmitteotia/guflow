@@ -22,7 +22,7 @@ namespace Guflow
         {
         }
 
-        public WorkflowItemEvent LatestEventFor(ActivityItem activityItem)
+        public WorkflowItemEvent LatestActivityEventFor(WorkflowItem activityItem)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
@@ -83,10 +83,10 @@ namespace Guflow
                 }
             }
 
-            return null;
+            return WorkflowItemEvent.NotFound;
         }
 
-        public TimerFiredEvent LatestEventFor(TimerItem timerItem)
+        public WorkflowItemEvent LatestTimerEventFor(WorkflowItem timerItem)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
@@ -96,8 +96,32 @@ namespace Guflow
                     if(firedTimerEvent.IsFor(timerItem))
                         return firedTimerEvent;
                 }
+                if (historyEvent.IsTimerStartedEvent())
+                {
+                    var timerStartedEvent = new TimerStartedEvent(historyEvent,_allHistoryEvents);
+                    if (timerStartedEvent.IsFor(timerItem))
+                        return timerStartedEvent;
+                }
+                if (historyEvent.IsTimerStartFailedEvent())
+                {
+                    var timerStartFailedEvent = new TimerStartFailedEvent(historyEvent);
+                    if (timerStartFailedEvent.IsFor(timerItem))
+                        return timerStartFailedEvent;
+                }
+                if (historyEvent.IsTimerCancelledEvent())
+                {
+                    var timerCancelledEvent = new TimerCancelledEvent(historyEvent,_allHistoryEvents);
+                    if(timerCancelledEvent.IsFor(timerItem))
+                        return timerCancelledEvent;
+                }
+                if (historyEvent.IsTimerCancellationFailedEvent())
+                {
+                    var timerCancellationFailedEvent = new TimerCancellationFailedEvent(historyEvent);
+                    if (timerCancellationFailedEvent.IsFor(timerItem))
+                        return timerCancellationFailedEvent;
+                }
             }
-            return null;
+            return WorkflowItemEvent.NotFound;
         }
 
         public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow)

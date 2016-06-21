@@ -87,6 +87,7 @@
     <Compile Include="TestWorkflows\TestWorkflow.cs" />
     <Compile Include="TimerCancellationFailedEventTests.cs" />
     <Compile Include="TimerCancelledEventTests.cs" />
+    <Compile Include="TimerStartedEventTests.cs" />
     <Compile Include="TimerStartFailedEventTests.cs" />
     <Compile Include="TimerFiredEventTests.cs" />
     <Compile Include="TimerItemTests.cs" />

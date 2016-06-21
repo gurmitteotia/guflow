@@ -8,7 +8,7 @@ namespace Guflow
         
         private readonly ActivityTaskCompletedEventAttributes _eventAttributes;
 
-        public ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(activityCompletedEvent.EventId)
         {
             _eventAttributes = activityCompletedEvent.ActivityTaskCompletedEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);

@@ -59,6 +59,7 @@ namespace Guflow
         internal abstract WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent);
         internal abstract WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent);
         internal abstract WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent);
+        internal abstract WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);
 
         public override bool Equals(object other)
         {
@@ -101,6 +102,7 @@ namespace Guflow
                     _resheduleTimerItem = new TimerItem(Identity, _workflowItems, true);
                     _resheduleTimerItem.OnStartFailure(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
                     _resheduleTimerItem.OnCancelled(e => WorkflowAction.CancelWorkflow("RESCHEDULE_TIMER_CANCELLED"));
+                    _resheduleTimerItem.OnFailedCancellation(e=>WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_CANCELLATION_FAILED",e.Cause));
                     _resheduleTimerItem.OnFired(e => WorkflowAction.Schedule(this));
                 }
                 return _resheduleTimerItem;

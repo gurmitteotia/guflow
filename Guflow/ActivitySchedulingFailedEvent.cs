@@ -6,7 +6,7 @@ namespace Guflow
     {
         private readonly ScheduleActivityTaskFailedEventAttributes _eventAttributes;
 
-        internal ActivitySchedulingFailedEvent(HistoryEvent schedulingFailedEvent)
+        internal ActivitySchedulingFailedEvent(HistoryEvent schedulingFailedEvent) : base(schedulingFailedEvent.EventId)
         {
             _eventAttributes = schedulingFailedEvent.ScheduleActivityTaskFailedEventAttributes;
             AwsIdentity = AwsIdentity.Raw(_eventAttributes.ActivityId);

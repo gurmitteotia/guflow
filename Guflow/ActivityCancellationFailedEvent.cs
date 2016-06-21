@@ -5,7 +5,7 @@ namespace Guflow
     public class ActivityCancellationFailedEvent : WorkflowItemEvent
     {
         private readonly RequestCancelActivityTaskFailedEventAttributes _eventAttributes;
-        internal ActivityCancellationFailedEvent(HistoryEvent activityCancellationFailedEvent)
+        internal ActivityCancellationFailedEvent(HistoryEvent activityCancellationFailedEvent) : base(activityCancellationFailedEvent.EventId)
         {
             _eventAttributes = activityCancellationFailedEvent.RequestCancelActivityTaskFailedEventAttributes;
             AwsIdentity = AwsIdentity.Raw(_eventAttributes.ActivityId);

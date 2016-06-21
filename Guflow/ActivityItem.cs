@@ -34,7 +34,15 @@ namespace Guflow
 
         public WorkflowItemEvent LatestEvent
         {
-            get { return WorkflowHistoryEvents.LatestEventFor(this); }
+            get
+            {
+                var latestActivityEvent = WorkflowHistoryEvents.LatestActivityEventFor(this);
+                var latestTimerEvent = WorkflowHistoryEvents.LatestTimerEventFor(this);
+                if (latestActivityEvent.IsNewerThan(latestTimerEvent))
+                    return latestActivityEvent;
+
+                return latestTimerEvent;
+            }
         }
         public string Version
         {
@@ -156,6 +164,11 @@ namespace Guflow
             return RescheduleTimerItem.TimerStartFailed(timerStartFailedEvent);
         }
 
+        internal override WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        {
+            return RescheduleTimerItem.TimerCancellationFailed(timerCancellationFailedEvent);
+        }
+
         internal WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent)
         {
             return _onCompletionAction(activityCompletedEvent);
@@ -163,7 +176,7 @@ namespace Guflow
         protected override bool IsProcessed()
         {
             var activity = LatestEvent;
-            return activity != null && !activity.IsActive ;
+            return activity != WorkflowItemEvent.NotFound && !activity.IsActive ;
         }
         internal WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
         {

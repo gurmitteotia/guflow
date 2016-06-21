@@ -26,6 +26,12 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void Should_not_be_active()
+        {
+            Assert.IsFalse(_timerCancelledEvent.IsActive);
+        }
+
+        [Test]
         public void By_default_return_cancel_workflow_action()
         {
             var workflow = new WorkflowWithTimer();

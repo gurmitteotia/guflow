@@ -351,6 +351,26 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
+        public static IEnumerable<HistoryEvent> CreateTimerStartedEventGraph(Identity identity, TimeSpan fireAfter, bool isARescheduleTimer =false)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.NewEventIds;
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerStarted,
+                EventId = eventIds.StartedId,
+                TimerStartedEventAttributes = new TimerStartedEventAttributes()
+                {
+                    TimerId = identity.Id,
+                    StartToFireTimeout = ((long)fireAfter.TotalSeconds).ToString(),
+                    Control = (new TimerScheduleData() { TimerName = identity.Name, IsARescheduleTimer = isARescheduleTimer }).ToJson()
+                }
+            });
+
+            return historyEvents;
+        }
+
         public static IEnumerable<HistoryEvent> CreateActivitySchedulingFailedEventGraph(Identity activityIdentity, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
@@ -496,5 +516,6 @@ namespace Guflow.Tests
                 get { return _completedId - 3; }
             }
         }
+
     }
 }

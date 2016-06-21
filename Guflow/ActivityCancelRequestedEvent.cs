@@ -5,7 +5,7 @@ namespace Guflow
 {
     public class ActivityCancelRequestedEvent : WorkflowItemEvent
     {
-        public ActivityCancelRequestedEvent(HistoryEvent activityCancelRequestedEvent)
+        public ActivityCancelRequestedEvent(HistoryEvent activityCancelRequestedEvent) : base(activityCancelRequestedEvent.EventId)
         {
             AwsIdentity = AwsIdentity.Raw(activityCancelRequestedEvent.ActivityTaskCancelRequestedEventAttributes.ActivityId);
             IsActive = true;

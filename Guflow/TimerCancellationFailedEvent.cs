@@ -5,7 +5,7 @@ namespace Guflow
     public class TimerCancellationFailedEvent : WorkflowItemEvent
     {
         private readonly CancelTimerFailedEventAttributes _eventAttributes;
-        internal TimerCancellationFailedEvent(HistoryEvent timerCancellationFailedEvent)
+        internal TimerCancellationFailedEvent(HistoryEvent timerCancellationFailedEvent) : base(timerCancellationFailedEvent.EventId)
         {
             _eventAttributes = timerCancellationFailedEvent.CancelTimerFailedEventAttributes;
             AwsIdentity = AwsIdentity.Raw(_eventAttributes.TimerId);

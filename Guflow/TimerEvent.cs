@@ -9,6 +9,11 @@ namespace Guflow
         private string _timerName;
         private TimeSpan _firedAfter;
         internal bool IsARescheduledTimer { get; private set; }
+
+        protected TimerEvent(long eventId)
+            : base(eventId)
+        {
+        }
         protected void PopulateProperties(long timerStartedEventId, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             bool foundTimerStartedEvent = false;

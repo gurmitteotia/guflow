@@ -2,6 +2,6 @@
 {
     public interface ITimerItem : IWorkflowItem
     {
-        TimerEvent LatestEvent { get; }
+        WorkflowItemEvent LatestEvent { get; }
     }
 }

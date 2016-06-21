@@ -5,7 +5,7 @@ namespace Guflow
 {
     public class TimerCancelledEvent : TimerEvent
     {
-        public TimerCancelledEvent(HistoryEvent timerCancelledEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public TimerCancelledEvent(HistoryEvent timerCancelledEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerCancelledEvent.EventId)
         {
             var eventAttributes = timerCancelledEvent.TimerCanceledEventAttributes;
             PopulateProperties(eventAttributes.StartedEventId, allHistoryEvents);

@@ -5,7 +5,7 @@ namespace Guflow
     public class TimerStartFailedEvent : WorkflowItemEvent
     {
         private readonly StartTimerFailedEventAttributes _startTimerFailedAttributes;
-        public TimerStartFailedEvent(HistoryEvent startTimerFailedEvent)
+        public TimerStartFailedEvent(HistoryEvent startTimerFailedEvent) : base(startTimerFailedEvent.EventId)
         {
             _startTimerFailedAttributes = startTimerFailedEvent.StartTimerFailedEventAttributes;
             AwsIdentity =  AwsIdentity.Raw(_startTimerFailedAttributes.TimerId);

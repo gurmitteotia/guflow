@@ -123,6 +123,7 @@
     <Compile Include="TimerCancellationFailedEvent.cs" />
     <Compile Include="TimerCancelledEvent.cs" />
     <Compile Include="TimerEvent.cs" />
+    <Compile Include="TimerStartedEvent.cs" />
     <Compile Include="TimerStartFailedEvent.cs" />
     <Compile Include="TimerFiredEvent.cs" />
     <Compile Include="TimerItem.cs" />

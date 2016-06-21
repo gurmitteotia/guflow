@@ -6,7 +6,7 @@ namespace Guflow
     public class ActivityCancelledEvent : ActivityEvent
     {
         private readonly ActivityTaskCanceledEventAttributes _eventAttributes;
-        public ActivityCancelledEvent(HistoryEvent cancelledActivityEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public ActivityCancelledEvent(HistoryEvent cancelledActivityEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(cancelledActivityEvent.EventId)
         {
             _eventAttributes = cancelledActivityEvent.ActivityTaskCanceledEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);

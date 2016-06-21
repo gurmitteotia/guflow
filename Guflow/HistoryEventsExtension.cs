@@ -51,6 +51,26 @@ namespace Guflow
         {
             return historyEvent.EventType == EventType.TimerFired;
         }
+
+        public static bool IsTimerStartedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.TimerStarted;
+        }
+
+        public static bool IsTimerStartFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.StartTimerFailed;
+        }
+
+        public static bool IsTimerCancelledEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.TimerCanceled;
+        }
+
+        public static bool IsTimerCancellationFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.CancelTimerFailed;
+        }
         public static bool IsWorkflowStartedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.WorkflowExecutionStarted;
@@ -59,14 +79,6 @@ namespace Guflow
         private static bool IsTimerFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.StartTimerFailed;
-        }
-        private static bool IsTimerCancelledEvent(this HistoryEvent historyEvent)
-        {
-            return historyEvent.EventType == EventType.TimerCanceled;
-        }
-        private static bool IsTimerCancellationFailedEvent(this HistoryEvent historyEvent)
-        {
-            return historyEvent.EventType == EventType.CancelTimerFailed;
         }
         public static bool IsActivityStartedEventFor(this HistoryEvent historyEvent, long startedEventId)
         {

@@ -10,6 +10,10 @@ namespace Guflow
         private string _activityPositionalName;
         public string WorkerIdentity { get; private set; }
 
+        protected ActivityEvent(long eventId)
+            : base(eventId)
+        {
+        }
         protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
         {
             bool foundActivityScheduledEvent=false;

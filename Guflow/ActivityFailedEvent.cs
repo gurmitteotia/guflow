@@ -7,7 +7,7 @@ namespace Guflow
     {
         private readonly ActivityTaskFailedEventAttributes _eventAttributes;
 
-        internal ActivityFailedEvent(HistoryEvent activityFailedHistoryEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        internal ActivityFailedEvent(HistoryEvent activityFailedHistoryEvent, IEnumerable<HistoryEvent> allHistoryEvents) : base(activityFailedHistoryEvent.EventId)
         {
             _eventAttributes = activityFailedHistoryEvent.ActivityTaskFailedEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);

@@ -6,7 +6,7 @@ namespace Guflow
     public class ActivityTimedoutEvent : ActivityEvent
     {
         private readonly ActivityTaskTimedOutEventAttributes _eventAttributes;
-        public ActivityTimedoutEvent(HistoryEvent activityTimedoutEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public ActivityTimedoutEvent(HistoryEvent activityTimedoutEvent, IEnumerable<HistoryEvent> allHistoryEvents) : base(activityTimedoutEvent.EventId)
         {
             _eventAttributes = activityTimedoutEvent.ActivityTaskTimedOutEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);

@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Linq;
+using NUnit.Framework;
 
 namespace Guflow.Tests
 {
@@ -17,6 +19,30 @@ namespace Guflow.Tests
         {
             Assert.Throws<ParentItemMissingException>(() => new WorkflowWithNonExistentParentActivityItem());
             Assert.Throws<ParentItemMissingException>(()=>new WorkflowWithNonExistentParentTimerItem());
+        }
+
+        [Test]
+        public void Activityof_test()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("Activity1", "1.0"),"id","result");
+            var activityCompletedEvent = new ActivityCompletedEvent(eventGraph.First(),eventGraph);
+            var workflow = new TestWorkflow();
+
+            var activity = workflow.GetActivityOf(activityCompletedEvent);
+
+            Assert.That(activity,Is.EqualTo(new ActivityItem(Identity.New("Activity1","1.0"),workflow)));
+        }
+
+        [Test]
+        public void Timerof_test()
+        {
+            var eventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("Timer1"),TimeSpan.FromSeconds(2));
+            var activityCompletedEvent = new TimerFiredEvent(eventGraph.First(), eventGraph);
+            var workflow = new TestWorkflow();
+
+            var activity = workflow.GetTimerOf(activityCompletedEvent);
+
+            Assert.That(activity, Is.EqualTo(new TimerItem(Identity.Timer("Timer1"), workflow)));
         }
 
         private class WorkflowWithSameActivity : Workflow
@@ -48,6 +74,25 @@ namespace Guflow.Tests
             public WorkflowWithNonExistentParentTimerItem()
             {
                 ScheduleActivity("_timerName", "version").DependsOn("ParentName");
+            }
+        }
+
+        private class TestWorkflow : Workflow
+        {
+            public TestWorkflow()
+            {
+                ScheduleTimer("Timer1");
+                ScheduleActivity("Activity1", "1.0");
+            }
+
+            public IActivityItem GetActivityOf(WorkflowItemEvent workflowItemEvent)
+            {
+                return ActivityOf(workflowItemEvent);
+            }
+
+            public ITimerItem GetTimerOf(WorkflowItemEvent workflowItemEvent)
+            {
+                return TimerOf(workflowItemEvent);
             }
         }
     }

@@ -6,7 +6,7 @@ namespace Guflow
 {
     public class ActivityScheduledEvent : ActivityEvent
     {
-        internal ActivityScheduledEvent(HistoryEvent scheduledActivityEvent,IEnumerable<HistoryEvent> allHistoryEvents)
+        internal ActivityScheduledEvent(HistoryEvent scheduledActivityEvent,IEnumerable<HistoryEvent> allHistoryEvents) : base(scheduledActivityEvent.EventId)
         {
             PopulateActivityFrom(allHistoryEvents, 0, scheduledActivityEvent.EventId);
             IsActive = true;
