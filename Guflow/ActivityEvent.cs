@@ -8,6 +8,8 @@ namespace Guflow
         private string _activityName;
         private string _activityVersion;
         private string _activityPositionalName;
+        private long _startedEventId;
+        private long _scheduledEventId;
         public string WorkerIdentity { get; private set; }
 
         protected ActivityEvent(long eventId)
@@ -17,6 +19,8 @@ namespace Guflow
         protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
         {
             bool foundActivityScheduledEvent=false;
+            _startedEventId = startedEventId;
+            _scheduledEventId = scheduledEventId;
             foreach (var historyEvent in allHistoryEvents)
             {
                 if (historyEvent.IsActivityStartedEventFor(startedEventId))
@@ -39,6 +43,21 @@ namespace Guflow
         public override string ToString()
         {
             return string.Format("{0} for activity name {1}, version {2} and positional name {3}", GetType().Name, _activityName, _activityVersion, _activityPositionalName);
+        }
+
+        internal bool InChainOf(IEnumerable<ActivityEvent> activityEvents)
+        {
+            foreach (var itemEvent in activityEvents)
+            {
+                if (IsInChainOf(itemEvent))
+                    return true;
+            }
+            return false;
+        }
+        private bool IsInChainOf(ActivityEvent otherActivityEvent)
+        {
+            return _startedEventId == otherActivityEvent._startedEventId ||
+                   _scheduledEventId == otherActivityEvent._scheduledEventId;
         }
     }
 }

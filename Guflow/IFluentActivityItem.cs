@@ -10,7 +10,7 @@ namespace Guflow
         IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationAction);
         IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> onFailedSchedulingAction);
         IFluentActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc);
-        IFluentActivityItem WithInput(Func<IActivityItem, string> inputFunc);
+        IFluentActivityItem WithInput(Func<IActivityItem, object> inputFunc);
         IFluentActivityItem OnTaskList(Func<IActivityItem, string> taskListFunc);
         IFluentActivityItem When(Func<IActivityItem, bool> whenFunc);
         IFluentActivityItem WithPriority(Func<IActivityItem, int?> priorityFunc);

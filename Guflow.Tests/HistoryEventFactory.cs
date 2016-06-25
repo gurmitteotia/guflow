@@ -499,12 +499,12 @@ namespace Guflow.Tests
 
             public long CompletedId
             {
-                get { return _completedId;}
+                get { return _completedId; }
             }
 
             public long CancelRequestedId
             {
-                get { return _completedId-1;}
+                get { return _completedId - 1; }
             }
             public long StartedId
             {
@@ -516,6 +516,5 @@ namespace Guflow.Tests
                 get { return _completedId - 3; }
             }
         }
-
     }
 }

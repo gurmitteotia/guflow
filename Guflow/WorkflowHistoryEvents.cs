@@ -22,7 +22,7 @@ namespace Guflow
         {
         }
 
-        public WorkflowItemEvent LatestActivityEventFor(WorkflowItem activityItem)
+        public WorkflowItemEvent LastActivityEventFor(WorkflowItem activityItem)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
@@ -32,7 +32,6 @@ namespace Guflow
                     if (completedActivityEvent.IsFor(activityItem))
                         return completedActivityEvent;
                 }
-
                 else if (historyEvent.IsActivityFailedEvent())
                 {
                     var failedActivityEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
@@ -86,7 +85,7 @@ namespace Guflow
             return WorkflowItemEvent.NotFound;
         }
 
-        public WorkflowItemEvent LatestTimerEventFor(WorkflowItem timerItem)
+        public WorkflowItemEvent LastTimerEventFor(WorkflowItem timerItem)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
@@ -154,6 +153,88 @@ namespace Guflow
         public bool IsActive()
         {
             throw new System.NotImplementedException();
+        }
+
+        public ActivityCompletedEvent LastCompletedEventFor(ActivityItem activityItem)
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if (historyEvent.IsActivityCompletedEvent())
+                {
+                    var activityCompletedEvent = new ActivityCompletedEvent(historyEvent,_allHistoryEvents);
+                    if (activityCompletedEvent.IsFor(activityItem))
+                        return activityCompletedEvent;
+                }
+            }
+            return null;
+        }
+
+        public ActivityFailedEvent LastFailedEventFor(ActivityItem activityItem)
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if (historyEvent.IsActivityFailedEvent())
+                {
+                    var activityFailedEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
+                    if (activityFailedEvent.IsFor(activityItem))
+                        return activityFailedEvent;
+                }
+            }
+            return null;
+        }
+        public ActivityTimedoutEvent LastTimedoutEventFor(ActivityItem activityItem)
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if (historyEvent.IsActivityTimedoutEvent())
+                {
+                    var activityTimedoutEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
+                    if (activityTimedoutEvent.IsFor(activityItem))
+                        return activityTimedoutEvent;
+                }
+            }
+            return null;
+        }
+
+        public ActivityCancelledEvent LastCancelledEventFor(ActivityItem activityItem)
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if (historyEvent.IsActivityCancelledEvent())
+                {
+                    var activityCancelledEvent = new ActivityCancelledEvent(historyEvent, _allHistoryEvents);
+                    if (activityCancelledEvent.IsFor(activityItem))
+                        return activityCancelledEvent;
+                }
+            }
+            return null;
+        }
+
+        public IEnumerable<WorkflowItemEvent> AllEventsFor(ActivityItem activityItem)
+        {
+            var activityEvents = new List<ActivityEvent>();
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if (historyEvent.IsActivityCompletedEvent())
+                {
+                    var activityCompletedEvent = new ActivityCompletedEvent(historyEvent,_allHistoryEvents);
+                    if(activityCompletedEvent.IsFor(activityItem))
+                        activityEvents.Add(activityCompletedEvent);
+                }
+                else if (historyEvent.IsActivityStartedEvent())
+                {
+                    var activityStartedEvent = new ActivityStartedEvent(historyEvent, _allHistoryEvents);
+                    if (activityStartedEvent.IsFor(activityItem) && !activityStartedEvent.InChainOf(activityEvents))
+                        activityEvents.Add(activityStartedEvent);
+                }
+                else if (historyEvent.IsActivityScheduledEvent())
+                {
+                    var activityScheduledEvent = new ActivityScheduledEvent(historyEvent,_allHistoryEvents);
+                    if(activityScheduledEvent.IsFor(activityItem) && !activityScheduledEvent.InChainOf(activityEvents))
+                        activityEvents.Add(activityScheduledEvent);
+                }
+            }
+            return activityEvents;
         }
     }
 }

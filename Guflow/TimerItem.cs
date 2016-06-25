@@ -20,9 +20,9 @@ namespace Guflow
             _onTimerCancelledAction = c => WorkflowAction.CancelWorkflow("TIMER_CANCELLED");
             _whenFunc = t => true;
         }
-        public WorkflowItemEvent LatestEvent
+        public WorkflowItemEvent LastEvent
         {
-            get { return WorkflowHistoryEvents.LatestTimerEventFor(this); }
+            get { return WorkflowHistoryEvents.LastTimerEventFor(this); }
         }
         public IFluentTimerItem FireAfter(TimeSpan fireAfter)
         {
@@ -105,7 +105,7 @@ namespace Guflow
 
         protected override bool IsProcessed()
         {
-            var timerEvent = LatestEvent;
+            var timerEvent = LastEvent;
             return timerEvent != null;
         }
     }

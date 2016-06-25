@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -21,7 +22,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_be_configured_to_schedule_activity_with_custom_input()
+        public void Can_be_configured_to_schedule_activity_with_custom_input_string()
         {
             const string activityInput = "actvity";
             var activityItem = new ActivityItem(_activityIdenity, null);
@@ -30,6 +31,28 @@ namespace Guflow.Tests
             var decision = (ScheduleActivityDecision) activityItem.GetScheduleDecision();
 
             Assert.That(decision.Input,Is.EqualTo(activityInput));
+        }
+
+        [Test]
+        public void Can_be_configured_to_schedule_activity_with_custom_input_object()
+        {
+            var activityItem = new ActivityItem(_activityIdenity, null);
+            activityItem.WithInput(a => new{InputFile ="SomeFile", Rate =50});
+
+            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+
+            Assert.That(decision.Input, Is.EqualTo(new { InputFile = "SomeFile", Rate = 50 }.ToJson()));
+        }
+
+        [Test]
+        public void Can_be_configured_to_schedule_activity_with_null_input()
+        {
+            var activityItem = new ActivityItem(_activityIdenity, null);
+            activityItem.WithInput(a => null);
+
+            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+
+            Assert.That(decision.Input, Is.Null);
         }
 
         [Test]
@@ -148,91 +171,212 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Latest_event_can_be_activity_started_event()
+        public void Last_event_can_be_activity_started_event()
         {
             var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
             var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
 
-            var latestEvent = activityItem.LatestEvent;
+            var latestEvent = activityItem.LastEvent;
 
             Assert.That(latestEvent,Is.EqualTo(new ActivityStartedEvent(eventGraph.First(),eventGraph)));
         }
 
         [Test]
-        public void Latest_event_can_be_activity_scheduled_event()
+        public void Last_event_can_be_activity_scheduled_event()
         {
             var eventGraph = HistoryEventFactory.CreateActivityScheduledEventGraph(_activityIdenity);
-            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
+            var activityItem = CreateActivityItemWith(eventGraph);
 
-            var latestEvent = activityItem.LatestEvent;
+            var latestEvent = activityItem.LastEvent;
 
             Assert.That(latestEvent, Is.EqualTo(new ActivityScheduledEvent(eventGraph.First(),eventGraph)));
         }
 
         [Test]
-        public void Latest_event_can_be_activity_cancel_requested_event()
+        public void Last_event_can_be_activity_cancel_requested_event()
         {
             var eventGraph = HistoryEventFactory.CreateActivityCancelRequestedGraph(_activityIdenity, "workerid");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
+            var activityItem = CreateActivityItemWith(eventGraph);
 
-            var latestEvent = activityItem.LatestEvent;
+            var latestEvent = activityItem.LastEvent;
 
             Assert.That(latestEvent, Is.EqualTo(new ActivityCancelRequestedEvent(eventGraph.First())));
         }
 
         [Test]
-        public void Latest_event_can_be_activity_cancellation_failed_event()
+        public void Last_event_can_be_activity_cancellation_failed_event()
         {
             var eventGraph = HistoryEventFactory.CreateActivityCancellationFailedEventGraph(_activityIdenity, "workerid");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
-
-            var latestEvent = activityItem.LatestEvent;
+            var activityItem = CreateActivityItemWith(eventGraph);
+            
+            var latestEvent = activityItem.LastEvent;
 
             Assert.That(latestEvent, Is.EqualTo(new ActivityCancellationFailedEvent(eventGraph.First())) );
         }
 
         [Test]
-        public void Latest_event_can_be_activity_scheduling_failed_event()
+        public void Last_event_can_be_activity_scheduling_failed_event()
         {
             var eventGraph = HistoryEventFactory.CreateActivitySchedulingFailedEventGraph(_activityIdenity, "workerid");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
+            var activityItem = CreateActivityItemWith(eventGraph);
 
-            var latestEvent = activityItem.LatestEvent;
+            var latestEvent = activityItem.LastEvent;
 
             Assert.That(latestEvent,Is.EqualTo(new ActivitySchedulingFailedEvent(eventGraph.First())));
         }
 
         [Test]
-        public void Latest_event_is_timer_event_when_timer_events_are_newer_then_activity_event()
+        public void Last_event_is_timer_event_when_timer_events_are_newer_then_activity_event()
         {
             var timerStartedEventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_activityIdenity,TimeSpan.FromSeconds(2));
-            var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph.Concat(HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "workerid","reason","detail")));
+            var eventGraph = timerStartedEventGraph.Concat(HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "workerid","reason","detail"));
+            var activityItem = CreateActivityItemWith(eventGraph);
 
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
-
-            var latestEvent = activityItem.LatestEvent;
+            var latestEvent = activityItem.LastEvent;
 
             Assert.That(latestEvent,Is.EqualTo(new TimerStartedEvent(timerStartedEventGraph.First(),timerStartedEventGraph)));
         }
 
         [Test]
-        public void Latest_event_is_activity_event_when_activity_events_are_newer_then_timer_event()
+        public void Last_event_is_activity_event_when_activity_events_are_newer_then_timer_event()
         {
             var activityFailedEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "workerid", "reason", "detail");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(activityFailedEventGraph.Concat(HistoryEventFactory.CreateTimerFiredEventGraph(_activityIdenity,TimeSpan.FromSeconds(2))));
+            var eventGraph =activityFailedEventGraph.Concat(HistoryEventFactory.CreateTimerFiredEventGraph(_activityIdenity,TimeSpan.FromSeconds(2)));
+            var activityItem = CreateActivityItemWith(eventGraph);
 
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
 
-            var latestEvent = activityItem.LatestEvent;
+            var latestEvent = activityItem.LastEvent;
 
             Assert.That(latestEvent, Is.EqualTo(new ActivityFailedEvent(activityFailedEventGraph.First(), activityFailedEventGraph)));
         }
 
+        [Test]
+        public void Can_return_last_completed_event()
+        {
+            var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityIdenity, "workerid", "detail");
+            var eventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "id","reason","detail").Concat(activityCompletedEventGraph);
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var lastCompletedEvent = activityItem.LastCompletedEvent;
+
+            Assert.That(lastCompletedEvent, Is.EqualTo(new ActivityCompletedEvent(activityCompletedEventGraph.First(), activityCompletedEventGraph)));
+        }
+        [Test]
+        public void Can_return_null_when_last_completed_event_is_not_found()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "id", "reason", "detail");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var lastCompletedEvent = activityItem.LastCompletedEvent;
+
+            Assert.That(lastCompletedEvent, Is.Null);
+        }
+        [Test]
+        public void Can_return_last_failed_event()
+        {
+            var activityFailedEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "workerid", "reason","detail");
+            var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id").Concat(activityFailedEventGraph);
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var lastFailedEvent = activityItem.LastFailedEvent;
+
+            Assert.That(lastFailedEvent, Is.EqualTo(new ActivityFailedEvent(activityFailedEventGraph.First(), activityFailedEventGraph)));
+        }
+        [Test]
+        public void Can_return_null_when_last_failed_event_is_not_found()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var lastFailedEvent = activityItem.LastFailedEvent;
+
+            Assert.That(lastFailedEvent, Is.Null);
+        }
+        [Test]
+        public void Can_return_last_timedout_event()
+        {
+            var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(_activityIdenity, "workerid", "reason", "detail");
+            var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id").Concat(activityTimedoutEventGraph);
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var lastTimedoutEvent = activityItem.LastTimedoutEvent;
+
+            Assert.That(lastTimedoutEvent, Is.EqualTo(new ActivityTimedoutEvent(activityTimedoutEventGraph.First(), activityTimedoutEventGraph)));
+        }
+        [Test]
+        public void Can_return_null_when_last_timedout_event_is_not_found()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var lastTimedoutEvent = activityItem.LastTimedoutEvent;
+
+            Assert.That(lastTimedoutEvent, Is.Null);
+        }
+        [Test]
+        public void Can_return_last_cancelled_event()
+        {
+            var activityCancelledEventGraph = HistoryEventFactory.CreateActivityCancelledEventGraph(_activityIdenity, "workerid", "detail");
+            var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id").Concat(activityCancelledEventGraph);
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var lastCancelledEvent = activityItem.LastCancelledEvent;
+
+            Assert.That(lastCancelledEvent, Is.EqualTo(new ActivityCancelledEvent(activityCancelledEventGraph.First(), activityCancelledEventGraph)));
+        }
+        [Test]
+        public void Can_return_null_when_last_cancelled_event_is_not_found()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var lastCancelledEvent = activityItem.LastCancelledEvent;
+
+            Assert.That(lastCancelledEvent, Is.Null);
+        }
+
+        [Test]
+        public void All_events_can_return_only_one_completed_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityIdenity, "workerid", "detail");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[]{new ActivityCompletedEvent(eventGraph.First(), eventGraph)}));
+        }
+
+        [Test]
+        public void All_events_can_return_completed_event_and_started_event()
+        {
+            var completedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityIdenity, "workerid", "detail");
+            var startedEventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
+            var activityItem = CreateActivityItemWith(completedEventGraph.Concat(startedEventGraph));
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new ActivityCompletedEvent(completedEventGraph.First(), completedEventGraph), new ActivityStartedEvent(startedEventGraph.First(), startedEventGraph) }));
+        }
+
+        [Test]
+        public void All_events_can_return_completed_event_and_scheduled_event()
+        {
+            var completedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityIdenity, "workerid", "detail");
+            var scheduledEventGraph = HistoryEventFactory.CreateActivityScheduledEventGraph(_activityIdenity);
+            var activityItem = CreateActivityItemWith(completedEventGraph.Concat(scheduledEventGraph));
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new ActivityCompletedEvent(completedEventGraph.First(), completedEventGraph), new ActivityScheduledEvent(scheduledEventGraph.First(), scheduledEventGraph),  }));
+        }
+        
+        private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
+        {
+            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+            return new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
+        }
+        
         private class TestWorkflowItems : IWorkflowItems
         {
             public TestWorkflowItems(IWorkflowHistoryEvents workflowHistoryEvents)

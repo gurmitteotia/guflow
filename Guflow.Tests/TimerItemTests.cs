@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -41,60 +43,65 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Latest_event_can_be_timer_started_event()
+        public void Last_event_can_be_timer_started_event()
         {
-            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateTimerStartedEventGraph(_timerIdentity,TimeSpan.FromSeconds(2)));
-            var timerItem = new TimerItem(_timerIdentity, new TestWorkflowItems(workflowHistoryEvents));
+            var eventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var timerItem = CreateTimerItemFor(eventGraph);
 
-            var latestEvent = timerItem.LatestEvent as TimerStartedEvent;
+            var latestEvent = timerItem.LastEvent;
 
-            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+            Assert.That(latestEvent, Is.EqualTo(new TimerStartedEvent(eventGraph.First(),eventGraph)));
         }
 
         [Test]
-        public void Latest_event_can_be_timer_fired_event()
+        public void Last_event_can_be_timer_fired_event()
         {
-            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateTimerFiredEventGraph(_timerIdentity, TimeSpan.FromSeconds(2)));
-            var timerItem = new TimerItem(_timerIdentity, new TestWorkflowItems(workflowHistoryEvents));
+            var eventGraph =HistoryEventFactory.CreateTimerFiredEventGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var timerItem = CreateTimerItemFor(eventGraph);
 
-            var latestEvent = timerItem.LatestEvent as TimerFiredEvent;
+            var latestEvent = timerItem.LastEvent;
 
-            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+            Assert.That(latestEvent, Is.EqualTo(new TimerFiredEvent(eventGraph.First(),eventGraph)));
         }
 
         [Test]
-        public void Latest_event_can_be_timer_start_failed_event()
+        public void Last_event_can_be_timer_start_failed_event()
         {
-            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateTimerStartFailedEventGraph(_timerIdentity, "cause"));
-            var timerItem = new TimerItem(_timerIdentity, new TestWorkflowItems(workflowHistoryEvents));
+            var eventGraph =HistoryEventFactory.CreateTimerStartFailedEventGraph(_timerIdentity, "cause");
+            var timerItem = CreateTimerItemFor(eventGraph);
 
-            var latestEvent = timerItem.LatestEvent as TimerStartFailedEvent;
+            var latestEvent = timerItem.LastEvent;
 
-            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+            Assert.That(latestEvent, Is.EqualTo(new TimerStartFailedEvent(eventGraph.First())));
         }
 
         [Test]
-        public void Latest_event_can_be_timer_cancelled_event()
+        public void Last_event_can_be_timer_cancelled_event()
         {
-            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateTimerCancelledEventGraph(_timerIdentity, TimeSpan.FromSeconds(2)));
-            var timerItem = new TimerItem(_timerIdentity, new TestWorkflowItems(workflowHistoryEvents));
+            var eventGraph = HistoryEventFactory.CreateTimerCancelledEventGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var timerItem = CreateTimerItemFor(eventGraph);
 
-            var latestEvent = timerItem.LatestEvent as TimerCancelledEvent;
+            var latestEvent = timerItem.LastEvent;
 
-            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+            Assert.That(latestEvent, Is.EqualTo(new TimerCancelledEvent(eventGraph.First(),eventGraph)));
         }
 
         [Test]
-        public void Latest_event_can_be_timer_cancellation_failed_event()
+        public void Last_event_can_be_timer_cancellation_failed_event()
         {
-            var workflowHistoryEvents = new WorkflowHistoryEvents(HistoryEventFactory.CreateTimerCancellationFailedEventGraph(_timerIdentity, "cause"));
-            var timerItem = new TimerItem(_timerIdentity, new TestWorkflowItems(workflowHistoryEvents));
+            var eventGraph=HistoryEventFactory.CreateTimerCancellationFailedEventGraph(_timerIdentity, "cause");
+            var timerItem = CreateTimerItemFor(eventGraph);
 
-            var latestEvent = timerItem.LatestEvent as TimerCancellationFailedEvent;
+            var latestEvent = timerItem.LastEvent;
 
-            Assert.NotNull(latestEvent, "Activity Item should have returned latest event");
+            Assert.That(latestEvent, Is.EqualTo(new TimerCancellationFailedEvent(eventGraph.First())));
         }
 
+        private TimerItem CreateTimerItemFor(IEnumerable<HistoryEvent> eventGraph)
+        {
+            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+            return new TimerItem(_timerIdentity, new TestWorkflowItems(workflowHistoryEvents));
+        }
         private class TestWorkflowItems : IWorkflowItems
         {
             public TestWorkflowItems(IWorkflowHistoryEvents workflowHistoryEvents)

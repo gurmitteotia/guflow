@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -10,7 +12,7 @@ namespace Guflow
         private Func<ActivityCancelledEvent, WorkflowAction> _onCancelledAction;
         private Func<ActivityCancellationFailedEvent, WorkflowAction> _onCancellationFailedAction;
         private Func<ActivitySchedulingFailedEvent, WorkflowAction> _onFailedSchedulingAction;
-        private Func<IActivityItem, string> _inputFunc;
+        private Func<IActivityItem, object> _inputFunc;
         private Func<IActivityItem, string> _taskListFunc;
         private Func<IActivityItem, bool> _whenFunc;
         private Func<IActivityItem, int?> _priorityFunc;
@@ -32,18 +34,44 @@ namespace Guflow
             _timeoutsFunc = a => new ScheduleActivityTimeouts();
         }
 
-        public WorkflowItemEvent LatestEvent
+        public WorkflowItemEvent LastEvent
         {
             get
             {
-                var latestActivityEvent = WorkflowHistoryEvents.LatestActivityEventFor(this);
-                var latestTimerEvent = WorkflowHistoryEvents.LatestTimerEventFor(this);
+                var latestActivityEvent = WorkflowHistoryEvents.LastActivityEventFor(this);
+                var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(this);
                 if (latestActivityEvent.IsNewerThan(latestTimerEvent))
                     return latestActivityEvent;
 
                 return latestTimerEvent;
             }
         }
+
+        public ActivityCompletedEvent LastCompletedEvent
+        {
+            get { return WorkflowHistoryEvents.LastCompletedEventFor(this); }
+        }
+
+        public ActivityFailedEvent LastFailedEvent
+        {
+            get { return WorkflowHistoryEvents.LastFailedEventFor(this); }
+        }
+
+        public ActivityTimedoutEvent LastTimedoutEvent
+        {
+            get { return WorkflowHistoryEvents.LastTimedoutEventFor(this); }
+        }
+
+        public ActivityCancelledEvent LastCancelledEvent
+        {
+            get { return WorkflowHistoryEvents.LastCancelledEventFor(this); }
+        }
+
+        public IEnumerable<WorkflowItemEvent> AllEvents
+        {
+            get { return WorkflowHistoryEvents.AllEventsFor(this); }
+        }
+
         public string Version
         {
             get { return Identity.Version; }
@@ -99,7 +127,7 @@ namespace Guflow
             _onCancellationFailedAction = onFailedCancellationAction;
             return this;
         }
-        public IFluentActivityItem WithInput(Func<IActivityItem, string> inputFunc)
+        public IFluentActivityItem WithInput(Func<IActivityItem, object> inputFunc)
         {
             _inputFunc = inputFunc;
             return this;
@@ -130,14 +158,13 @@ namespace Guflow
         {
             get { return RescheduleTimerItem; }
         }
-
         internal override WorkflowDecision GetScheduleDecision()
         {
             if(!_whenFunc(this))
                 return WorkflowDecision.Empty;
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
-            scheduleActivityDecision.UseInputFunc(()=>_inputFunc(this));
+            scheduleActivityDecision.UseInputFunc(GetActivityInput);
             scheduleActivityDecision.TaskList = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);
             scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
@@ -175,7 +202,7 @@ namespace Guflow
         }
         protected override bool IsProcessed()
         {
-            var activity = LatestEvent;
+            var activity = LastEvent;
             return activity != WorkflowItemEvent.NotFound && !activity.IsActive ;
         }
         internal WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
@@ -197,6 +224,18 @@ namespace Guflow
         internal WorkflowAction SchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
         {
             return _onFailedSchedulingAction(activitySchedulingFailedEvent);
+        }
+
+        private string GetActivityInput()
+        {
+            var inputObject = _inputFunc(this);
+            if (inputObject == null)
+                return null;
+            var inputAsString = inputObject as string;
+            if (inputAsString != null)
+                return inputAsString;
+
+            return inputObject.ToJson();
         }
     }
 }
