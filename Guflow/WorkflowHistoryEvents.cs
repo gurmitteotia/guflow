@@ -221,6 +221,18 @@ namespace Guflow
                     if(activityCompletedEvent.IsFor(activityItem))
                         activityEvents.Add(activityCompletedEvent);
                 }
+                else if (historyEvent.IsActivityFailedEvent())
+                {
+                    var activityFailedEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
+                    if (activityFailedEvent.IsFor(activityItem))
+                        activityEvents.Add(activityFailedEvent);
+                }
+                else if (historyEvent.IsActivityTimedoutEvent())
+                {
+                    var timedoutActivityEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
+                    if (timedoutActivityEvent.IsFor(activityItem))
+                        activityEvents.Add(timedoutActivityEvent);
+                }
                 else if (historyEvent.IsActivityStartedEvent())
                 {
                     var activityStartedEvent = new ActivityStartedEvent(historyEvent, _allHistoryEvents);

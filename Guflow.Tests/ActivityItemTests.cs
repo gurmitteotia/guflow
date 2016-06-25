@@ -337,7 +337,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void All_events_can_return_only_one_completed_event()
+        public void All_events_can_return_completed_event()
         {
             var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityIdenity, "workerid", "detail");
             var activityItem = CreateActivityItemWith(eventGraph);
@@ -369,6 +369,28 @@ namespace Guflow.Tests
             var allEvents = activityItem.AllEvents;
 
             Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new ActivityCompletedEvent(completedEventGraph.First(), completedEventGraph), new ActivityScheduledEvent(scheduledEventGraph.First(), scheduledEventGraph),  }));
+        }
+
+        [Test]
+        public void All_events_can_return_failed_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "workerid", "reason","detail");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivityFailedEvent(eventGraph.First(), eventGraph),  }));
+        }
+
+        [Test]
+        public void All_events_can_return_timedout_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(_activityIdenity, "workerid", "reason", "detail");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivityTimedoutEvent(eventGraph.First(), eventGraph), }));
         }
         
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
