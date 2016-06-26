@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -40,7 +41,7 @@ namespace Guflow
             {
                 var latestActivityEvent = WorkflowHistoryEvents.LastActivityEventFor(this);
                 var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(this);
-                if (latestActivityEvent.IsNewerThan(latestTimerEvent))
+                if (latestActivityEvent>latestTimerEvent)
                     return latestActivityEvent;
 
                 return latestTimerEvent;

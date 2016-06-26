@@ -1,6 +1,9 @@
-﻿namespace Guflow
+﻿using System;
+using System.Collections.Generic;
+
+namespace Guflow
 {
-    public abstract class WorkflowEvent
+    public abstract class WorkflowEvent : IComparer<WorkflowEvent>, IComparable<WorkflowEvent>
     {
         private readonly long _eventId;
         protected WorkflowEvent(long eventId)
@@ -10,9 +13,14 @@
 
         internal abstract WorkflowAction Interpret(IWorkflow workflow);
         
-        public bool IsNewerThan(WorkflowEvent otherWorkflowEvent)
+        public int Compare(WorkflowEvent first, WorkflowEvent second)
         {
-            return _eventId > otherWorkflowEvent._eventId;
+            return first.CompareTo(second);
+        }
+
+        public int CompareTo(WorkflowEvent other)
+        {
+            return _eventId.CompareTo(other._eventId);
         }
 
         public override string ToString()
@@ -42,6 +50,22 @@
             return Equals(left, right);
         }
 
+        public static bool operator >=(WorkflowEvent left, WorkflowEvent right)
+        {
+            return left.CompareTo(right)>=0;
+        }
+        public static bool operator >(WorkflowEvent left, WorkflowEvent right)
+        {
+            return left.CompareTo(right) >0;
+        }
+        public static bool operator <=(WorkflowEvent left, WorkflowEvent right)
+        {
+            return left.CompareTo(right)<=0;
+        }
+        public static bool operator <(WorkflowEvent left, WorkflowEvent right)
+        {
+            return left.CompareTo(right) < 0;
+        }
         public static bool operator !=(WorkflowEvent left, WorkflowEvent right)
         {
             return !Equals(left, right);
