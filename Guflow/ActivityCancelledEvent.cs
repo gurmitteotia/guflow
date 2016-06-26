@@ -17,5 +17,10 @@ namespace Guflow
         {
             return workflow.ActivityCancelled(this);
         }
+
+        internal bool IsCancelledEventFor(long cancelRequestedEventId)
+        {
+            return _eventAttributes.LatestCancelRequestedEventId == cancelRequestedEventId;
+        }
     }
 }

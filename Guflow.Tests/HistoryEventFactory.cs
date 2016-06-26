@@ -155,7 +155,7 @@ namespace Guflow.Tests
                 EventId = eventIds.CancelRequestedId,
                 ActivityTaskCancelRequestedEventAttributes = new ActivityTaskCancelRequestedEventAttributes()
                 {
-                    ActivityId = string.Empty
+                    ActivityId = activityIdentity.Id
                 }
             });
 

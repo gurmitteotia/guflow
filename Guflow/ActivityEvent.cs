@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -45,11 +46,22 @@ namespace Guflow
             return string.Format("{0} for activity name {1}, version {2} and positional name {3}", GetType().Name, _activityName, _activityVersion, _activityPositionalName);
         }
 
-        internal bool InChainOf(IEnumerable<ActivityEvent> activityEvents)
+        internal override bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)
         {
-            foreach (var itemEvent in activityEvents)
+            foreach (var itemEvent in workflowItemEvents.OfType<ActivityEvent>())
             {
                 if (IsInChainOf(itemEvent))
+                    return true;
+            }
+            //swf does not link cancel requested/failed event with scheduled id or start id
+            foreach (var itemEvent in workflowItemEvents.OfType<ActivityCancelRequestedEvent>())
+            {
+                if (itemEvent.IsForSameWorkflowItemAs(this))
+                    return true;
+            }
+            foreach (var itemEvent in workflowItemEvents.OfType<ActivityCancellationFailedEvent>())
+            {
+                if (itemEvent.IsForSameWorkflowItemAs(this))
                     return true;
             }
             return false;

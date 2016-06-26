@@ -95,7 +95,7 @@ namespace Guflow
             return historyEvent.EventType == EventType.TimerStarted && historyEvent.EventId == timerStartedEventId;
         }
 
-        public static WorkflowEvent CreateEventFor(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public static WorkflowEvent CreateInterpretableEventFor(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             if (historyEvent.IsActivityCompletedEvent())
                 return new ActivityCompletedEvent(historyEvent, allHistoryEvents);
@@ -118,6 +118,44 @@ namespace Guflow
             if (historyEvent.IsTimerCancellationFailedEvent())
                 return new TimerCancellationFailedEvent(historyEvent);
             
+            return null;
+        }
+
+        public static WorkflowItemEvent CreateActivityEventFor(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        {
+            if (historyEvent.IsActivityCompletedEvent())
+                return new ActivityCompletedEvent(historyEvent, allHistoryEvents);
+            if (historyEvent.IsActivityFailedEvent())
+                return new ActivityFailedEvent(historyEvent, allHistoryEvents);
+            if (historyEvent.IsActivityTimedoutEvent())
+                return new ActivityTimedoutEvent(historyEvent, allHistoryEvents);
+            if (historyEvent.IsActivityCancelledEvent())
+                return new ActivityCancelledEvent(historyEvent, allHistoryEvents);
+            if(historyEvent.IsActivityCancelRequestedEvent())
+                return new ActivityCancelRequestedEvent(historyEvent);
+            if (historyEvent.IsActivityCancellationFailedEvent())
+                return new ActivityCancellationFailedEvent(historyEvent);
+            if (historyEvent.IsActivityStartedEvent())
+                return new ActivityStartedEvent(historyEvent,allHistoryEvents);
+            if (historyEvent.IsActivityScheduledEvent())
+                return new ActivityScheduledEvent(historyEvent, allHistoryEvents);
+            if (historyEvent.IsActivitySchedulingFailedEvent())
+                return new ActivitySchedulingFailedEvent(historyEvent);
+            return null;
+        }
+
+        public static WorkflowItemEvent CreateTimerEventFor(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        {
+            if (historyEvent.IsTimerFiredEvent())
+                return new TimerFiredEvent(historyEvent, allHistoryEvents);
+            if (historyEvent.IsTimerStartedEvent())
+                return new TimerStartedEvent(historyEvent, allHistoryEvents);
+            if (historyEvent.IsTimerStartFailedEvent())
+                return  new TimerStartFailedEvent(historyEvent);
+            if (historyEvent.IsTimerCancelledEvent())
+                return new TimerCancelledEvent(historyEvent, allHistoryEvents);
+            if (historyEvent.IsTimerCancellationFailedEvent())
+                return new TimerCancellationFailedEvent(historyEvent);
             return null;
         }
     }

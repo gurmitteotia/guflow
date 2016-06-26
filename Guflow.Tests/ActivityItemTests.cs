@@ -392,6 +392,86 @@ namespace Guflow.Tests
 
             Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivityTimedoutEvent(eventGraph.First(), eventGraph), }));
         }
+
+        [Test]
+        public void All_events_can_return_cancelled_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityCancelledEventGraph(_activityIdenity, "workerid", "detail");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivityCancelledEvent(eventGraph.First(), eventGraph), }));
+        }
+
+        [Test]
+        public void All_events_can_return_cancelled_event_and_cancel_requested_event()
+        {
+            var cancelledEventGraph = HistoryEventFactory.CreateActivityCancelledEventGraph(_activityIdenity, "workerid", "detail");
+            var cancelRequestedEventGraph = HistoryEventFactory.CreateActivityCancelRequestedGraph(_activityIdenity,"id");
+            var activityItem = CreateActivityItemWith(cancelledEventGraph.Concat(cancelRequestedEventGraph));
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new ActivityCancelledEvent(cancelledEventGraph.First(), cancelledEventGraph), new ActivityCancelRequestedEvent(cancelRequestedEventGraph.First()),  }));
+        }
+
+        [Test]
+        public void All_events_can_return_cancellation_failed_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityCancellationFailedEventGraph(_activityIdenity, "cause");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivityCancellationFailedEvent(eventGraph.First()), }));
+        }
+
+        [Test]
+        public void All_events_can_return_cancelled_event_and_cancellation_request_failed_event()
+        {
+            var cancelledEventGraph = HistoryEventFactory.CreateActivityCancelledEventGraph(_activityIdenity, "workerid", "detail");
+            var activityCancellationFailedEventGraph = HistoryEventFactory.CreateActivityCancellationFailedEventGraph(_activityIdenity, "id");
+            var activityItem = CreateActivityItemWith(cancelledEventGraph.Concat(activityCancellationFailedEventGraph));
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new ActivityCancelledEvent(cancelledEventGraph.First(), cancelledEventGraph), new ActivityCancellationFailedEvent(activityCancellationFailedEventGraph.First()), }));
+        }
+
+        [Test]
+        public void All_events_can_return_activity_started_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "workerid");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new []{ new ActivityStartedEvent(eventGraph.First(),eventGraph)}));
+        }
+
+        [Test]
+        public void All_events_can_return_activity_scheduled_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityScheduledEventGraph(_activityIdenity);
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivityScheduledEvent(eventGraph.First(), eventGraph),  }));
+        }
+
+        [Test]
+        public void All_events_can_return_activity_scheduling_failed_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivitySchedulingFailedEventGraph(_activityIdenity,"cause");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivitySchedulingFailedEvent(eventGraph.First()), }));
+        }
+      
         
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
         {

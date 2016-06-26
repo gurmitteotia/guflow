@@ -30,10 +30,14 @@
 
         public static bool operator ==(AwsIdentity left, AwsIdentity right)
         {
+            if (ReferenceEquals(left,null))
+                return false;
             return left.Equals(right);
         }
         public static bool operator !=(AwsIdentity left, AwsIdentity right)
         {
+            if (ReferenceEquals(left, null))
+                return false;
             return !left.Equals(right);
         }
         public static implicit operator string(AwsIdentity instance)

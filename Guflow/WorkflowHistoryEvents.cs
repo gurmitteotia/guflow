@@ -26,60 +26,11 @@ namespace Guflow
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
-                if (historyEvent.IsActivityCompletedEvent())
-                {
-                    var completedActivityEvent = new ActivityCompletedEvent(historyEvent,_allHistoryEvents);
-                    if (completedActivityEvent.IsFor(activityItem))
-                        return completedActivityEvent;
-                }
-                else if (historyEvent.IsActivityFailedEvent())
-                {
-                    var failedActivityEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
-                    if (failedActivityEvent.IsFor(activityItem))
-                        return failedActivityEvent;
-                }
-                else if (historyEvent.IsActivityTimedoutEvent())
-                {
-                    var timedoutActivityEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
-                    if (timedoutActivityEvent.IsFor(activityItem))
-                        return timedoutActivityEvent;
-                }
-                else if (historyEvent.IsActivityCancelledEvent())
-                {
-                    var cancelledActivityEvent = new ActivityCancelledEvent(historyEvent, _allHistoryEvents);
-                    if (cancelledActivityEvent.IsFor(activityItem))
-                        return cancelledActivityEvent;
-                }
-                else if (historyEvent.IsActivityCancelRequestedEvent())
-                {
-                    var activityCancelRequestedEvent = new ActivityCancelRequestedEvent(historyEvent);
-                    if (activityCancelRequestedEvent.IsFor(activityItem))
-                        return activityCancelRequestedEvent;
-                }
-                else if (historyEvent.IsActivityCancellationFailedEvent())
-                {
-                    var activityCancellationFailedEvent = new ActivityCancellationFailedEvent(historyEvent);
-                    if(activityCancellationFailedEvent.IsFor(activityItem))
-                        return activityCancellationFailedEvent;
-                }
-                else if (historyEvent.IsActivityStartedEvent())
-                {
-                    var activityStartedEvent = new ActivityStartedEvent(historyEvent, _allHistoryEvents);
-                    if (activityStartedEvent.IsFor(activityItem))
-                        return activityStartedEvent;
-                }
-                else if (historyEvent.IsActivityScheduledEvent())
-                {
-                    var activityScheduledEvent = new ActivityScheduledEvent(historyEvent,_allHistoryEvents);
-                    if (activityScheduledEvent.IsFor(activityItem))
-                        return activityScheduledEvent;
-                }
-                else if (historyEvent.IsActivitySchedulingFailedEvent())
-                {
-                    var activitySchedulingFailedEvent = new ActivitySchedulingFailedEvent(historyEvent);
-                    if (activitySchedulingFailedEvent.IsFor(activityItem))
-                        return activitySchedulingFailedEvent;
-                }
+                var workflowItemEvent = historyEvent.CreateActivityEventFor(_allHistoryEvents);
+                if(workflowItemEvent==null)
+                    continue;
+                if (workflowItemEvent.IsFor(activityItem))
+                    return workflowItemEvent;
             }
 
             return WorkflowItemEvent.NotFound;
@@ -89,36 +40,11 @@ namespace Guflow
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
-                if (historyEvent.IsTimerFiredEvent())
-                {
-                    var firedTimerEvent = new TimerFiredEvent(historyEvent,_allHistoryEvents);
-                    if(firedTimerEvent.IsFor(timerItem))
-                        return firedTimerEvent;
-                }
-                if (historyEvent.IsTimerStartedEvent())
-                {
-                    var timerStartedEvent = new TimerStartedEvent(historyEvent,_allHistoryEvents);
-                    if (timerStartedEvent.IsFor(timerItem))
-                        return timerStartedEvent;
-                }
-                if (historyEvent.IsTimerStartFailedEvent())
-                {
-                    var timerStartFailedEvent = new TimerStartFailedEvent(historyEvent);
-                    if (timerStartFailedEvent.IsFor(timerItem))
-                        return timerStartFailedEvent;
-                }
-                if (historyEvent.IsTimerCancelledEvent())
-                {
-                    var timerCancelledEvent = new TimerCancelledEvent(historyEvent,_allHistoryEvents);
-                    if(timerCancelledEvent.IsFor(timerItem))
-                        return timerCancelledEvent;
-                }
-                if (historyEvent.IsTimerCancellationFailedEvent())
-                {
-                    var timerCancellationFailedEvent = new TimerCancellationFailedEvent(historyEvent);
-                    if (timerCancellationFailedEvent.IsFor(timerItem))
-                        return timerCancellationFailedEvent;
-                }
+                var workflowItemEvent = historyEvent.CreateTimerEventFor(_allHistoryEvents);
+                if (workflowItemEvent == null)
+                    continue;
+                if (workflowItemEvent.IsFor(timerItem))
+                    return workflowItemEvent;
             }
             return WorkflowItemEvent.NotFound;
         }
@@ -132,7 +58,7 @@ namespace Guflow
                 var historyEvent = _allHistoryEvents.FirstOrDefault(h => h.EventId == eventId);
                 if (historyEvent == null)
                     continue;
-                var workflowEvent = historyEvent.CreateEventFor(_allHistoryEvents);
+                var workflowEvent = historyEvent.CreateInterpretableEventFor(_allHistoryEvents);
                 if(workflowEvent!=null)
                     workflowActions.Add(workflowEvent.Interpret(workflow));
             }
@@ -212,41 +138,18 @@ namespace Guflow
 
         public IEnumerable<WorkflowItemEvent> AllEventsFor(ActivityItem activityItem)
         {
-            var activityEvents = new List<ActivityEvent>();
+            var allEvents = new List<WorkflowItemEvent>();
             foreach (var historyEvent in _allHistoryEvents)
             {
-                if (historyEvent.IsActivityCompletedEvent())
+                var workflowItemEvent = historyEvent.CreateActivityEventFor(_allHistoryEvents);
+                if(workflowItemEvent==null)
+                    continue;
+                if (workflowItemEvent.IsFor(activityItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
-                    var activityCompletedEvent = new ActivityCompletedEvent(historyEvent,_allHistoryEvents);
-                    if(activityCompletedEvent.IsFor(activityItem))
-                        activityEvents.Add(activityCompletedEvent);
-                }
-                else if (historyEvent.IsActivityFailedEvent())
-                {
-                    var activityFailedEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
-                    if (activityFailedEvent.IsFor(activityItem))
-                        activityEvents.Add(activityFailedEvent);
-                }
-                else if (historyEvent.IsActivityTimedoutEvent())
-                {
-                    var timedoutActivityEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
-                    if (timedoutActivityEvent.IsFor(activityItem))
-                        activityEvents.Add(timedoutActivityEvent);
-                }
-                else if (historyEvent.IsActivityStartedEvent())
-                {
-                    var activityStartedEvent = new ActivityStartedEvent(historyEvent, _allHistoryEvents);
-                    if (activityStartedEvent.IsFor(activityItem) && !activityStartedEvent.InChainOf(activityEvents))
-                        activityEvents.Add(activityStartedEvent);
-                }
-                else if (historyEvent.IsActivityScheduledEvent())
-                {
-                    var activityScheduledEvent = new ActivityScheduledEvent(historyEvent,_allHistoryEvents);
-                    if(activityScheduledEvent.IsFor(activityItem) && !activityScheduledEvent.InChainOf(activityEvents))
-                        activityEvents.Add(activityScheduledEvent);
+                    allEvents.Add(workflowItemEvent);
                 }
             }
-            return activityEvents;
+            return allEvents;
         }
     }
 }

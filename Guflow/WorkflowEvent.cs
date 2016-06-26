@@ -3,7 +3,6 @@
     public abstract class WorkflowEvent
     {
         private readonly long _eventId;
-
         protected WorkflowEvent(long eventId)
         {
             _eventId = eventId;
