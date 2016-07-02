@@ -22,7 +22,7 @@ namespace Guflow
         {
         }
 
-        public WorkflowItemEvent LastActivityEventFor(WorkflowItem activityItem)
+        public WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
@@ -36,7 +36,7 @@ namespace Guflow
             return WorkflowItemEvent.NotFound;
         }
 
-        public WorkflowItemEvent LastTimerEventFor(WorkflowItem timerItem)
+        public WorkflowItemEvent LastTimerEventFor(TimerItem timerItem)
         {
             foreach (var historyEvent in _allHistoryEvents)
             {
@@ -136,7 +136,7 @@ namespace Guflow
             return null;
         }
 
-        public IEnumerable<WorkflowItemEvent> AllEventsFor(ActivityItem activityItem)
+        public IEnumerable<WorkflowItemEvent> AllActivityEventsFor(ActivityItem activityItem)
         {
             var allEvents = new List<WorkflowItemEvent>();
             foreach (var historyEvent in _allHistoryEvents)
@@ -145,6 +145,22 @@ namespace Guflow
                 if(workflowItemEvent==null)
                     continue;
                 if (workflowItemEvent.IsFor(activityItem) && !workflowItemEvent.InChainOf(allEvents))
+                {
+                    allEvents.Add(workflowItemEvent);
+                }
+            }
+            return allEvents;
+        }
+
+        public IEnumerable<WorkflowItemEvent> AllTimerEventsFor(TimerItem timerItem)
+        {
+            var allEvents = new List<WorkflowItemEvent>();
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                var workflowItemEvent = historyEvent.CreateTimerEventFor(_allHistoryEvents);
+                if (workflowItemEvent == null)
+                    continue;
+                if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
                     allEvents.Add(workflowItemEvent);
                 }

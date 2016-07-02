@@ -4,8 +4,8 @@ namespace Guflow
 {
     internal interface IWorkflowHistoryEvents
     {
-        WorkflowItemEvent LastActivityEventFor(WorkflowItem activityItem);
-        WorkflowItemEvent LastTimerEventFor(WorkflowItem timerItem);
+        WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem);
+        WorkflowItemEvent LastTimerEventFor(TimerItem timerItem);
         IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow);
         WorkflowStartedEvent WorkflowStartedEvent();
         bool IsActive();
@@ -13,6 +13,8 @@ namespace Guflow
         ActivityFailedEvent LastFailedEventFor(ActivityItem activityItem);
         ActivityTimedoutEvent LastTimedoutEventFor(ActivityItem activityItem);
         ActivityCancelledEvent LastCancelledEventFor(ActivityItem activityItem);
-        IEnumerable<WorkflowItemEvent> AllEventsFor(ActivityItem activityItem);
+        IEnumerable<WorkflowItemEvent> AllActivityEventsFor(ActivityItem activityItem);
+        IEnumerable<WorkflowItemEvent> AllTimerEventsFor(TimerItem timerItem);
+
     }
 }

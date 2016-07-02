@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -40,11 +39,20 @@ namespace Guflow
             get
             {
                 var latestActivityEvent = WorkflowHistoryEvents.LastActivityEventFor(this);
-                var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(this);
-                if (latestActivityEvent>latestTimerEvent)
+                var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(RescheduleTimerItem);
+                if (latestActivityEvent > latestTimerEvent)
                     return latestActivityEvent;
 
                 return latestTimerEvent;
+            }
+        }
+
+        public bool IsActive
+        {
+            get
+            {
+                var lastEvent = LastEvent;
+                return lastEvent != WorkflowItemEvent.NotFound && lastEvent.IsActive;
             }
         }
 
@@ -70,7 +78,12 @@ namespace Guflow
 
         public IEnumerable<WorkflowItemEvent> AllEvents
         {
-            get { return WorkflowHistoryEvents.AllEventsFor(this); }
+            get
+            {
+                var activityEvents = WorkflowHistoryEvents.AllActivityEventsFor(this);
+                var timerEvents = WorkflowHistoryEvents.AllTimerEventsFor(RescheduleTimerItem);
+                return activityEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
+            }
         }
 
         public string Version
@@ -94,7 +107,7 @@ namespace Guflow
             AddParent(Identity.Timer(timerName));
             return this;
         }
-    
+
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
         {
             _onCompletionAction = onCompletionFunc;
@@ -159,9 +172,11 @@ namespace Guflow
         {
             get { return RescheduleTimerItem; }
         }
+
+
         internal override WorkflowDecision GetScheduleDecision()
         {
-            if(!_whenFunc(this))
+            if (!_whenFunc(this))
                 return WorkflowDecision.Empty;
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
@@ -204,7 +219,7 @@ namespace Guflow
         protected override bool IsProcessed()
         {
             var activity = LastEvent;
-            return activity != WorkflowItemEvent.NotFound && !activity.IsActive ;
+            return activity != WorkflowItemEvent.NotFound && !activity.IsActive;
         }
         internal WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
         {

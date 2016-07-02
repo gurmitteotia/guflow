@@ -24,6 +24,14 @@ namespace Guflow
         {
             get { return WorkflowHistoryEvents.LastTimerEventFor(this); }
         }
+        public bool IsActive
+        {
+            get
+            {
+                var lastEvent = LastEvent;
+                return lastEvent != WorkflowItemEvent.NotFound && lastEvent.IsActive;
+            }
+        }
         public IFluentTimerItem FireAfter(TimeSpan fireAfter)
         {
             _fireAfter = fireAfter;

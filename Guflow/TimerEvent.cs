@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -8,6 +9,7 @@ namespace Guflow
     {
         private string _timerName;
         private TimeSpan _firedAfter;
+        private long _timerStartedEventId;
         internal bool IsARescheduledTimer { get; private set; }
 
         protected TimerEvent(long eventId)
@@ -17,6 +19,7 @@ namespace Guflow
         protected void PopulateProperties(long timerStartedEventId, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             bool foundTimerStartedEvent = false;
+            _timerStartedEventId = timerStartedEventId;
             foreach (var historyEvent in allHistoryEvents)
             {
                 if (historyEvent.IsTimerStartedEventFor(timerStartedEventId))
@@ -34,6 +37,27 @@ namespace Guflow
                 throw new IncompleteEventGraphException(string.Format("Can not find the timer started event id {0}",timerStartedEventId));
         }
 
+        internal override bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)
+        {
+            foreach (var timerEvent in workflowItemEvents.OfType<TimerEvent>())
+            {
+                if (IsInChainOf(timerEvent))
+                    return true;
+            }
+
+            //swf does not link cancellation failed event with started event id.
+            foreach (var itemEvent in workflowItemEvents.OfType<TimerCancellationFailedEvent>())
+            {
+                if (itemEvent.IsForSameWorkflowItemAs(this))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool IsInChainOf(TimerEvent otherTimerEvent)
+        {
+            return _timerStartedEventId == otherTimerEvent._timerStartedEventId;
+        }
         public override string ToString()
         {
             return string.Format("{0} for timer {1}, fired after {2}",GetType().Name,_timerName,_firedAfter);

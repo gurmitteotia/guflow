@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Guflow
 {
-    public abstract class WorkflowEvent : IComparer<WorkflowEvent>, IComparable<WorkflowEvent>
+    public abstract class WorkflowEvent : IComparable<WorkflowEvent>
     {
         private readonly long _eventId;
         protected WorkflowEvent(long eventId)
@@ -12,12 +12,8 @@ namespace Guflow
         }
 
         internal abstract WorkflowAction Interpret(IWorkflow workflow);
-        
-        public int Compare(WorkflowEvent first, WorkflowEvent second)
-        {
-            return first.CompareTo(second);
-        }
-
+        public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();
+    
         public int CompareTo(WorkflowEvent other)
         {
             return _eventId.CompareTo(other._eventId);
@@ -69,6 +65,14 @@ namespace Guflow
         public static bool operator !=(WorkflowEvent left, WorkflowEvent right)
         {
             return !Equals(left, right);
+        }
+
+        private class EventIdComparer : IComparer<WorkflowEvent> 
+        {
+            public int Compare(WorkflowEvent first, WorkflowEvent second)
+            {
+                return first.CompareTo(second);
+            }
         }
     }
 }

@@ -471,8 +471,113 @@ namespace Guflow.Tests
 
             Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivitySchedulingFailedEvent(eventGraph.First()), }));
         }
-      
-        
+
+        [Test]
+        public void All_events_can_return_timer_fired_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(_activityIdenity, TimeSpan.FromSeconds(3),true);
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new TimerFiredEvent(eventGraph.First(),eventGraph)}));
+        }
+
+        [Test]
+        public void All_events_return_the_events_in_the_order_of_their_occurrence()
+        {
+            var startedEventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var completedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(_activityIdenity, "workerid", "detail");
+
+            var activityItem = CreateActivityItemWith(startedEventGraph.Concat(timerFiredEventGraph).Concat(completedEventGraph));
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[] {new ActivityStartedEvent(startedEventGraph.First(),startedEventGraph) ,
+                                                                       new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph),
+                                                                       new ActivityCompletedEvent(completedEventGraph.First(),completedEventGraph)}));
+        }
+
+        [Test]
+        public void All_events_can_return_timer_fired_and_timer_started_event_event()
+        {
+            var timerStartedEventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_activityIdenity,TimeSpan.FromSeconds(3),true);
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(timerFiredEventGraph));
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new TimerEvent[] {new TimerStartedEvent(timerStartedEventGraph.First(),timerStartedEventGraph), new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph)}));
+        }
+
+        [Test]
+        public void All_events_can_return_timer_cancelled_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateTimerCancelledEventGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new TimerCancelledEvent(eventGraph.First(), eventGraph),  }));
+        }
+
+        [Test]
+        public void All_events_can_return_timer_cancelled_and_timer_started_event()
+        {
+            var timerStartedEventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_activityIdenity,TimeSpan.FromSeconds(3),true);
+            var timerCancelledEventGraph = HistoryEventFactory.CreateTimerCancelledEventGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(timerCancelledEventGraph));
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo( new TimerEvent[] { new TimerStartedEvent(timerStartedEventGraph.First(), timerStartedEventGraph), new TimerCancelledEvent(timerCancelledEventGraph.First(), timerCancelledEventGraph), }));
+        }
+
+        [Test]
+        public void All_events_can_return_timer_cancellattion_failed_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateTimerCancellationFailedEventGraph(_activityIdenity, "cause");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new[] { new TimerCancellationFailedEvent(eventGraph.First())}));
+        }
+
+        [Test]
+        public void All_events_can_return_timer_started_and_cancellattion_failed_event()
+        {
+            var timerStartedEventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var timerCancellationFailedEventGraph = HistoryEventFactory.CreateTimerCancellationFailedEventGraph(_activityIdenity, "cause");
+            var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(timerCancellationFailedEventGraph));
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new TimerStartedEvent(timerStartedEventGraph.First(), timerStartedEventGraph), new TimerCancellationFailedEvent(timerCancellationFailedEventGraph.First()) }));
+        }
+
+        [Test]
+        public void All_events_can_return_timer_started()
+        {
+            var eventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new TimerStartedEvent(eventGraph.First(), eventGraph)}));
+        }
+
+        [Test]
+        public void Should_be_active_when_last_event_is_active()
+        {
+            var startedEventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
+            var activityItem = CreateActivityItemWith(startedEventGraph);
+
+            Assert.IsTrue(activityItem.IsActive);
+            
+        }
+
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);

@@ -348,6 +348,18 @@ namespace Guflow.Tests
                 }
             });
 
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerStarted,
+                EventId = eventIds.StartedId,
+                TimerStartedEventAttributes = new TimerStartedEventAttributes()
+                {
+                    TimerId = timerId.Id,
+                    StartToFireTimeout = ((long)20).ToString(),
+                    Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = false }).ToJson()
+                }
+            });
+
             return historyEvents;
         }
 
