@@ -1,17 +1,7 @@
 ﻿namespace Guflow
 {
-    public interface IWorkflow
+    internal interface IWorkflow : IWorkflowItems, IWorkflowActions
     {
-        WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent);
-        WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent);
-        WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent);
-        WorkflowAction ActivityTimedout(ActivityTimedoutEvent activityTimedoutEvent);
-        WorkflowAction ActivityCancelled(ActivityCancelledEvent activityCancelledEvent);
-        WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent);
-        WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent);
-        WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent);
-        WorkflowAction ActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent);
-        WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);
-        WorkflowAction ActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);
+        IWorkflowHistoryEvents CurrentHistoryEvents { get; }
     }
 }

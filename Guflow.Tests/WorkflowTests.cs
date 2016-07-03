@@ -66,14 +66,14 @@ namespace Guflow.Tests
         {
             public WorkflowWithNonExistentParentActivityItem()
             {
-                ScheduleActivity("_timerName", "version").DependsOn("ParentName", "parentVer");
+                ScheduleActivity("_timerName", "version").After("ParentName", "parentVer");
             }
         }
         private class WorkflowWithNonExistentParentTimerItem : Workflow
         {
             public WorkflowWithNonExistentParentTimerItem()
             {
-                ScheduleActivity("_timerName", "version").DependsOn("ParentName");
+                ScheduleActivity("_timerName", "version").After("ParentName");
             }
         }
 

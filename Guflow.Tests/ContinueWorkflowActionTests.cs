@@ -17,8 +17,8 @@ namespace Guflow.Tests
         [Test]
         public void Equality_tests()
         {
-            var workflowItem1 = new ActivityItem(Identity.New( _activityName, _activityVersion, _positionalName), new Mock<IWorkflowItems>().Object);
-            var workflowItem2 = new ActivityItem(Identity.New("DifferentName", _activityVersion, _positionalName), new Mock<IWorkflowItems>().Object);
+            var workflowItem1 = new ActivityItem(Identity.New( _activityName, _activityVersion, _positionalName), new Mock<IWorkflow>().Object);
+            var workflowItem2 = new ActivityItem(Identity.New("DifferentName", _activityVersion, _positionalName), new Mock<IWorkflow>().Object);
 
             Assert.True(WorkflowAction.ContinueWorkflow(workflowItem1).Equals(WorkflowAction.ContinueWorkflow(workflowItem1)));
             Assert.False(WorkflowAction.ContinueWorkflow(workflowItem1).Equals(WorkflowAction.ContinueWorkflow(workflowItem2)));
@@ -58,6 +58,19 @@ namespace Guflow.Tests
             CollectionAssert.IsEmpty(decisions);
         }
 
+
+        [Test]
+        public void Should_not_schedule_the_child_when_one_of_its_parent_activity_ignores_the_action()
+        {
+            var workflow = new WorkflowWithAParentIgnoringCompleteEvent();
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
+                                  .Concat(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2"));
+
+            var decisions = workflow.ExecuteFor(new WorkflowHistoryEvents(allHistoryEvents));
+
+            CollectionAssert.IsEmpty(decisions);
+        }
+
         [Test]
         public void Should_not_schedule_the_child_when_one_of_its_parent_activity_is_active()
         {
@@ -82,11 +95,10 @@ namespace Guflow.Tests
 
             Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0")) }));
         }
-
         [Test]
-        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_failed()
+        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_other_one_is_failed_but_configured_to_continue()
         {
-            var workflow = new WorkflowWithMultipleParents();
+            var workflow = new WorkflowWithAParentContinueOnFailure();
             var allHistoryEvents = CreateParentActivityCompletedAndFailedEventsGraph();
            
             var decisions = workflow.ExecuteFor(allHistoryEvents);
@@ -95,9 +107,9 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_timedout()
+        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_other_one_is_timedout_but_configured_to_continue()
         {
-            var workflow = new WorkflowWithMultipleParents();
+            var workflow = new WorkflowWithAParentContinueOnTimedout();
             var allHistoryEvents = CreateParentActivityCompletedAndTimedoutEventsGraph();
 
             var decisions = workflow.ExecuteFor(allHistoryEvents);
@@ -106,9 +118,9 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_cancelled()
+        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_cancelled_but_configured_to_continue()
         {
-            var workflow = new WorkflowWithMultipleParents();
+            var workflow = new WorkflowWithAParentContinueOnCancelled();
             var allHistoryEvents = CreateParentActivityCompletedAndCancelledEventsGraph();
 
             var decisions = workflow.ExecuteFor(allHistoryEvents);
@@ -205,8 +217,8 @@ namespace Guflow.Tests
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
 
-                ScheduleActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName);
-                ScheduleActivity("Sync", "2.1").DependsOn(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity("Sync", "2.1").After(_activityName, _activityVersion, _positionalName);
             }
         }
         private class WorkflowWithMultipleParents : Workflow
@@ -215,7 +227,46 @@ namespace Guflow.Tests
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion);
-                ScheduleActivity("Transcode", "2.0").DependsOn(_activityName, _activityVersion, _positionalName).DependsOn(_siblingActivityName, _siblingActivityVersion);
+                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+            }
+        }
+
+        private class WorkflowWithAParentContinueOnFailure : Workflow
+        {
+            public WorkflowWithAParentContinueOnFailure()
+            {
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnFailure(Continue);
+                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+            }
+        }
+        private class WorkflowWithAParentContinueOnTimedout : Workflow
+        {
+            public WorkflowWithAParentContinueOnTimedout()
+            {
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnTimedout(Continue);
+                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+            }
+        }
+
+        private class WorkflowWithAParentContinueOnCancelled : Workflow
+        {
+            public WorkflowWithAParentContinueOnCancelled()
+            {
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnCancelled(Continue);
+                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+            }
+        }
+
+        private class WorkflowWithAParentIgnoringCompleteEvent : Workflow
+        {
+            public WorkflowWithAParentIgnoringCompleteEvent()
+            {
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnCompletion(e => Ignore());
+                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
             }
         }
         private class SingleActivityWorkflow : Workflow
@@ -238,7 +289,7 @@ namespace Guflow.Tests
             public WorkflowWithParentChildTimers(string timerName, string childTimer,TimeSpan childTimeout)
             {
                 ScheduleTimer(timerName);
-                ScheduleTimer(childTimer).DependsOn(timerName).FireAfter(childTimeout);
+                ScheduleTimer(childTimer).After(timerName).FireAfter(childTimeout);
             }
         }
         private class WorkflowWithChildActivity : Workflow
@@ -246,7 +297,7 @@ namespace Guflow.Tests
             public WorkflowWithChildActivity(string timerName)
             {
                 ScheduleTimer(timerName);
-                ScheduleActivity(_activityName, _activityVersion).DependsOn(timerName);
+                ScheduleActivity(_activityName, _activityVersion).After(timerName);
             }
         }
         private class WorkflowWithParentActivityAndChildTimers : Workflow
@@ -254,7 +305,7 @@ namespace Guflow.Tests
             public WorkflowWithParentActivityAndChildTimers(string timerName)
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
-                ScheduleTimer(timerName).DependsOn(_activityName, _activityVersion,_positionalName);
+                ScheduleTimer(timerName).After(_activityName, _activityVersion,_positionalName);
             }
         }
     }

@@ -11,7 +11,7 @@ namespace Guflow
             _eventId = eventId;
         }
 
-        internal abstract WorkflowAction Interpret(IWorkflow workflow);
+        internal abstract WorkflowAction Interpret(IWorkflowActions workflowActions);
         public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();
     
         public int CompareTo(WorkflowEvent other)

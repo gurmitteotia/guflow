@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Guflow
 {
@@ -11,7 +12,7 @@ namespace Guflow
         private Func<TimerCancelledEvent, WorkflowAction> _onTimerCancelledAction; 
         private Func<TimerItem, bool> _whenFunc;
         private readonly bool _isRescheduleTimer;
-        internal TimerItem(Identity identity, IWorkflowItems workflowItems, bool isRescheduleTimer=false):base(identity,workflowItems)
+        internal TimerItem(Identity identity, IWorkflow workflow, bool isRescheduleTimer=false):base(identity,workflow)
         {
             _isRescheduleTimer = isRescheduleTimer;
             _onFiredAction = f=>WorkflowAction.ContinueWorkflow(this);
@@ -20,17 +21,14 @@ namespace Guflow
             _onTimerCancelledAction = c => WorkflowAction.CancelWorkflow("TIMER_CANCELLED");
             _whenFunc = t => true;
         }
-        public WorkflowItemEvent LastEvent
+        public override WorkflowItemEvent LastEvent
         {
             get { return WorkflowHistoryEvents.LastTimerEventFor(this); }
         }
-        public bool IsActive
+
+        public override IEnumerable<WorkflowItemEvent> AllEvents
         {
-            get
-            {
-                var lastEvent = LastEvent;
-                return lastEvent != WorkflowItemEvent.NotFound && lastEvent.IsActive;
-            }
+            get { return WorkflowHistoryEvents.AllTimerEventsFor(this); }
         }
         public IFluentTimerItem FireAfter(TimeSpan fireAfter)
         {
@@ -47,13 +45,13 @@ namespace Guflow
             _onFiredAction = onFiredAction;
             return this;
         }
-        public IFluentTimerItem DependsOn(string timerName)
+        public IFluentTimerItem After(string timerName)
         {
             AddParent(Identity.Timer(timerName));
             return this;
         }
 
-        public IFluentTimerItem DependsOn(string activityName, string activityVersion, string positionalName = "")
+        public IFluentTimerItem After(string activityName, string activityVersion, string positionalName = "")
         {
             AddParent(Identity.New(activityName, activityVersion, positionalName));
             return this;
@@ -109,12 +107,6 @@ namespace Guflow
         internal override WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
             return _onCanellationFailedAction(timerCancellationFailedEvent);
-        }
-
-        protected override bool IsProcessed()
-        {
-            var timerEvent = LastEvent;
-            return timerEvent != null;
         }
     }
 }

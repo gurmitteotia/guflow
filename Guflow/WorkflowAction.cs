@@ -7,7 +7,10 @@ namespace Guflow
     {
         private static readonly WorkflowAction _emptyWorkflowAction = new EmptyWorkflowAction();
         internal abstract IEnumerable<WorkflowDecision> GetDecisions();
-
+        internal virtual bool AllowSchedulingOfChildWorkflowItem()
+        {
+            return false;
+        }
         internal static WorkflowAction FailWorkflow(string reason, string detail)
         {
             return new GenericWorkflowAction(new FailWorkflowDecision(reason,detail));

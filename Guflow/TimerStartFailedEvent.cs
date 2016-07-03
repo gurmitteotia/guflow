@@ -13,9 +13,9 @@ namespace Guflow
 
         internal string Cause { get { return _startTimerFailedAttributes.Cause; } }
 
-        internal override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
-            return workflow.TimerStartFailed(this);
+            return workflowActions.OnTimerStartFailure(this);
         }
     }
 }

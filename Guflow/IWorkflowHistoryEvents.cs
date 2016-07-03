@@ -6,7 +6,7 @@ namespace Guflow
     {
         WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem);
         WorkflowItemEvent LastTimerEventFor(TimerItem timerItem);
-        IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow);
+        IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflowActions workflow);
         WorkflowStartedEvent WorkflowStartedEvent();
         bool IsActive();
         ActivityCompletedEvent LastCompletedEventFor(ActivityItem activityItem);

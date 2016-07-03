@@ -2,7 +2,7 @@
 {
     public interface IFluentWorkflowItem<T>
     {
-        T DependsOn(string timerName);
-        T DependsOn(string activityName, string activityVersion, string positionalName = "");
+        T After(string timerName);
+        T After(string activityName, string activityVersion, string positionalName = "");
     }
 }

@@ -16,9 +16,9 @@ namespace Guflow
 
         public string Result { get { return _eventAttributes.Result; } }
 
-        internal override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
-            return workflow.ActivityCompleted(this);            
+            return workflowActions.OnActivityCompletion(this);            
         }
     }
 }

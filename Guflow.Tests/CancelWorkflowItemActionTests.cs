@@ -13,8 +13,8 @@ namespace Guflow.Tests
         [Test]
         public void Equality_tests()
         {
-            var workflowItem1 = new TimerItem(Identity.Timer("TimerName"),new Mock<IWorkflowItems>().Object);
-            var workflowItem2 = new TimerItem(Identity.Timer("TimerName2"),new Mock<IWorkflowItems>().Object);
+            var workflowItem1 = new TimerItem(Identity.Timer("TimerName"),new Mock<IWorkflow>().Object);
+            var workflowItem2 = new TimerItem(Identity.Timer("TimerName2"),new Mock<IWorkflow>().Object);
             Assert.That(WorkflowAction.Cancel(workflowItem1).Equals(WorkflowAction.Cancel(workflowItem1)));
             Assert.False(WorkflowAction.Cancel(workflowItem1).Equals(WorkflowAction.Cancel(workflowItem2)));
         }
@@ -22,7 +22,7 @@ namespace Guflow.Tests
         [Test]
         public void Should_return_cancel_timer_decision_for_timer_item()
         {
-            var timerItem =new TimerItem(Identity.Timer("TimerName"), new Mock<IWorkflowItems>().Object);
+            var timerItem =new TimerItem(Identity.Timer("TimerName"), new Mock<IWorkflow>().Object);
             var workflowAction = WorkflowAction.Cancel(timerItem);
 
             var decisions = workflowAction.GetDecisions();
@@ -33,7 +33,7 @@ namespace Guflow.Tests
         [Test]
         public void Should_return_cancel_activity_decision_for_activity_item()
         {
-            var activityItem = new ActivityItem(Identity.New("_timerName","ver","pos"), new Mock<IWorkflowItems>().Object);
+            var activityItem = new ActivityItem(Identity.New("_timerName","ver","pos"), new Mock<IWorkflow>().Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
             var decisions = workflowAction.GetDecisions();

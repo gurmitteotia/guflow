@@ -13,9 +13,9 @@ namespace Guflow
         }
         public string Cause { get { return _eventAttributes.Cause; } }
 
-        internal override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
-            return workflow.ActivitySchedulingFailed(this);
+            return workflowActions.OnActivitySchedulingFailed(this);
         }
     }
 }

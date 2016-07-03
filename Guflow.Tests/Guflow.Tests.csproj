@@ -94,6 +94,7 @@
     <Compile Include="WorkflowHistoryEventsTests.cs" />
     <Compile Include="WorkflowStartedEventTests.cs" />
     <Compile Include="WorkflowTests.cs" />
+    <Compile Include="WorkflowToStubHistoryEvents.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

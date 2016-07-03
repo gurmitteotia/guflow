@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Amazon.SimpleWorkflow.Model;
-
-namespace Guflow
+﻿namespace Guflow
 {
     public interface IActivityItem : IWorkflowItem
     {
@@ -9,7 +6,6 @@ namespace Guflow
         ActivityFailedEvent LastFailedEvent { get; }
         ActivityTimedoutEvent LastTimedoutEvent { get; }
         ActivityCancelledEvent LastCancelledEvent { get; }
-        IEnumerable<WorkflowItemEvent> AllEvents { get; }
         string Version { get; }
         string PositionalName { get; }
     }

@@ -12,7 +12,7 @@ namespace Guflow
         private long _startedEventId;
         private long _scheduledEventId;
         public string WorkerIdentity { get; private set; }
-
+        public string Input { get; private set; }
         protected ActivityEvent(long eventId)
             : base(eventId)
         {
@@ -34,6 +34,7 @@ namespace Guflow
                     _activityVersion = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
                     _activityPositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ActivityScheduleData>().PN;
                     AwsIdentity = AwsIdentity.Raw(historyEvent.ActivityTaskScheduledEventAttributes.ActivityId);
+                    Input = historyEvent.ActivityTaskScheduledEventAttributes.Input;
                     foundActivityScheduledEvent = true;
                 }
             }

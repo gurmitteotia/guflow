@@ -26,9 +26,14 @@ namespace Guflow
         {
             var childItems = _completedWorkflowItem.GetChildlern();
 
-            var schedulableChildItems = childItems.Where(s => s.AllParentsAreProcessed());
+            var schedulableChildItems = childItems.Where(s => s.SchedulingIsAllowedByAllParents());
 
             return schedulableChildItems.Select(f => f.GetScheduleDecision());
+        }
+
+        internal override bool AllowSchedulingOfChildWorkflowItem()
+        {
+            return true;
         }
     }
 }

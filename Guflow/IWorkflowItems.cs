@@ -9,7 +9,5 @@ namespace Guflow
         IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem item);
 
         WorkflowItem Find(Identity identity);
-
-        IWorkflowHistoryEvents CurrentHistoryEvents { get; }
     }
 }

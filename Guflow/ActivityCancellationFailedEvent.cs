@@ -12,9 +12,9 @@ namespace Guflow
         }
         public string Cause { get { return _eventAttributes.Cause.Value; } }
 
-        internal override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
-            return workflow.ActivityCancellationFailed(this);
+            return workflowActions.OnActivityCancellationFailed(this);
         }
     }
 }

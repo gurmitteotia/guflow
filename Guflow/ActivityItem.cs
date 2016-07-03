@@ -18,8 +18,8 @@ namespace Guflow
         private Func<IActivityItem, int?> _priorityFunc;
         private Func<IActivityItem, ScheduleActivityTimeouts> _timeoutsFunc;
 
-        internal ActivityItem(Identity identity, IWorkflowItems workflowItems)
-            : base(identity, workflowItems)
+        internal ActivityItem(Identity identity, IWorkflow workflow)
+            : base(identity, workflow)
         {
             _onCompletionAction = c => WorkflowAction.ContinueWorkflow(this);
             _onFailedAction = c => WorkflowAction.FailWorkflow(c.Reason, c.Detail);
@@ -34,7 +34,7 @@ namespace Guflow
             _timeoutsFunc = a => new ScheduleActivityTimeouts();
         }
 
-        public WorkflowItemEvent LastEvent
+        public override WorkflowItemEvent LastEvent
         {
             get
             {
@@ -76,7 +76,7 @@ namespace Guflow
             get { return WorkflowHistoryEvents.LastCancelledEventFor(this); }
         }
 
-        public IEnumerable<WorkflowItemEvent> AllEvents
+        public override IEnumerable<WorkflowItemEvent> AllEvents
         {
             get
             {
@@ -96,13 +96,13 @@ namespace Guflow
             get { return Identity.PositionalName; }
         }
 
-        public IFluentActivityItem DependsOn(string name, string version, string positionalName = "")
+        public IFluentActivityItem After(string name, string version, string positionalName = "")
         {
             AddParent(Identity.New(name, version, positionalName));
             return this;
         }
 
-        public IFluentActivityItem DependsOn(string timerName)
+        public IFluentActivityItem After(string timerName)
         {
             AddParent(Identity.Timer(timerName));
             return this;
@@ -172,8 +172,6 @@ namespace Guflow
         {
             get { return RescheduleTimerItem; }
         }
-
-
         internal override WorkflowDecision GetScheduleDecision()
         {
             if (!_whenFunc(this))
@@ -216,11 +214,7 @@ namespace Guflow
         {
             return _onCompletionAction(activityCompletedEvent);
         }
-        protected override bool IsProcessed()
-        {
-            var activity = LastEvent;
-            return activity != WorkflowItemEvent.NotFound && !activity.IsActive;
-        }
+      
         internal WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
         {
             return _onFailedAction(activityFailedEvent);

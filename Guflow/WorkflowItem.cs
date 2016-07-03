@@ -5,16 +5,16 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    internal abstract class WorkflowItem
+    internal abstract class WorkflowItem : IWorkflowItem
     {
-        private readonly IWorkflowItems _workflowItems;
+        private readonly IWorkflow _workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
         protected readonly Identity Identity;
         private TimerItem _resheduleTimerItem;
-        protected WorkflowItem(Identity identity, IWorkflowItems workflowItems)
+        protected WorkflowItem(Identity identity, IWorkflow workflow)
         {
             Identity = identity;
-            _workflowItems = workflowItems;
+            _workflow = workflow;
         }
 
         public IEnumerable<IActivityItem> ParentActivities { get { return _parentItems.OfType<IActivityItem>(); } }
@@ -25,6 +25,19 @@ namespace Guflow
         {
             get { return Identity.Name; }
         }
+
+        public bool IsActive
+        {
+            get
+            {
+                var lastEvent = LastEvent;
+                return lastEvent != WorkflowItemEvent.NotFound && lastEvent.IsActive;
+            }
+        }
+
+        public abstract WorkflowItemEvent LastEvent { get; }
+
+        public abstract IEnumerable<WorkflowItemEvent> AllEvents { get; } 
 
         internal bool HasNoParents()
         {
@@ -37,7 +50,7 @@ namespace Guflow
 
         internal IEnumerable<WorkflowItem> GetChildlern()
         {
-            return _workflowItems.GetChildernOf(this);
+            return _workflow.GetChildernOf(this);
         }
 
         internal abstract WorkflowDecision GetScheduleDecision();
@@ -73,16 +86,24 @@ namespace Guflow
             return Identity.GetHashCode();
         }
 
-        internal bool AllParentsAreProcessed()
+        internal bool SchedulingIsAllowedByAllParents()
         {
-            return _parentItems.All(p => p.IsProcessed());
+            return _parentItems.All(p => p.AllowSchedulingOfChildWorkflowItem());
         }
+        private bool AllowSchedulingOfChildWorkflowItem()
+        {
+            var lastEvent = LastEvent;
+            if (lastEvent != WorkflowItemEvent.NotFound && !lastEvent.IsActive)
+            {
+                var lastEventAction = lastEvent.Interpret(_workflow);
+                return lastEventAction.AllowSchedulingOfChildWorkflowItem();
+            }
 
-        protected abstract bool IsProcessed();
-
+            return false;
+        }
         protected void AddParent(Identity identity)
         {
-            var parentItem = _workflowItems.Find(identity);
+            var parentItem = _workflow.Find(identity);
             if (parentItem == null)
                 throw new ParentItemMissingException(string.Format(Resources.Schedulable_item_missing, identity));
             _parentItems.Add(parentItem);
@@ -90,7 +111,7 @@ namespace Guflow
 
         protected IWorkflowHistoryEvents WorkflowHistoryEvents
         {
-            get { return _workflowItems.CurrentHistoryEvents; }
+            get { return _workflow.CurrentHistoryEvents; }
         }
 
         protected TimerItem RescheduleTimerItem
@@ -99,7 +120,7 @@ namespace Guflow
             {
                 if (_resheduleTimerItem == null)
                 {
-                    _resheduleTimerItem = new TimerItem(Identity, _workflowItems, true);
+                    _resheduleTimerItem = new TimerItem(Identity, _workflow, true);
                     _resheduleTimerItem.OnStartFailure(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
                     _resheduleTimerItem.OnCancelled(e => WorkflowAction.CancelWorkflow("RESCHEDULE_TIMER_CANCELLED"));
                     _resheduleTimerItem.OnFailedCancellation(e=>WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_CANCELLATION_FAILED",e.Cause));

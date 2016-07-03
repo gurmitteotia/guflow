@@ -7,7 +7,7 @@ namespace Guflow.Tests
 {
     public class HistoryEventFactory
     {
-        public static IEnumerable<HistoryEvent> CreateActivityCompletedEventGraph(Identity activityIdentity, string identity, string result)
+        public static IEnumerable<HistoryEvent> CreateActivityCompletedEventGraph(Identity activityIdentity, string identity, string result, string input="")
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;
@@ -42,7 +42,8 @@ namespace Guflow.Tests
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
                     Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
-                    ActivityId = activityIdentity.Id
+                    ActivityId = activityIdentity.Id,
+                    Input = input
                 }
             });
             return historyEvents;

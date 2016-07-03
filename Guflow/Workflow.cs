@@ -5,7 +5,7 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    public abstract class Workflow : IWorkflow, IWorkflowItems
+    public abstract class Workflow : IWorkflow
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
         private Func<WorkflowStartedEvent, WorkflowAction> _onStartupFunc;
@@ -16,66 +16,66 @@ namespace Guflow
             _onStartupFunc = s => WorkflowAction.StartWorkflow(this);
         }
 
-        public WorkflowAction WorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
+        public WorkflowAction OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
             return _onStartupFunc(workflowStartedEvent);
         }
 
-        public WorkflowAction ActivityCompleted(ActivityCompletedEvent activityCompletedEvent)
+        public WorkflowAction OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
         {
             var workflowActivity = FindActivityFor(activityCompletedEvent);
             return workflowActivity.Completed(activityCompletedEvent);
         }
 
-        public WorkflowAction ActivityFailed(ActivityFailedEvent activityFailedEvent)
+        public WorkflowAction OnActivityFailure(ActivityFailedEvent activityFailedEvent)
         {
             var workflowActivity = FindActivityFor(activityFailedEvent);
             return workflowActivity.Failed(activityFailedEvent);
         }
 
-        public WorkflowAction ActivityTimedout(ActivityTimedoutEvent activityTimedoutEvent)
+        public WorkflowAction OnActivityTimeout(ActivityTimedoutEvent activityTimedoutEvent)
         {
             var workflowActivity = FindActivityFor(activityTimedoutEvent);
             return workflowActivity.Timedout(activityTimedoutEvent);
         }
 
-        public WorkflowAction ActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
+        public WorkflowAction OnActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
         {
             var workflowActivity = FindActivityFor(activityCancelledEvent);
             return workflowActivity.Cancelled(activityCancelledEvent);
         }
 
-        public WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
+        public WorkflowAction OnTimerFired(TimerFiredEvent timerFiredEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerFiredEvent);
             return workflowItem.TimerFired(timerFiredEvent);
         }
 
-        public WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        public WorkflowAction OnTimerStartFailure(TimerStartFailedEvent timerStartFailedEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerStartFailedEvent);
             return workflowItem.TimerStartFailed(timerStartFailedEvent);
         }
 
-        public WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        public WorkflowAction OnTimerCancelled(TimerCancelledEvent timerCancelledEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerCancelledEvent);
             return workflowItem.TimerCancelled(timerCancelledEvent);
         }
 
-        public WorkflowAction ActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
+        public WorkflowAction OnActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
         {
             var workflowActivity = FindActivityFor(activityCancellationFailedEvent);
             return workflowActivity.CancellationFailed(activityCancellationFailedEvent);
         }
 
-        public WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        public WorkflowAction OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerCancellationFailedEvent);
             return workflowItem.TimerCancellationFailed(timerCancellationFailedEvent);
         }
 
-        public WorkflowAction ActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
+        public WorkflowAction OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
         {
             var workflowActivity = FindActivityFor(activitySchedulingFailedEvent);
             return workflowActivity.SchedulingFailed(activitySchedulingFailedEvent);
@@ -137,7 +137,7 @@ namespace Guflow
         {
             return WorkflowAction.Ignore;
         }
-        protected ScheduleWorkflowItemAction JumpToActivity(string name, string version, string positionalName)
+        protected ScheduleWorkflowItemAction JumpToActivity(string name, string version, string positionalName="")
         {
             var activityItem = FindActivityFor(Identity.New(name,version,positionalName));
             return WorkflowAction.Schedule(activityItem);
@@ -180,7 +180,7 @@ namespace Guflow
             return _allWorkflowItems.FirstOrDefault(s => s.Has(identity));
         }
 
-        IWorkflowHistoryEvents IWorkflowItems.CurrentHistoryEvents
+        IWorkflowHistoryEvents IWorkflow.CurrentHistoryEvents
         {
             get
             {

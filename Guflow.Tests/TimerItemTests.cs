@@ -97,34 +97,21 @@ namespace Guflow.Tests
             Assert.That(latestEvent, Is.EqualTo(new TimerCancellationFailedEvent(eventGraph.First())));
         }
 
+        [Test]
+        public void All_events_can_return_timer_fired_events()
+        {
+            var eventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var timerItem = CreateTimerItemFor(eventGraph);
+
+            var latestEvent = timerItem.AllEvents;
+
+            Assert.That(latestEvent, Is.EqualTo(new[]{new TimerFiredEvent(eventGraph.First(),eventGraph)}));
+        }
+
         private TimerItem CreateTimerItemFor(IEnumerable<HistoryEvent> eventGraph)
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            return new TimerItem(_timerIdentity, new TestWorkflowItems(workflowHistoryEvents));
+            return new TimerItem(_timerIdentity, new WorkflowToStubHistoryEvents(workflowHistoryEvents));
         }
-        private class TestWorkflowItems : IWorkflowItems
-        {
-            public TestWorkflowItems(IWorkflowHistoryEvents workflowHistoryEvents)
-            {
-                CurrentHistoryEvents = workflowHistoryEvents;
-            }
-            public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem item)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public WorkflowItem Find(Identity identity)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public IWorkflowHistoryEvents CurrentHistoryEvents { get; private set; }
-        }
-        
     }
 }

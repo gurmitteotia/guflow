@@ -8,7 +8,7 @@ namespace Guflow.Tests
     [TestFixture]
     public class ScheduleWorkflowItemActionTest
     {
-        private readonly Mock<IWorkflowItems> _workflowItems = new Mock<IWorkflowItems>();
+        private readonly Mock<IWorkflow> _workflow = new Mock<IWorkflow>();
         private const string _activityName = "Download";
         private const string _activityVersion = "1.0";
         private const string _positionalName = "First";
@@ -16,13 +16,13 @@ namespace Guflow.Tests
         [Test]
         public void Equality_tests()
         {
-            Assert.True(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"),_workflowItems.Object)).Equals(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"),_workflowItems.Object))));
-            Assert.False(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"), _workflowItems.Object)).Equals(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename1"), _workflowItems.Object))));
+            Assert.True(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"),_workflow.Object)).Equals(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"),_workflow.Object))));
+            Assert.False(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"), _workflow.Object)).Equals(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename1"), _workflow.Object))));
         }
         [Test]
         public void Should_return_the_scheduling_decision_for_workflow_item()
         {
-            var workflowItem = new TimerItem(Identity.Timer("Somename"),_workflowItems.Object);
+            var workflowItem = new TimerItem(Identity.Timer("Somename"),_workflow.Object);
             var workflowAction = WorkflowAction.Schedule(workflowItem);
 
             var decisions = workflowAction.GetDecisions();
@@ -33,7 +33,7 @@ namespace Guflow.Tests
         [Test]
         public void Should_return_timer_decision_when_rescheduled_after_a_timeout()
         {
-            var workflowItem = new ActivityItem(Identity.New("name","ver","pos"),_workflowItems.Object);
+            var workflowItem = new ActivityItem(Identity.New("name","ver","pos"),_workflow.Object);
             var workflowAction = WorkflowAction.Schedule(workflowItem).After(TimeSpan.FromSeconds(2));
 
             var decisions = workflowAction.GetDecisions();

@@ -59,7 +59,7 @@ namespace Guflow.Tests
             {
                 ScheduleActivity("Download", "1.0");
 
-                ScheduleActivity("Transcode", "2.0").DependsOn("Download", "1.0");
+                ScheduleActivity("Transcode", "2.0").After("Download", "1.0");
             }
         }
         private class WorkflowReturningStartWorkflowAction : Workflow

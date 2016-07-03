@@ -49,7 +49,7 @@ namespace Guflow
             return WorkflowItemEvent.NotFound;
         }
 
-        public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow)
+        public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflowActions workflow)
         {
             var workflowActions = new List<WorkflowAction>();
 

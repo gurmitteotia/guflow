@@ -14,12 +14,13 @@ namespace Guflow.Tests
         private const string _activityVersion = "1.0";
         private const string _positionalName = "First";
         private const string _identity = "machine name";
+        private const string _input = "input";
         private ActivityCompletedEvent _activityCompletedEvent;
 
         [SetUp]
         public void Setup()
         {
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
+            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result,_input);
             _activityCompletedEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
         }
 
@@ -29,6 +30,7 @@ namespace Guflow.Tests
             Assert.That(_activityCompletedEvent.Result, Is.EqualTo(_result));
             Assert.That(_activityCompletedEvent.WorkerIdentity, Is.EqualTo(_identity));
             Assert.That(_activityCompletedEvent.IsActive,Is.False);
+            Assert.That(_activityCompletedEvent.Input,Is.EqualTo(_input));
         }
 
         [Test]

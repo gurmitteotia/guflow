@@ -16,9 +16,9 @@ namespace Guflow
 
         public string Details { get { return _eventAttributes.Details; } }
 
-        internal override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
-            return workflow.ActivityTimedout(this);
+            return workflowActions.OnActivityTimeout(this);
         }
     }
 }

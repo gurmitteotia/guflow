@@ -34,7 +34,7 @@ namespace Guflow
             {
                 AwsIdentity= AwsIdentity.Raw("");
             }
-            internal override WorkflowAction Interpret(IWorkflow workflow)
+            internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
             {
                 throw new NotSupportedException("Can not interpret not found event.");
             }

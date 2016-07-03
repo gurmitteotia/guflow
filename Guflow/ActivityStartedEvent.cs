@@ -11,7 +11,7 @@ namespace Guflow
             PopulateActivityFrom(allHistoryEvents,activityStartedEvent.EventId,activityStartedEvent.ActivityTaskStartedEventAttributes.ScheduledEventId);
             IsActive = true;
         }
-        internal override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
             throw new NotSupportedException("Can not interpret activity started event.");
         }

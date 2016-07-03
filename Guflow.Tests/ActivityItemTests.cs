@@ -14,7 +14,7 @@ namespace Guflow.Tests
         public void By_default_workflow_input_is_passed_as_activity_input()
         {
             const string workflowInput = "actvity";
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(new WorkflowHistoryEvents(HistoryEventFactory.CreateWorkflowStartedEventGraph(workflowInput))));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(new WorkflowHistoryEvents(HistoryEventFactory.CreateWorkflowStartedEventGraph(workflowInput))));
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -58,7 +58,7 @@ namespace Guflow.Tests
         [Test]
         public void By_default_schedule_activity_with_empty_task_list()
         {
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(null));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(null));
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -69,7 +69,7 @@ namespace Guflow.Tests
         public void Can_be_configured_to_schedule_activity_with_custom_task_list()
         {
             const string taskList = "taskList";
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(null));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(null));
             activityItem.OnTaskList(a => taskList);
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
@@ -80,7 +80,7 @@ namespace Guflow.Tests
         [Test]
         public void Does_not_schedule_activity_when_when_func_is_evaluated_to_false()
         {
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(null));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(null));
             activityItem.When(a => false);
 
             var decision = activityItem.GetScheduleDecision();
@@ -91,7 +91,7 @@ namespace Guflow.Tests
         [Test]
         public void By_default_schedule_activity_without_priority()
         {
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(null));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(null));
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -101,7 +101,7 @@ namespace Guflow.Tests
         [Test]
         public void Can_be_configured_to_schedule_activity_with_priority()
         {
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(null));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(null));
             activityItem.WithPriority(a => 10);
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -111,7 +111,7 @@ namespace Guflow.Tests
         [Test]
         public void By_default_schedule_activity_with_empty_timeouts()
         {
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(null));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(null));
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
 
@@ -124,7 +124,7 @@ namespace Guflow.Tests
         [Test]
         public void Can_be_configured_to_schedule_activity_with_timeouts()
         {
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(null));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(null));
             activityItem.WithTimeouts(
                 a =>
                     new ScheduleActivityTimeouts()
@@ -147,7 +147,7 @@ namespace Guflow.Tests
         {
             var workflowWithParentActivity = new WorkflowWithParentActivity("parent1","1.0","pos");
             var childActivity = new ActivityItem(Identity.New("child","1.0"),workflowWithParentActivity);
-            childActivity.DependsOn("parent1", "1.0","pos");
+            childActivity.After("parent1", "1.0","pos");
 
             var parentActivities = childActivity.ParentActivities;
             
@@ -162,7 +162,7 @@ namespace Guflow.Tests
         {
             var workflowWithParentActivity = new WorkflowWithParentTimer("parent1");
             var childActivity = new ActivityItem(Identity.New("child", "1.0"), workflowWithParentActivity);
-            childActivity.DependsOn("parent1");
+            childActivity.After("parent1");
 
             var parentActivities = childActivity.ParentTimers;
 
@@ -175,7 +175,7 @@ namespace Guflow.Tests
         {
             var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            var activityItem = new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
+            var activityItem = new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(workflowHistoryEvents));
 
             var latestEvent = activityItem.LastEvent;
 
@@ -558,14 +558,25 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void All_events_can_return_timer_started()
+        public void All_events_can_return_timer_started_event()
         {
             var eventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents;
 
-            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new TimerStartedEvent(eventGraph.First(), eventGraph)}));
+            Assert.That(allEvents, Is.EquivalentTo(new [] { new TimerStartedEvent(eventGraph.First(), eventGraph)}));
+        }
+
+        [Test]
+        public void All_events_can_return_timer_start_failed_event()
+        {
+            var eventGraph = HistoryEventFactory.CreateTimerStartFailedEventGraph(_activityIdenity,"cause");
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+            var allEvents = activityItem.AllEvents;
+
+            Assert.That(allEvents, Is.EquivalentTo(new [] { new TimerStartFailedEvent(eventGraph.First()) }));
         }
 
         [Test]
@@ -573,41 +584,22 @@ namespace Guflow.Tests
         {
             var startedEventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
             var activityItem = CreateActivityItemWith(startedEventGraph);
-
             Assert.IsTrue(activityItem.IsActive);
-            
+        }
+
+        [Test]
+        public void Should_not_be_active_when_no_event_is_found()
+        {
+            var activityItem = CreateActivityItemWith(HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New("Different",""),"id"));
+            Assert.IsFalse(activityItem.IsActive);
         }
 
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            return new ActivityItem(_activityIdenity, new TestWorkflowItems(workflowHistoryEvents));
+            return new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(workflowHistoryEvents));
         }
-        
-        private class TestWorkflowItems : IWorkflowItems
-        {
-            public TestWorkflowItems(IWorkflowHistoryEvents workflowHistoryEvents)
-            {
-                CurrentHistoryEvents = workflowHistoryEvents;
-            }
-            public IEnumerable<WorkflowItem> GetStartupWorkflowItems()
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem item)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public WorkflowItem Find(Identity identity)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public IWorkflowHistoryEvents CurrentHistoryEvents { get; private set; }
-        }
-
+       
         private class WorkflowWithParentActivity : Workflow
         {
             public WorkflowWithParentActivity(string parentActivityName,string parentActivityVersion, string postionalName)

@@ -11,9 +11,9 @@ namespace Guflow
             AwsIdentity = AwsIdentity.Raw(_eventAttributes.TimerId);
         }
         public string Cause { get { return _eventAttributes.Cause; } }
-        internal override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
-            return workflow.TimerCancellationFailed(this);
+            return workflowActions.OnTimerCancellationFailed(this);
         }
     }
 }

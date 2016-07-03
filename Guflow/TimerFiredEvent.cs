@@ -10,9 +10,9 @@ namespace Guflow
             var eventAttributes =timerFiredEvent.TimerFiredEventAttributes;
             PopulateProperties(eventAttributes.StartedEventId, allHistoryEvents);
         }
-        internal override WorkflowAction Interpret(IWorkflow workflow)
+        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
-            return workflow.TimerFired(this);
+            return workflowActions.OnTimerFired(this);
         }
     }
 }
