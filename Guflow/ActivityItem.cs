@@ -46,16 +46,6 @@ namespace Guflow
                 return latestTimerEvent;
             }
         }
-
-        public bool IsActive
-        {
-            get
-            {
-                var lastEvent = LastEvent;
-                return lastEvent != WorkflowItemEvent.NotFound && lastEvent.IsActive;
-            }
-        }
-
         public ActivityCompletedEvent LastCompletedEvent
         {
             get { return WorkflowHistoryEvents.LastCompletedEventFor(this); }

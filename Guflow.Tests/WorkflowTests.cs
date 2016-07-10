@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using Guflow.Tests.TestWorkflows;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -7,6 +9,13 @@ namespace Guflow.Tests
     [TestFixture]
     public class WorkflowTests
     {
+        private Mock<IWorkflowHistoryEvents> _workflowHistoryEvents;
+
+        [SetUp]
+        public void Setup()
+        {
+            _workflowHistoryEvents = new Mock<IWorkflowHistoryEvents>();
+        }
         [Test]
         public void Throws_exception_when_adding_the_same_item_again()
         {
@@ -45,6 +54,42 @@ namespace Guflow.Tests
             Assert.That(activity, Is.EqualTo(new TimerItem(Identity.Timer("Timer1"), workflow)));
         }
 
+        [Test]
+        public void Should_return_complete_workflow_decision_when_only_propose_to_complete_workflow_decision_is_generated()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] {new CompleteWorkflowDecision("complete", true)});
+            
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions,Is.EqualTo(new []{new CompleteWorkflowDecision("complete",true)}));
+        }
+
+        [Test]
+        public void Should_filter_out_propose_to_complete_workflow_decision_when_it_is_generated_along_with_other_decisions()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[] { new CompleteWorkflowDecision("complete", true),
+                                                                                new ScheduleActivityDecision(Identity.New("something","1.0"))});
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New("something","1.0"))}));
+        }
+
+        [Test]
+        public void Should_filter_out_scheduling_decisions_when_generated_along_complet_workflow_decision()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[] { new CompleteWorkflowDecision("complete"),
+                                                                                new ScheduleActivityDecision(Identity.New("something","1.0"))});
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("complete") }));
+        }
+
+       
         private class WorkflowWithSameActivity : Workflow
         {
             public WorkflowWithSameActivity()
@@ -61,7 +106,6 @@ namespace Guflow.Tests
                 ScheduleTimer("Download");
             }
         }
-
         private class WorkflowWithNonExistentParentActivityItem : Workflow
         {
             public WorkflowWithNonExistentParentActivityItem()
@@ -94,6 +138,11 @@ namespace Guflow.Tests
             {
                 return TimerOf(workflowItemEvent);
             }
+        }
+
+        private class StubWorkflow : Workflow
+        {
+            
         }
     }
 

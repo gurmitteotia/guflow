@@ -6,7 +6,7 @@ namespace Guflow
     internal class ContinueWorkflowAction : WorkflowAction
     {
         private readonly WorkflowItem _completedWorkflowItem;
-
+        private const string _defaultWorkflowCompletedResult = "Workflow is completed.";
         public ContinueWorkflowAction(WorkflowItem completedWorkflowItem)
         {
             _completedWorkflowItem = completedWorkflowItem;
@@ -25,7 +25,8 @@ namespace Guflow
         internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
             var childItems = _completedWorkflowItem.GetChildlern();
-
+            if(!childItems.Any())
+                return new[]{new CompleteWorkflowDecision(_defaultWorkflowCompletedResult,true)};
             var schedulableChildItems = childItems.Where(s => s.SchedulingIsAllowedByAllParents());
 
             return schedulableChildItems.Select(f => f.GetScheduleDecision());

@@ -4,7 +4,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal class ScheduleActivityDecision : WorkflowDecision
+    internal sealed class ScheduleActivityDecision : WorkflowDecision
     {
         private readonly Identity _identity;
         private Func<string> _inputFunc;
@@ -36,7 +36,7 @@ namespace Guflow
             return _identity.GetHashCode();
         }
 
-        public override Decision Decision()
+        internal override Decision Decision()
         {
             return new Decision()
             {

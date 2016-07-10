@@ -95,7 +95,7 @@ namespace Guflow
             return historyEvent.EventType == EventType.TimerStarted && historyEvent.EventId == timerStartedEventId;
         }
 
-        public static WorkflowEvent CreateInterpretableEventFor(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public static WorkflowEvent CreateInterpretableEvent(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             if (historyEvent.IsActivityCompletedEvent())
                 return new ActivityCompletedEvent(historyEvent, allHistoryEvents);

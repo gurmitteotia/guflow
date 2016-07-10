@@ -3,7 +3,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal class CancelWorkflowDecision : WorkflowDecision
+    internal sealed class CancelWorkflowDecision : WorkflowDecision
     {
         private readonly string _details;
 
@@ -25,7 +25,7 @@ namespace Guflow
             return string.IsNullOrEmpty(_details) ? GetType().GetHashCode() : _details.GetHashCode();
         }
 
-        public override Decision Decision()
+        internal override Decision Decision()
         {
             return new Decision
             {

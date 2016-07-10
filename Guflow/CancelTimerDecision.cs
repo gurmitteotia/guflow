@@ -11,7 +11,7 @@ namespace Guflow
             _timerIdentity = timerIdentity;
         }
 
-        public override Decision Decision()
+        internal override Decision Decision()
         {
             return new Decision()
             {

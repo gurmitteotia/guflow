@@ -3,7 +3,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal class FailWorkflowDecision : WorkflowDecision
+    internal sealed class FailWorkflowDecision : WorkflowDecision
     {
         private readonly string _reason;
         private readonly string _detail;
@@ -28,7 +28,7 @@ namespace Guflow
             return string.Format("{0}{1}", _reason, _detail).GetHashCode();
         }
 
-        public override Decision Decision()
+        internal override Decision Decision()
         {
             return new Decision
             {

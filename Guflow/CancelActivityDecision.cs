@@ -12,7 +12,7 @@ namespace Guflow
             _activityIdentiy = activityIdentiy;
         }
 
-        public override Decision Decision()
+        internal override Decision Decision()
         {
             return new Decision()
             {

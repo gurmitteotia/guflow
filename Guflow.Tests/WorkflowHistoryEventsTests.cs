@@ -160,18 +160,6 @@ namespace Guflow.Tests
         public void Should_filter_out_duplicate_workflow_decisions()
         {
             _workflow.Setup(w => w.OnTimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
-            _workflow.Setup(w => w.OnTimerStartFailure(It.IsAny<TimerStartFailedEvent>())).Returns(new TestWorkflowAction(WorkflowDecision.Empty));
-            var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
-
-            var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
-
-            Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision.Object }));
-        }
-
-        [Test]
-        public void Should_filter_out_empty_workflow_decisions()
-        {
-            _workflow.Setup(w => w.OnTimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
             _workflow.Setup(w => w.OnTimerStartFailure(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
 

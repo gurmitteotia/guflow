@@ -49,21 +49,21 @@ namespace Guflow
             return WorkflowItemEvent.NotFound;
         }
 
-        public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflowActions workflow)
+        public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflowActions workflowActions)
         {
-            var workflowActions = new List<WorkflowAction>();
+            var interpretedWorkflowActions = new List<WorkflowAction>();
 
             for (var eventId = _newEventsStartId;eventId>=_newEventsEndId;eventId--)
             {
                 var historyEvent = _allHistoryEvents.FirstOrDefault(h => h.EventId == eventId);
                 if (historyEvent == null)
                     continue;
-                var workflowEvent = historyEvent.CreateInterpretableEventFor(_allHistoryEvents);
+                var workflowEvent = historyEvent.CreateInterpretableEvent(_allHistoryEvents);
                 if(workflowEvent!=null)
-                    workflowActions.Add(workflowEvent.Interpret(workflow));
+                    interpretedWorkflowActions.Add(workflowEvent.Interpret(workflowActions));
             }
 
-            return workflowActions.SelectMany(a => a.GetDecisions()).Distinct().Where(d=>d!=WorkflowDecision.Empty);
+            return interpretedWorkflowActions.SelectMany(a => a.GetDecisions()).Distinct();
         }
 
         public WorkflowStartedEvent WorkflowStartedEvent()

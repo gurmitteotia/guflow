@@ -36,15 +36,14 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_empty_decision_when_no_schedulable_child_item_found_and_workflow_is_active()
+        public void Should_return_propose_to_complete_decision_when_no_schedulable_child_item_found()
         {
             var workflow = new SingleActivityWorkflow();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
             var decisions = workflow.ExecuteFor(workflowHistoryEvents);
 
-
-            CollectionAssert.IsEmpty(decisions);
+            Assert.That(decisions,Is.EqualTo(new []{new CompleteWorkflowDecision("Workflow is completed.",proposal:true)}));
         }
 
         [Test]
@@ -274,6 +273,15 @@ namespace Guflow.Tests
             public SingleActivityWorkflow()
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+            }
+        }
+
+        private class WorkflowWithMutlipleStartup : Workflow
+        {
+            public WorkflowWithMutlipleStartup()
+            {
+                ScheduleActivity(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }
         private class WorkflowWithCustomContinue : Workflow

@@ -44,7 +44,7 @@ namespace Guflow
         {
             internal override IEnumerable<WorkflowDecision> GetDecisions()
             {
-                return Enumerable.Empty<WorkflowDecision>();
+                return new[] {WorkflowDecision.Empty};
             }
         }
         private class StartWorkflowAction : WorkflowAction

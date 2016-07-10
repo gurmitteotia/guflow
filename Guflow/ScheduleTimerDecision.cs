@@ -4,7 +4,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal class ScheduleTimerDecision : WorkflowDecision
+    internal sealed class ScheduleTimerDecision : WorkflowDecision
     {
         private readonly Identity _timerIdentity;
         private readonly TimeSpan _fireAfter;
@@ -30,7 +30,7 @@ namespace Guflow
             return _timerIdentity.GetHashCode();
         }
 
-        public override Decision Decision()
+        internal override Decision Decision()
         {
             return new Decision()
             {

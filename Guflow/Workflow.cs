@@ -195,13 +195,19 @@ namespace Guflow
             try
             {
                 _currentworkflowHistoryEvents = workflowHistoryEvents;
-                return workflowHistoryEvents.InterpretNewEventsFor(this).ToArray();
+                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this);
+                return FilterOutIncompatibleDecisions(workflowDecisions);
             }
             finally
             {
                 _currentworkflowHistoryEvents = null;
             }
         }
+
+        private IEnumerable<WorkflowDecision> FilterOutIncompatibleDecisions(IEnumerable<WorkflowDecision> workflowDecisions)
+        {
+            return workflowDecisions.Where(d => d.IsCompaitbleWith(workflowDecisions.Where(f=>!f.Equals(d))));
+        } 
 
         private ActivityItem FindActivity(Identity identity)
         {
