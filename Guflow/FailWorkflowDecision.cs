@@ -8,7 +8,7 @@ namespace Guflow
         private readonly string _reason;
         private readonly string _detail;
 
-        public FailWorkflowDecision(string reason, string detail)
+        public FailWorkflowDecision(string reason, string detail):base(true)
         {
             _reason = reason;
             _detail = detail;

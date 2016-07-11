@@ -18,7 +18,7 @@ namespace Guflow.Tests
         public void Setup()
         {
             _workflow = new Mock<IWorkflowActions>();
-            _expectedWorkflowDecision = new Mock<WorkflowDecision>();
+            _expectedWorkflowDecision = new Mock<WorkflowDecision>(false,false);
             _interpretedWorkflowAction = new TestWorkflowAction(_expectedWorkflowDecision.Object);
         }
         
@@ -145,7 +145,7 @@ namespace Guflow.Tests
         [Test]
         public void Should_accumulate_the_interpreted_actions()
         {
-            var timerFailedDecision = new Mock<WorkflowDecision>();
+            var timerFailedDecision = new Mock<WorkflowDecision>(false,false);
             var timerFailedAction = new TestWorkflowAction(timerFailedDecision.Object);
             _workflow.Setup(w => w.OnTimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
             _workflow.Setup(w => w.OnTimerStartFailure(It.IsAny<TimerStartFailedEvent>())).Returns(timerFailedAction);

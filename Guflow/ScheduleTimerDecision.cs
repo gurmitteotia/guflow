@@ -9,7 +9,7 @@ namespace Guflow
         private readonly Identity _timerIdentity;
         private readonly TimeSpan _fireAfter;
         private readonly bool _isRescheduleTimer;
-        public ScheduleTimerDecision(Identity timerIdentity, TimeSpan fireAfter, bool isRescheduleTimer=false)
+        public ScheduleTimerDecision(Identity timerIdentity, TimeSpan fireAfter, bool isRescheduleTimer=false):base(false)
         {
             _timerIdentity = timerIdentity;
             _fireAfter = fireAfter;

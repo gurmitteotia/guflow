@@ -6,7 +6,7 @@ namespace Guflow
     internal sealed class CancelTimerDecision : WorkflowDecision
     {
         private readonly Identity _timerIdentity;
-        public CancelTimerDecision(Identity timerIdentity)
+        public CancelTimerDecision(Identity timerIdentity):base(false)
         {
             _timerIdentity = timerIdentity;
         }

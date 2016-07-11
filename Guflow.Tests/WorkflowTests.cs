@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Guflow.Tests.TestWorkflows;
 using Moq;
 using NUnit.Framework;
 
@@ -78,17 +78,77 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_filter_out_scheduling_decisions_when_generated_along_complet_workflow_decision()
+        public void Should_filter_out_propose_to_complete_workflow_decision_and_any_scheduling_decision_when_it_is_generated_along_with_complete_workflow_decision()
         {
             var workflow = new StubWorkflow();
-            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[] { new CompleteWorkflowDecision("complete"),
-                                                                                new ScheduleActivityDecision(Identity.New("something","1.0"))});
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CompleteWorkflowDecision("complete", true),
+                                                                                new CompleteWorkflowDecision("complete3")}));
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("complete3") }));
+        }
+
+        [Test]
+        public void Should_filter_out_scheduling_decisions_when_generated_along_complete_workflow_decision()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[]{new CompleteWorkflowDecision("complete")}));
 
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("complete") }));
         }
 
+        [Test]
+        public void Should_filter_out_activity_scheduling_decisions_when_generated_along_with_fail_workflow_decision()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new [] { new FailWorkflowDecision("reason","detail")}));
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new FailWorkflowDecision("reason","detail") }));
+        }
+
+        [Test]
+        public void Should_filter_out_activity_scheduling_decisions_when_generated_along_with_cancel_workflow_decision()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new [] { new CancelWorkflowDecision("detail")}));
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new CancelWorkflowDecision("detail") }));
+        }
+
+        //[Test]
+        //public void Should_return_the_decision_with_highest_priority_from_all_closing_workflow_decisions()
+        //{
+        //    var workflow = new StubWorkflow();
+        //    _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
+        //    {
+        //        new CompleteWorkflowDecision("result",10,false),
+        //        new CancelWorkflowDecision("detail",15),
+        //        new CompleteWorkflowDecision("result2",5,true),
+        //        new FailWorkflowDecision("reason","detail",20), 
+        //    }));
+
+        //    var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+        //    Assert.That(workflowDecisions, Is.EqualTo(new[] { new CancelWorkflowDecision("detail") }));
+        //}
+
+        private IEnumerable<WorkflowDecision> AllNonCompletingDecisions()
+        {
+            return new WorkflowDecision[]
+            {
+                new ScheduleActivityDecision(Identity.New("id", "1.0")),
+                new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2)),
+                new CancelActivityDecision(Identity.New("newid", "1.0")),
+                new CancelTimerDecision(Identity.Timer("first")),
+            };
+        }
        
         private class WorkflowWithSameActivity : Workflow
         {

@@ -7,7 +7,7 @@ namespace Guflow
     {
         private readonly string _details;
 
-        public CancelWorkflowDecision(string details)
+        public CancelWorkflowDecision(string details):base(true)
         {
             _details = details;
         }

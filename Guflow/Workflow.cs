@@ -196,7 +196,7 @@ namespace Guflow
             {
                 _currentworkflowHistoryEvents = workflowHistoryEvents;
                 var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this);
-                return FilterOutIncompatibleDecisions(workflowDecisions);
+                return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty).ToArray();
             }
             finally
             {
@@ -206,7 +206,7 @@ namespace Guflow
 
         private IEnumerable<WorkflowDecision> FilterOutIncompatibleDecisions(IEnumerable<WorkflowDecision> workflowDecisions)
         {
-            return workflowDecisions.Where(d => d.IsCompaitbleWith(workflowDecisions.Where(f=>!f.Equals(d))));
+            return workflowDecisions.Where(d => !d.IsIncompaitbleWith(workflowDecisions.Where(f=>!f.Equals(d))));
         } 
 
         private ActivityItem FindActivity(Identity identity)

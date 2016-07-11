@@ -15,7 +15,7 @@ namespace Guflow.Tests
         public void Return_empty_decisions()
         {
             var workflowAction = WorkflowAction.Ignore;
-            Assert.That(workflowAction.GetDecisions(),Is.Empty);
+            Assert.That(workflowAction.GetDecisions(),Is.EqualTo(new[]{WorkflowDecision.Empty}));
         }
 
         [Test]

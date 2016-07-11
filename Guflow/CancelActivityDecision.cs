@@ -7,7 +7,7 @@ namespace Guflow
     {
         private readonly Identity _activityIdentiy;
 
-        public CancelActivityDecision(Identity activityIdentiy)
+        public CancelActivityDecision(Identity activityIdentiy):base(false)
         {
             _activityIdentiy = activityIdentiy;
         }

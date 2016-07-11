@@ -8,7 +8,7 @@ namespace Guflow
     {
         private readonly Identity _identity;
         private Func<string> _inputFunc;
-        public ScheduleActivityDecision(Identity identity)
+        public ScheduleActivityDecision(Identity identity) : base(false)
         {
             _identity = identity;
             _inputFunc = () => null;
