@@ -36,16 +36,15 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_propose_to_complete_decision_when_no_schedulable_child_item_found()
+        public void Should_return_propose_to_complete_complete_decision_when_no_schedulable_child_item_found()
         {
             var workflow = new SingleActivityWorkflow();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
-            var decisions = workflow.ExecuteFor(workflowHistoryEvents);
+            var decisions = workflowHistoryEvents.InterpretNewEventsFor(workflow);
 
-            Assert.That(decisions,Is.EqualTo(new []{new CompleteWorkflowDecision("Workflow is completed.",proposal:true)}));
+            Assert.That(decisions,Is.EqualTo(new []{new CompleteWorkflowDecision("Workflow is completed.",true)}));
         }
-
         [Test]
         public void Should_not_schedule_the_child_when_one_of_its_parent_activity_is_not_completed()
         {
@@ -56,8 +55,6 @@ namespace Guflow.Tests
 
             CollectionAssert.IsEmpty(decisions);
         }
-
-
         [Test]
         public void Should_not_schedule_the_child_when_one_of_its_parent_activity_ignores_the_action()
         {
@@ -171,7 +168,7 @@ namespace Guflow.Tests
             var workflow = new WorkflowWithCustomContinue();
             var activityFailedEvent = CreateFailedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
-            var decisions = workflow.ExecuteFor(activityFailedEvent);
+            var decisions = activityFailedEvent.InterpretNewEventsFor(workflow);
 
             Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(new ActivityItem(Identity.New(_activityName,_activityVersion,_positionalName),workflow)).GetDecisions()));
         }
@@ -184,6 +181,11 @@ namespace Guflow.Tests
         private IWorkflowHistoryEvents CreateCompletedActivityEventGraph(string activityName, string activityVersion, string positionalName)
         {
             return new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res"));
+        }
+        private IWorkflowHistoryEvents CreateActivityCompletedAndActivityStartedEventGraph()
+        {
+            return new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
+                                            .Concat(HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New(_siblingActivityName,_siblingActivityVersion),"id")));
         }
 
         private IWorkflowHistoryEvents CreateTimerFiredEventGraph(string timerName)

@@ -11,6 +11,7 @@ namespace Guflow
         {
             _completedWorkflowItem = completedWorkflowItem;
         }
+
         public override bool Equals(object other)
         {
             var otherAction = other as ContinueWorkflowAction;
@@ -27,8 +28,8 @@ namespace Guflow
             var childItems = _completedWorkflowItem.GetChildlern();
             if(!childItems.Any())
                 return new[]{new CompleteWorkflowDecision(_defaultWorkflowCompletedResult,true)};
+           
             var schedulableChildItems = childItems.Where(s => s.SchedulingIsAllowedByAllParents());
-
             return schedulableChildItems.Select(f => f.GetScheduleDecision());
         }
 

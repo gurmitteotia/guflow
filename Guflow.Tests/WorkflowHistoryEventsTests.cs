@@ -168,6 +168,70 @@ namespace Guflow.Tests
             Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision.Object }));
         }
 
+        [Test]
+        public void Should_be_active_when_activity_is_just_started()
+        {
+            var activityStartedEventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New("activity", "1.0"), "id");
+            var workflowHistoryEvents = new WorkflowHistoryEvents(activityStartedEventGraph);
+
+            Assert.IsTrue(workflowHistoryEvents.IsActive());
+        }
+
+        [Test]
+        public void Should_be_active_when_activity_is_just_scheduled()
+        {
+            var activityScheduledEventGraph = HistoryEventFactory.CreateActivityScheduledEventGraph(Identity.New("activity", "1.0"));
+            var workflowHistoryEvents = new WorkflowHistoryEvents(activityScheduledEventGraph);
+
+            Assert.IsTrue(workflowHistoryEvents.IsActive());
+        }
+
+        [Test]
+        public void Should_be_active_when_activity_cancellation_is_in_progress()
+        {
+            var activityCancelRequestedGraph = HistoryEventFactory.CreateActivityCancelRequestedGraph(Identity.New("activity", "1.0"),"id");
+            var workflowHistoryEvents = new WorkflowHistoryEvents(activityCancelRequestedGraph);
+
+            Assert.IsTrue(workflowHistoryEvents.IsActive());
+        }
+
+        [Test]
+        public void Should_not_be_active_when_activity_is_completed()
+        {
+            var activityCompletedEventGraph =HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "res");
+            var workflowHistoryEvents = new WorkflowHistoryEvents(activityCompletedEventGraph);
+
+            Assert.IsFalse(workflowHistoryEvents.IsActive());
+        }
+
+        [Test]
+        public void Should_be_active_when_activity_is_just_started_after_failure()
+        {
+            var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New("activity", "1.0"), "id")
+                                            .Concat(HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New("activity", "1.0"), "id", "res","detail"));
+            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+
+            Assert.IsTrue(workflowHistoryEvents.IsActive());
+        }
+
+        [Test]
+        public void Should_be_active_when_timer_is_started()
+        {
+            var timerStartedEventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(Identity.Timer("id"),TimeSpan.FromSeconds(2));
+            var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph);
+
+            Assert.IsTrue(workflowHistoryEvents.IsActive());
+        }
+
+        [Test]
+        public void Should_not_be_active_when_timer_is_fired()
+        {
+            var timerStartedEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("id"), TimeSpan.FromSeconds(2));
+            var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph);
+
+            Assert.IsFalse(workflowHistoryEvents.IsActive());
+        }
+
         private WorkflowHistoryEvents CreateActivityCompletedEventGraph()
         {
             var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "result").ToArray();

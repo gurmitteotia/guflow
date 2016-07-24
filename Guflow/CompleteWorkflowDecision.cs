@@ -3,13 +3,15 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal sealed class CompleteWorkflowDecision : WorkflowDecision
+    internal sealed class CompleteWorkflowDecision : WorkflowClosingDecision
     {
         private readonly string _result;
-
-        public CompleteWorkflowDecision(string result, bool proposal=false):base(true, proposal)
+        private const int _mediumLow = 5;
+        private const int _medium = 10;
+        public CompleteWorkflowDecision(string result, bool proposal=false):base(proposal)
         {
             _result = result;
+            Priority = proposal ? _mediumLow : _medium;
         }
         internal override Decision Decision()
         {
@@ -22,6 +24,12 @@ namespace Guflow
                 }
             };
         }
+
+        internal override WorkflowAction ProvideFinalActionFrom(IWorkflowClosingActions workflowClosingActions)
+        {
+            return workflowClosingActions.OnCompletion(_result, Proposal);
+        }
+
         public override string ToString()
         {
             return string.Format("{0} with result {1} and proposal {2}", GetType().Name, _result, Proposal);

@@ -508,7 +508,8 @@ namespace Guflow.Tests
 
             var allEvents = activityItem.AllEvents;
 
-            Assert.That(allEvents, Is.EquivalentTo(new TimerEvent[] {new TimerStartedEvent(timerStartedEventGraph.First(),timerStartedEventGraph), new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph)}));
+            Assert.That(allEvents, Is.EquivalentTo(new TimerEvent[] {new TimerStartedEvent(timerStartedEventGraph.First(),timerStartedEventGraph), 
+                                            new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph)}));
         }
 
         [Test]
@@ -531,7 +532,8 @@ namespace Guflow.Tests
 
             var allEvents = activityItem.AllEvents;
 
-            Assert.That(allEvents, Is.EquivalentTo( new TimerEvent[] { new TimerStartedEvent(timerStartedEventGraph.First(), timerStartedEventGraph), new TimerCancelledEvent(timerCancelledEventGraph.First(), timerCancelledEventGraph), }));
+            Assert.That(allEvents, Is.EquivalentTo( new TimerEvent[] { new TimerStartedEvent(timerStartedEventGraph.First(), timerStartedEventGraph), 
+                                new TimerCancelledEvent(timerCancelledEventGraph.First(), timerCancelledEventGraph), }));
         }
 
         [Test]

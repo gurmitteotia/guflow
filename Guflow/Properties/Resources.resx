@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Duplicate_activity" xml:space="preserve">
-    <value>Activity with name {0}, version {1} and positional name {2} is already added to workflow.</value>
+    <value>Activity with name {0}, version {1} and positional name {2} is already added to workflowClosingActions.</value>
   </data>
   <data name="Duplicate_timer" xml:space="preserve">
-    <value>Timer with name {0} is already added to workflow.</value>
+    <value>Timer with name {0} is already added to workflowClosingActions.</value>
   </data>
   <data name="Schedulable_item_missing" xml:space="preserve">
     <value>Can not find the schedulable item for {0}.</value>

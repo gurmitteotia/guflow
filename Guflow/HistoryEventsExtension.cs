@@ -158,5 +158,11 @@ namespace Guflow
                 return new TimerCancellationFailedEvent(historyEvent);
             return null;
         }
+
+        public static WorkflowItemEvent CreateWorkflowItemEventFor(this HistoryEvent historyEvent,IEnumerable<HistoryEvent> allHistoryEvents)
+        {
+            var activityEvent = historyEvent.CreateActivityEventFor(allHistoryEvents);
+            return activityEvent ?? historyEvent.CreateTimerEventFor(allHistoryEvents);
+        }
     }
 }

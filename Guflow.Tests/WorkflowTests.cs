@@ -19,7 +19,7 @@ namespace Guflow.Tests
         [Test]
         public void Throws_exception_when_adding_the_same_item_again()
         {
-            Assert.Throws<DuplicateItemException>(()=>new WorkflowWithSameActivity());
+            Assert.Throws<DuplicateItemException>(() => new WorkflowWithSameActivity());
             Assert.Throws<DuplicateItemException>(() => new WorkflowWithSameTimer());
         }
 
@@ -27,25 +27,25 @@ namespace Guflow.Tests
         public void Throws_exception_when_parent_item_is_not_found()
         {
             Assert.Throws<ParentItemMissingException>(() => new WorkflowWithNonExistentParentActivityItem());
-            Assert.Throws<ParentItemMissingException>(()=>new WorkflowWithNonExistentParentTimerItem());
+            Assert.Throws<ParentItemMissingException>(() => new WorkflowWithNonExistentParentTimerItem());
         }
 
         [Test]
         public void Activityof_test()
         {
-            var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("Activity1", "1.0"),"id","result");
-            var activityCompletedEvent = new ActivityCompletedEvent(eventGraph.First(),eventGraph);
+            var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("Activity1", "1.0"), "id", "result");
+            var activityCompletedEvent = new ActivityCompletedEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
             var activity = workflow.GetActivityOf(activityCompletedEvent);
 
-            Assert.That(activity,Is.EqualTo(new ActivityItem(Identity.New("Activity1","1.0"),workflow)));
+            Assert.That(activity, Is.EqualTo(new ActivityItem(Identity.New("Activity1", "1.0"), workflow)));
         }
 
         [Test]
         public void Timerof_test()
         {
-            var eventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("Timer1"),TimeSpan.FromSeconds(2));
+            var eventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("Timer1"), TimeSpan.FromSeconds(2));
             var activityCompletedEvent = new TimerFiredEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -58,11 +58,11 @@ namespace Guflow.Tests
         public void Should_return_complete_workflow_decision_when_only_propose_to_complete_workflow_decision_is_generated()
         {
             var workflow = new StubWorkflow();
-            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] {new CompleteWorkflowDecision("complete", true)});
-            
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete", true) });
+
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
-            Assert.That(workflowDecisions,Is.EqualTo(new []{new CompleteWorkflowDecision("complete",true)}));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("complete") }));
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New("something","1.0"))}));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New("something", "1.0")) }));
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace Guflow.Tests
         public void Should_filter_out_scheduling_decisions_when_generated_along_complete_workflow_decision()
         {
             var workflow = new StubWorkflow();
-            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[]{new CompleteWorkflowDecision("complete")}));
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CompleteWorkflowDecision("complete") }));
 
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
@@ -104,40 +104,139 @@ namespace Guflow.Tests
         public void Should_filter_out_activity_scheduling_decisions_when_generated_along_with_fail_workflow_decision()
         {
             var workflow = new StubWorkflow();
-            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new [] { new FailWorkflowDecision("reason","detail")}));
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new FailWorkflowDecision("reason", "detail") }));
 
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { new FailWorkflowDecision("reason","detail") }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new FailWorkflowDecision("reason", "detail") }));
         }
 
         [Test]
         public void Should_filter_out_activity_scheduling_decisions_when_generated_along_with_cancel_workflow_decision()
         {
             var workflow = new StubWorkflow();
-            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new [] { new CancelWorkflowDecision("detail")}));
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CancelWorkflowDecision("detail") }));
 
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CancelWorkflowDecision("detail") }));
         }
 
-        //[Test]
-        //public void Should_return_the_decision_with_highest_priority_from_all_closing_workflow_decisions()
-        //{
-        //    var workflow = new StubWorkflow();
-        //    _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
-        //    {
-        //        new CompleteWorkflowDecision("result",10,false),
-        //        new CancelWorkflowDecision("detail",15),
-        //        new CompleteWorkflowDecision("result2",5,true),
-        //        new FailWorkflowDecision("reason","detail",20), 
-        //    }));
+        [Test]
+        public void Should_return_fail_workflow_decision_when_multiple_close_workflow_decisions_are_generated()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
+            {
+                new CompleteWorkflowDecision("result",false),
+                new CancelWorkflowDecision("detail"),
+                new CompleteWorkflowDecision("result2",true),
+                new FailWorkflowDecision("reason","detail"), 
+            });
 
-        //    var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
-        //    Assert.That(workflowDecisions, Is.EqualTo(new[] { new CancelWorkflowDecision("detail") }));
-        //}
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new FailWorkflowDecision("reason", "detail") }));
+        }
+
+        [Test]
+        public void Should_return_cancel_workflow_decision_when_it_generated_along_with_complete_workflow_decision()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
+            {
+                new CompleteWorkflowDecision("result",false),
+                new CancelWorkflowDecision("detail"),
+            });
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new CancelWorkflowDecision("detail") }));
+        }
+
+        [Test]
+        public void Should_return_complete_workflow_decision_when_it_generated_along_with_a_proposed_complete_workflow_decision()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
+            {
+                new CompleteWorkflowDecision("result",false),
+                new CompleteWorkflowDecision("result2",true),
+            });
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result") }));
+        }
+
+        [Test]
+        public void Workflow_can_return_custom_decisions_during_completion()
+        {
+            var workflowDecision = new Mock<WorkflowDecision>(false,false);
+            var workflow = new WorkflowToReturnCustomActionOnClosing(workflowDecision.Object);
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
+            {
+                new CompleteWorkflowDecision("result2",true),
+            });
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { workflowDecision.Object }));
+        }
+
+        [Test]
+        public void Workflow_can_return_custom_decisions_during_failure()
+        {
+            var workflowDecision = new Mock<WorkflowDecision>(false, false);
+            var workflow = new WorkflowToReturnCustomActionOnClosing(workflowDecision.Object);
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
+            {
+                new FailWorkflowDecision("reason","detail"), 
+            });
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { workflowDecision.Object }));
+        }
+
+        [Test]
+        public void Workflow_can_return_custom_decisions_during_cancellation()
+        {
+            var workflowDecision = new Mock<WorkflowDecision>(false, false);
+            var workflow = new WorkflowToReturnCustomActionOnClosing(workflowDecision.Object);
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
+            {
+                new CancelWorkflowDecision("detail"), 
+            });
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { workflowDecision.Object }));
+        }
+
+        [Test]
+        public void Should_return_empty_decisions_when_only_propose_to_complete_workflow_decision_is_generated_and_workflow_is_active()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete", true) });
+            _workflowHistoryEvents.Setup(h => h.IsActive()).Returns(true);
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.Empty);
+        }
+
+        [Test]
+        public void Should_filter_out_empty_workflow_decisions()
+        {
+            var workflow = new StubWorkflow();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete"), WorkflowDecision.Empty });
+            _workflowHistoryEvents.Setup(h => h.IsActive()).Returns(true);
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[]{new CompleteWorkflowDecision("complete")}));
+        }
 
         private IEnumerable<WorkflowDecision> AllNonCompletingDecisions()
         {
@@ -149,7 +248,7 @@ namespace Guflow.Tests
                 new CancelTimerDecision(Identity.Timer("first")),
             };
         }
-       
+
         private class WorkflowWithSameActivity : Workflow
         {
             public WorkflowWithSameActivity()
@@ -180,7 +279,6 @@ namespace Guflow.Tests
                 ScheduleActivity("_timerName", "version").After("ParentName");
             }
         }
-
         private class TestWorkflow : Workflow
         {
             public TestWorkflow()
@@ -188,21 +286,41 @@ namespace Guflow.Tests
                 ScheduleTimer("Timer1");
                 ScheduleActivity("Activity1", "1.0");
             }
-
             public IActivityItem GetActivityOf(WorkflowItemEvent workflowItemEvent)
             {
                 return ActivityOf(workflowItemEvent);
             }
-
             public ITimerItem GetTimerOf(WorkflowItemEvent workflowItemEvent)
             {
                 return TimerOf(workflowItemEvent);
             }
         }
-
         private class StubWorkflow : Workflow
         {
-            
+
+        }
+        private class WorkflowToReturnCustomActionOnClosing : Workflow
+        {
+            private readonly Mock<WorkflowAction> _customAction; 
+            public WorkflowToReturnCustomActionOnClosing(WorkflowDecision workflowDecision)
+            {
+                _customAction = new Mock<WorkflowAction>();
+                _customAction.Setup(w => w.GetDecisions()).Returns(new[] {workflowDecision});
+            }
+            protected override WorkflowAction DuringCompletion(string result)
+            {
+                return _customAction.Object;
+            }
+
+            protected override WorkflowAction DuringFailure(string reason, string detail)
+            {
+                return _customAction.Object;
+            }
+
+            protected override WorkflowAction DuringCancellation(string detail)
+            {
+                return _customAction.Object;
+            }
         }
     }
 

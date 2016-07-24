@@ -37,7 +37,7 @@ namespace Guflow
 
         public abstract WorkflowItemEvent LastEvent { get; }
 
-        public abstract IEnumerable<WorkflowItemEvent> AllEvents { get; } 
+        public abstract IEnumerable<WorkflowItemEvent> AllEvents { get; }
 
         internal bool HasNoParents()
         {

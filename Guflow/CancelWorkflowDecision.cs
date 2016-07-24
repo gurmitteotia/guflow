@@ -3,13 +3,14 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal sealed class CancelWorkflowDecision : WorkflowDecision
+    internal sealed class CancelWorkflowDecision : WorkflowClosingDecision
     {
         private readonly string _details;
-
-        public CancelWorkflowDecision(string details):base(true)
+        private const int _mediumHigh = 15;
+        public CancelWorkflowDecision(string details)
         {
             _details = details;
+            Priority = _mediumHigh;
         }
 
         public override bool Equals(object other)
@@ -40,6 +41,11 @@ namespace Guflow
         public override string ToString()
         {
             return string.Format("{0} with details {1}", GetType().Name, _details);
+        }
+
+        internal override WorkflowAction ProvideFinalActionFrom(IWorkflowClosingActions workflowClosingActions)
+        {
+            return workflowClosingActions.OnCancellation(_details);
         }
     }
 }

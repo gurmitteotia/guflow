@@ -91,7 +91,6 @@
     <Compile Include="CancelTimerDecision.cs" />
     <Compile Include="CancelWorkflowDecision.cs" />
     <Compile Include="ContinueWorkflowAction.cs" />
-    <Compile Include="DecisionAssertExtension.cs" />
     <Compile Include="DuplicateItemException.cs" />
     <Compile Include="Ensure.cs" />
     <Compile Include="FailWorkflowDecision.cs" />
@@ -107,6 +106,7 @@
     <Compile Include="IncompleteEventGraphException.cs" />
     <Compile Include="ITimerItem.cs" />
     <Compile Include="IWorkflow.cs" />
+    <Compile Include="IWorkflowClosingActions.cs" />
     <Compile Include="IWorkflowHistoryEvents.cs" />
     <Compile Include="IWorkflowItem.cs" />
     <Compile Include="IWorkflowItems.cs" />
@@ -135,6 +135,8 @@
     <Compile Include="TimerItem.cs" />
     <Compile Include="TimerScheduleData.cs" />
     <Compile Include="NameTooLongException.cs" />
+    <Compile Include="WorkflowClosingDecision.cs" />
+    <Compile Include="WorkflowDecisionExtension.cs" />
     <Compile Include="WorkflowItem.cs" />
     <Compile Include="ScheduleActivityDecision.cs" />
     <Compile Include="ActivityScheduleData.cs" />

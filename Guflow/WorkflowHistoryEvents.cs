@@ -78,7 +78,17 @@ namespace Guflow
 
         public bool IsActive()
         {
-            throw new System.NotImplementedException();
+            var allEvents = new List<WorkflowItemEvent>();
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                var workflowItemEvent = historyEvent.CreateWorkflowItemEventFor(_allHistoryEvents);
+                if (workflowItemEvent == null)
+                    continue;
+                if (workflowItemEvent.IsActive && !workflowItemEvent.InChainOf(allEvents))
+                    return true;
+                allEvents.Add(workflowItemEvent);
+            }
+            return false;
         }
 
         public ActivityCompletedEvent LastCompletedEventFor(ActivityItem activityItem)

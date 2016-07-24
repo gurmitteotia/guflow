@@ -3,15 +3,16 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal sealed class FailWorkflowDecision : WorkflowDecision
+    internal sealed class FailWorkflowDecision : WorkflowClosingDecision
     {
         private readonly string _reason;
-        private readonly string _detail;
-
-        public FailWorkflowDecision(string reason, string detail):base(true)
+        private readonly string _details;
+        private const int _high = 20;
+        public FailWorkflowDecision(string reason, string details)
         {
             _reason = reason;
-            _detail = detail;
+            _details = details;
+            Priority = _high;
         }
 
         public override bool Equals(object other)
@@ -20,14 +21,12 @@ namespace Guflow
             if (otherDecision == null)
                 return false;
             return string.Equals(_reason, otherDecision._reason) &&
-                   string.Equals(_detail, otherDecision._detail);
+                   string.Equals(_details, otherDecision._details);
         }
-
         public override int GetHashCode()
         {
-            return string.Format("{0}{1}", _reason, _detail).GetHashCode();
+            return string.Format("{0}{1}", _reason, _details).GetHashCode();
         }
-
         internal override Decision Decision()
         {
             return new Decision
@@ -36,14 +35,18 @@ namespace Guflow
                 FailWorkflowExecutionDecisionAttributes = new FailWorkflowExecutionDecisionAttributes()
                 {
                     Reason = _reason,
-                    Details = _detail
+                    Details = _details
                 }
             };
         }
-
         public override string ToString()
         {
-            return string.Format("{0} with reason {1} and detail {2}", GetType().Name, _reason, _detail);
+            return string.Format("{0} with reason {1} and details {2}", GetType().Name, _reason, _details);
+        }
+
+        internal override WorkflowAction ProvideFinalActionFrom(IWorkflowClosingActions workflowClosingActions)
+        {
+            return workflowClosingActions.OnFailure(_reason, _details);
         }
     }
 }
