@@ -80,5 +80,15 @@ namespace Guflow.Tests
         {
             throw new NotImplementedException();
         }
+
+        public WorkflowAction OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent)
+        {
+            throw new NotImplementedException();
+        }
+
+        public WorkflowAction OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

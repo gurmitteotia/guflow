@@ -8,74 +8,69 @@ namespace Guflow
     public abstract class Workflow : IWorkflow, IWorkflowClosingActions
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
-        private Func<WorkflowStartedEvent, WorkflowAction> _onStartupFunc;
         private IWorkflowHistoryEvents _currentworkflowHistoryEvents;
-
-        protected Workflow()
+        WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
-            _onStartupFunc = s => WorkflowAction.StartWorkflow(this);
+            return OnStart(workflowStartedEvent);
         }
 
-        public WorkflowAction OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
-        {
-            return _onStartupFunc(workflowStartedEvent);
-        }
-
-        public WorkflowAction OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
+        WorkflowAction IWorkflowActions.OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
         {
             var workflowActivity = FindActivityFor(activityCompletedEvent);
             return workflowActivity.Completed(activityCompletedEvent);
         }
-        public WorkflowAction OnActivityFailure(ActivityFailedEvent activityFailedEvent)
+        WorkflowAction IWorkflowActions.OnActivityFailure(ActivityFailedEvent activityFailedEvent)
         {
             var workflowActivity = FindActivityFor(activityFailedEvent);
             return workflowActivity.Failed(activityFailedEvent);
         }
-        public WorkflowAction OnActivityTimeout(ActivityTimedoutEvent activityTimedoutEvent)
+        WorkflowAction IWorkflowActions.OnActivityTimeout(ActivityTimedoutEvent activityTimedoutEvent)
         {
             var workflowActivity = FindActivityFor(activityTimedoutEvent);
             return workflowActivity.Timedout(activityTimedoutEvent);
         }
-        public WorkflowAction OnActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
+        WorkflowAction IWorkflowActions.OnActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
         {
             var workflowActivity = FindActivityFor(activityCancelledEvent);
             return workflowActivity.Cancelled(activityCancelledEvent);
         }
-
-        public WorkflowAction OnTimerFired(TimerFiredEvent timerFiredEvent)
+        WorkflowAction IWorkflowActions.OnTimerFired(TimerFiredEvent timerFiredEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerFiredEvent);
             return workflowItem.TimerFired(timerFiredEvent);
         }
-
-        public WorkflowAction OnTimerStartFailure(TimerStartFailedEvent timerStartFailedEvent)
+        WorkflowAction IWorkflowActions.OnTimerStartFailure(TimerStartFailedEvent timerStartFailedEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerStartFailedEvent);
             return workflowItem.TimerStartFailed(timerStartFailedEvent);
         }
-
-        public WorkflowAction OnTimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        WorkflowAction IWorkflowActions.OnTimerCancelled(TimerCancelledEvent timerCancelledEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerCancelledEvent);
             return workflowItem.TimerCancelled(timerCancelledEvent);
         }
-
-        public WorkflowAction OnActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
+        WorkflowAction IWorkflowActions.OnActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
         {
             var workflowActivity = FindActivityFor(activityCancellationFailedEvent);
             return workflowActivity.CancellationFailed(activityCancellationFailedEvent);
         }
-
-        public WorkflowAction OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        WorkflowAction IWorkflowActions.OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
             var workflowItem = FindWorkflowItemFor(timerCancellationFailedEvent);
             return workflowItem.TimerCancellationFailed(timerCancellationFailedEvent);
         }
-
-        public WorkflowAction OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
+        WorkflowAction IWorkflowActions.OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
         {
             var workflowActivity = FindActivityFor(activitySchedulingFailedEvent);
             return workflowActivity.SchedulingFailed(activitySchedulingFailedEvent);
+        }
+        WorkflowAction IWorkflowActions.OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent)
+        {
+            return OnSignal(workflowSignaledEvent);
+        }
+        WorkflowAction IWorkflowActions.OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
+        {
+            return OnCancellationRequested(workflowCancellationRequestedEvent);
         }
 
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
@@ -93,10 +88,17 @@ namespace Guflow
 
             return timerItem;
         }
-        protected Workflow OnStartup(Func<WorkflowStartedEvent, WorkflowAction> workflowStartupFunc)
+        protected virtual WorkflowAction OnStart(WorkflowStartedEvent workflowSartedEvent)
         {
-            _onStartupFunc = workflowStartupFunc;
-            return this;
+            return WorkflowAction.StartWorkflow(this);
+        }
+        protected virtual WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignaledEvent)
+        {
+            return WorkflowAction.Ignore;
+        }
+        protected virtual WorkflowAction OnCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
+        {
+            return WorkflowAction.CancelWorkflow(workflowCancellationRequestedEvent.Cause);
         }
         protected WorkflowAction Continue(WorkflowItemEvent workflowEvent)
         {
@@ -190,7 +192,7 @@ namespace Guflow
             return DuringFailure(reason,details);
         }
 
-        public WorkflowAction OnCancellation(string details)
+        WorkflowAction IWorkflowClosingActions.OnCancellation(string details)
         {
             return DuringCancellation(details);
         }

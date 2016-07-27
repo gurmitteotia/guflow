@@ -43,10 +43,10 @@ namespace Guflow.Tests
         [Test]
         public void Can_return_custom_workflow_action()
         {
-            var customAction = new Mock<WorkflowAction>();
-            var workflowAction = _activityCancellationFailedEvent.Interpret(new WorkflowReturnCustomAction(customAction.Object));
+            var customAction = new Mock<WorkflowAction>().Object;
+            var workflowAction = _activityCancellationFailedEvent.Interpret(new WorkflowReturnCustomAction(customAction));
 
-            Assert.That(workflowAction,Is.EqualTo(customAction.Object));
+            Assert.That(workflowAction,Is.EqualTo(customAction));
         }
         private class TestWorkflow : Workflow
         {

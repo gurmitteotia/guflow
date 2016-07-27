@@ -135,6 +135,7 @@
     <Compile Include="TimerItem.cs" />
     <Compile Include="TimerScheduleData.cs" />
     <Compile Include="NameTooLongException.cs" />
+    <Compile Include="WorkflowCancellationRequestedEvent.cs" />
     <Compile Include="WorkflowClosingDecision.cs" />
     <Compile Include="WorkflowDecisionExtension.cs" />
     <Compile Include="WorkflowItem.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="WorkflowEvent.cs" />
     <Compile Include="WorkflowItemEvent.cs" />
     <Compile Include="WorkflowItemNotFoundException.cs" />
+    <Compile Include="WorkflowSignaledEvent.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />
   </ItemGroup>

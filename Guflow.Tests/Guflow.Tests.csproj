@@ -91,7 +91,9 @@
     <Compile Include="TimerStartFailedEventTests.cs" />
     <Compile Include="TimerFiredEventTests.cs" />
     <Compile Include="TimerItemTests.cs" />
+    <Compile Include="WorkflowCancellationRequestedEventTests.cs" />
     <Compile Include="WorkflowHistoryEventsTests.cs" />
+    <Compile Include="WorkflowSignaledEventTests.cs" />
     <Compile Include="WorkflowStartedEventTests.cs" />
     <Compile Include="WorkflowTests.cs" />
     <Compile Include="WorkflowToStubHistoryEvents.cs" />

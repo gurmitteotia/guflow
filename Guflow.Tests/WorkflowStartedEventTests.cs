@@ -34,13 +34,13 @@ namespace Guflow.Tests
         [Test]
         public void Can_return_custom_workflow_action()
         {
-            var customStartupAction = new Mock<WorkflowAction>();
-            var workflow = new WorkflowWithCustomStartupAction(customStartupAction.Object);
+            var customStartupAction = new Mock<WorkflowAction>().Object;
+            var workflow = new WorkflowWithCustomStartupAction(customStartupAction);
             var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
 
             var actualStartupAction = workflowEvent.Interpret(workflow);
 
-            Assert.That(actualStartupAction,Is.EqualTo(customStartupAction.Object));
+            Assert.That(actualStartupAction,Is.EqualTo(customStartupAction));
         }
 
         [Test]
@@ -59,9 +59,16 @@ namespace Guflow.Tests
         }
         private class WorkflowWithCustomStartupAction : Workflow
         {
+            private readonly WorkflowAction _workflowAction;
+
             public WorkflowWithCustomStartupAction(WorkflowAction workflowAction)
             {
-                OnStartup(s => workflowAction);
+                _workflowAction = workflowAction;
+            }
+
+            protected override WorkflowAction OnStart(WorkflowStartedEvent workflowSartedEvent)
+            {
+                return _workflowAction;
             }
         }
     }

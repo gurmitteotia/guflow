@@ -174,37 +174,30 @@ namespace Guflow
             scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
             return scheduleActivityDecision;
         }
-
         internal override WorkflowDecision GetCancelDecision()
         {
             return new CancelActivityDecision(Identity);
         }
-
         internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
         {
             return RescheduleTimerItem.TimerFired(timerFiredEvent);
         }
-
         internal override WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
         {
             return RescheduleTimerItem.TimerCancelled(timerCancelledEvent);
         }
-
         internal override WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent)
         {
             return RescheduleTimerItem.TimerStartFailed(timerStartFailedEvent);
         }
-
         internal override WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
             return RescheduleTimerItem.TimerCancellationFailed(timerCancellationFailedEvent);
         }
-
         internal WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent)
         {
             return _onCompletionAction(activityCompletedEvent);
         }
-      
         internal WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
         {
             return _onFailedAction(activityFailedEvent);
@@ -225,7 +218,6 @@ namespace Guflow
         {
             return _onFailedSchedulingAction(activitySchedulingFailedEvent);
         }
-
         private string GetActivityInput()
         {
             var inputObject = _inputFunc(this);

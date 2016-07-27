@@ -51,12 +51,12 @@ namespace Guflow.Tests
         [Test]
         public void Can_return_the_custom_workflow_action()
         {
-            var workflowAction = new Mock<WorkflowAction>();
-            var workflow = new WorkflowWithCustomAction(workflowAction.Object);
+            var workflowAction = new Mock<WorkflowAction>().Object;
+            var workflow = new WorkflowWithCustomAction(workflowAction);
 
             var actualWorkflowAction = _activityFailedEvent.Interpret(workflow);
 
-            Assert.That(actualWorkflowAction,Is.EqualTo(workflowAction.Object));
+            Assert.That(actualWorkflowAction,Is.EqualTo(workflowAction));
         }
 
         private class SingleActivityWorkflow : Workflow

@@ -52,21 +52,21 @@ namespace Guflow.Tests
         [Test]
         public void Can_return_custom_workflow_action_from_workflow()
         {
-            var customAction = new Mock<WorkflowAction>();
-            var workflowAction = _timerCancellationFailedEvent.Interpret(new WorkflowWithCustomAction(customAction.Object));
+            var customAction = new Mock<WorkflowAction>().Object;
+            var workflowAction = _timerCancellationFailedEvent.Interpret(new WorkflowWithCustomAction(customAction));
 
-            Assert.That(workflowAction, Is.EqualTo(customAction.Object));
+            Assert.That(workflowAction, Is.EqualTo(customAction));
         }
         
         [Test]
         public void Can_return_custom_workflow_action_from_workflow_for_reschedule_timer()
         {
-            var expectedWorkflowAction = new Mock<WorkflowAction>();
-            var workflow = new WorkflowWithCustomActionForActivity(expectedWorkflowAction.Object);
+            var expectedWorkflowAction = new Mock<WorkflowAction>().Object;
+            var workflow = new WorkflowWithCustomActionForActivity(expectedWorkflowAction);
             var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.New(_activityName, _activityVersion), _cause);
             var workflowAction = timerCancellationFailedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(expectedWorkflowAction.Object));
+            Assert.That(workflowAction, Is.EqualTo(expectedWorkflowAction));
         }
 
         private TimerCancellationFailedEvent CreateTimerCancellationFailedEvent(Identity identity, string cause)

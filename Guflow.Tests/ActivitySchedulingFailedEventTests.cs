@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -39,7 +40,11 @@ namespace Guflow.Tests
         [Test]
         public void Can_return_custom_workflow_action()
         {
+            var expectedAction = new Mock<WorkflowAction>().Object;
             
+            var workflowAction = _activitySchedulingFailedEvent.Interpret(new WorkflowWithCustomAction(expectedAction));
+
+            Assert.That(workflowAction,Is.EqualTo(workflowAction));
         }
 
         private class SingleActivityWorkflow : Workflow

@@ -13,5 +13,7 @@
         WorkflowAction OnActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent);
         WorkflowAction OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);
         WorkflowAction OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);
+        WorkflowAction OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent);
+        WorkflowAction OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent);
     }
 }

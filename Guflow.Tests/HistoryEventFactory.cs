@@ -492,6 +492,68 @@ namespace Guflow.Tests
             return historyEvents;
         }
 
+
+        public static HistoryEvent CreateWorkflowSignaledEvent(string signalName, string input, string externalWorkflowRunId, string externalWorkflowId)
+        {
+            var eventIds = EventIds.NewEventIds;
+
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.WorkflowExecutionSignaled,
+                WorkflowExecutionSignaledEventAttributes = new WorkflowExecutionSignaledEventAttributes()
+                {
+                    SignalName = signalName,
+                    Input = input,
+                    ExternalWorkflowExecution = new WorkflowExecution() { RunId  = externalWorkflowRunId, WorkflowId = externalWorkflowId}
+                }
+            };
+        }
+        public static HistoryEvent CreateWorkflowSignaledEvent(string signalName, string input)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.WorkflowExecutionSignaled,
+                WorkflowExecutionSignaledEventAttributes = new WorkflowExecutionSignaledEventAttributes()
+                {
+                    SignalName = signalName,
+                    Input = input,
+                }
+            };
+        }
+        public static HistoryEvent CreateWorkflowCancellationRequestedEvent(string cause, string externalWorkflowRunid,string externalWorkflowId)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType    = EventType.WorkflowExecutionCancelRequested,
+                WorkflowExecutionCancelRequestedEventAttributes = new WorkflowExecutionCancelRequestedEventAttributes()
+                {
+                    Cause = cause,
+                    ExternalWorkflowExecution = new WorkflowExecution()
+                    {
+                        RunId = externalWorkflowRunid,
+                        WorkflowId = externalWorkflowId
+                    }
+                }
+            };
+        }
+        public static HistoryEvent CreateWorkflowCancellationRequestedEvent(string cause)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.WorkflowExecutionCancelRequested,
+                WorkflowExecutionCancelRequestedEventAttributes = new WorkflowExecutionCancelRequestedEventAttributes()
+                {
+                    Cause = cause,
+                }
+            };
+        }
         private class EventIds
         {
             private static long _seed = long.MaxValue;
@@ -529,5 +591,6 @@ namespace Guflow.Tests
                 get { return _completedId - 3; }
             }
         }
+
     }
 }

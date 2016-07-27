@@ -13,13 +13,13 @@ namespace Guflow.Tests
     {
         private Mock<IWorkflowActions> _workflow;
         private WorkflowAction _interpretedWorkflowAction;
-        private Mock<WorkflowDecision> _expectedWorkflowDecision;
+        private WorkflowDecision _expectedWorkflowDecision;
         [SetUp]
         public void Setup()
         {
             _workflow = new Mock<IWorkflowActions>();
-            _expectedWorkflowDecision = new Mock<WorkflowDecision>(false,false);
-            _interpretedWorkflowAction = new TestWorkflowAction(_expectedWorkflowDecision.Object);
+            _expectedWorkflowDecision = new Mock<WorkflowDecision>(false,false).Object;
+            _interpretedWorkflowAction = new TestWorkflowAction(_expectedWorkflowDecision);
         }
         
         [Test]
@@ -30,7 +30,7 @@ namespace Guflow.Tests
 
             var workflowDecisions =historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] {_expectedWorkflowDecision.Object}));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] {_expectedWorkflowDecision}));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -107,7 +107,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -129,7 +129,27 @@ namespace Guflow.Tests
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
+        }
+        [Test]
+        public void Can_interpret_workflow_signaled_event()
+        {
+            _workflow.Setup(w => w.OnWorkflowSignaled(It.IsAny<WorkflowSignaledEvent>())).Returns(_interpretedWorkflowAction);
+            var historyEvents = CreateWorkflowSignaledEventGraph();
+
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
+        }
+        [Test]
+        public void Can_interpret_workflow_cancellation_requested_event()
+        {
+            _workflow.Setup(w => w.OnWorkflowCancellationRequested(It.IsAny<WorkflowCancellationRequestedEvent>())).Returns(_interpretedWorkflowAction);
+            var historyEvents = CreateWorkflowCancellationRequestedEventGraph();
+
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -153,7 +173,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision.Object, timerFailedDecision.Object }));
+            Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision, timerFailedDecision.Object }));
         }
 
         [Test]
@@ -165,7 +185,7 @@ namespace Guflow.Tests
 
             var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
 
-            Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision.Object }));
+            Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision }));
         }
 
         [Test]
@@ -283,7 +303,16 @@ namespace Guflow.Tests
             var timerCancellationFailedEventGraph = HistoryEventFactory.CreateTimerCancellationFailedEventGraph(Identity.Timer("timer"), "cause");
             return new WorkflowHistoryEvents(timerCancellationFailedEventGraph);
         }
-
+        private WorkflowHistoryEvents CreateWorkflowSignaledEventGraph()
+        {
+            var workflowSignaledEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name","input");
+            return new WorkflowHistoryEvents(new[]{workflowSignaledEvent});
+        }
+        private WorkflowHistoryEvents CreateWorkflowCancellationRequestedEventGraph()
+        {
+            var workflowCancellationRequestedEvent = HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause");
+            return new WorkflowHistoryEvents(new[] { workflowCancellationRequestedEvent });
+        }
         private WorkflowHistoryEvents CreateNotInterpretingEventGraph()
         {
             var nonInterpretEvent = new HistoryEvent() {EventType = EventType.DecisionTaskCompleted};
