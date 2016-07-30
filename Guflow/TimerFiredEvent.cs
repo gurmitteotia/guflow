@@ -5,7 +5,7 @@ namespace Guflow
 {
     public class TimerFiredEvent :TimerEvent
     {
-        public TimerFiredEvent(HistoryEvent timerFiredEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerFiredEvent.EventId)
+        internal TimerFiredEvent(HistoryEvent timerFiredEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerFiredEvent.EventId)
         {
             var eventAttributes =timerFiredEvent.TimerFiredEventAttributes;
             PopulateProperties(eventAttributes.StartedEventId, allHistoryEvents);

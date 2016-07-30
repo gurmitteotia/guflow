@@ -5,7 +5,8 @@ namespace Guflow
     public class WorkflowCancellationRequestedEvent : WorkflowEvent
     {
         private readonly WorkflowExecutionCancelRequestedEventAttributes _eventAttributes;
-        public WorkflowCancellationRequestedEvent(HistoryEvent cancellationRequestedEvent)
+
+        internal WorkflowCancellationRequestedEvent(HistoryEvent cancellationRequestedEvent)
             : base(cancellationRequestedEvent.EventId)
         {
             _eventAttributes = cancellationRequestedEvent.WorkflowExecutionCancelRequestedEventAttributes;

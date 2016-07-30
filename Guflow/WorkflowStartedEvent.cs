@@ -7,7 +7,8 @@ namespace Guflow
     public class WorkflowStartedEvent : WorkflowEvent
     {
         private readonly WorkflowExecutionStartedEventAttributes _workflowStartedAttributes;
-        public WorkflowStartedEvent(HistoryEvent workflowStartedEvent):base(workflowStartedEvent.EventId)
+
+        internal WorkflowStartedEvent(HistoryEvent workflowStartedEvent):base(workflowStartedEvent.EventId)
         {
             _workflowStartedAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
         }

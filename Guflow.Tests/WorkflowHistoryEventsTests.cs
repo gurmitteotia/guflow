@@ -252,6 +252,20 @@ namespace Guflow.Tests
             Assert.IsFalse(workflowHistoryEvents.IsActive());
         }
 
+        [Test]
+        public void Can_return_all_marker_recorded_events()
+        {
+            var markerRecordedEventGraph = new[]
+            {
+                HistoryEventFactory.CreateMarkerRecordedEvent("name1", "detail1"),
+                HistoryEventFactory.CreateMarkerRecordedEvent("name2", "detail2")
+            };
+            var workflowHistoryEvents = new WorkflowHistoryEvents(markerRecordedEventGraph);
+            var markerRecordedEvents = workflowHistoryEvents.AllMarkerRecordedEvents();
+
+            Assert.That(markerRecordedEvents,Is.EqualTo(new []{new MarkerRecordedEvent(markerRecordedEventGraph.First()),
+                new MarkerRecordedEvent(markerRecordedEventGraph.Last())}));
+        }
         private WorkflowHistoryEvents CreateActivityCompletedEventGraph()
         {
             var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "result").ToArray();

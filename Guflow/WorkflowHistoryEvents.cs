@@ -177,5 +177,14 @@ namespace Guflow
             }
             return allEvents;
         }
+
+        public IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents()
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if(historyEvent.IsMarkerRecordedEvent())
+                    yield return new MarkerRecordedEvent(historyEvent);
+            }
+        }
     }
 }

@@ -221,13 +221,7 @@ namespace Guflow
         private string GetActivityInput()
         {
             var inputObject = _inputFunc(this);
-            if (inputObject == null)
-                return null;
-            var inputAsString = inputObject as string;
-            if (inputAsString != null)
-                return inputAsString;
-
-            return inputObject.ToJson();
+            return inputObject.ToAwsString();
         }
     }
 }

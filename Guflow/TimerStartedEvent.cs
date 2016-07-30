@@ -6,7 +6,7 @@ namespace Guflow
 {
     public class TimerStartedEvent : TimerEvent
     {
-        public TimerStartedEvent(HistoryEvent timerStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerStartedEvent.EventId)
+        internal TimerStartedEvent(HistoryEvent timerStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerStartedEvent.EventId)
         {
             PopulateProperties(timerStartedEvent.EventId,allHistoryEvents);
             IsActive = true;

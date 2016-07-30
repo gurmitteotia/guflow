@@ -13,5 +13,15 @@ namespace Guflow
         {
             return JsonConvert.DeserializeObject<T>(jsonData);
         }
+
+        internal static string ToAwsString(this object instance)
+        {
+            if (instance == null)
+                return null;
+            var inputAsString = instance as string;
+            if (inputAsString != null)
+                return inputAsString;
+            return instance.ToJson();
+        }
     }
 }

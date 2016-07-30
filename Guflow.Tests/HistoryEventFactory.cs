@@ -554,6 +554,21 @@ namespace Guflow.Tests
                 }
             };
         }
+
+        public static HistoryEvent CreateMarkerRecordedEvent(string markerName, string detail1)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.MarkerRecorded,
+                MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
+                {
+                    MarkerName = markerName,
+                    Details = detail1
+                }
+            };
+        }
         private class EventIds
         {
             private static long _seed = long.MaxValue;

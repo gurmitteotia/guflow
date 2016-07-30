@@ -79,7 +79,10 @@
     <Compile Include="HistoryEventFactory.cs" />
     <Compile Include="IdentityTests.cs" />
     <Compile Include="IgnoreWorkflowActionTests.cs" />
+    <Compile Include="MarkerRecordedEventTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RecordMarkerDecisionTests.cs" />
+    <Compile Include="RecordMarkerFailedEventTests.cs" />
     <Compile Include="ScheduleTimerDecisionTests.cs" />
     <Compile Include="ScheduleWorkflowItemActionTest.cs" />
     <Compile Include="ScheduleActivityDecisionTests.cs" />

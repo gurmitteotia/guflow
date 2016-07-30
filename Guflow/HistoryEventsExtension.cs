@@ -103,6 +103,10 @@ namespace Guflow
             return historyEvent.EventType == EventType.TimerStarted && historyEvent.EventId == timerStartedEventId;
         }
 
+        public static bool IsMarkerRecordedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.MarkerRecorded;
+        }
         public static WorkflowEvent CreateInterpretableEvent(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             if (historyEvent.IsActivityCompletedEvent())

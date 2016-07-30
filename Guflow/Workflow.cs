@@ -9,6 +9,7 @@ namespace Guflow
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
         private IWorkflowHistoryEvents _currentworkflowHistoryEvents;
+        protected readonly Markers Markers = new Markers();
         WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
             return OnStart(workflowStartedEvent);
@@ -158,16 +159,18 @@ namespace Guflow
         {
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(activityEvent.IsFor);
         }
+        protected bool IsActive
+        {
+            get { return ((IWorkflow)this).CurrentHistoryEvents.IsActive(); }
+        }
         IEnumerable<WorkflowItem> IWorkflowItems.GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());
         }
-
         IEnumerable<WorkflowItem> IWorkflowItems.GetChildernOf(WorkflowItem item)
         {
             return _allWorkflowItems.Where(s => s.IsChildOf(item));
         }
-
         WorkflowItem IWorkflowItems.Find(Identity identity)
         {
             return _allWorkflowItems.FirstOrDefault(s => s.Has(identity));
@@ -183,7 +186,7 @@ namespace Guflow
         }
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
         {
-            if(proposal && _currentworkflowHistoryEvents.IsActive())
+            if(proposal && IsActive)
                 return WorkflowAction.Ignore;
             return DuringCompletion(result);
         }
@@ -191,12 +194,10 @@ namespace Guflow
         {
             return DuringFailure(reason,details);
         }
-
         WorkflowAction IWorkflowClosingActions.OnCancellation(string details)
         {
             return DuringCancellation(details);
         }
-
         protected virtual WorkflowAction DuringCompletion(string result)
         {
             return CompleteWorkflow(result);
@@ -214,11 +215,12 @@ namespace Guflow
             try
             {
                 _currentworkflowHistoryEvents = workflowHistoryEvents;
-                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this);
+                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this).Concat(Markers.GetDecisions());
                 return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
             }
             finally
             {
+                Markers.Clear();
                 _currentworkflowHistoryEvents = null;
             }
         }
@@ -232,7 +234,6 @@ namespace Guflow
             
             return compatibleWorkflows;
         } 
-
         private ActivityItem FindActivity(Identity identity)
         {
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
@@ -241,7 +242,6 @@ namespace Guflow
         {
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
         }
-
         private TimerItem FindTimer(TimerEvent timerFiredEvent)
         {
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(timerFiredEvent.IsFor);

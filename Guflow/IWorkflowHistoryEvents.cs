@@ -15,6 +15,6 @@ namespace Guflow
         ActivityCancelledEvent LastCancelledEventFor(ActivityItem activityItem);
         IEnumerable<WorkflowItemEvent> AllActivityEventsFor(ActivityItem activityItem);
         IEnumerable<WorkflowItemEvent> AllTimerEventsFor(TimerItem timerItem);
-
+        IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents();
     }
 }

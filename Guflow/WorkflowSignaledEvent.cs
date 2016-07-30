@@ -4,8 +4,8 @@ namespace Guflow
 {
     public class WorkflowSignaledEvent : WorkflowEvent
     {
-        private WorkflowExecutionSignaledEventAttributes _eventAttributes;
-        public WorkflowSignaledEvent(HistoryEvent signaledEvent) : base(signaledEvent.EventId)
+        private readonly WorkflowExecutionSignaledEventAttributes _eventAttributes;
+        internal WorkflowSignaledEvent(HistoryEvent signaledEvent) : base(signaledEvent.EventId)
         {
             _eventAttributes = signaledEvent.WorkflowExecutionSignaledEventAttributes;
         }

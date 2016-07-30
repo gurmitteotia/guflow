@@ -238,6 +238,40 @@ namespace Guflow.Tests
             Assert.That(workflowDecisions, Is.EqualTo(new[]{new CompleteWorkflowDecision("complete")}));
         }
 
+        [Test]
+        public void Can_return_marker_decisions()
+        {
+            var workflow = new WorkflowWithMarker("name","detail");
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { WorkflowDecision.Empty });
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions,Is.EqualTo(new []{new RecordMarkerDecision("name","detail")}));
+        }
+
+        [Test]
+        public void Return_markers_decision_when_generated_along_with_propose_to_close_workflow()
+        {
+            var workflow = new WorkflowWithMarker("name", "detail");
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("detail",true), });
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new RecordMarkerDecision("name", "detail") }));
+        }
+
+        [Test]
+        public void Markers_are_cleared_after_execution()
+        {
+            var workflow = new WorkflowWithMarker("name", "detail");
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { WorkflowDecision.Empty });
+            workflow.ExecuteFor(_workflowHistoryEvents.Object);
+ 
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.Empty);
+        }
+
         private IEnumerable<WorkflowDecision> AllNonCompletingDecisions()
         {
             return new WorkflowDecision[]
@@ -297,7 +331,6 @@ namespace Guflow.Tests
         }
         private class StubWorkflow : Workflow
         {
-
         }
         private class WorkflowToReturnCustomActionOnClosing : Workflow
         {
@@ -320,6 +353,14 @@ namespace Guflow.Tests
             protected override WorkflowAction DuringCancellation(string detail)
             {
                 return _customAction.Object;
+            }
+        }
+
+        private class WorkflowWithMarker : Workflow
+        {
+            public WorkflowWithMarker(string markerName,string markerDetail)
+            {
+                Markers.Add(markerName, markerDetail);
             }
         }
     }
