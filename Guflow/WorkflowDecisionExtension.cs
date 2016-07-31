@@ -9,7 +9,7 @@ namespace Guflow
         {
             var finalClosingDecision = workflowClosingDecisions.OrderByDescending(d => d.Priority).First();
             var finalWorkflowAction = finalClosingDecision.ProvideFinalActionFrom(workflowClosingActions);
-            return finalWorkflowAction.GetDecisions();
+            return finalWorkflowAction==null? Enumerable.Empty<WorkflowDecision>(): finalWorkflowAction.GetDecisions();
         } 
     }
 }

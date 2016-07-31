@@ -86,74 +86,93 @@ namespace Guflow
             get { return Identity.PositionalName; }
         }
 
-        public IFluentActivityItem After(string name, string version, string positionalName = "")
+        public IFluentActivityItem After(string activityName, string activityVersion, string positionalName = "")
         {
-            AddParent(Identity.New(name, version, positionalName));
+            Ensure.NotNullAndEmpty(activityName, "activityName");
+            Ensure.NotNullAndEmpty(activityVersion, "activityVersion");
+
+            AddParent(Identity.New(activityName, activityVersion, positionalName));
             return this;
         }
 
         public IFluentActivityItem After(string timerName)
         {
+            Ensure.NotNullAndEmpty(timerName, "timerName");
+
             AddParent(Identity.Timer(timerName));
             return this;
         }
 
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
         {
+            Ensure.NotNull(onCompletionFunc, "onCompletionFunc");
             _onCompletionAction = onCompletionFunc;
             return this;
         }
         public IFluentActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> onFailureFunc)
         {
+            Ensure.NotNull(onFailureFunc, "onFailureFunc");
             _onFailedAction = onFailureFunc;
             return this;
         }
         public IFluentActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> onTimedoutFunc)
         {
+            Ensure.NotNull(onTimedoutFunc, "onTimedoutFunc");
             _onTimedoutAction = onTimedoutFunc;
             return this;
         }
 
         public IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> onFailedSchedulingAction)
         {
+            Ensure.NotNull(onFailedSchedulingAction, "onFailedSchedulingAction");
             _onFailedSchedulingAction = onFailedSchedulingAction;
             return this;
         }
 
         public IFluentActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc)
         {
+            Ensure.NotNull(onCancelledFunc, "onCancelledFunc");
             _onCancelledAction = onCancelledFunc;
             return this;
         }
 
-        public IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationAction)
+        public IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationFunc)
         {
-            _onCancellationFailedAction = onFailedCancellationAction;
+            Ensure.NotNull(onFailedCancellationFunc, "onFailedCancellationFunc");
+
+            _onCancellationFailedAction = onFailedCancellationFunc;
             return this;
         }
         public IFluentActivityItem WithInput(Func<IActivityItem, object> inputFunc)
         {
+            Ensure.NotNull(inputFunc, "inputFunc");
             _inputFunc = inputFunc;
             return this;
         }
         public IFluentActivityItem OnTaskList(Func<IActivityItem, string> taskListFunc)
         {
+            Ensure.NotNull(taskListFunc, "taskListFunc");
             _taskListFunc = taskListFunc;
             return this;
         }
         public IFluentActivityItem When(Func<IActivityItem, bool> whenFunc)
         {
+            Ensure.NotNull(whenFunc, "whenFunc");
+
             _whenFunc = whenFunc;
             return this;
         }
         public IFluentActivityItem WithPriority(Func<IActivityItem, int?> priorityFunc)
         {
+            Ensure.NotNull(priorityFunc, "priorityFunc");
+
             _priorityFunc = priorityFunc;
             return this;
         }
 
         public IFluentActivityItem WithTimeouts(Func<IActivityItem, ScheduleActivityTimeouts> timeoutsFunc)
         {
+            Ensure.NotNull(timeoutsFunc, "timeoutsFunc");
             _timeoutsFunc = timeoutsFunc;
             return this;
         }

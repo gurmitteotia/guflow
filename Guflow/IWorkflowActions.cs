@@ -15,5 +15,6 @@
         WorkflowAction OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);
         WorkflowAction OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent);
         WorkflowAction OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent);
+        WorkflowAction OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent);
     }
 }

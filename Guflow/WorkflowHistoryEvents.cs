@@ -63,7 +63,7 @@ namespace Guflow
                     interpretedWorkflowActions.Add(workflowEvent.Interpret(workflowActions));
             }
 
-            return interpretedWorkflowActions.SelectMany(a => a.GetDecisions()).Distinct();
+            return interpretedWorkflowActions.Where(w=>w!=null).SelectMany(a => a.GetDecisions()).Distinct();
         }
 
         public WorkflowStartedEvent WorkflowStartedEvent()

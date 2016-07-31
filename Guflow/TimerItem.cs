@@ -37,39 +37,52 @@ namespace Guflow
         }
         public IFluentTimerItem When(Func<ITimerItem, bool> whenFunc)
         {
+            Ensure.NotNull(whenFunc,"whenFunc");
+
             _whenFunc = whenFunc;
             return this;
         }
         public IFluentTimerItem OnFired(Func<TimerFiredEvent, WorkflowAction> onFiredAction)
         {
+            Ensure.NotNull(onFiredAction, "onFiredAction");
+
             _onFiredAction = onFiredAction;
             return this;
         }
         public IFluentTimerItem After(string timerName)
         {
+            Ensure.NotNullAndEmpty(timerName, "timerName");
             AddParent(Identity.Timer(timerName));
             return this;
         }
 
         public IFluentTimerItem After(string activityName, string activityVersion, string positionalName = "")
         {
+            Ensure.NotNullAndEmpty(activityName, "activityName");
+            Ensure.NotNullAndEmpty(activityVersion, "activityVersion");
+
             AddParent(Identity.New(activityName, activityVersion, positionalName));
             return this;
         }
 
-        public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> onCancelledAction)
+        public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> onCancelledFunc)
         {
-            _onTimerCancelledAction = onCancelledAction;
+            Ensure.NotNull(onCancelledFunc, "onCancelledFunc");
+
+            _onTimerCancelledAction = onCancelledFunc;
             return this;
         }
-        public IFluentTimerItem OnFailedCancellation(Func<TimerCancellationFailedEvent, WorkflowAction> onCancellationFailedAction)
+        public IFluentTimerItem OnFailedCancellation(Func<TimerCancellationFailedEvent, WorkflowAction> onCancellationFailedFunc)
         {
-            _onCanellationFailedAction = onCancellationFailedAction;
+            Ensure.NotNull(onCancellationFailedFunc, "onCancellationFailedFunc");
+
+            _onCanellationFailedAction = onCancellationFailedFunc;
             return this;
         }
 
         public IFluentTimerItem OnStartFailure(Func<TimerStartFailedEvent, WorkflowAction> onStartFailureAction)
         {
+            Ensure.NotNull(onStartFailureAction, "onStartFailureAction");
             _onStartFailureAction = onStartFailureAction;
             return this;
         }

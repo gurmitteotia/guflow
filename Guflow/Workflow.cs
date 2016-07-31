@@ -9,7 +9,13 @@ namespace Guflow
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
         private IWorkflowHistoryEvents _currentworkflowHistoryEvents;
-        protected readonly Markers Markers = new Markers();
+        protected readonly Markers Markers;
+
+        protected Workflow()
+        {
+            Markers = new Markers(this);
+        }
+
         WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
             return OnStart(workflowStartedEvent);
@@ -73,9 +79,16 @@ namespace Guflow
         {
             return OnCancellationRequested(workflowCancellationRequestedEvent);
         }
+        WorkflowAction IWorkflowActions.OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent)
+        {
+            return OnFailToRecordMarker(recordMarkerFailedEvent);
+        }
 
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
+            Ensure.NotNullAndEmpty(name,"name");
+            Ensure.NotNullAndEmpty(version, "version");
+
             var activityItem = new ActivityItem(Identity.New(name,version, positionalName),this);
             if(!_allWorkflowItems.Add(activityItem))
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_activity,name,version,positionalName));
@@ -83,6 +96,8 @@ namespace Guflow
         }
         protected IFluentTimerItem ScheduleTimer(string name)
         {
+            Ensure.NotNullAndEmpty(name, "name");
+
             var timerItem = new TimerItem(Identity.Timer(name),this);
             if(!_allWorkflowItems.Add(timerItem))
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_timer,name));
@@ -96,6 +111,11 @@ namespace Guflow
         protected virtual WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignaledEvent)
         {
             return WorkflowAction.Ignore;
+        }
+
+        protected virtual WorkflowAction OnFailToRecordMarker(RecordMarkerFailedEvent recordMarkerFailedEvent)
+        {
+            return FailWorkflow("FAILED_TO_RECORD_MARKER", recordMarkerFailedEvent.Cause);
         }
         protected virtual WorkflowAction OnCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
         {

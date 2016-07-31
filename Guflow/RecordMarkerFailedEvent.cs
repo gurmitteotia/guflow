@@ -4,15 +4,18 @@ namespace Guflow
 {
     public class RecordMarkerFailedEvent : WorkflowEvent
     {
-        private RecordMarkerFailedEventAttributes _eventAttributes;
+        private readonly RecordMarkerFailedEventAttributes _eventAttributes;
         internal RecordMarkerFailedEvent(HistoryEvent recordMarkerFailedEvent): base(recordMarkerFailedEvent.EventId)
         {
             _eventAttributes = recordMarkerFailedEvent.RecordMarkerFailedEventAttributes;
         }
 
+        public string MarkerName { get { return _eventAttributes.MarkerName; } }
+        public string Cause { get { return _eventAttributes.Cause; } }
+
         internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
-            throw new System.NotImplementedException();
+            return workflowActions.OnRecordMarkerFailed(this);
         }
     }
 }

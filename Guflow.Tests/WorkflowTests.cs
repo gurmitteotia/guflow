@@ -213,7 +213,19 @@ namespace Guflow.Tests
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { workflowDecision.Object }));
         }
+        [Test]
+        public void Ignores_when_null_workflow_action_is_returned_during_completion()
+        {
+            var workflow = new WorkflowToReturnNullActionOnClosing();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
+            {
+                new CompleteWorkflowDecision("result2",true),
+            });
 
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.Empty);
+        }
         [Test]
         public void Should_return_empty_decisions_when_only_propose_to_complete_workflow_decision_is_generated_and_workflow_is_active()
         {
@@ -270,6 +282,14 @@ namespace Guflow.Tests
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
             Assert.That(workflowDecisions, Is.Empty);
+        }
+
+        [Test]
+        public void Invalid_argument_tests()
+        {
+            Assert.Throws<ArgumentException>(() => new WithNullActivityName());
+            Assert.Throws<ArgumentException>(() => new WithNullActivityVersion());
+            Assert.Throws<ArgumentException>(() => new WithNullTimerName());
         }
 
         private IEnumerable<WorkflowDecision> AllNonCompletingDecisions()
@@ -356,11 +376,41 @@ namespace Guflow.Tests
             }
         }
 
+        private class WorkflowToReturnNullActionOnClosing : Workflow
+        {
+            protected override WorkflowAction DuringCompletion(string result)
+            {
+                return null;
+            }
+        }
+
         private class WorkflowWithMarker : Workflow
         {
             public WorkflowWithMarker(string markerName,string markerDetail)
             {
                 Markers.Add(markerName, markerDetail);
+            }
+        }
+
+        private class WithNullActivityName : Workflow
+        {
+            public WithNullActivityName()
+            {
+                ScheduleActivity(null, "1.0");
+            }
+        }
+        private class WithNullActivityVersion : Workflow
+        {
+            public WithNullActivityVersion()
+            {
+                ScheduleActivity("act", null);
+            }
+        }
+        private class WithNullTimerName : Workflow
+        {
+            public WithNullTimerName()
+            {
+                ScheduleTimer(null);
             }
         }
     }

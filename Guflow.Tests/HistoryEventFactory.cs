@@ -569,6 +569,21 @@ namespace Guflow.Tests
                 }
             };
         }
+
+        public static HistoryEvent CreateRecordMarkerFailedEvent(string markerName,string cause)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.RecordMarkerFailed,
+                RecordMarkerFailedEventAttributes = new RecordMarkerFailedEventAttributes()
+                {
+                    MarkerName = markerName,
+                    Cause = cause
+                }
+            };
+        }
         private class EventIds
         {
             private static long _seed = long.MaxValue;
@@ -606,6 +621,5 @@ namespace Guflow.Tests
                 get { return _completedId - 3; }
             }
         }
-
     }
 }

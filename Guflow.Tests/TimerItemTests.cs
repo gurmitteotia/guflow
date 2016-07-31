@@ -108,6 +108,22 @@ namespace Guflow.Tests
             Assert.That(latestEvent, Is.EqualTo(new[]{new TimerFiredEvent(eventGraph.First(),eventGraph)}));
         }
 
+        [Test]
+        public void Invalid_arguments_test()
+        {
+            var timerItem = (IFluentTimerItem) new TimerItem(_timerIdentity, null);
+
+            Assert.Throws<ArgumentNullException>(() => timerItem.OnCancelled(null));
+            Assert.Throws<ArgumentNullException>(() => timerItem.OnFailedCancellation(null));
+            Assert.Throws<ArgumentNullException>(() => timerItem.OnFired(null));
+            Assert.Throws<ArgumentNullException>(() => timerItem.OnStartFailure(null));
+            Assert.Throws<ArgumentNullException>(() => timerItem.When(null));
+
+            Assert.Throws<ArgumentException>(() => timerItem.After(null,"1.0"));
+            Assert.Throws<ArgumentException>(() => timerItem.After("1.0", null));
+            Assert.Throws<ArgumentException>(() => timerItem.After(null));
+        }
+
         private TimerItem CreateTimerItemFor(IEnumerable<HistoryEvent> eventGraph)
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);

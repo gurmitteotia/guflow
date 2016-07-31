@@ -596,12 +596,33 @@ namespace Guflow.Tests
             Assert.IsFalse(activityItem.IsActive);
         }
 
+        [Test]
+        public void Invalid_arguments_tests()
+        {
+            var activityItem = (IFluentActivityItem)new ActivityItem(_activityIdenity, null);
+
+            Assert.Throws<ArgumentNullException>(() => activityItem.WithInput(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnCancelled(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnCompletion(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnFailedCancellation(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnFailedScheduling(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnFailure(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnTaskList(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnTimedout(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.When(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.WithPriority(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.WithTimeouts(null));
+
+            Assert.Throws<ArgumentException>(() => activityItem.After(null, "1.0"));
+            Assert.Throws<ArgumentException>(() => activityItem.After("34", null));
+            Assert.Throws<ArgumentException>(() => activityItem.After(null));
+        }
+
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
             return new ActivityItem(_activityIdenity, new WorkflowToStubHistoryEvents(workflowHistoryEvents));
         }
-       
         private class WorkflowWithParentActivity : Workflow
         {
             public WorkflowWithParentActivity(string parentActivityName,string parentActivityVersion, string postionalName)

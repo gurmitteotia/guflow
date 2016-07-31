@@ -90,5 +90,10 @@ namespace Guflow.Tests
         {
             throw new NotImplementedException();
         }
+
+        public WorkflowAction OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
