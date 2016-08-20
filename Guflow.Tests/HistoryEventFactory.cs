@@ -5,7 +5,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Tests
 {
-    public class HistoryEventFactory
+    internal class HistoryEventFactory
     {
         public static IEnumerable<HistoryEvent> CreateActivityCompletedEventGraph(Identity activityIdentity, string identity, string result, string input="")
         {

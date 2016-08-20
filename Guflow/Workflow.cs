@@ -87,7 +87,7 @@ namespace Guflow
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name,"name");
-            Ensure.NotNullAndEmpty(version, "version");
+            Ensure.NotNullAndEmpty(version,"version");
 
             var activityItem = new ActivityItem(Identity.New(name,version, positionalName),this);
             if(!_allWorkflowItems.Add(activityItem))
@@ -112,7 +112,6 @@ namespace Guflow
         {
             return WorkflowAction.Ignore;
         }
-
         protected virtual WorkflowAction OnFailToRecordMarker(RecordMarkerFailedEvent recordMarkerFailedEvent)
         {
             return FailWorkflow("FAILED_TO_RECORD_MARKER", recordMarkerFailedEvent.Cause);
@@ -121,9 +120,11 @@ namespace Guflow
         {
             return WorkflowAction.CancelWorkflow(workflowCancellationRequestedEvent.Cause);
         }
-        protected WorkflowAction Continue(WorkflowItemEvent workflowEvent)
+        protected WorkflowAction Continue(WorkflowItemEvent workflowItemEvent)
         {
-            var workfowItem = FindWorkflowItemFor(workflowEvent);
+            Ensure.NotNull(workflowItemEvent, "workflowItemEvent");
+
+            var workfowItem = FindWorkflowItemFor(workflowItemEvent);
             return WorkflowAction.ContinueWorkflow(workfowItem);
         }
         protected WorkflowAction FailWorkflow(string reason, string details)
@@ -140,6 +141,7 @@ namespace Guflow
         }
         protected ScheduleWorkflowItemAction Reschedule(WorkflowItemEvent workflowItemEvent)
         {
+            Ensure.NotNull(workflowItemEvent, "workflowItemEvent");
             var workflowItem = FindWorkflowItemFor(workflowItemEvent);
             return WorkflowAction.Schedule(workflowItem);
         }
@@ -153,30 +155,42 @@ namespace Guflow
         }
         protected ScheduleWorkflowItemAction JumpToActivity(string name, string version, string positionalName="")
         {
+            Ensure.NotNullAndEmpty(name,"name");
+            Ensure.NotNullAndEmpty(version,"version");
+
             var activityItem = FindActivityFor(Identity.New(name,version,positionalName));
             return WorkflowAction.Schedule(activityItem);
         }
         protected WorkflowAction JumpToTimer(string name)
         {
+            Ensure.NotNullAndEmpty(name, "name");
+
             var activityItem = FindTimerFor(Identity.Timer(name));
             return WorkflowAction.Schedule(activityItem);
         }
         protected WorkflowAction CancelActivity(string name, string version, string positionalName="")
         {
+            Ensure.NotNullAndEmpty(name, "name");
+            Ensure.NotNullAndEmpty(version, "version");
+
             var activityItem = FindActivityFor(Identity.New(name, version, positionalName));
             return WorkflowAction.Cancel(activityItem);
         }
         protected WorkflowAction CancelTimer(string name)
         {
+            Ensure.NotNullAndEmpty(name, "name");
+
             var activityItem = FindTimerFor(Identity.Timer(name));
             return WorkflowAction.Cancel(activityItem);
         }
         protected IActivityItem ActivityOf(WorkflowItemEvent activityEvent)
         {
+            Ensure.NotNull(activityEvent,"activityEvent");
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(activityEvent.IsFor);
         }
         protected ITimerItem TimerOf(WorkflowItemEvent activityEvent)
         {
+            Ensure.NotNull(activityEvent, "activityEvent");
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(activityEvent.IsFor);
         }
         protected bool IsActive

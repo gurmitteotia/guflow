@@ -27,8 +27,6 @@ namespace Guflow
             foreach (var historyEvent in _allHistoryEvents)
             {
                 var workflowItemEvent = historyEvent.CreateActivityEventFor(_allHistoryEvents);
-                if(workflowItemEvent==null)
-                    continue;
                 if (workflowItemEvent.IsFor(activityItem))
                     return workflowItemEvent;
             }
@@ -41,8 +39,6 @@ namespace Guflow
             foreach (var historyEvent in _allHistoryEvents)
             {
                 var workflowItemEvent = historyEvent.CreateTimerEventFor(_allHistoryEvents);
-                if (workflowItemEvent == null)
-                    continue;
                 if (workflowItemEvent.IsFor(timerItem))
                     return workflowItemEvent;
             }
@@ -82,8 +78,6 @@ namespace Guflow
             foreach (var historyEvent in _allHistoryEvents)
             {
                 var workflowItemEvent = historyEvent.CreateWorkflowItemEventFor(_allHistoryEvents);
-                if (workflowItemEvent == null)
-                    continue;
                 if (workflowItemEvent.IsActive && !workflowItemEvent.InChainOf(allEvents))
                     return true;
                 allEvents.Add(workflowItemEvent);
@@ -152,8 +146,6 @@ namespace Guflow
             foreach (var historyEvent in _allHistoryEvents)
             {
                 var workflowItemEvent = historyEvent.CreateActivityEventFor(_allHistoryEvents);
-                if(workflowItemEvent==null)
-                    continue;
                 if (workflowItemEvent.IsFor(activityItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
                     allEvents.Add(workflowItemEvent);
@@ -168,8 +160,6 @@ namespace Guflow
             foreach (var historyEvent in _allHistoryEvents)
             {
                 var workflowItemEvent = historyEvent.CreateTimerEventFor(_allHistoryEvents);
-                if (workflowItemEvent == null)
-                    continue;
                 if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
                     allEvents.Add(workflowItemEvent);

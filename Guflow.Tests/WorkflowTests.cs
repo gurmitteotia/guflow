@@ -251,7 +251,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_return_marker_decisions()
+        public void Workflow_execution_can_return_marker_decisions()
         {
             var workflow = new WorkflowWithMarker("name","detail");
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { WorkflowDecision.Empty });

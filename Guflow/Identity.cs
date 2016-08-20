@@ -1,6 +1,6 @@
 ﻿namespace Guflow
 {
-    public class Identity
+    internal class Identity
     {
         public string Name { get; private set; }
         public string Version { get; private set; }
@@ -16,9 +16,9 @@
         
         internal AwsIdentity Id{get { return _id; }}
 
-        internal static Identity Timer(string timerName)
+        internal static Identity Timer(string name)
         {
-            return new Identity(timerName,string.Empty,string.Empty);
+            return new Identity(name,string.Empty,string.Empty);
         }
         internal static Identity New(string name, string version, string positionalName="")
         {

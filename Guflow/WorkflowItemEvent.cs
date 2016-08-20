@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Guflow
 {
@@ -33,10 +32,11 @@ namespace Guflow
             public NotFoundWorkflowItemEvent(long eventId) : base(eventId)
             {
                 AwsIdentity= AwsIdentity.Raw("");
+                IsActive = false;
             }
             internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
             {
-                throw new NotSupportedException("Can not interpret not found event.");
+                return WorkflowAction.Ignore;
             }
         }
     }
