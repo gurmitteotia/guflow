@@ -130,6 +130,9 @@
     <Compile Include="ScheduleWorkflowItemAction.cs" />
     <Compile Include="RuntimeActivityConfig.cs" />
     <Compile Include="ScheduleTimerDecision.cs" />
+    <Compile Include="Signal.cs" />
+    <Compile Include="Signals.cs" />
+    <Compile Include="SignalWorkflowDecision.cs" />
     <Compile Include="TimerCancellationFailedEvent.cs" />
     <Compile Include="TimerCancelledEvent.cs" />
     <Compile Include="TimerEvent.cs" />

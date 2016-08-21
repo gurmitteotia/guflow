@@ -1,33 +1,19 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Guflow
 {
-    public class Markers
+    internal static class Markers
     {
-        private readonly Dictionary<string,string> _markers = new Dictionary<string, string>();
-        private readonly IWorkflow _workflow;
-        internal Markers(IWorkflow workflow)
+        private static readonly List<RecordMarkerDecision> MarkerDecisions = new List<RecordMarkerDecision>(); 
+        public static void Add(string markerName, object details)
         {
-            _workflow = workflow;
+            MarkerDecisions.Add(new RecordMarkerDecision(markerName,details.ToAwsString()));
         }
-        public void Add(string name, object details)
-        {
-            var awsDetails = details.ToAwsString();
-            _markers.Add(name,awsDetails);
-        }
-        public IEnumerable<MarkerRecordedEvent> AllRecordedEvents
-        {
-            get {return _workflow.CurrentHistoryEvents.AllMarkerRecordedEvents(); }
-        } 
+        public static IEnumerable<RecordMarkerDecision> Decisions { get { return MarkerDecisions;} }
 
-        internal IEnumerable<RecordMarkerDecision> GetDecisions()
+        public static void Clear()
         {
-            return _markers.Select(kv => new RecordMarkerDecision(kv.Key, kv.Value));
-        }
-        internal void Clear()
-        {
-            _markers.Clear();
+            MarkerDecisions.Clear();
         }
     }
 }

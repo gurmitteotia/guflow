@@ -15,6 +15,7 @@ namespace Guflow.Tests
         public void Setup()
         {
             _workflowHistoryEvents = new Mock<IWorkflowHistoryEvents>();
+            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(It.IsAny<Workflow>())).Returns(new WorkflowDecision[] { });
         }
         [Test]
         public void Throws_exception_when_adding_the_same_item_again()
@@ -254,7 +255,6 @@ namespace Guflow.Tests
         public void Workflow_execution_can_return_marker_decisions()
         {
             var workflow = new WorkflowWithMarker("name","detail");
-            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { WorkflowDecision.Empty });
 
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
@@ -276,7 +276,6 @@ namespace Guflow.Tests
         public void Markers_are_cleared_after_execution()
         {
             var workflow = new WorkflowWithMarker("name", "detail");
-            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { WorkflowDecision.Empty });
             workflow.ExecuteFor(_workflowHistoryEvents.Object);
  
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
@@ -285,11 +284,46 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void Workflow_execution_can_return_signal_decision()
+        {
+            var workflow = new WorkflowWithSignal("signalName","signalDetail","workflowId","runid");
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new SignalWorkflowDecision("signalName", "signalDetail", "workflowId", "runid")}));
+        }
+        [Test]
+        public void Signals_are_cleared_after_execution()
+        {
+            var workflow = new WorkflowWithSignal("signalName", "signalDetail", "workflowId", "runid");
+            workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.Empty);
+        }
+
+        [Test]
+        public void Workflow_can_reply_to_a_signal_during_execution()
+        {
+            var workflow = new WorkflowToReplyToSignal("signalName", "signalDetail");
+            IWorkflowActions actions = workflow;
+            actions.OnWorkflowSignaled(new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input", "runid","wid")));
+
+            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new []{new SignalWorkflowDecision("signalName","signalDetail","wid","runid")}));
+        }
+
+        [Test]
         public void Invalid_argument_tests()
         {
             Assert.Throws<ArgumentException>(() => new WithNullActivityName());
             Assert.Throws<ArgumentException>(() => new WithNullActivityVersion());
             Assert.Throws<ArgumentException>(() => new WithNullTimerName());
+            Assert.Throws<ArgumentException>(() => new WorkflowWithMarker(null, "detail"));
+            Assert.Throws<ArgumentException>(() => new WorkflowWithSignal(null, "detail", "id", "id1"));
+            Assert.Throws<ArgumentException>(() => new WorkflowWithSignal("signalName", "detail", null, "id1"));
         }
 
         private IEnumerable<WorkflowDecision> AllNonCompletingDecisions()
@@ -388,7 +422,7 @@ namespace Guflow.Tests
         {
             public WorkflowWithMarker(string markerName,string markerDetail)
             {
-                Markers.Add(markerName, markerDetail);
+                RecordMarker(markerName, markerDetail);
             }
         }
 
@@ -411,6 +445,30 @@ namespace Guflow.Tests
             public WithNullTimerName()
             {
                 ScheduleTimer(null);
+            }
+        }
+        private class WorkflowWithSignal : Workflow
+        {
+            public WorkflowWithSignal(string signalName, string signalDetail, string workflowid, string runid)
+            {
+                Signal(signalName, signalDetail).SendTo(workflowid, runid);
+            }
+        }
+
+        private class WorkflowToReplyToSignal : Workflow
+        {
+            private readonly string _signalName;
+            private readonly string _signalInput;
+            public WorkflowToReplyToSignal(string signalName, string signalInput)
+            {
+                _signalName = signalName;
+                _signalInput = signalInput;
+            }
+
+            protected override WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignaledEvent)
+            {
+                Signal(_signalName, _signalInput).ReplyTo(workflowSignaledEvent);
+                return Ignore();
             }
         }
     }

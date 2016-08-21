@@ -9,13 +9,6 @@ namespace Guflow
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
         private IWorkflowHistoryEvents _currentworkflowHistoryEvents;
-        protected readonly Markers Markers;
-
-        protected Workflow()
-        {
-            Markers = new Markers(this);
-        }
-
         WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
             return OnStart(workflowStartedEvent);
@@ -83,7 +76,6 @@ namespace Guflow
         {
             return OnFailToRecordMarker(recordMarkerFailedEvent);
         }
-
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name,"name");
@@ -197,6 +189,22 @@ namespace Guflow
         {
             get { return ((IWorkflow)this).CurrentHistoryEvents.IsActive(); }
         }
+        protected void RecordMarker(string markerName, object details)
+        {
+            Ensure.NotNullAndEmpty(markerName, "markerName");
+            Markers.Add(markerName,details);
+        }
+        protected IEnumerable<MarkerRecordedEvent> AllRecordedMarkers
+        {
+            get { return ((IWorkflow) this).CurrentHistoryEvents.AllMarkerRecordedEvents(); }
+        }
+
+        protected Signal Signal(string signalName, object input)
+        {
+            Ensure.NotNullAndEmpty(signalName,"signalName");
+            return Signals.New(signalName,input);
+        }
+
         IEnumerable<WorkflowItem> IWorkflowItems.GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());
@@ -249,12 +257,13 @@ namespace Guflow
             try
             {
                 _currentworkflowHistoryEvents = workflowHistoryEvents;
-                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this).Concat(Markers.GetDecisions());
+                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this).Concat(Markers.Decisions).Concat(Signals.Decisions);
                 return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
             }
             finally
             {
                 Markers.Clear();
+                Signals.Clear();
                 _currentworkflowHistoryEvents = null;
             }
         }
@@ -310,7 +319,7 @@ namespace Guflow
             var workflowActivity = FindActivity(identity);
 
             if (workflowActivity == null)
-                throw new WorkflowItemNotFoundException(string.Format("Can not find activity by name {0}, version {1} and positional name {2} in workflow.", identity.Name, identity.Version, identity.PositionalName));
+                throw new WorkflowItemNotFoundException(string.Format("Can not find activity by name {0}, version {1} and positional markerName {2} in workflow.", identity.Name, identity.Version, identity.PositionalName));
             return workflowActivity;
         }
         private TimerItem FindTimerFor(Identity identity)

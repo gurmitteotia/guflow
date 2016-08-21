@@ -86,6 +86,7 @@
     <Compile Include="ScheduleTimerDecisionTests.cs" />
     <Compile Include="ScheduleWorkflowItemActionTest.cs" />
     <Compile Include="ScheduleActivityDecisionTests.cs" />
+    <Compile Include="SignalWorkflowDecisionTests.cs" />
     <Compile Include="StartWorkflowActionTests.cs" />
     <Compile Include="TestWorkflows\TestWorkflow.cs" />
     <Compile Include="TimerCancellationFailedEventTests.cs" />
