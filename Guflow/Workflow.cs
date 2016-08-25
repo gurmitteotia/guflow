@@ -202,7 +202,7 @@ namespace Guflow
         protected Signal Signal(string signalName, object input)
         {
             Ensure.NotNullAndEmpty(signalName,"signalName");
-            return Signals.New(signalName,input);
+            return new Signal(signalName,input);
         }
 
         IEnumerable<WorkflowItem> IWorkflowItems.GetStartupWorkflowItems()
@@ -257,13 +257,12 @@ namespace Guflow
             try
             {
                 _currentworkflowHistoryEvents = workflowHistoryEvents;
-                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this).Concat(Markers.Decisions).Concat(Signals.Decisions);
+                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this).Concat(Markers.Decisions);
                 return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
             }
             finally
             {
                 Markers.Clear();
-                Signals.Clear();
                 _currentworkflowHistoryEvents = null;
             }
         }

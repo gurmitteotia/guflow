@@ -56,7 +56,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_complete_workflow_decision_when_only_propose_to_complete_workflow_decision_is_generated()
+        public void Returns_complete_workflow_decision_when_only_propose_to_complete_workflow_decision_is_generated()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete", true) });
@@ -67,7 +67,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_filter_out_propose_to_complete_workflow_decision_when_it_is_generated_along_with_other_decisions()
+        public void Filters_out_propose_to_complete_workflow_decision_when_it_is_generated_along_with_other_decisions()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[] { new CompleteWorkflowDecision("complete", true),
@@ -79,7 +79,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_filter_out_propose_to_complete_workflow_decision_and_any_scheduling_decision_when_it_is_generated_along_with_complete_workflow_decision()
+        public void Filters_out_propose_to_complete_workflow_decision_and_any_scheduling_decision_when_it_is_generated_along_with_complete_workflow_decision()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CompleteWorkflowDecision("complete", true),
@@ -91,7 +91,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_filter_out_scheduling_decisions_when_generated_along_complete_workflow_decision()
+        public void Filters_out_scheduling_decisions_when_generated_along_complete_workflow_decision()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CompleteWorkflowDecision("complete") }));
@@ -102,7 +102,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_filter_out_activity_scheduling_decisions_when_generated_along_with_fail_workflow_decision()
+        public void Filters_out_activity_scheduling_decisions_when_generated_along_with_fail_workflow_decision()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new FailWorkflowDecision("reason", "detail") }));
@@ -113,7 +113,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_filter_out_activity_scheduling_decisions_when_generated_along_with_cancel_workflow_decision()
+        public void Filters_out_activity_scheduling_decisions_when_generated_along_with_cancel_workflow_decision()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CancelWorkflowDecision("detail") }));
@@ -124,7 +124,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_fail_workflow_decision_when_multiple_close_workflow_decisions_are_generated()
+        public void Returns_fail_workflow_decision_when_multiple_close_workflow_decisions_are_generated()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
@@ -141,7 +141,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_cancel_workflow_decision_when_it_generated_along_with_complete_workflow_decision()
+        public void Returns_cancel_workflow_decision_when_it_generated_along_with_complete_workflow_decision()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
@@ -156,7 +156,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_complete_workflow_decision_when_it_generated_along_with_a_proposed_complete_workflow_decision()
+        public void Return_complete_workflow_decision_when_it_generated_along_with_a_proposed_complete_workflow_decision()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[]
@@ -228,7 +228,7 @@ namespace Guflow.Tests
             Assert.That(workflowDecisions, Is.Empty);
         }
         [Test]
-        public void Should_return_empty_decisions_when_only_propose_to_complete_workflow_decision_is_generated_and_workflow_is_active()
+        public void Returns_empty_decisions_when_only_propose_to_complete_workflow_decision_is_generated_and_workflow_is_active()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete", true) });
@@ -240,7 +240,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_filter_out_empty_workflow_decisions()
+        public void Filters_out_empty_workflow_decisions()
         {
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete"), WorkflowDecision.Empty });
@@ -262,7 +262,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Return_markers_decision_when_generated_along_with_propose_to_close_workflow()
+        public void Returns_markers_decision_when_generated_along_with_propose_to_close_workflow()
         {
             var workflow = new WorkflowWithMarker("name", "detail");
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("detail",true), });
@@ -281,38 +281,6 @@ namespace Guflow.Tests
             var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
 
             Assert.That(workflowDecisions, Is.Empty);
-        }
-
-        [Test]
-        public void Workflow_execution_can_return_signal_decision()
-        {
-            var workflow = new WorkflowWithSignal("signalName","signalDetail","workflowId","runid");
-
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
-
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { new SignalWorkflowDecision("signalName", "signalDetail", "workflowId", "runid")}));
-        }
-        [Test]
-        public void Signals_are_cleared_after_execution()
-        {
-            var workflow = new WorkflowWithSignal("signalName", "signalDetail", "workflowId", "runid");
-            workflow.ExecuteFor(_workflowHistoryEvents.Object);
-
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
-
-            Assert.That(workflowDecisions, Is.Empty);
-        }
-
-        [Test]
-        public void Workflow_can_reply_to_a_signal_during_execution()
-        {
-            var workflow = new WorkflowToReplyToSignal("signalName", "signalDetail");
-            IWorkflowActions actions = workflow;
-            actions.OnWorkflowSignaled(new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input", "runid","wid")));
-
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
-
-            Assert.That(workflowDecisions, Is.EqualTo(new []{new SignalWorkflowDecision("signalName","signalDetail","wid","runid")}));
         }
 
         [Test]
@@ -452,23 +420,6 @@ namespace Guflow.Tests
             public WorkflowWithSignal(string signalName, string signalDetail, string workflowid, string runid)
             {
                 Signal(signalName, signalDetail).SendTo(workflowid, runid);
-            }
-        }
-
-        private class WorkflowToReplyToSignal : Workflow
-        {
-            private readonly string _signalName;
-            private readonly string _signalInput;
-            public WorkflowToReplyToSignal(string signalName, string signalInput)
-            {
-                _signalName = signalName;
-                _signalInput = signalInput;
-            }
-
-            protected override WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignaledEvent)
-            {
-                Signal(_signalName, _signalInput).ReplyTo(workflowSignaledEvent);
-                return Ignore();
             }
         }
     }

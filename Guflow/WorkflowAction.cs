@@ -11,6 +11,11 @@ namespace Guflow
         {
             return false;
         }
+
+        public static WorkflowAction operator +(WorkflowAction left, WorkflowAction right)
+        {
+            return new CompositeWorkflowAction(left,right);
+        }
         internal static WorkflowAction FailWorkflow(string reason, string detail)
         {
             return new GenericWorkflowAction(new FailWorkflowDecision(reason,detail));
@@ -39,6 +44,10 @@ namespace Guflow
         internal static WorkflowAction Cancel(WorkflowItem workflowItem)
         {
             return new GenericWorkflowAction(workflowItem.GetCancelDecision());
+        }
+        internal static WorkflowAction Signal(string signalName, string input,string workflowId, string runId)
+        {
+            return new GenericWorkflowAction(new SignalWorkflowDecision(signalName,input,workflowId,runId));
         }
         private class EmptyWorkflowAction : WorkflowAction
         {
@@ -75,6 +84,21 @@ namespace Guflow
                     return new[] { new CompleteWorkflowDecision(_defaultCompleteResult) };
 
                 return startupWorkflowItems.Select(s => s.GetScheduleDecision());
+            }
+        }
+
+        private class CompositeWorkflowAction : WorkflowAction
+        {
+            private readonly WorkflowAction _left;
+            private readonly WorkflowAction _right;
+            public CompositeWorkflowAction(WorkflowAction left, WorkflowAction right)
+            {
+                _left = left;
+                _right = right;
+            }
+            internal override IEnumerable<WorkflowDecision> GetDecisions()
+            {
+                return _left.GetDecisions().Concat(_right.GetDecisions());
             }
         }
     }
