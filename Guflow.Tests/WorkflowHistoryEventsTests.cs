@@ -278,6 +278,20 @@ namespace Guflow.Tests
             Assert.That(markerRecordedEvents,Is.EqualTo(new []{new MarkerRecordedEvent(markerRecordedEventGraph.First()),
                 new MarkerRecordedEvent(markerRecordedEventGraph.Last())}));
         }
+
+        [Test]
+        public void Can_return_all_signal_events()
+        {
+            var signalEventsGraph = new[]
+            {
+                HistoryEventFactory.CreateWorkflowSignaledEvent("name1", "input1"),
+                HistoryEventFactory.CreateWorkflowSignaledEvent("name1", "input1","runid","wid")
+            };
+            var workflowHistoryEvents = new WorkflowHistoryEvents(signalEventsGraph);
+            var allSignalEvents = workflowHistoryEvents.AllSignalEvents();
+
+            Assert.That(allSignalEvents,Is.EqualTo(new []{ new WorkflowSignaledEvent(signalEventsGraph.First()),new WorkflowSignaledEvent(signalEventsGraph.Last())}));
+        }
         private WorkflowHistoryEvents CreateActivityCompletedEventGraph()
         {
             var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "result").ToArray();

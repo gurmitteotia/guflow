@@ -5,7 +5,6 @@ namespace Guflow
 {
     internal sealed class SignalWorkflowDecision : WorkflowDecision
     {
-        
         private readonly string _signalName;
         private readonly string _input;
         private readonly string _workflowId;
@@ -58,5 +57,10 @@ namespace Guflow
             }
         }
 
+        public override string ToString()
+        {
+            return string.Format("Signal name {0}, input {1}, workflowId {2} and runid {3}", _signalName, _input,
+                _workflowId, _runId);
+        }
     }
 }

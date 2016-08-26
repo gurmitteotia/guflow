@@ -112,7 +112,6 @@
     <Compile Include="IWorkflowItems.cs" />
     <Compile Include="JsonExtension.cs" />
     <Compile Include="MarkerRecordedEvent.cs" />
-    <Compile Include="Markers.cs" />
     <Compile Include="ParentItemMissingException.cs" />
     <Compile Include="IActivityHost.cs" />
     <Compile Include="IActivityTaskPoller.cs" />
@@ -124,7 +123,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RecordMarkerDecision.cs" />
+    <Compile Include="RecordMarkerWorkflowDecision.cs" />
     <Compile Include="RecordMarkerFailedEvent.cs" />
     <Compile Include="ScheduleActivityTimeouts.cs" />
     <Compile Include="ScheduleWorkflowItemAction.cs" />

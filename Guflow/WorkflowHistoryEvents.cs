@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -174,6 +175,15 @@ namespace Guflow
             {
                 if(historyEvent.IsMarkerRecordedEvent())
                     yield return new MarkerRecordedEvent(historyEvent);
+            }
+        }
+
+        public IEnumerable<WorkflowSignaledEvent> AllSignalEvents()
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if(historyEvent.IsWorkflowSignaledEvent())
+                    yield return new WorkflowSignaledEvent(historyEvent);
             }
         }
     }

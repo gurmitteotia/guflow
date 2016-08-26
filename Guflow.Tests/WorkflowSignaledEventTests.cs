@@ -54,12 +54,11 @@ namespace Guflow.Tests
         [Test]
         public void Workflow_can_reply_to_signal_event()
         {
-            var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input","runid","wid"));
 
-            var workflowAction = workflowSignaledEvent.Interpret(new WorkflowWithCustomActionOnSignal(expectedAction));
+            var workflowAction = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput"));
 
-            Assert.That(workflowAction, Is.EqualTo(expectedAction));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Signal("newSignal","newInput",workflowSignaledEvent.ExternalWorkflowId,workflowSignaledEvent.ExternalWorkflowRunid)));
         }
 
         private class WorkflowWithCustomActionOnSignal : Workflow
@@ -84,7 +83,6 @@ namespace Guflow.Tests
                 _signalName = signalName;
                 _input = input;
             }
-
             protected override WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return Signal(_signalName, _input).ReplyTo(workflowSignalEvent);

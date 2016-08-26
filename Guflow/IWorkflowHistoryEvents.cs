@@ -16,5 +16,6 @@ namespace Guflow
         IEnumerable<WorkflowItemEvent> AllActivityEventsFor(ActivityItem activityItem);
         IEnumerable<WorkflowItemEvent> AllTimerEventsFor(TimerItem timerItem);
         IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents();
+        IEnumerable<WorkflowSignaledEvent> AllSignalEvents();
     }
 }

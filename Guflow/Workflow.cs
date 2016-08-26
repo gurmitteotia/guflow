@@ -189,16 +189,19 @@ namespace Guflow
         {
             get { return ((IWorkflow)this).CurrentHistoryEvents.IsActive(); }
         }
-        protected void RecordMarker(string markerName, object details)
+        protected WorkflowAction RecordMarker(string markerName, object details)
         {
             Ensure.NotNullAndEmpty(markerName, "markerName");
-            Markers.Add(markerName,details);
+            return WorkflowAction.RecordMarker(markerName, details.ToAwsString());
         }
-        protected IEnumerable<MarkerRecordedEvent> AllRecordedMarkers
+        protected IEnumerable<MarkerRecordedEvent> AllMarkerEvents
         {
             get { return ((IWorkflow) this).CurrentHistoryEvents.AllMarkerRecordedEvents(); }
         }
-
+        protected IEnumerable<WorkflowSignaledEvent> AllSignalEvents
+        {
+            get { return ((IWorkflow)this).CurrentHistoryEvents.AllSignalEvents() ; }
+        }
         protected Signal Signal(string signalName, object input)
         {
             Ensure.NotNullAndEmpty(signalName,"signalName");
@@ -257,12 +260,11 @@ namespace Guflow
             try
             {
                 _currentworkflowHistoryEvents = workflowHistoryEvents;
-                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this).Concat(Markers.Decisions);
+                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this);
                 return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
             }
             finally
             {
-                Markers.Clear();
                 _currentworkflowHistoryEvents = null;
             }
         }

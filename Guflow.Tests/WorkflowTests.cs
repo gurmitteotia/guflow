@@ -252,46 +252,11 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Workflow_execution_can_return_marker_decisions()
-        {
-            var workflow = new WorkflowWithMarker("name","detail");
-
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
-
-            Assert.That(workflowDecisions,Is.EqualTo(new []{new RecordMarkerDecision("name","detail")}));
-        }
-
-        [Test]
-        public void Returns_markers_decision_when_generated_along_with_propose_to_close_workflow()
-        {
-            var workflow = new WorkflowWithMarker("name", "detail");
-            _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("detail",true), });
-
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
-
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { new RecordMarkerDecision("name", "detail") }));
-        }
-
-        [Test]
-        public void Markers_are_cleared_after_execution()
-        {
-            var workflow = new WorkflowWithMarker("name", "detail");
-            workflow.ExecuteFor(_workflowHistoryEvents.Object);
- 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
-
-            Assert.That(workflowDecisions, Is.Empty);
-        }
-
-        [Test]
         public void Invalid_argument_tests()
         {
             Assert.Throws<ArgumentException>(() => new WithNullActivityName());
             Assert.Throws<ArgumentException>(() => new WithNullActivityVersion());
             Assert.Throws<ArgumentException>(() => new WithNullTimerName());
-            Assert.Throws<ArgumentException>(() => new WorkflowWithMarker(null, "detail"));
-            Assert.Throws<ArgumentException>(() => new WorkflowWithSignal(null, "detail", "id", "id1"));
-            Assert.Throws<ArgumentException>(() => new WorkflowWithSignal("signalName", "detail", null, "id1"));
         }
 
         private IEnumerable<WorkflowDecision> AllNonCompletingDecisions()
@@ -386,14 +351,6 @@ namespace Guflow.Tests
             }
         }
 
-        private class WorkflowWithMarker : Workflow
-        {
-            public WorkflowWithMarker(string markerName,string markerDetail)
-            {
-                RecordMarker(markerName, markerDetail);
-            }
-        }
-
         private class WithNullActivityName : Workflow
         {
             public WithNullActivityName()
@@ -413,13 +370,6 @@ namespace Guflow.Tests
             public WithNullTimerName()
             {
                 ScheduleTimer(null);
-            }
-        }
-        private class WorkflowWithSignal : Workflow
-        {
-            public WorkflowWithSignal(string signalName, string signalDetail, string workflowid, string runid)
-            {
-                Signal(signalName, signalDetail).SendTo(workflowid, runid);
             }
         }
     }

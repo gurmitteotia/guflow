@@ -49,6 +49,10 @@ namespace Guflow
         {
             return new GenericWorkflowAction(new SignalWorkflowDecision(signalName,input,workflowId,runId));
         }
+        public static WorkflowAction RecordMarker(string markerName, string details)
+        {
+            return new GenericWorkflowAction(new RecordMarkerWorkflowDecision(markerName,details));
+        }
         private class EmptyWorkflowAction : WorkflowAction
         {
             internal override IEnumerable<WorkflowDecision> GetDecisions()
@@ -101,5 +105,6 @@ namespace Guflow
                 return _left.GetDecisions().Concat(_right.GetDecisions());
             }
         }
+
     }
 }
