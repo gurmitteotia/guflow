@@ -73,6 +73,7 @@
     <Compile Include="CancelWorkflowItemActionTests.cs" />
     <Compile Include="CompleteWorkflowActionTests.cs" />
     <Compile Include="CompleteWorkflowDecisionTests.cs" />
+    <Compile Include="CompleteWorkflowExecutionFailedEventTests.cs" />
     <Compile Include="ContinueWorkflowActionTests.cs" />
     <Compile Include="FailWorkflowActionTests.cs" />
     <Compile Include="FailWorkflowDecisionTests.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="IdentityTests.cs" />
     <Compile Include="IgnoreWorkflowActionTests.cs" />
     <Compile Include="MarkerRecordedEventTests.cs" />
+    <Compile Include="WorkflowEventMethodsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecordMarkerWorkflowDecisionTests.cs" />
     <Compile Include="RecordMarkerFailedEventTests.cs" />
@@ -101,9 +103,9 @@
     <Compile Include="WorkflowCancellationRequestedEventTests.cs" />
     <Compile Include="WorkflowHistoryEventsTests.cs" />
     <Compile Include="WorkflowSignaledEventTests.cs" />
+    <Compile Include="WorkflowSignalFailedEventTests.cs" />
     <Compile Include="WorkflowStartedEventTests.cs" />
     <Compile Include="WorkflowTests.cs" />
-    <Compile Include="WorkflowToStubHistoryEvents.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

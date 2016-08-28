@@ -292,6 +292,21 @@ namespace Guflow.Tests
 
             Assert.That(allSignalEvents,Is.EqualTo(new []{ new WorkflowSignaledEvent(signalEventsGraph.First()),new WorkflowSignaledEvent(signalEventsGraph.Last())}));
         }
+
+        [Test]
+        public void Can_return_all_cancellation_request()
+        {
+            var cancellationEventGraph = new[]
+            {
+                HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause"),
+                HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause2","runid","wid")
+            };
+            var workflowHistoryEvents = new WorkflowHistoryEvents(cancellationEventGraph);
+            var allWorkflowCancellationRequestedEvents = workflowHistoryEvents.AllWorkflowCancellationRequestedEvents();
+
+            Assert.That(allWorkflowCancellationRequestedEvents, Is.EqualTo(new[] { new WorkflowCancellationRequestedEvent(cancellationEventGraph.First()), new WorkflowCancellationRequestedEvent(cancellationEventGraph.Last()) }));
+        }
+
         private WorkflowHistoryEvents CreateActivityCompletedEventGraph()
         {
             var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "result").ToArray();

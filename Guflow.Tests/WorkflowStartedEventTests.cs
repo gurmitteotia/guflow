@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using Amazon.SimpleWorkflow.Model;
 using Moq;
 using NUnit.Framework;
 
@@ -27,7 +25,7 @@ namespace Guflow.Tests
             Assert.AreEqual(startAttributes.ParentWorkflowExecution.WorkflowId, workflowEvent.ParentWorkflowId);
             Assert.AreEqual(startAttributes.TagList, workflowEvent.TagList);
             Assert.AreEqual(startAttributes.TaskList.Name, workflowEvent.TaskList);
-            Assert.AreEqual(startAttributes.TaskPriority, workflowEvent.TaskPriority);
+            Assert.AreEqual(int.Parse(startAttributes.TaskPriority), workflowEvent.TaskPriority);
             Assert.AreEqual(TimeSpan.FromSeconds(Convert.ToInt32(startAttributes.TaskStartToCloseTimeout)), workflowEvent.TaskStartToCloseTimeout);
         }
 
@@ -36,7 +34,7 @@ namespace Guflow.Tests
         {
             var customStartupAction = new Mock<WorkflowAction>().Object;
             var workflow = new WorkflowWithCustomStartupAction(customStartupAction);
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
+            var workflowEvent = new WorkflowStartedEvent(HistoryEventFactory.CreateWorkflowStartedEvent());
 
             var actualStartupAction = workflowEvent.Interpret(workflow);
 
@@ -47,7 +45,7 @@ namespace Guflow.Tests
         public void Return_workflow_started_action()
         {
             var workflow = new EmptyWorkflow();
-            var workflowEvent = new WorkflowStartedEvent(new HistoryEvent());
+            var workflowEvent = new WorkflowStartedEvent(HistoryEventFactory.CreateWorkflowStartedEvent());
 
             var workflowAction = workflowEvent.Interpret(workflow);
 
@@ -66,7 +64,8 @@ namespace Guflow.Tests
                 _workflowAction = workflowAction;
             }
 
-            protected override WorkflowAction OnStart(WorkflowStartedEvent workflowSartedEvent)
+            [WorkflowStart]
+            protected WorkflowAction OnStart(WorkflowStartedEvent workflowSartedEvent)
             {
                 return _workflowAction;
             }

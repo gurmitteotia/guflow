@@ -54,7 +54,9 @@ namespace Guflow.Tests
             {
                 _workflowAction = workflowAction;
             }
-            protected override WorkflowAction OnCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
+
+            [CancellationRequest]
+            protected WorkflowAction OnCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
             {
                 return _workflowAction;
             }

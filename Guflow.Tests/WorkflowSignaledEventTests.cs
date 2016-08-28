@@ -68,7 +68,9 @@ namespace Guflow.Tests
             {
                 _workflowAction = workflowAction;
             }
-            protected override WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
+
+            [Signal]
+            protected WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return _workflowAction;
             }
@@ -83,7 +85,8 @@ namespace Guflow.Tests
                 _signalName = signalName;
                 _input = input;
             }
-            protected override WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
+            [Signal]
+            protected WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return Signal(_signalName, _input).ReplyTo(workflowSignalEvent);
             }

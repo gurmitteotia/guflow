@@ -9,9 +9,19 @@ namespace Guflow
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
         private IWorkflowHistoryEvents _currentworkflowHistoryEvents;
+        private readonly WorkflowEventMethods _workflowEventMethods;
+
+        protected Workflow()
+        {
+            _workflowEventMethods = WorkflowEventMethods.For(this);
+        }
+
         WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
-            return OnStart(workflowStartedEvent);
+            var workflowEventMethod = _workflowEventMethods.FindFor<WorkflowStartAttribute>();
+            return workflowEventMethod == null
+                ? WorkflowAction.StartWorkflow(this)
+                : workflowEventMethod.Invoke(workflowStartedEvent);
         }
 
         WorkflowAction IWorkflowActions.OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
@@ -66,16 +76,34 @@ namespace Guflow
         }
         WorkflowAction IWorkflowActions.OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent)
         {
-            return OnSignal(workflowSignaledEvent);
+            var workflowEventMethod = _workflowEventMethods.FindFor<SignalAttribute>();
+            return workflowEventMethod == null
+                ? WorkflowAction.Ignore
+                : workflowEventMethod.Invoke(workflowSignaledEvent);
         }
         WorkflowAction IWorkflowActions.OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
         {
-            return OnCancellationRequested(workflowCancellationRequestedEvent);
+            var workflowEventMethod = _workflowEventMethods.FindFor<CancellationRequestAttribute>();
+            return workflowEventMethod == null
+                ? WorkflowAction.CancelWorkflow(workflowCancellationRequestedEvent.Cause)
+                : workflowEventMethod.Invoke(workflowCancellationRequestedEvent);
         }
         WorkflowAction IWorkflowActions.OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent)
         {
-            return OnFailToRecordMarker(recordMarkerFailedEvent);
+            var workflowEventMethod = _workflowEventMethods.FindFor<RecordMarkerFailedAttribute>();
+            return workflowEventMethod == null
+                ? FailWorkflow("FAILED_TO_RECORD_MARKER", recordMarkerFailedEvent.Cause)
+                : workflowEventMethod.Invoke(recordMarkerFailedEvent);
         }
+
+        public WorkflowAction OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent)
+        {
+            var workflowEventMethod = _workflowEventMethods.FindFor<SignalFailedAttribute>();
+            return workflowEventMethod == null
+                ? FailWorkflow("FAILED_TO_SIGNAL_WORKFLOW", workflowSignalFailedEvent.Cause)
+                : workflowEventMethod.Invoke(workflowSignalFailedEvent);
+        }
+
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name,"name");
@@ -95,22 +123,6 @@ namespace Guflow
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_timer,name));
 
             return timerItem;
-        }
-        protected virtual WorkflowAction OnStart(WorkflowStartedEvent workflowSartedEvent)
-        {
-            return WorkflowAction.StartWorkflow(this);
-        }
-        protected virtual WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignaledEvent)
-        {
-            return WorkflowAction.Ignore;
-        }
-        protected virtual WorkflowAction OnFailToRecordMarker(RecordMarkerFailedEvent recordMarkerFailedEvent)
-        {
-            return FailWorkflow("FAILED_TO_RECORD_MARKER", recordMarkerFailedEvent.Cause);
-        }
-        protected virtual WorkflowAction OnCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
-        {
-            return WorkflowAction.CancelWorkflow(workflowCancellationRequestedEvent.Cause);
         }
         protected WorkflowAction Continue(WorkflowItemEvent workflowItemEvent)
         {
@@ -202,12 +214,15 @@ namespace Guflow
         {
             get { return ((IWorkflow)this).CurrentHistoryEvents.AllSignalEvents() ; }
         }
+        protected IEnumerable<WorkflowCancellationRequestedEvent> AllCancellationRequestedEvents
+        {
+            get { return ((IWorkflow)this).CurrentHistoryEvents.AllWorkflowCancellationRequestedEvents(); }
+        } 
         protected Signal Signal(string signalName, object input)
         {
             Ensure.NotNullAndEmpty(signalName,"signalName");
             return new Signal(signalName,input);
         }
-
         IEnumerable<WorkflowItem> IWorkflowItems.GetStartupWorkflowItems()
         {
             return _allWorkflowItems.Where(s => s.HasNoParents());

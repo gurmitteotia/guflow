@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow.Model;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -127,7 +128,9 @@ namespace Guflow.Tests
         private TimerItem CreateTimerItemFor(IEnumerable<HistoryEvent> eventGraph)
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            return new TimerItem(_timerIdentity, new WorkflowToStubHistoryEvents(workflowHistoryEvents));
+            var workflow = new Mock<IWorkflow>();
+            workflow.SetupGet(w => w.CurrentHistoryEvents).Returns(workflowHistoryEvents);
+            return new TimerItem(_timerIdentity, workflow.Object);
         }
     }
 }

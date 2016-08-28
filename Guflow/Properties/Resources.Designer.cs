@@ -61,7 +61,7 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Activity with name {0}, version {1} and positional name {2} is already added to workflow..
+        ///   Looks up a localized string similar to Activity with name {0}, version {1} and positional markerName {2} is already added to workflowClosingActions..
         /// </summary>
         internal static string Duplicate_activity {
             get {
@@ -70,11 +70,38 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Timer with name {0} is already added to workflow..
+        ///   Looks up a localized string similar to Timer with name {0} is already added to workflowClosingActions..
         /// </summary>
         internal static string Duplicate_timer {
             get {
                 return ResourceManager.GetString("Duplicate_timer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Workflow method {0} has incompatible parameter {1}, which can not be deserialized from source event {2}.
+        /// </summary>
+        internal static string Invalid_parameter {
+            get {
+                return ResourceManager.GetString("Invalid_parameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Workflow method {0} has invalid return type. Only {1} and {2} are allowed as return types..
+        /// </summary>
+        internal static string Invalid_return_type {
+            get {
+                return ResourceManager.GetString("Invalid_return_type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Multiple workflow methods are found for event {0}. Please provide only one method..
+        /// </summary>
+        internal static string Multiple_event_methods {
+            get {
+                return ResourceManager.GetString("Multiple_event_methods", resourceCulture);
             }
         }
         

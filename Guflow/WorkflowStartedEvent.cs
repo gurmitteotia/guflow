@@ -8,12 +8,20 @@ namespace Guflow
     {
         private readonly WorkflowExecutionStartedEventAttributes _workflowStartedAttributes;
 
-        internal WorkflowStartedEvent(HistoryEvent workflowStartedEvent):base(workflowStartedEvent.EventId)
+        internal WorkflowStartedEvent(HistoryEvent workflowStartedEvent)
+            : base(workflowStartedEvent.EventId)
         {
             _workflowStartedAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
         }
 
-        public string ChildPolicy { get { return _workflowStartedAttributes.ChildPolicy.Value; } }
+        public string ChildPolicy
+        {
+            get
+            {
+                return _workflowStartedAttributes.ChildPolicy == null ? string.Empty : _workflowStartedAttributes.ChildPolicy.Value;
+            }
+        }
+
         public string ContinuedExecutionRunId { get { return _workflowStartedAttributes.ContinuedExecutionRunId; } }
         public TimeSpan ExecutionStartToCloseTimeout { get { return TimeSpan.FromSeconds(Convert.ToInt32(_workflowStartedAttributes.ExecutionStartToCloseTimeout)); } }
         public string Input { get { return _workflowStartedAttributes.Input; } }
@@ -47,9 +55,15 @@ namespace Guflow
             get { return _workflowStartedAttributes.TaskList.Name; }
         }
 
-        public string TaskPriority
+        public int? TaskPriority
         {
-            get { return _workflowStartedAttributes.TaskPriority; }
+            get
+            {
+                if (string.IsNullOrEmpty(_workflowStartedAttributes.TaskPriority))
+                    return null;
+
+                return int.Parse(_workflowStartedAttributes.TaskPriority);
+            }
         }
 
         public TimeSpan TaskStartToCloseTimeout

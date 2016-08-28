@@ -86,6 +86,15 @@
     <Compile Include="ActivitySchedulingFailedEvent.cs" />
     <Compile Include="ActivityStartedEvent.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
+    <Compile Include="AmbiguousWorkflowMethodException.cs" />
+    <Compile Include="CancellationRequestAttribute.cs" />
+    <Compile Include="InvalidMethodSignatureException.cs" />
+    <Compile Include="RecordMarkerFailedAttribute.cs" />
+    <Compile Include="SignalAttribute.cs" />
+    <Compile Include="SignalFailedAttribute.cs" />
+    <Compile Include="WorkflowEventAttribute.cs" />
+    <Compile Include="WorkflowEventMethod.cs" />
+    <Compile Include="WorkflowEventMethods.cs" />
     <Compile Include="AwsIdentity.cs" />
     <Compile Include="CancelActivityDecision.cs" />
     <Compile Include="CancelTimerDecision.cs" />
@@ -155,6 +164,8 @@
     <Compile Include="WorkflowItemEvent.cs" />
     <Compile Include="WorkflowItemNotFoundException.cs" />
     <Compile Include="WorkflowSignaledEvent.cs" />
+    <Compile Include="WorkflowSignalFailedEvent.cs" />
+    <Compile Include="WorkflowStartAttribute.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />
   </ItemGroup>

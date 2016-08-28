@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -17,5 +18,6 @@ namespace Guflow
         IEnumerable<WorkflowItemEvent> AllTimerEventsFor(TimerItem timerItem);
         IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents();
         IEnumerable<WorkflowSignaledEvent> AllSignalEvents();
+        IEnumerable<WorkflowCancellationRequestedEvent> AllWorkflowCancellationRequestedEvents();
     }
 }

@@ -41,7 +41,9 @@ namespace Guflow.Tests
             {
                 _workflowAction = workflowAction;
             }
-            protected override WorkflowAction OnFailToRecordMarker(RecordMarkerFailedEvent recordMarkerFailedEvent)
+
+            [RecordMarkerFailed]
+            protected WorkflowAction OnFailToRecordMarker(RecordMarkerFailedEvent recordMarkerFailedEvent)
             {
                 return _workflowAction;
             }

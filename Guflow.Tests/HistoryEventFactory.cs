@@ -584,6 +584,22 @@ namespace Guflow.Tests
                 }
             };
         }
+
+        public static HistoryEvent CreateWorkflowSignalFailedEvent(string cause, string workflowId, string runId)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.SignalExternalWorkflowExecutionFailed,
+                SignalExternalWorkflowExecutionFailedEventAttributes = new SignalExternalWorkflowExecutionFailedEventAttributes()
+                {
+                    Cause = cause,
+                    WorkflowId = workflowId,
+                    RunId = runId
+                }
+            };
+        }
         private class EventIds
         {
             private static long _seed = long.MaxValue;

@@ -16,5 +16,6 @@
         WorkflowAction OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent);
         WorkflowAction OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent);
         WorkflowAction OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent);
+        WorkflowAction OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent);
     }
 }

@@ -186,5 +186,14 @@ namespace Guflow
                     yield return new WorkflowSignaledEvent(historyEvent);
             }
         }
+
+        public IEnumerable<WorkflowCancellationRequestedEvent> AllWorkflowCancellationRequestedEvents()
+        {
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                if (historyEvent.IsWorkflowCancellationRequestedEvent())
+                    yield return new WorkflowCancellationRequestedEvent(historyEvent);
+            }
+        }
     }
 }
