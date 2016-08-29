@@ -79,6 +79,20 @@ namespace Guflow
         {
             return historyEvent.EventType == EventType.WorkflowExecutionCancelRequested;
         }
+        public static bool IsWorkflowCompletionFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.CompleteWorkflowExecutionFailed;
+        }
+
+        public static bool IsWorkflowFailureFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.FailWorkflowExecutionFailed;
+        }
+
+        public static bool IsWorkflowSignalFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.SignalExternalWorkflowExecutionFailed;
+        }
         public static bool IsWorkflowStartedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.WorkflowExecutionStarted;
@@ -133,6 +147,12 @@ namespace Guflow
                 return new WorkflowSignaledEvent(historyEvent);
             if(historyEvent.IsWorkflowCancellationRequestedEvent())
                 return new WorkflowCancellationRequestedEvent(historyEvent);
+            if(historyEvent.IsWorkflowCompletionFailedEvent())
+                return new WorkflowCompletionFailedEvent(historyEvent);
+            if (historyEvent.IsWorkflowFailureFailedEvent())
+                return new WorkflowFailureFailedEvent(historyEvent);
+            if (historyEvent.IsWorkflowSignalFailedEvent())
+                return new WorkflowSignalFailedEvent(historyEvent);
             return null;
         }
 

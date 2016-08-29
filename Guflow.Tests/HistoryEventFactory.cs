@@ -600,6 +600,35 @@ namespace Guflow.Tests
                 }
             };
         }
+
+        public static HistoryEvent CreateWorkflowCompletionFailureEvent(string cause)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.CompleteWorkflowExecutionFailed,
+                CompleteWorkflowExecutionFailedEventAttributes = new CompleteWorkflowExecutionFailedEventAttributes()
+                {
+                    Cause = cause,
+                }
+            };
+        }
+
+        public static HistoryEvent CreateWorkflowFailureFailedEvent(string cause)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.FailWorkflowExecutionFailed,
+                FailWorkflowExecutionFailedEventAttributes = new FailWorkflowExecutionFailedEventAttributes()
+                {
+                    Cause = cause,
+                }
+            };
+        }
+
         private class EventIds
         {
             private static long _seed = long.MaxValue;

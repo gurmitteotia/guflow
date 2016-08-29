@@ -104,6 +104,22 @@ namespace Guflow
                 : workflowEventMethod.Invoke(workflowSignalFailedEvent);
         }
 
+        public WorkflowAction OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent)
+        {
+            var workflowEventMethod = _workflowEventMethods.FindFor<CompletionFailedAttribute>();
+            return workflowEventMethod == null
+                ? FailWorkflow("FAILED_TO_COMPLETE_WORKFLOW", workflowCompletionFailedEvent.Cause)
+                : workflowEventMethod.Invoke(workflowCompletionFailedEvent);
+        }
+
+        public WorkflowAction OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent)
+        {
+            var workflowEventMethod = _workflowEventMethods.FindFor<FailureFailedAttribute>();
+            return workflowEventMethod == null
+                ? FailWorkflow("FAILED_TO_FAIL_WORKFLOW", workflowFailureFailedEvent.Cause)
+                : workflowEventMethod.Invoke(workflowFailureFailedEvent);
+        }
+
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name,"name");
@@ -186,6 +202,12 @@ namespace Guflow
 
             var activityItem = FindTimerFor(Identity.Timer(name));
             return WorkflowAction.Cancel(activityItem);
+        }
+
+        protected WorkflowAction CancelRequest(string workflowId, string runId)
+        {
+            Ensure.NotNullAndEmpty(workflowId, "workflowId");
+            return WorkflowAction.CancelRequest(workflowId, runId);
         }
         protected IActivityItem ActivityOf(WorkflowItemEvent activityEvent)
         {

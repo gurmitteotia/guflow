@@ -5,7 +5,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal abstract class WorkflowDecision
+    public abstract class WorkflowDecision
     {
         private readonly bool _canCloseWorkflow;
         protected readonly bool Proposal;

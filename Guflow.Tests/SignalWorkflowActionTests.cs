@@ -36,7 +36,7 @@ namespace Guflow.Tests
         [Test]
         public void Can_be_returned_as_custom_action_from_workflow()
         {
-            var workflow = new WorkflowToReturnSiganal("name","input","id","runid");
+            var workflow = new WorkflowToReturnSignal("name","input","id","runid");
             var timerFiredEventGraph= HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
             var timerEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
 
@@ -45,9 +45,9 @@ namespace Guflow.Tests
             Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Signal("name","input","id","runid")));
         }
 
-        private class WorkflowToReturnSiganal : Workflow
+        private class WorkflowToReturnSignal : Workflow
         {
-            public WorkflowToReturnSiganal(string name, string input, string workflowId, string runid)
+            public WorkflowToReturnSignal(string name, string input, string workflowId, string runid)
             {
                 ScheduleTimer("timer1").OnFired(e => Signal(name, input).SendTo(workflowId, runid));
             }

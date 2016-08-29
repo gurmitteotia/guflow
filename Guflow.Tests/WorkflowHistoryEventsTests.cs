@@ -141,11 +141,42 @@ namespace Guflow.Tests
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
         }
+
+        [Test]
+        public void Can_interpret_workflow_signaled_failed_event()
+        {
+            _workflow.Setup(w => w.OnWorkflowSignalFailed(It.IsAny<WorkflowSignalFailedEvent>())).Returns(_interpretedWorkflowAction);
+            var historyEvents = new WorkflowHistoryEvents(new []{HistoryEventFactory.CreateWorkflowSignalFailedEvent("cause","wid","rid")});
+
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
+        }
         [Test]
         public void Can_interpret_workflow_cancellation_requested_event()
         {
             _workflow.Setup(w => w.OnWorkflowCancellationRequested(It.IsAny<WorkflowCancellationRequestedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateWorkflowCancellationRequestedEventGraph();
+
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
+        }
+        [Test]
+        public void Can_interpret_workflow_completion_failed_event()
+        {
+            _workflow.Setup(w => w.OnWorkflowCompletionFailed(It.IsAny<WorkflowCompletionFailedEvent>())).Returns(_interpretedWorkflowAction);
+            var historyEvents = new WorkflowHistoryEvents(new[]{HistoryEventFactory.CreateWorkflowCompletionFailureEvent("cause")});
+
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
+        }
+        [Test]
+        public void Can_interpret_workflow_failure_failed_event()
+        {
+            _workflow.Setup(w => w.OnWorkflowFailureFailed(It.IsAny<WorkflowFailureFailedEvent>())).Returns(_interpretedWorkflowAction);
+            var historyEvents = new WorkflowHistoryEvents(new[] { HistoryEventFactory.CreateWorkflowFailureFailedEvent("cause") });
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 

@@ -73,7 +73,8 @@
     <Compile Include="CancelWorkflowItemActionTests.cs" />
     <Compile Include="CompleteWorkflowActionTests.cs" />
     <Compile Include="CompleteWorkflowDecisionTests.cs" />
-    <Compile Include="CompleteWorkflowExecutionFailedEventTests.cs" />
+    <Compile Include="WorkflowCancelRequestActionTests.cs" />
+    <Compile Include="WorkflowCompletionFailedEventTests.cs" />
     <Compile Include="ContinueWorkflowActionTests.cs" />
     <Compile Include="FailWorkflowActionTests.cs" />
     <Compile Include="FailWorkflowDecisionTests.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="TimerItemTests.cs" />
     <Compile Include="WorkflowActionTests.cs" />
     <Compile Include="WorkflowCancellationRequestedEventTests.cs" />
+    <Compile Include="WorkflowFailureFailedEventTests.cs" />
     <Compile Include="WorkflowHistoryEventsTests.cs" />
     <Compile Include="WorkflowSignaledEventTests.cs" />
     <Compile Include="WorkflowSignalFailedEventTests.cs" />
