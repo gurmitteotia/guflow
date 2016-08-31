@@ -53,7 +53,7 @@ namespace Guflow
         {
             return new GenericWorkflowAction(new RecordMarkerWorkflowDecision(markerName,details));
         }
-        internal static WorkflowAction CancelRequest(string workflowId, string runId)
+        internal static WorkflowAction CancelWorkflowRequest(string workflowId, string runId)
         {
             return new GenericWorkflowAction(new CancelRequestWorkflowDecision(workflowId, runId));
         }

@@ -1,4 +1,5 @@
-﻿using Amazon.SimpleWorkflow.Model;
+﻿using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -16,7 +17,16 @@ namespace Guflow
 
         internal override Decision Decision()
         {
-            throw new System.NotImplementedException();
+            return new Decision()
+            {
+                DecisionType = DecisionType.RequestCancelExternalWorkflowExecution,
+                RequestCancelExternalWorkflowExecutionDecisionAttributes =
+                    new RequestCancelExternalWorkflowExecutionDecisionAttributes()
+                    {
+                        WorkflowId = _workflowId,
+                        RunId = _runId
+                    }
+            };
         }
 
         private bool Equals(CancelRequestWorkflowDecision other)

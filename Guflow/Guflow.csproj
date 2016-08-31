@@ -92,9 +92,11 @@
     <Compile Include="CompletionFailedAttribute.cs" />
     <Compile Include="FailureFailedAttribute.cs" />
     <Compile Include="InvalidMethodSignatureException.cs" />
+    <Compile Include="OnCancelRequestFailedAttribute.cs" />
     <Compile Include="RecordMarkerFailedAttribute.cs" />
     <Compile Include="SignalAttribute.cs" />
     <Compile Include="SignalFailedAttribute.cs" />
+    <Compile Include="WorkflowCancelRequestFailedEvent.cs" />
     <Compile Include="WorkflowCompletionFailedEvent.cs" />
     <Compile Include="WorkflowEventAttribute.cs" />
     <Compile Include="WorkflowEventMethod.cs" />

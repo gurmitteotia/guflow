@@ -67,13 +67,15 @@
     <Compile Include="ActivityTimedoutEventTests.cs" />
     <Compile Include="AwsIdentityTests.cs" />
     <Compile Include="CancelActivityDecisionTests.cs" />
+    <Compile Include="CancelRequestWorkflowDecisionTests.cs" />
     <Compile Include="CancelTimerDecisionTests.cs" />
     <Compile Include="CancelWorkflowActionTests.cs" />
     <Compile Include="CancelWorkflowDecisionTests.cs" />
     <Compile Include="CancelWorkflowItemActionTests.cs" />
     <Compile Include="CompleteWorkflowActionTests.cs" />
     <Compile Include="CompleteWorkflowDecisionTests.cs" />
-    <Compile Include="WorkflowCancelRequestActionTests.cs" />
+    <Compile Include="CancelWorkflowRequestWorkflowActionTests.cs" />
+    <Compile Include="WorkflowCancelRequestFailedEventTests.cs" />
     <Compile Include="WorkflowCompletionFailedEventTests.cs" />
     <Compile Include="ContinueWorkflowActionTests.cs" />
     <Compile Include="FailWorkflowActionTests.cs" />

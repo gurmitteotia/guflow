@@ -5,21 +5,21 @@ using NUnit.Framework;
 namespace Guflow.Tests
 {
     [TestFixture]
-    public class WorkflowCancelRequestActionTests
+    public class CancelWorkflowRequestWorkflowActionTests
     {
         [Test]
         public void Equality_tests()
         {
-            Assert.That(WorkflowAction.CancelRequest("wid","rid").Equals(WorkflowAction.CancelRequest("wid","rid")));
+            Assert.That(WorkflowAction.CancelWorkflowRequest("wid","rid").Equals(WorkflowAction.CancelWorkflowRequest("wid","rid")));
 
-            Assert.False(WorkflowAction.CancelRequest("wid", "rid").Equals(WorkflowAction.CancelRequest("wid", "rid1")));
-            Assert.False(WorkflowAction.CancelRequest("wid", "rid").Equals(WorkflowAction.CancelRequest("wid1", "rid")));
+            Assert.False(WorkflowAction.CancelWorkflowRequest("wid", "rid").Equals(WorkflowAction.CancelWorkflowRequest("wid", "rid1")));
+            Assert.False(WorkflowAction.CancelWorkflowRequest("wid", "rid").Equals(WorkflowAction.CancelWorkflowRequest("wid1", "rid")));
         }
 
         [Test]
         public void Returns_cancel_request_workflow_decision()
         {
-            var workflowDecisions = WorkflowAction.CancelRequest("wid", "rid").GetDecisions();
+            var workflowDecisions = WorkflowAction.CancelWorkflowRequest("wid", "rid").GetDecisions();
 
             Assert.That(workflowDecisions,Is.EqualTo(new[]{new CancelRequestWorkflowDecision("wid","rid")}));
         }
@@ -33,7 +33,7 @@ namespace Guflow.Tests
 
             var workflowAction = timerEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelRequest("id", "runid")));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelWorkflowRequest("id", "runid")));
         }
 
         private class WorkflowToReturnCancelRequest : Workflow

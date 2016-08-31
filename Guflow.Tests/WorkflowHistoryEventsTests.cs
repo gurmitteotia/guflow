@@ -184,6 +184,17 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void Can_interpret_workflow_cancel_request_failed_event()
+        {
+            _workflow.Setup(w => w.OnWorkflowCancelRequestFailed(It.IsAny<WorkflowCancelRequestFailedEvent>())).Returns(_interpretedWorkflowAction);
+            var historyEvents = new WorkflowHistoryEvents(new[] { HistoryEventFactory.CreateWorkflowCancelRequestFailedEvent("cause") });
+
+            var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
+
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { _expectedWorkflowDecision }));
+        }
+
+        [Test]
         public void Should_return_empty_workflow_action_when_history_event_can_not_be_interpreted()
         {
             var historyEvents = CreateNotInterpretingEventGraph();

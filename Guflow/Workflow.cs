@@ -120,6 +120,14 @@ namespace Guflow
                 : workflowEventMethod.Invoke(workflowFailureFailedEvent);
         }
 
+        public WorkflowAction OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
+        {
+            var workflowEventMethod = _workflowEventMethods.FindFor<OnCancelRequestFailedAttribute>();
+            return workflowEventMethod == null
+                ? FailWorkflow("FAILED_TO_SEND_CANCEL_REQUEST", workflowCancelRequestFailedEvent.Cause)
+                : workflowEventMethod.Invoke(workflowCancelRequestFailedEvent);
+        }
+
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name,"name");
@@ -200,14 +208,14 @@ namespace Guflow
         {
             Ensure.NotNullAndEmpty(name, "name");
 
-            var activityItem = FindTimerFor(Identity.Timer(name));
-            return WorkflowAction.Cancel(activityItem);
+            var timerItem = FindTimerFor(Identity.Timer(name));
+            return WorkflowAction.Cancel(timerItem);
         }
 
-        protected WorkflowAction CancelRequest(string workflowId, string runId)
+        protected WorkflowAction CancelRequest(string workflowId, string runId=null)
         {
             Ensure.NotNullAndEmpty(workflowId, "workflowId");
-            return WorkflowAction.CancelRequest(workflowId, runId);
+            return WorkflowAction.CancelWorkflowRequest(workflowId, runId);
         }
         protected IActivityItem ActivityOf(WorkflowItemEvent activityEvent)
         {

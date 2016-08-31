@@ -19,5 +19,6 @@
         WorkflowAction OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent);
         WorkflowAction OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent);
         WorkflowAction OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent);
+        WorkflowAction OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent);
     }
 }
