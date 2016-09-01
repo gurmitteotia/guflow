@@ -64,7 +64,7 @@ namespace Guflow.Tests
                 _workflowAction = workflowAction;
             }
 
-            [WorkflowStart]
+            [WorkflowEvent(EventName.WorkflowStarted)]
             protected WorkflowAction OnStart(WorkflowStartedEvent workflowSartedEvent)
             {
                 return _workflowAction;

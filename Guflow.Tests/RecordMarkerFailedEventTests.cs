@@ -42,7 +42,7 @@ namespace Guflow.Tests
                 _workflowAction = workflowAction;
             }
 
-            [RecordMarkerFailed]
+            [WorkflowEvent(EventName.RecordMarkerFailed)]
             protected WorkflowAction OnFailToRecordMarker(RecordMarkerFailedEvent recordMarkerFailedEvent)
             {
                 return _workflowAction;

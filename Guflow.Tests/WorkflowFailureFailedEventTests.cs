@@ -48,7 +48,7 @@ namespace Guflow.Tests
                 _workflowAction = workflowAction;
             }
 
-            [FailureFailed]
+            [WorkflowEvent(EventName.FailureFailed)]
             public WorkflowAction OnFailureToFailWorkflow(WorkflowFailureFailedEvent @event)
             {
                 return _workflowAction;

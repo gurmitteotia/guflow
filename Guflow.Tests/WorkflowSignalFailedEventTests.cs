@@ -48,7 +48,7 @@ namespace Guflow.Tests
                 _workflowAction = workflowAction;
             }
 
-            [SignalFailed]
+            [WorkflowEvent(EventName.SignalFailed)]
             protected WorkflowAction OnFailToSignalWorkflow(WorkflowSignalFailedEvent workflowSignalFailedEvent)
             {
                 return _workflowAction;

@@ -87,15 +87,9 @@
     <Compile Include="ActivityStartedEvent.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="AmbiguousWorkflowMethodException.cs" />
-    <Compile Include="CancellationRequestAttribute.cs" />
     <Compile Include="CancelRequestWorkflowDecision.cs" />
-    <Compile Include="CompletionFailedAttribute.cs" />
-    <Compile Include="FailureFailedAttribute.cs" />
+    <Compile Include="EventName.cs" />
     <Compile Include="InvalidMethodSignatureException.cs" />
-    <Compile Include="OnCancelRequestFailedAttribute.cs" />
-    <Compile Include="RecordMarkerFailedAttribute.cs" />
-    <Compile Include="SignalAttribute.cs" />
-    <Compile Include="SignalFailedAttribute.cs" />
     <Compile Include="WorkflowCancelRequestFailedEvent.cs" />
     <Compile Include="WorkflowCompletionFailedEvent.cs" />
     <Compile Include="WorkflowEventAttribute.cs" />
@@ -172,7 +166,6 @@
     <Compile Include="WorkflowItemNotFoundException.cs" />
     <Compile Include="WorkflowSignaledEvent.cs" />
     <Compile Include="WorkflowSignalFailedEvent.cs" />
-    <Compile Include="WorkflowStartAttribute.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />
   </ItemGroup>

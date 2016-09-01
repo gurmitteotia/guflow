@@ -46,7 +46,7 @@ namespace Guflow.Tests
                 _workflowAction = workflowAction;
             }
 
-            [OnCancelRequestFailed]
+            [WorkflowEvent(EventName.CancelRequestFailed)]
             public WorkflowAction OnCancelRequestFailed(WorkflowCancelRequestFailedEvent @event)
             {
                 return _workflowAction;

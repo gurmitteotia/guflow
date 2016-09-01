@@ -18,7 +18,7 @@ namespace Guflow
 
         WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor<WorkflowStartAttribute>();
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.WorkflowStarted);
             return workflowEventMethod == null
                 ? WorkflowAction.StartWorkflow(this)
                 : workflowEventMethod.Invoke(workflowStartedEvent);
@@ -76,21 +76,21 @@ namespace Guflow
         }
         WorkflowAction IWorkflowActions.OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor<SignalAttribute>();
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.Signal);
             return workflowEventMethod == null
                 ? WorkflowAction.Ignore
                 : workflowEventMethod.Invoke(workflowSignaledEvent);
         }
         WorkflowAction IWorkflowActions.OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor<CancellationRequestAttribute>();
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CancelRequest);
             return workflowEventMethod == null
                 ? WorkflowAction.CancelWorkflow(workflowCancellationRequestedEvent.Cause)
                 : workflowEventMethod.Invoke(workflowCancellationRequestedEvent);
         }
         WorkflowAction IWorkflowActions.OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor<RecordMarkerFailedAttribute>();
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.RecordMarkerFailed);
             return workflowEventMethod == null
                 ? FailWorkflow("FAILED_TO_RECORD_MARKER", recordMarkerFailedEvent.Cause)
                 : workflowEventMethod.Invoke(recordMarkerFailedEvent);
@@ -98,7 +98,7 @@ namespace Guflow
 
         public WorkflowAction OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor<SignalFailedAttribute>();
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.SignalFailed);
             return workflowEventMethod == null
                 ? FailWorkflow("FAILED_TO_SIGNAL_WORKFLOW", workflowSignalFailedEvent.Cause)
                 : workflowEventMethod.Invoke(workflowSignalFailedEvent);
@@ -106,7 +106,7 @@ namespace Guflow
 
         public WorkflowAction OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor<CompletionFailedAttribute>();
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CompletionFailed);
             return workflowEventMethod == null
                 ? FailWorkflow("FAILED_TO_COMPLETE_WORKFLOW", workflowCompletionFailedEvent.Cause)
                 : workflowEventMethod.Invoke(workflowCompletionFailedEvent);
@@ -114,7 +114,7 @@ namespace Guflow
 
         public WorkflowAction OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor<FailureFailedAttribute>();
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.FailureFailed);
             return workflowEventMethod == null
                 ? FailWorkflow("FAILED_TO_FAIL_WORKFLOW", workflowFailureFailedEvent.Cause)
                 : workflowEventMethod.Invoke(workflowFailureFailedEvent);
@@ -122,7 +122,7 @@ namespace Guflow
 
         public WorkflowAction OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor<OnCancelRequestFailedAttribute>();
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CancelRequestFailed);
             return workflowEventMethod == null
                 ? FailWorkflow("FAILED_TO_SEND_CANCEL_REQUEST", workflowCancelRequestFailedEvent.Cause)
                 : workflowEventMethod.Invoke(workflowCancelRequestFailedEvent);

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Amazon.Auth.AccessControlPolicy;
 using Guflow.Properties;
 
 namespace Guflow
@@ -22,13 +20,13 @@ namespace Guflow
             return new WorkflowEventMethods(targetInstance);
         }
 
-        public WorkflowEventMethod FindFor<TAttribute>() where TAttribute:Attribute
+        public WorkflowEventMethod FindFor(EventName eventName)
         {
-            var matchingMethods =_allTargetMethods.Where(m => m.GetCustomAttributes<TAttribute>().Any());
+            var matchingMethods =_allTargetMethods.Where(m => m.GetCustomAttributes<WorkflowEventAttribute>().Any(e=>e.IsFor(eventName)));
             if (!matchingMethods.Any())
                 return null;
             if(matchingMethods.Count()>1)
-                throw new AmbiguousWorkflowMethodException(string.Format(Resources.Multiple_event_methods, typeof(TAttribute).Name));
+                throw new AmbiguousWorkflowMethodException(string.Format(Resources.Multiple_event_methods, eventName));
             var foundMethod = matchingMethods.First();
 
             if(!HasValidReturnType(foundMethod))

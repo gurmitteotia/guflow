@@ -69,7 +69,7 @@ namespace Guflow.Tests
                 _workflowAction = workflowAction;
             }
 
-            [Signal]
+            [WorkflowEvent(EventName.Signal)]
             protected WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return _workflowAction;
@@ -85,7 +85,8 @@ namespace Guflow.Tests
                 _signalName = signalName;
                 _input = input;
             }
-            [Signal]
+
+            [WorkflowEvent(EventName.Signal)]
             protected WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return Signal(_signalName, _input).ReplyTo(workflowSignalEvent);
