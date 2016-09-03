@@ -47,7 +47,7 @@ namespace Guflow
  
                 }
                 else
-                    throw new InvalidMethodSignatureException(string.Format(Resources.Invalid_parameter,_methodInfo.Name,parameterInfo.Name,invokedArgumentType.Name));
+                    parameters.Add(DefaultValueFor(parameterInfo.ParameterType));
             }
 
             return parameters.ToArray();
@@ -66,6 +66,11 @@ namespace Guflow
             }
 
             return properties;
+        }
+
+        private object DefaultValueFor(Type type)
+        {
+            return type.IsValueType ? Activator.CreateInstance(type) : null;
         }
     }
 }

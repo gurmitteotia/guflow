@@ -155,6 +155,21 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void Pass_default_values_to_parameters_when_not_found_in_event()
+        {
+            var targetWorkflow = new MethodWithNonExistingArgument();
+            _argument.Reason = "reason3";
+            _argument.SomeId = 56;
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+
+            workflowMethod.Invoke(_argument);
+
+            Assert.That(targetWorkflow.NotExistString,Is.Null);
+            Assert.That(targetWorkflow.NotExistLong, Is.EqualTo(0));
+            Assert.That(targetWorkflow.NotExistBool, Is.EqualTo(false));
+        }
+
+        [Test]
         public void Throws_exception_when_multiple_methods_are_found_for_same_event()
         {
             Assert.Throws<AmbiguousWorkflowMethodException>(()=> WorkflowEventMethods.For(new TestClassWithMultipleMethods()).FindFor(_eventName));
@@ -287,6 +302,21 @@ namespace Guflow.Tests
             {
             }
 
+        }
+
+        private class MethodWithNonExistingArgument : Workflow
+        {
+            [WorkflowEvent(_eventName)]
+            public void TestMethod(string notExistString, long notExistLong, bool notExistBool)
+            {
+                NotExistString = notExistString;
+                NotExistLong = notExistLong;
+                NotExistBool = notExistBool;
+            }
+
+            public string NotExistString { get; private set; }
+            public long NotExistLong { get; private set; }
+            public bool NotExistBool { get; private set; }
         }
 
         private class TestClassWithMultipleMethods : Workflow

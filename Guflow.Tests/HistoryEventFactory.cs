@@ -628,7 +628,6 @@ namespace Guflow.Tests
                 }
             };
         }
-
         public static HistoryEvent CreateWorkflowCancelRequestFailedEvent(string cause)
         {
             var eventIds = EventIds.NewEventIds;
@@ -637,6 +636,19 @@ namespace Guflow.Tests
                 EventId = eventIds.CompletedId,
                 EventType = EventType.RequestCancelExternalWorkflowExecutionFailed,
                 RequestCancelExternalWorkflowExecutionFailedEventAttributes = new RequestCancelExternalWorkflowExecutionFailedEventAttributes()
+                {
+                    Cause = cause,
+                }
+            };
+        }
+        public static HistoryEvent CreateWorkflowCancellationFailedEvent(string cause)
+        {
+            var eventIds = EventIds.NewEventIds;
+            return new HistoryEvent
+            {
+                EventId = eventIds.CompletedId,
+                EventType = EventType.CancelWorkflowExecutionFailed,
+                CancelWorkflowExecutionFailedEventAttributes = new CancelWorkflowExecutionFailedEventAttributes()
                 {
                     Cause = cause,
                 }

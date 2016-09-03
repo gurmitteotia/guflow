@@ -102,7 +102,10 @@ namespace Guflow
         {
             return historyEvent.EventType == EventType.RequestCancelExternalWorkflowExecutionFailed;
         }
-
+        private static bool IsWorkflowCancellationFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.CancelWorkflowExecutionFailed;
+        }
         private static bool IsTimerFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.StartTimerFailed;
@@ -160,6 +163,8 @@ namespace Guflow
                 return new WorkflowSignalFailedEvent(historyEvent);
             if (historyEvent.IsWorkflowCancelRequestFailedEvent())
                 return new WorkflowCancelRequestFailedEvent(historyEvent);
+            if (historyEvent.IsWorkflowCancellationFailedEvent())
+                return new WorkflowCancellationFailedEvent(historyEvent);
             return null;
         }
 

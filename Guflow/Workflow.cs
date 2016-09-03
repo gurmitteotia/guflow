@@ -128,23 +128,31 @@ namespace Guflow
                 : workflowEventMethod.Invoke(workflowCancelRequestFailedEvent);
         }
 
+        public WorkflowAction OnWorkflowCancellationFailed(WorkflowCancellationFailedEvent workflowCancellationFailedEvent)
+        {
+            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CancellationFailed);
+            return workflowEventMethod == null
+                ? FailWorkflow("FAILED_TO_CANCEL_WORKFLOW", workflowCancellationFailedEvent.Cause)
+                : workflowEventMethod.Invoke(workflowCancellationFailedEvent);
+        }
+
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
-            Ensure.NotNullAndEmpty(name,"name");
-            Ensure.NotNullAndEmpty(version,"version");
+            Ensure.NotNullAndEmpty(name, "name");
+            Ensure.NotNullAndEmpty(version, "version");
 
-            var activityItem = new ActivityItem(Identity.New(name,version, positionalName),this);
-            if(!_allWorkflowItems.Add(activityItem))
-                throw new DuplicateItemException(string.Format(Resources.Duplicate_activity,name,version,positionalName));
+            var activityItem = new ActivityItem(Identity.New(name, version, positionalName), this);
+            if (!_allWorkflowItems.Add(activityItem))
+                throw new DuplicateItemException(string.Format(Resources.Duplicate_activity, name, version, positionalName));
             return activityItem;
         }
         protected IFluentTimerItem ScheduleTimer(string name)
         {
             Ensure.NotNullAndEmpty(name, "name");
 
-            var timerItem = new TimerItem(Identity.Timer(name),this);
-            if(!_allWorkflowItems.Add(timerItem))
-                throw new DuplicateItemException(string.Format(Resources.Duplicate_timer,name));
+            var timerItem = new TimerItem(Identity.Timer(name), this);
+            if (!_allWorkflowItems.Add(timerItem))
+                throw new DuplicateItemException(string.Format(Resources.Duplicate_timer, name));
 
             return timerItem;
         }
@@ -181,12 +189,12 @@ namespace Guflow
         {
             return WorkflowAction.Ignore;
         }
-        protected ScheduleWorkflowItemAction JumpToActivity(string name, string version, string positionalName="")
+        protected ScheduleWorkflowItemAction JumpToActivity(string name, string version, string positionalName = "")
         {
-            Ensure.NotNullAndEmpty(name,"name");
-            Ensure.NotNullAndEmpty(version,"version");
+            Ensure.NotNullAndEmpty(name, "name");
+            Ensure.NotNullAndEmpty(version, "version");
 
-            var activityItem = FindActivityFor(Identity.New(name,version,positionalName));
+            var activityItem = FindActivityFor(Identity.New(name, version, positionalName));
             return WorkflowAction.Schedule(activityItem);
         }
         protected WorkflowAction JumpToTimer(string name)
@@ -196,7 +204,7 @@ namespace Guflow
             var activityItem = FindTimerFor(Identity.Timer(name));
             return WorkflowAction.Schedule(activityItem);
         }
-        protected WorkflowAction CancelActivity(string name, string version, string positionalName="")
+        protected WorkflowAction CancelActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name, "name");
             Ensure.NotNullAndEmpty(version, "version");
@@ -212,14 +220,14 @@ namespace Guflow
             return WorkflowAction.Cancel(timerItem);
         }
 
-        protected WorkflowAction CancelRequest(string workflowId, string runId=null)
+        protected WorkflowAction CancelRequest(string workflowId, string runId = null)
         {
             Ensure.NotNullAndEmpty(workflowId, "workflowId");
             return WorkflowAction.CancelWorkflowRequest(workflowId, runId);
         }
         protected IActivityItem ActivityOf(WorkflowItemEvent activityEvent)
         {
-            Ensure.NotNull(activityEvent,"activityEvent");
+            Ensure.NotNull(activityEvent, "activityEvent");
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(activityEvent.IsFor);
         }
         protected ITimerItem TimerOf(WorkflowItemEvent activityEvent)
@@ -238,20 +246,20 @@ namespace Guflow
         }
         protected IEnumerable<MarkerRecordedEvent> AllMarkerEvents
         {
-            get { return ((IWorkflow) this).CurrentHistoryEvents.AllMarkerRecordedEvents(); }
+            get { return ((IWorkflow)this).CurrentHistoryEvents.AllMarkerRecordedEvents(); }
         }
         protected IEnumerable<WorkflowSignaledEvent> AllSignalEvents
         {
-            get { return ((IWorkflow)this).CurrentHistoryEvents.AllSignalEvents() ; }
+            get { return ((IWorkflow)this).CurrentHistoryEvents.AllSignalEvents(); }
         }
         protected IEnumerable<WorkflowCancellationRequestedEvent> AllCancellationRequestedEvents
         {
             get { return ((IWorkflow)this).CurrentHistoryEvents.AllWorkflowCancellationRequestedEvents(); }
-        } 
+        }
         protected Signal Signal(string signalName, object input)
         {
-            Ensure.NotNullAndEmpty(signalName,"signalName");
-            return new Signal(signalName,input);
+            Ensure.NotNullAndEmpty(signalName, "signalName");
+            return new Signal(signalName, input);
         }
         IEnumerable<WorkflowItem> IWorkflowItems.GetStartupWorkflowItems()
         {
@@ -269,20 +277,20 @@ namespace Guflow
         {
             get
             {
-                if(_currentworkflowHistoryEvents==null)
+                if (_currentworkflowHistoryEvents == null)
                     throw new InvalidOperationException("Current history events can be accessed only when workflow is executing.");
                 return _currentworkflowHistoryEvents;
             }
         }
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
         {
-            if(proposal && IsActive)
+            if (proposal && IsActive)
                 return WorkflowAction.Ignore;
             return DuringCompletion(result);
         }
         WorkflowAction IWorkflowClosingActions.OnFailure(string reason, string details)
         {
-            return DuringFailure(reason,details);
+            return DuringFailure(reason, details);
         }
         WorkflowAction IWorkflowClosingActions.OnCancellation(string details)
         {
@@ -294,7 +302,7 @@ namespace Guflow
         }
         protected virtual WorkflowAction DuringFailure(string reason, string detail)
         {
-            return FailWorkflow(reason,detail);
+            return FailWorkflow(reason, detail);
         }
         protected virtual WorkflowAction DuringCancellation(string details)
         {
@@ -320,9 +328,9 @@ namespace Guflow
             var workflowClosingDecisions = compatibleWorkflows.OfType<WorkflowClosingDecision>();
             if (workflowClosingDecisions.Any())
                 return workflowClosingDecisions.GenerateFinalDecisionsFor(this);
-            
+
             return compatibleWorkflows;
-        } 
+        }
         private ActivityItem FindActivity(Identity identity)
         {
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
@@ -349,7 +357,7 @@ namespace Guflow
             var workflowActivity = FindActivity(workflowItemEvent);
 
             if (workflowActivity == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find activity for event {0}.", workflowItemEvent ));
+                throw new IncompatibleWorkflowException(string.Format("Can not find activity for event {0}.", workflowItemEvent));
 
             return workflowActivity;
         }

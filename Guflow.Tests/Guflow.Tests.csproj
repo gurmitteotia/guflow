@@ -71,6 +71,7 @@
     <Compile Include="CancelTimerDecisionTests.cs" />
     <Compile Include="CancelWorkflowActionTests.cs" />
     <Compile Include="CancelWorkflowDecisionTests.cs" />
+    <Compile Include="WorkflowCancellationFailedEventTests.cs" />
     <Compile Include="CancelWorkflowItemActionTests.cs" />
     <Compile Include="CompleteWorkflowActionTests.cs" />
     <Compile Include="CompleteWorkflowDecisionTests.cs" />

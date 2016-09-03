@@ -90,6 +90,7 @@
     <Compile Include="CancelRequestWorkflowDecision.cs" />
     <Compile Include="EventName.cs" />
     <Compile Include="InvalidMethodSignatureException.cs" />
+    <Compile Include="WorkflowCancellationFailedEvent.cs" />
     <Compile Include="WorkflowCancelRequestFailedEvent.cs" />
     <Compile Include="WorkflowCompletionFailedEvent.cs" />
     <Compile Include="WorkflowEventAttribute.cs" />
