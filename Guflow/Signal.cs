@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Guflow
+﻿namespace Guflow
 {
     public class Signal
     {
@@ -13,7 +11,7 @@ namespace Guflow
             _input = input.ToAwsString();
         }
        
-        public WorkflowAction SendTo(string workflowId, string runId)
+        public WorkflowAction ForWorkflow(string workflowId, string runId)
         {
             Ensure.NotNullAndEmpty(workflowId,"workflowId");
             return WorkflowAction.Signal(_signalName, _input, workflowId, runId);

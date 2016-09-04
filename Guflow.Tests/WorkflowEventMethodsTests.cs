@@ -1,5 +1,4 @@
 ﻿using System;
-using Amazon.SimpleWorkflow;
 using Guflow.Tests.TestWorkflows;
 using Moq;
 using NUnit.Framework;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Guflow.Properties;
 
 namespace Guflow
 {
@@ -195,6 +196,14 @@ namespace Guflow
         }
         internal override WorkflowDecision GetCancelDecision()
         {
+            var lastEvent = LastEvent;
+            if( lastEvent==null || !lastEvent.IsActive)
+                throw new ActivityNotActiveException(string.Format(Resources.Activity_not_active,Identity));
+            var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(RescheduleTimerItem);
+            
+            if (lastEvent==latestTimerEvent)
+                return RescheduleTimerItem.GetCancelDecision();
+
             return new CancelActivityDecision(Identity);
         }
         internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)

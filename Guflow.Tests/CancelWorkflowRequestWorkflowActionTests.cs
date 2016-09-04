@@ -40,7 +40,7 @@ namespace Guflow.Tests
         {
             public WorkflowToReturnCancelRequest(string workflowId, string runid)
             {
-                ScheduleTimer("timer1").OnFired(e => CancelRequest(workflowId, runid));
+                ScheduleTimer("timer1").OnFired(e => CancelRequest.ForWorkflow(workflowId, runid));
             }
         }
     }

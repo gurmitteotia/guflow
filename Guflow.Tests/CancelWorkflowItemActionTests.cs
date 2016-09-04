@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Moq;
 using NUnit.Framework;
 
@@ -10,19 +13,30 @@ namespace Guflow.Tests
         private const string _activityName = "Download";
         private const string _activityVersion = "1.0";
         private const string _positionalName = "First";
+        private Mock<IWorkflow> _workflow;
+
+        [SetUp]
+        public void Setup()
+        {
+            _workflow = new Mock<IWorkflow>();
+            _workflow.SetupGet(w => w.CurrentHistoryEvents)
+                .Returns(new WorkflowHistoryEvents(new[] {new HistoryEvent()}));
+        }
+
         [Test]
         public void Equality_tests()
         {
-            var workflowItem1 = new TimerItem(Identity.Timer("TimerName"),new Mock<IWorkflow>().Object);
-            var workflowItem2 = new TimerItem(Identity.Timer("TimerName2"),new Mock<IWorkflow>().Object);
+            var workflowItem1 = new TimerItem(Identity.Timer("TimerName"),_workflow.Object);
+            var workflowItem2 = new TimerItem(Identity.Timer("TimerName2"),_workflow.Object);
             Assert.That(WorkflowAction.Cancel(workflowItem1).Equals(WorkflowAction.Cancel(workflowItem1)));
             Assert.False(WorkflowAction.Cancel(workflowItem1).Equals(WorkflowAction.Cancel(workflowItem2)));
         }
 
         [Test]
-        public void Should_return_cancel_timer_decision_for_timer_item()
+        public void Returns_cancel_timer_decision_for_timer_item_when_it_is_active()
         {
-            var timerItem =new TimerItem(Identity.Timer("TimerName"), new Mock<IWorkflow>().Object);
+            SetupWorkflowToReturns(HistoryEventFactory.CreateTimerStartedEventGraph(Identity.Timer("TimerName"),TimeSpan.FromSeconds(2)));
+            var timerItem =new TimerItem(Identity.Timer("TimerName"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(timerItem);
 
             var decisions = workflowAction.GetDecisions();
@@ -31,18 +45,58 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Should_return_cancel_activity_decision_for_activity_item()
+        public void Throws_exception_when_timer_being_cancelled_is_not_active()
         {
-            var activityItem = new ActivityItem(Identity.New("_timerName","ver","pos"), new Mock<IWorkflow>().Object);
+            SetupWorkflowToReturns(HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("TimerName"), TimeSpan.FromSeconds(2)));
+            var timerItem = new TimerItem(Identity.Timer("TimerName"), _workflow.Object);
+            
+            Assert.Throws<TimerNotActiveException>(()=> WorkflowAction.Cancel(timerItem));
+        }
+
+        [Test]
+        public void Returns_cancel_activity_decision_for_activity_item_when_activity_is_active()
+        {
+            SetupWorkflowToReturns(HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New("activityName1", "ver"),"id"));
+            var activityItem = new ActivityItem(Identity.New("activityName1","ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
             var decisions = workflowAction.GetDecisions();
 
-            Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("_timerName", "ver", "pos")) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver")) }));
         }
 
         [Test]
-        public void Can_be_returned_as_cancelled_activity_action_from_workflow()
+        public void Returns_cancel_timer_decision_for_activity_item_when_reschedule_timer_is_active()
+        {
+            SetupWorkflowToReturns(HistoryEventFactory.CreateTimerStartedEventGraph(Identity.New("activityName1","ver"),TimeSpan.FromSeconds(2),true));
+            var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
+            var workflowAction = WorkflowAction.Cancel(activityItem);
+
+            var decisions = workflowAction.GetDecisions();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(Identity.New("activityName1", "ver")) }));
+        }
+
+        [Test]
+        public void Throws_exception_when_cancelled_being_cancelled_is_not_active()
+        {
+            SetupWorkflowToReturns(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activityName1", "ver"),"result","input"));
+            var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
+            
+            Assert.Throws<ActivityNotActiveException>(()=> WorkflowAction.Cancel(activityItem));
+        }
+
+        [Test]
+        public void Throws_exception_when_no_events_are_found_for_activity()
+        {
+            SetupWorkflowToReturns(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("Adifferentactivity", "ver"), "result", "input"));
+            var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
+
+            Assert.Throws<ActivityNotActiveException>(() => WorkflowAction.Cancel(activityItem));
+        }
+
+        [Test]
+        public void Cancel_request_for_activity_can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnCancelActivityAction();
             var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
@@ -53,7 +107,7 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Can_be_returned_as_cancelled_timer_action_from_workflow()
+        public void Cancel_request_for_timer_can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnCancelledTimerAction();
             var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
@@ -73,14 +127,19 @@ namespace Guflow.Tests
             public WorkflowToReturnCancelActivityAction()
             {
                 ScheduleActivity("ActivityToCancel", "1.2");
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelActivity("ActivityToCancel", "1.2"));
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelRequest.ForActivity("ActivityToCancel", "1.2"));
             }
+        }
+
+        private void SetupWorkflowToReturns(IEnumerable<HistoryEvent> historyEvents)
+        {
+            _workflow.SetupGet(w => w.CurrentHistoryEvents).Returns(new WorkflowHistoryEvents(historyEvents));
         }
         private class WorkflowToReturnCancelledTimerAction : Workflow
         {
             public WorkflowToReturnCancelledTimerAction()
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelTimer("SomeTimer"));
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelRequest.ForTimer("SomeTimer"));
                 ScheduleTimer("SomeTimer");
             }
         }

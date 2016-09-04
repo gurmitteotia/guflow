@@ -8,24 +8,6 @@ namespace Guflow.Tests
     public class SignalWorkflowActionTests
     {
         [Test]
-        public void Signal_retuns_signal_workflow_action()
-        {
-            var signalAction = new Signal("name", "input");
-
-            var workflowAction =signalAction.SendTo("id", "runid");
-
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Signal("name","input","id","runid")));
-        }
-
-        [Test]
-        public void Invalid_arguments_tests()
-        {
-            var signalAction = new Signal("name", "input");
-            Assert.Throws<ArgumentException>(() => signalAction.SendTo(null, "runid"));
-            Assert.Throws<ArgumentNullException>(() => signalAction.ReplyTo(null));
-        }
-
-        [Test]
         public void Returns_signal_workflow_decision()
         {
             var signalAction = WorkflowAction.Signal("name", "input", "id", "runid");
@@ -49,7 +31,7 @@ namespace Guflow.Tests
         {
             public WorkflowToReturnSignal(string name, string input, string workflowId, string runid)
             {
-                ScheduleTimer("timer1").OnFired(e => Signal(name, input).SendTo(workflowId, runid));
+                ScheduleTimer("timer1").OnFired(e => Signal(name, input).ForWorkflow(workflowId, runid));
             }
         }
     }

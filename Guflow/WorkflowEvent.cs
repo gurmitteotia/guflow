@@ -16,6 +16,8 @@ namespace Guflow
     
         public int CompareTo(WorkflowEvent other)
         {
+            if (other == null)
+                return 1;
             return _eventId.CompareTo(other._eventId);
         }
 
@@ -25,15 +27,16 @@ namespace Guflow
         }
         private bool Equals(WorkflowEvent other)
         {
+            if (ReferenceEquals(null, other)) return false;
             return _eventId == other._eventId;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object other)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((WorkflowEvent)obj);
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            if (other.GetType() != this.GetType()) return false;
+            return Equals((WorkflowEvent)other);
         }
 
         public override int GetHashCode()
@@ -43,34 +46,46 @@ namespace Guflow
 
         public static bool operator ==(WorkflowEvent left, WorkflowEvent right)
         {
-            return Equals(left, right);
+            if (ReferenceEquals(left, null) && ReferenceEquals(right, null))
+                return true;
+            if (ReferenceEquals(left, null))
+                return false;
+            return left.Equals(right);
         }
 
         public static bool operator >=(WorkflowEvent left, WorkflowEvent right)
         {
-            return left.CompareTo(right)>=0;
+            return IdComparer.Compare(left,right) >= 0;
         }
         public static bool operator >(WorkflowEvent left, WorkflowEvent right)
         {
-            return left.CompareTo(right) >0;
+            return IdComparer.Compare(left, right) > 0;
         }
         public static bool operator <=(WorkflowEvent left, WorkflowEvent right)
         {
-            return left.CompareTo(right)<=0;
+            return IdComparer.Compare(left, right) <= 0;
         }
         public static bool operator <(WorkflowEvent left, WorkflowEvent right)
         {
-            return left.CompareTo(right) < 0;
+            return IdComparer.Compare(left, right) < 0;
         }
         public static bool operator !=(WorkflowEvent left, WorkflowEvent right)
         {
-            return !Equals(left, right);
+            if (ReferenceEquals(left, null) && ReferenceEquals(right, null))
+                return false;
+            if (ReferenceEquals(left, null))
+                return true;
+            return !left.Equals(right);
         }
 
         private class EventIdComparer : IComparer<WorkflowEvent> 
         {
             public int Compare(WorkflowEvent first, WorkflowEvent second)
             {
+                if (first == null && second == null)
+                    return 0;
+                if (first == null)
+                    return -1;
                 return first.CompareTo(second);
             }
         }
