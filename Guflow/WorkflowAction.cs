@@ -45,6 +45,10 @@ namespace Guflow
         {
             return new GenericWorkflowAction(workflowItem.GetCancelDecision());
         }
+        internal static WorkflowAction Cancel(IEnumerable<WorkflowItem> workflowItems)
+        {
+            return new CancelItemsWorkflowAction(workflowItems);
+        }
         internal static WorkflowAction Signal(string signalName, string input,string workflowId, string runId)
         {
             return new GenericWorkflowAction(new SignalWorkflowDecision(signalName,input,workflowId,runId));
@@ -95,6 +99,20 @@ namespace Guflow
             }
         }
 
+        private class CancelItemsWorkflowAction : WorkflowAction
+        {
+            private readonly IEnumerable<WorkflowItem> _workflowItems;
+
+            public CancelItemsWorkflowAction(IEnumerable<WorkflowItem> workflowItems)
+            {
+                _workflowItems = workflowItems;
+            }
+
+            internal override IEnumerable<WorkflowDecision> GetDecisions()
+            {
+                return _workflowItems.Select(w => w.GetCancelDecision());
+            }
+        }
         private class CompositeWorkflowAction : WorkflowAction
         {
             private readonly WorkflowAction _left;

@@ -1,4 +1,7 @@
-﻿namespace Guflow
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Guflow
 {
     public class CancelRequest
     {
@@ -26,6 +29,12 @@
         {
             Ensure.NotNullAndEmpty(workflowId, "workflowId");
             return WorkflowAction.CancelWorkflowRequest(workflowId, runId);
+        }
+
+        public WorkflowAction For(IEnumerable<IWorkflowItem> workflowItems)
+        {
+            Ensure.NotNull(workflowItems, "workflowItems");
+            return WorkflowAction.Cancel(workflowItems.OfType<WorkflowItem>());
         }
     }
 }

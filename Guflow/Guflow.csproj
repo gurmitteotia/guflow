@@ -82,7 +82,6 @@
     <Compile Include="ActivityEvent.cs" />
     <Compile Include="ActivityFailedEvent.cs" />
     <Compile Include="ActivityItem.cs" />
-    <Compile Include="ActivityNotActiveException.cs" />
     <Compile Include="ActivityScheduledEvent.cs" />
     <Compile Include="ActivitySchedulingFailedEvent.cs" />
     <Compile Include="ActivityStartedEvent.cs" />
@@ -90,9 +89,9 @@
     <Compile Include="AmbiguousWorkflowMethodException.cs" />
     <Compile Include="CancelRequest.cs" />
     <Compile Include="CancelRequestWorkflowDecision.cs" />
+    <Compile Include="CyclicDependencyException.cs" />
     <Compile Include="EventName.cs" />
     <Compile Include="InvalidMethodSignatureException.cs" />
-    <Compile Include="TimerNotActiveException.cs" />
     <Compile Include="WorkflowCancellationFailedEvent.cs" />
     <Compile Include="WorkflowCancelRequestFailedEvent.cs" />
     <Compile Include="WorkflowCompletionFailedEvent.cs" />
@@ -156,6 +155,7 @@
     <Compile Include="WorkflowCancellationRequestedEvent.cs" />
     <Compile Include="WorkflowClosingDecision.cs" />
     <Compile Include="WorkflowDecisionExtension.cs" />
+    <Compile Include="WorkflowExecution.cs" />
     <Compile Include="WorkflowFailureFailedEvent.cs" />
     <Compile Include="WorkflowItem.cs" />
     <Compile Include="ScheduleActivityDecision.cs" />

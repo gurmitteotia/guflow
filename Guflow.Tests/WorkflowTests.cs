@@ -32,6 +32,12 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void Throws_exception_when_scheduling_activity_depends_on_itself()
+        {
+            Assert.Throws<CyclicDependencyException>(() => new WorkflowWithActivityToParentItself());
+        }
+
+        [Test]
         public void Activityof_test()
         {
             var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("Activity1", "1.0"), "id", "result");
@@ -61,7 +67,7 @@ namespace Guflow.Tests
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete", true) });
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("complete") }));
         }
@@ -73,7 +79,7 @@ namespace Guflow.Tests
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new WorkflowDecision[] { new CompleteWorkflowDecision("complete", true),
                                                                                 new ScheduleActivityDecision(Identity.New("something","1.0"))});
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New("something", "1.0")) }));
         }
@@ -85,7 +91,7 @@ namespace Guflow.Tests
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CompleteWorkflowDecision("complete", true),
                                                                                 new CompleteWorkflowDecision("complete3")}));
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("complete3") }));
         }
@@ -96,7 +102,7 @@ namespace Guflow.Tests
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CompleteWorkflowDecision("complete") }));
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("complete") }));
         }
@@ -107,7 +113,7 @@ namespace Guflow.Tests
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new FailWorkflowDecision("reason", "detail") }));
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new FailWorkflowDecision("reason", "detail") }));
         }
@@ -118,7 +124,7 @@ namespace Guflow.Tests
             var workflow = new StubWorkflow();
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(AllNonCompletingDecisions().Concat(new[] { new CancelWorkflowDecision("detail") }));
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CancelWorkflowDecision("detail") }));
         }
@@ -135,7 +141,7 @@ namespace Guflow.Tests
                 new FailWorkflowDecision("reason","detail"), 
             });
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new FailWorkflowDecision("reason", "detail") }));
         }
@@ -150,7 +156,7 @@ namespace Guflow.Tests
                 new CancelWorkflowDecision("detail"),
             });
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CancelWorkflowDecision("detail") }));
         }
@@ -165,7 +171,7 @@ namespace Guflow.Tests
                 new CompleteWorkflowDecision("result2",true),
             });
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result") }));
         }
@@ -180,7 +186,7 @@ namespace Guflow.Tests
                 new CompleteWorkflowDecision("result2",true),
             });
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { workflowDecision.Object }));
         }
@@ -195,7 +201,7 @@ namespace Guflow.Tests
                 new FailWorkflowDecision("reason","detail"), 
             });
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { workflowDecision.Object }));
         }
@@ -210,7 +216,7 @@ namespace Guflow.Tests
                 new CancelWorkflowDecision("detail"), 
             });
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { workflowDecision.Object }));
         }
@@ -223,7 +229,7 @@ namespace Guflow.Tests
                 new CompleteWorkflowDecision("result2",true),
             });
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.Empty);
         }
@@ -234,7 +240,7 @@ namespace Guflow.Tests
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete", true) });
             _workflowHistoryEvents.Setup(h => h.IsActive()).Returns(true);
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.Empty);
         }
@@ -246,7 +252,7 @@ namespace Guflow.Tests
             _workflowHistoryEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete"), WorkflowDecision.Empty });
             _workflowHistoryEvents.Setup(h => h.IsActive()).Returns(true);
 
-            var workflowDecisions = workflow.ExecuteFor(_workflowHistoryEvents.Object);
+            var workflowDecisions = workflow.NewExecutionFor(_workflowHistoryEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[]{new CompleteWorkflowDecision("complete")}));
         }
@@ -276,6 +282,13 @@ namespace Guflow.Tests
             {
                 ScheduleActivity("Download", "1.0");
                 ScheduleActivity("Download", "1.0");
+            }
+        }
+        private class WorkflowWithActivityToParentItself : Workflow
+        {
+            public WorkflowWithActivityToParentItself()
+            {
+                ScheduleActivity("Download", "1.0").After("Download", "1.0");
             }
         }
         private class WorkflowWithSameTimer : Workflow

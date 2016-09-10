@@ -106,6 +106,8 @@ namespace Guflow
             var parentItem = _workflow.Find(identity);
             if (parentItem == null)
                 throw new ParentItemMissingException(string.Format(Resources.Schedulable_item_missing, identity));
+            if(Equals(parentItem))
+                throw new CyclicDependencyException(string.Format(Resources.Cyclic_dependency, identity));
             _parentItems.Add(parentItem);
         }
 

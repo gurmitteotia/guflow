@@ -217,6 +217,9 @@ namespace Guflow
             Ensure.NotNull(activityEvent, "activityEvent");
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(activityEvent.IsFor);
         }
+        protected IEnumerable<IWorkflowItem> AllWorkflowItems { get { return _allWorkflowItems; } }
+        protected IEnumerable<IWorkflowItem> AllActivities { get { return _allWorkflowItems.OfType<IActivityItem>(); } }
+        protected IEnumerable<IWorkflowItem> AllTimers { get { return _allWorkflowItems.OfType<ITimerItem>(); } }
         protected bool IsActive
         {
             get { return ((IWorkflow)this).CurrentHistoryEvents.IsActive(); }
@@ -298,28 +301,16 @@ namespace Guflow
         {
             return CancelWorkflow(details);
         }
-        internal IEnumerable<WorkflowDecision> ExecuteFor(IWorkflowHistoryEvents workflowHistoryEvents)
+
+        internal WorkflowEventsExecution NewExecutionFor(IWorkflowHistoryEvents workflowHistoryEvents)
         {
-            try
-            {
-                _currentworkflowHistoryEvents = workflowHistoryEvents;
-                var workflowDecisions = workflowHistoryEvents.InterpretNewEventsFor(this);
-                return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
-            }
-            finally
-            {
-                _currentworkflowHistoryEvents = null;
-            }
+            _currentworkflowHistoryEvents = workflowHistoryEvents;
+            return new WorkflowEventsExecution(this, workflowHistoryEvents);
         }
-        private IEnumerable<WorkflowDecision> FilterOutIncompatibleDecisions(IEnumerable<WorkflowDecision> workflowDecisions)
+
+        internal void FinishExecution()
         {
-            var compatibleWorkflows = workflowDecisions.Where(d => !d.IsIncompaitbleWith(workflowDecisions.Where(f => !f.Equals(d)))).ToArray();
-
-            var workflowClosingDecisions = compatibleWorkflows.OfType<WorkflowClosingDecision>();
-            if (workflowClosingDecisions.Any())
-                return workflowClosingDecisions.GenerateFinalDecisionsFor(this);
-
-            return compatibleWorkflows;
+            _currentworkflowHistoryEvents = null;
         }
         private ActivityItem FindActivity(Identity identity)
         {

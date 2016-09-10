@@ -61,11 +61,11 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Activity {0} is not active. For an activity to be cancelled it should be active in SWF..
+        ///   Looks up a localized string similar to Workflow item {0} depends on itself.
         /// </summary>
-        internal static string Activity_not_active {
+        internal static string Cyclic_dependency {
             get {
-                return ResourceManager.GetString("Activity_not_active", resourceCulture);
+                return ResourceManager.GetString("Cyclic_dependency", resourceCulture);
             }
         }
         
@@ -120,15 +120,6 @@ namespace Guflow.Properties {
         internal static string Schedulable_item_missing {
             get {
                 return ResourceManager.GetString("Schedulable_item_missing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Timer {0} is not active. For a timer to be cancelled it should be active in SWF..
-        /// </summary>
-        internal static string Timer_not_active {
-            get {
-                return ResourceManager.GetString("Timer_not_active", resourceCulture);
             }
         }
     }

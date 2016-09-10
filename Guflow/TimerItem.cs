@@ -97,10 +97,6 @@ namespace Guflow
         }
         internal override WorkflowDecision GetCancelDecision()
         {
-            var lastEvent = LastEvent;
-            if(lastEvent==null || !lastEvent.IsActive)
-                throw new TimerNotActiveException(string.Format(Resources.Timer_not_active,Identity));
-
             return new CancelTimerDecision(Identity);
         }
 
