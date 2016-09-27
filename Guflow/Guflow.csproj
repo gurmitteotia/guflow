@@ -94,7 +94,10 @@
     <Compile Include="InvalidMethodSignatureException.cs" />
     <Compile Include="WorkflowCancellationFailedEvent.cs" />
     <Compile Include="WorkflowCancelRequestFailedEvent.cs" />
+    <Compile Include="WorkflowClient.cs" />
     <Compile Include="WorkflowCompletionFailedEvent.cs" />
+    <Compile Include="WorkflowDeprecatedException.cs" />
+    <Compile Include="WorkflowDescriptionAttribute.cs" />
     <Compile Include="WorkflowEventAttribute.cs" />
     <Compile Include="WorkflowEventMethod.cs" />
     <Compile Include="WorkflowEventMethods.cs" />
@@ -139,7 +142,6 @@
     <Compile Include="RecordMarkerFailedEvent.cs" />
     <Compile Include="ScheduleActivityTimeouts.cs" />
     <Compile Include="ScheduleWorkflowItemAction.cs" />
-    <Compile Include="RuntimeActivityConfig.cs" />
     <Compile Include="ScheduleTimerDecision.cs" />
     <Compile Include="Signal.cs" />
     <Compile Include="SignalWorkflowDecision.cs" />
@@ -155,7 +157,7 @@
     <Compile Include="WorkflowCancellationRequestedEvent.cs" />
     <Compile Include="WorkflowClosingDecision.cs" />
     <Compile Include="WorkflowDecisionExtension.cs" />
-    <Compile Include="WorkflowExecution.cs" />
+    <Compile Include="WorkflowEventsExecution.cs" />
     <Compile Include="WorkflowFailureFailedEvent.cs" />
     <Compile Include="WorkflowItem.cs" />
     <Compile Include="ScheduleActivityDecision.cs" />

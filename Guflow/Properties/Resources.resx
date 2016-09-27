@@ -138,4 +138,7 @@
   <data name="Schedulable_item_missing" xml:space="preserve">
     <value>Can not find the schedulable item for {0}.</value>
   </data>
+  <data name="Workflow_deprecated" xml:space="preserve">
+    <value>Workflow name {0} and version {1} is deprecated. </value>
+  </data>
 </root>

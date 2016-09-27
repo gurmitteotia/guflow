@@ -122,5 +122,14 @@ namespace Guflow.Properties {
                 return ResourceManager.GetString("Schedulable_item_missing", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Workflow name {0} and version {1} is deprecated. .
+        /// </summary>
+        internal static string Workflow_deprecated {
+            get {
+                return ResourceManager.GetString("Workflow_deprecated", resourceCulture);
+            }
+        }
     }
 }
