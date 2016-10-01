@@ -22,21 +22,26 @@ namespace Guflow
             await Register(typeof(T));
         }
 
-        public async Task Register(Type workflowType)
+        public async Task Register(WorkflowDescription workflowDescription)
         {
-            var workflowDescription = WorkflowDescriptionAttribute.FindOn(workflowType);
-
-            var registeredWorkflowInfos = await ListWorkflowFromAmazonBy();
+            var registeredWorkflowInfos = await ListWorkflowFromAmazonBy(workflowDescription.Name, workflowDescription.Domain);
 
             var workflowToRegister = registeredWorkflowInfos.FirstOrDefault(w => w.WorkflowType.Version.Equals(workflowDescription.Version));
 
-            if(workflowToRegister!=null && workflowToRegister.Status==RegistrationStatus.DEPRECATED)
-                throw new WorkflowDeprecatedException(string.Format(Resources.Workflow_deprecated,workflowDescription.Name,workflowDescription.Version));
+            if (workflowToRegister != null && workflowToRegister.Status == RegistrationStatus.DEPRECATED)
+                throw new WorkflowDeprecatedException(string.Format(Resources.Workflow_deprecated, workflowDescription.Name, workflowDescription.Version));
 
-            await RegisterWorkflow(workflowDescription);
+            if (workflowToRegister == null)
+                await RegisterWorkflow(workflowDescription);
         }
 
-        private async Task RegisterWorkflow(WorkflowDescriptionAttribute workflowDescription)
+        public async Task Register(Type workflowType)
+        {
+            var workflowDescription = WorkflowDescriptionAttribute.FindOn(workflowType);
+            await Register(workflowDescription);
+        }
+
+        private async Task RegisterWorkflow(WorkflowDescription workflowDescription)
         {
             var registerRequest = new RegisterWorkflowTypeRequest()
             {
@@ -44,15 +49,23 @@ namespace Guflow
                 Version = workflowDescription.Version,
                 Description = workflowDescription.Description,
                 Domain = workflowDescription.Domain,
+                DefaultExecutionStartToCloseTimeout = workflowDescription.DefaultExecutionStartToCloseTimeout,
+                DefaultTaskList = new TaskList() { Name = workflowDescription.DefaultTaskListName},
+                DefaultTaskStartToCloseTimeout = workflowDescription.DefaultTaskStartToCloseTimeout,
+                DefaultChildPolicy = workflowDescription.DefaultChildPolicy,
+                DefaultLambdaRole = workflowDescription.DefaultLambdaRole,
+                DefaultTaskPriority = workflowDescription.DefaultTaskPriority.ToString()
             };
 
             await _amazonSimpleWorkflow.RegisterWorkflowTypeAsync(registerRequest);
         }
 
-        private async Task<IEnumerable<WorkflowTypeInfo>> ListWorkflowFromAmazonBy()
+        private async Task<IEnumerable<WorkflowTypeInfo>> ListWorkflowFromAmazonBy(string workflowName, string domainName)
         {
             var listRequest = new ListWorkflowTypesRequest();
-
+            listRequest.Name = workflowName;
+            listRequest.Domain = domainName;
+            listRequest.MaximumPageSize = 1000;
             var response = await _amazonSimpleWorkflow.ListWorkflowTypesAsync(listRequest);
             return response.WorkflowTypeInfos.TypeInfos;
         } 
