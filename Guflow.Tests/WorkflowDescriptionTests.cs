@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Configuration;
+using NUnit.Framework;
 
 namespace Guflow.Tests
 {
@@ -8,7 +9,7 @@ namespace Guflow.Tests
         [Test]
         public void Throws_exception_when_attribute_is_not_applied()
         {
-            Assert.Throws<AttributeMissingException>(() => WorkflowDescriptionAttribute.FindOn<WorkflowWithoutAttribute>());
+            Assert.Throws<WorkflowDescriptionMissingException>(() => WorkflowDescriptionAttribute.FindOn<WorkflowWithoutAttribute>());
         }
 
         [Test]
@@ -29,6 +30,12 @@ namespace Guflow.Tests
             Assert.That(workflowDescription.DefaultTaskStartToCloseTimeout, Is.EqualTo("0"));
         }
 
+        [Test]
+        public void Throws_exception_version_is_empty()
+        {
+            Assert.Throws<ConfigurationErrorsException>(() => WorkflowDescriptionAttribute.FindOn<WorkflowWithEmptyVersion>());
+        }
+
         private class WorkflowWithoutAttribute : Workflow
         {
         }
@@ -41,6 +48,12 @@ namespace Guflow.Tests
 
         [WorkflowDescription("1.0", DefaultExecutionStartToCloseTimeoutInSeconds = 10, DefaultTaskStartToCloseTimeoutInSeconds = 0)]
         private class WorkflowWitTimeoutSet : Workflow
+        {
+
+        }
+
+        [WorkflowDescription("")]
+        private class WorkflowWithEmptyVersion : Workflow
         {
 
         }

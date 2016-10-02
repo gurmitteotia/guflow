@@ -120,11 +120,17 @@
   <data name="Cyclic_dependency" xml:space="preserve">
     <value>Workflow item {0} depends on itself</value>
   </data>
+  <data name="Domain_name_missing" xml:space="preserve">
+    <value>Domain is missing.</value>
+  </data>
   <data name="Duplicate_activity" xml:space="preserve">
     <value>Activity with name {0}, version {1} and positional markerName {2} is already added to workflowClosingActions.</value>
   </data>
   <data name="Duplicate_timer" xml:space="preserve">
     <value>Timer with name {0} is already added to workflowClosingActions.</value>
+  </data>
+  <data name="Empty_version" xml:space="preserve">
+    <value>Version is empty.</value>
   </data>
   <data name="Invalid_parameter" xml:space="preserve">
     <value>Workflow method {0} has incompatible parameter {1}, which can not be deserialized from source event {2}</value>

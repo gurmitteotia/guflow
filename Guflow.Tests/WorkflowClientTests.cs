@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,6 +74,26 @@ namespace Guflow.Tests
             _amazonWorkflowClient.Verify(w=>w.RegisterWorkflowTypeAsync(It.IsAny<RegisterWorkflowTypeRequest>(),default(CancellationToken)),Times.Never);
         }
 
+        [Test]
+        public void Throws_exception_when_domain_name_is_missing()
+        {
+            Assert.Throws<ConfigurationErrorsException>(async () => await _workflowClient.Register<WorkflowWithoutDomain>());
+        }
+
+        [Test]
+        public async Task Override_domain_name_and_tasklist_name_with_workflow_clients_one_when_registering_the_workflow()
+        {
+            _workflowClient.Domain = "NewDomain";
+            _workflowClient.TaskListName = "NewTaskListName";
+            AmazonWorkflowReturnsEmptyListFor("TestWorkflow", "NewDomain");
+
+            await _workflowClient.Register<TestWorkflow>();
+
+            _descriptionForTestWorkflow.Domain = "NewDomain";
+            _descriptionForTestWorkflow.DefaultTaskListName = "NewTaskListName";
+            AssertThatAmazonIsSendRegistrationRequest(_descriptionForTestWorkflow);
+        }
+
         private void AmazonWorkflowReturns(params WorkflowTypeInfo [] workflowTypeInfos)
         {
             var listWorkflowTypeResponse = new ListWorkflowTypesResponse();
@@ -97,8 +118,6 @@ namespace Guflow.Tests
             _amazonWorkflowClient.Setup(a => a.ListWorkflowTypesAsync(It.IsAny<ListWorkflowTypesRequest>(), default(CancellationToken)))
                 .Returns(Task.FromResult(emptyListResponse)).Callback(requestedParameters);
         }
-
-
         private void AssertThatAmazonIsSendRegistrationRequest(WorkflowDescription attribute)
         {
             Func<RegisterWorkflowTypeRequest,bool> parameter = (r) =>
@@ -123,6 +142,12 @@ namespace Guflow.Tests
             Description = "desc",Domain = _domainName, DefaultTaskStartToCloseTimeoutInSeconds = 11, DefaultExecutionStartToCloseTimeoutInSeconds = 12)]
         private class TestWorkflow : Workflow
         {
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowWithoutDomain : Workflow
+        {
+            
         }
     }
 }

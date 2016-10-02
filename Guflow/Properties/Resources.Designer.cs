@@ -70,6 +70,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Domain is missing..
+        /// </summary>
+        internal static string Domain_name_missing {
+            get {
+                return ResourceManager.GetString("Domain_name_missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Activity with name {0}, version {1} and positional markerName {2} is already added to workflowClosingActions..
         /// </summary>
         internal static string Duplicate_activity {
@@ -84,6 +93,15 @@ namespace Guflow.Properties {
         internal static string Duplicate_timer {
             get {
                 return ResourceManager.GetString("Duplicate_timer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version is empty..
+        /// </summary>
+        internal static string Empty_version {
+            get {
+                return ResourceManager.GetString("Empty_version", resourceCulture);
             }
         }
         

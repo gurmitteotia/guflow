@@ -87,7 +87,8 @@
     <Compile Include="ActivityStartedEvent.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="AmbiguousWorkflowMethodException.cs" />
-    <Compile Include="AttributeMissingException.cs" />
+    <Compile Include="IWorkflowClient.cs" />
+    <Compile Include="WorkflowDescriptionMissingException.cs" />
     <Compile Include="CancelRequest.cs" />
     <Compile Include="CancelRequestWorkflowDecision.cs" />
     <Compile Include="CyclicDependencyException.cs" />
@@ -162,6 +163,7 @@
     <Compile Include="WorkflowDecisionExtension.cs" />
     <Compile Include="WorkflowEventsExecution.cs" />
     <Compile Include="WorkflowFailureFailedEvent.cs" />
+    <Compile Include="WorkflowHost.cs" />
     <Compile Include="WorkflowItem.cs" />
     <Compile Include="ScheduleActivityDecision.cs" />
     <Compile Include="ActivityScheduleData.cs" />

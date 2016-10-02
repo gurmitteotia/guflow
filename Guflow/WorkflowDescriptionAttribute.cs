@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Reflection;
 using Guflow.Properties;
 
@@ -12,7 +13,7 @@ namespace Guflow
 
         public WorkflowDescriptionAttribute(string version)
         {
-            Version = version;
+           Version = version;
         }
 
         public string Name { get; set; }
@@ -58,7 +59,10 @@ namespace Guflow
         {
             var workflowDescription = workflowType.GetCustomAttribute<WorkflowDescriptionAttribute>();
             if (workflowDescription == null)
-                throw new AttributeMissingException(string.Format(Resources.Workflow_attribute_missing, workflowType.Name));
+                throw new WorkflowDescriptionMissingException(string.Format(Resources.Workflow_attribute_missing, workflowType.Name));
+            
+            if (string.IsNullOrEmpty(workflowDescription.Version))
+                throw new ConfigurationErrorsException(Resources.Empty_version);
 
             if (string.IsNullOrEmpty(workflowDescription.Name))
                 workflowDescription.Name = workflowType.Name;

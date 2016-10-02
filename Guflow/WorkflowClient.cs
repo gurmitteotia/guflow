@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
@@ -9,13 +9,20 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    public class WorkflowClient
+    public class WorkflowClient : IWorkflowClient
     {
         private readonly IAmazonSimpleWorkflow _amazonSimpleWorkflow;
+
+        public WorkflowClient():this(new AmazonSimpleWorkflowClient())
+        {
+        }
         public WorkflowClient(IAmazonSimpleWorkflow amazonSimpleWorkflow)
         {
             _amazonSimpleWorkflow = amazonSimpleWorkflow;
         }
+
+        public string Domain { get; set; }
+        public string TaskListName { get; set; }
 
         public async Task Register<T>() where T: Workflow
         {
@@ -24,7 +31,8 @@ namespace Guflow
 
         public async Task Register(WorkflowDescription workflowDescription)
         {
-            var registeredWorkflowInfos = await ListWorkflowFromAmazonBy(workflowDescription.Name, workflowDescription.Domain);
+            Validate(workflowDescription);
+            var registeredWorkflowInfos = await ListWorkflowFromAmazonBy(workflowDescription.Name, DomainName(workflowDescription.Domain));
 
             var workflowToRegister = registeredWorkflowInfos.FirstOrDefault(w => w.WorkflowType.Version.Equals(workflowDescription.Version));
 
@@ -48,9 +56,9 @@ namespace Guflow
                 Name = workflowDescription.Name,
                 Version = workflowDescription.Version,
                 Description = workflowDescription.Description,
-                Domain = workflowDescription.Domain,
+                Domain = DomainName(workflowDescription.Domain),
                 DefaultExecutionStartToCloseTimeout = workflowDescription.DefaultExecutionStartToCloseTimeout,
-                DefaultTaskList = new TaskList() { Name = workflowDescription.DefaultTaskListName},
+                DefaultTaskList = TaskList(workflowDescription.DefaultTaskListName),
                 DefaultTaskStartToCloseTimeout = workflowDescription.DefaultTaskStartToCloseTimeout,
                 DefaultChildPolicy = workflowDescription.DefaultChildPolicy,
                 DefaultLambdaRole = workflowDescription.DefaultLambdaRole,
@@ -68,6 +76,30 @@ namespace Guflow
             listRequest.MaximumPageSize = 1000;
             var response = await _amazonSimpleWorkflow.ListWorkflowTypesAsync(listRequest);
             return response.WorkflowTypeInfos.TypeInfos;
-        } 
+        }
+
+        private void Validate(WorkflowDescription workflowDescription)
+        {
+            if(string.IsNullOrEmpty(workflowDescription.Domain)&& string.IsNullOrEmpty(Domain))
+                throw new ConfigurationErrorsException(Resources.Domain_name_missing);
+        }
+
+        private string DomainName(string defaultDomainName)
+        {
+            return string.IsNullOrEmpty(Domain) ? defaultDomainName : Domain;
+        }
+        private TaskList TaskList(string defaultTaskList)
+        {
+            if (!string.IsNullOrEmpty(TaskListName))
+                return new TaskList() {Name = TaskListName};
+            if (!string.IsNullOrEmpty(defaultTaskList))
+                return new TaskList() {Name = defaultTaskList};
+            return null;
+        }
+
+        public WorkflowHost CreateHostFor(Workflow workflow)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
