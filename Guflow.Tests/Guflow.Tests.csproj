@@ -73,6 +73,7 @@
     <Compile Include="CancelTimerDecisionTests.cs" />
     <Compile Include="CancelWorkflowActionTests.cs" />
     <Compile Include="CancelWorkflowDecisionTests.cs" />
+    <Compile Include="HostedWorkflowsTests.cs" />
     <Compile Include="SignalTests.cs" />
     <Compile Include="WorkflowCancellationFailedEventTests.cs" />
     <Compile Include="CancelWorkflowItemActionTests.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="WorkflowSignaledEventTests.cs" />
     <Compile Include="WorkflowSignalFailedEventTests.cs" />
     <Compile Include="WorkflowStartedEventTests.cs" />
+    <Compile Include="WorkflowTasksTests.cs" />
     <Compile Include="WorkflowTests.cs" />
   </ItemGroup>
   <ItemGroup>

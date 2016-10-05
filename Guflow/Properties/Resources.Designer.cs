@@ -142,6 +142,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Workflow name {0} and version {1} is already hosted..
+        /// </summary>
+        internal static string Workflow_already_hosted {
+            get {
+                return ResourceManager.GetString("Workflow_already_hosted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to WorkflowDescriptionAttribute is not applied on workflow {0}..
         /// </summary>
         internal static string Workflow_attribute_missing {
@@ -156,6 +165,15 @@ namespace Guflow.Properties {
         internal static string Workflow_deprecated {
             get {
                 return ResourceManager.GetString("Workflow_deprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Workflow name {0} and version {1} is not hosted..
+        /// </summary>
+        internal static string Workflow_not_hosted {
+            get {
+                return ResourceManager.GetString("Workflow_not_hosted", resourceCulture);
             }
         }
     }
