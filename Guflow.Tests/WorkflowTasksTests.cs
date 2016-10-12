@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Amazon.SimpleWorkflow;
+﻿using System.Collections.Generic;
 using Amazon.SimpleWorkflow.Model;
 using Moq;
 using NUnit.Framework;
@@ -9,21 +8,26 @@ namespace Guflow.Tests
     [TestFixture]
     public class WorkflowTasksTests
     {
-        private IWorkflowClient _workflowClient;
-        private Mock<IAmazonSimpleWorkflow> _amazonWorkflow;
+        private Mock<IWorkflowClient> _workflowClient;
         [SetUp]
         public void Setup()
         {
-            _amazonWorkflow = new Mock<IAmazonSimpleWorkflow>();
-            _workflowClient = new WorkflowClient(_amazonWorkflow.Object);
+            _workflowClient = new Mock<IWorkflowClient>();
         }
 
         [Test]
         public void Can_interpret_new_task_for_hosted_workflow()
         {
-            var decisionTask = new DecisionTask();
-            var hostedWorkflows = new HostedWorkflows();
-            var workflowTasks = new WorkflowTasks(decisionTask);
+            var decisionTask = new DecisionTask()
+            {
+                WorkflowType = new WorkflowType() {Name = "TestWorkflow", Version = "1.0"},
+                Events = new List<HistoryEvent>(),
+                PreviousStartedEventId = 10,
+                StartedEventId = 20,
+                TaskToken = "token"
+            };
+            var hostedWorkflows = new HostedWorkflows(new []{new TestWorkflow()});
+            var workflowTasks = new WorkflowTasks(decisionTask,_workflowClient.Object);
 
             workflowTasks.ExecuteFor(hostedWorkflows);
 
@@ -32,8 +36,8 @@ namespace Guflow.Tests
 
         private void AssertThatInterpretedDecisionsAreSentOverWorkflowClient()
         {
-            _amazonWorkflow.Verify(a=>a.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),It.IsAny<CancellationToken>())).
-                            
+            _workflowClient.Verify(w=>w.RespondWithDecisions("token",It.IsAny<IEnumerable<Decision>>()));
+
         }
 
         [WorkflowDescription("1.0")]

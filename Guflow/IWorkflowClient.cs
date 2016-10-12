@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
@@ -8,6 +10,6 @@ namespace Guflow
         Task Register<T>() where T: Workflow;
         Task Register(WorkflowDescription workflowDescription);
         Task Register(Type workflowType);
-        WorkflowHost CreateHostFor(Workflow workflow);
+        Task RespondWithDecisions(string taskToken, IEnumerable<Decision> decisions);
     }
 }

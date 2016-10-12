@@ -49,6 +49,11 @@ namespace Guflow
             await Register(workflowDescription);
         }
 
+        public Task RespondWithDecisions(string taskToken, IEnumerable<Decision> decisions)
+        {
+            throw new NotImplementedException();
+        }
+
         private async Task RegisterWorkflow(WorkflowDescription workflowDescription)
         {
             var registerRequest = new RegisterWorkflowTypeRequest()

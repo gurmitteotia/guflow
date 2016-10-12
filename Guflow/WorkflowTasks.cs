@@ -4,7 +4,7 @@ namespace Guflow
 {
     internal class WorkflowTasks
     {
-        public WorkflowTasks(DecisionTask decisionTask)
+        public WorkflowTasks(DecisionTask decisionTask, IWorkflowClient workflowClient)
         {
             throw new System.NotImplementedException();
         }
