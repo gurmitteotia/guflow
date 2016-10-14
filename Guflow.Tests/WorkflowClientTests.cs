@@ -94,6 +94,17 @@ namespace Guflow.Tests
             AssertThatAmazonIsSendRegistrationRequest(_descriptionForTestWorkflow);
         }
 
+        [Test]
+        public void Returns_empty_workflow_task_when_new_task_are_not_returned_from_amazon_swf()
+        {
+            _amazonWorkflowClient.Setup(c => c.PollForDecisionTask(It.IsAny<PollForDecisionTaskRequest>()))
+                .Returns(new PollForDecisionTaskResponse(){ DecisionTask = new DecisionTask()});
+
+            var workflowTask = _workflowClient.PollForNewTasks();
+
+            Assert.That(workflowTask,Is.EqualTo(WorkflowTasks.Empty));
+        }
+
         private void AmazonWorkflowReturns(params WorkflowTypeInfo [] workflowTypeInfos)
         {
             var listWorkflowTypeResponse = new ListWorkflowTypesResponse();

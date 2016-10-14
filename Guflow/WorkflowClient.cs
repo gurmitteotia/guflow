@@ -106,5 +106,10 @@ namespace Guflow
         {
             throw new NotImplementedException();
         }
+
+        public WorkflowTasks PollForNewTasks()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
