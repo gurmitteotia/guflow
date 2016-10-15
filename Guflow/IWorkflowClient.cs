@@ -11,5 +11,6 @@ namespace Guflow
         Task Register(WorkflowDescription workflowDescription);
         Task Register(Type workflowType);
         Task RespondWithDecisions(string taskToken, IEnumerable<Decision> decisions);
+        Task<WorkflowTasks> PollForNewTasks();
     }
 }

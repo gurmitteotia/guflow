@@ -95,16 +95,73 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Returns_empty_workflow_task_when_new_task_are_not_returned_from_amazon_swf()
+        public async Task Returns_empty_workflow_task_when_no_new_task_are_returned_from_amazon_swf()
         {
-            _amazonWorkflowClient.Setup(c => c.PollForDecisionTask(It.IsAny<PollForDecisionTaskRequest>()))
-                .Returns(new PollForDecisionTaskResponse(){ DecisionTask = new DecisionTask()});
+            AmazonSwfReturnsDecisionTask(new DecisionTask());
 
-            var workflowTask = _workflowClient.PollForNewTasks();
+            var workflowTasks = await _workflowClient.PollForNewTasks();
 
-            Assert.That(workflowTask,Is.EqualTo(WorkflowTasks.Empty));
+            Assert.That(workflowTasks,Is.EqualTo(WorkflowTasks.Empty));
         }
 
+        [Test]
+        public async Task Returns_non_empty_workflow_task_when_new_tasks_are_returned_from_amazon_swf()
+        {
+            AmazonSwfReturnsDecisionTask(new DecisionTask(){TaskToken = "token"});
+
+            var workflowTasks = await _workflowClient.PollForNewTasks();
+
+            Assert.That(workflowTasks, Is.Not.EqualTo(WorkflowTasks.Empty));
+        }
+
+        [Test]
+        public async Task Polling_for_new_tasks_makes_request_to_amazon_swf()
+        {
+            SetupAmazonSwfClientToMakeRequest();
+
+            await _workflowClient.PollForNewTasks();
+
+            _amazonWorkflowClient.Verify();
+            
+        }
+
+        [Test]
+        public async Task Polling_use_retreival_strategy_when_next_page_token_is_non_empty()
+        {
+            var decisionTask = new DecisionTask() {TaskToken = "token", NextPageToken = "nextpageToken"};
+            AmazonSwfReturnsDecisionTask(decisionTask);
+            var retreivalStrategy = new Mock<IHistoryEventRetreivalStrategy>();
+            retreivalStrategy.Setup(r => r.RetreiveEvents(decisionTask, _workflowClient)).Returns(new DecisionTask());
+            _workflowClient.EventRetreivalStrategy = retreivalStrategy.Object;
+
+            await _workflowClient.PollForNewTasks();
+
+            
+        }
+
+        private void AmazonSwfReturnsDecisionTask(DecisionTask decisionTask)
+        {
+            _amazonWorkflowClient.Setup(c => c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = decisionTask}));
+        }
+
+        private void SetupAmazonSwfClientToMakeRequest()
+        {
+            Func<PollForDecisionTaskRequest, bool> request = (r) =>
+            {
+                Assert.That(r.Identity, Is.EqualTo(_workflowClient.Identity));
+                Assert.That(r.Domain, Is.EqualTo(_workflowClient.Domain));
+                Assert.That(r.TaskList.Name, Is.EqualTo(_workflowClient.TaskListName));
+                Assert.That(r.MaximumPageSize, Is.EqualTo(1000));
+                Assert.That(r.ReverseOrder, Is.True);
+                Assert.That(r.NextPageToken, Is.Null.Or.Empty);
+                return true;
+            };
+
+            _amazonWorkflowClient.Setup(c => c.PollForDecisionTaskAsync(It.Is<PollForDecisionTaskRequest>(r=>request(r)), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = new DecisionTask() })).Verifiable();
+        }
+       
         private void AmazonWorkflowReturns(params WorkflowTypeInfo [] workflowTypeInfos)
         {
             var listWorkflowTypeResponse = new ListWorkflowTypesResponse();

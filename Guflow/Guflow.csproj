@@ -87,6 +87,7 @@
     <Compile Include="ActivityStartedEvent.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="AmbiguousWorkflowMethodException.cs" />
+    <Compile Include="IHistoryEventRetreivalStrategy.cs" />
     <Compile Include="WorkflowAlreadyHostedException.cs" />
     <Compile Include="HostedWorkflows.cs" />
     <Compile Include="IWorkflowClient.cs" />

@@ -4,7 +4,7 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    internal class HostedWorkflows
+    public class HostedWorkflows
     {
         private readonly Dictionary<string, Workflow> _hostedWorkflows = new Dictionary<string, Workflow>(); 
         public HostedWorkflows(IEnumerable<Workflow> workflows)

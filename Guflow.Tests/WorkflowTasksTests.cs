@@ -23,7 +23,7 @@ namespace Guflow.Tests
         {
             var decisionTask = CreateDecisionTaskWithSignalEvents("token");
             var hostedWorkflows = new HostedWorkflows(new []{new TestWorkflow()});
-            var workflowTasks = new WorkflowTasks(decisionTask,_workflowClient.Object);
+            var workflowTasks = WorkflowTasks.CreateFor(decisionTask,_workflowClient.Object);
 
             workflowTasks.ExecuteFor(hostedWorkflows);
 
@@ -36,7 +36,7 @@ namespace Guflow.Tests
             var decisionTask = CreateDecisionTaskWithSignalEvents("token");
             var hostedWorkflow = new TestWorkflow();
             var hostedWorkflows = new HostedWorkflows(new[] { hostedWorkflow });
-            var workflowTasks = new WorkflowTasks(decisionTask, _workflowClient.Object);
+            var workflowTasks = WorkflowTasks.CreateFor(decisionTask, _workflowClient.Object);
             workflowTasks.ExecuteFor(hostedWorkflows);
 
             Assert.Throws<InvalidOperationException>(() => hostedWorkflow.AccessHistoryEvents());
