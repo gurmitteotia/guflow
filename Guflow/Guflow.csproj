@@ -87,10 +87,11 @@
     <Compile Include="ActivityStartedEvent.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="AmbiguousWorkflowMethodException.cs" />
-    <Compile Include="IHistoryEventRetreivalStrategy.cs" />
+    <Compile Include="Domain.cs" />
+    <Compile Include="NonWorkflowTypeException.cs" />
+    <Compile Include="TaskQueue.cs" />
     <Compile Include="WorkflowAlreadyHostedException.cs" />
     <Compile Include="HostedWorkflows.cs" />
-    <Compile Include="IWorkflowClient.cs" />
     <Compile Include="WorkflowDescriptionMissingException.cs" />
     <Compile Include="CancelRequest.cs" />
     <Compile Include="CancelRequestWorkflowDecision.cs" />
@@ -100,7 +101,6 @@
     <Compile Include="SwfTimeoutExtensions.cs" />
     <Compile Include="WorkflowCancellationFailedEvent.cs" />
     <Compile Include="WorkflowCancelRequestFailedEvent.cs" />
-    <Compile Include="WorkflowClient.cs" />
     <Compile Include="WorkflowCompletionFailedEvent.cs" />
     <Compile Include="WorkflowDeprecatedException.cs" />
     <Compile Include="WorkflowDescription.cs" />
@@ -166,7 +166,6 @@
     <Compile Include="WorkflowDecisionExtension.cs" />
     <Compile Include="WorkflowEventsExecution.cs" />
     <Compile Include="WorkflowFailureFailedEvent.cs" />
-    <Compile Include="WorkflowHost.cs" />
     <Compile Include="WorkflowItem.cs" />
     <Compile Include="ScheduleActivityDecision.cs" />
     <Compile Include="ActivityScheduleData.cs" />
@@ -183,7 +182,7 @@
     <Compile Include="WorkflowSignalFailedEvent.cs" />
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />
-    <Compile Include="WorkflowTasks.cs" />
+    <Compile Include="WorkflowTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

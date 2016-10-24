@@ -36,6 +36,12 @@ namespace Guflow.Tests
             Assert.Throws<ConfigurationErrorsException>(() => WorkflowDescriptionAttribute.FindOn<WorkflowWithEmptyVersion>());
         }
 
+        [Test]
+        public void Throws_exception_when_type_does_not_derive_from_workflow_class()
+        {
+           Assert.Throws<NonWorkflowTypeException>(()=> WorkflowDescriptionAttribute.FindOn(typeof (NonWorkflow)));
+        }
+
         private class WorkflowWithoutAttribute : Workflow
         {
         }
@@ -56,6 +62,11 @@ namespace Guflow.Tests
         private class WorkflowWithEmptyVersion : Workflow
         {
 
+        }
+
+        public class NonWorkflow
+        {
+            
         }
     }
 }

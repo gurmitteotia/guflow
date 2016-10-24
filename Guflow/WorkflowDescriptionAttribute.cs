@@ -6,7 +6,7 @@ using Guflow.Properties;
 namespace Guflow
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public sealed class WorkflowDescriptionAttribute : Attribute, WorkflowDescription
+    public sealed class WorkflowDescriptionAttribute : Attribute
     {
         private uint? _defaultExecutionStartToCloseTimeout;
         private uint? _defaultTaskStartToCloseTimeout;
@@ -18,7 +18,6 @@ namespace Guflow
 
         public string Name { get; set; }
         public string Version { get; set; }
-        public string Domain { get; set; }
         public string Description { get; set; }
         public string DefaultTaskListName { get; set; }
         public string DefaultChildPolicy { get; set; }
@@ -51,12 +50,15 @@ namespace Guflow
         }
         public string DefaultTaskStartToCloseTimeout { get { return _defaultTaskStartToCloseTimeout.ToAwsFormat(); } }
 
-        public static WorkflowDescription FindOn<TWorkflow>() where TWorkflow : Workflow
+        public static WorkflowDescriptionAttribute FindOn<TWorkflow>() where TWorkflow : Workflow
         {
             return FindOn(typeof(TWorkflow));
         }
-        public static WorkflowDescription FindOn(Type workflowType)
+        public static WorkflowDescriptionAttribute FindOn(Type workflowType)
         {
+            if(!typeof(Workflow).IsAssignableFrom(workflowType))
+                throw new NonWorkflowTypeException(string.Format(Resources.Non_Workflow_type,workflowType.Name,typeof(Workflow).Name));
+
             var workflowDescription = workflowType.GetCustomAttribute<WorkflowDescriptionAttribute>();
             if (workflowDescription == null)
                 throw new WorkflowDescriptionMissingException(string.Format(Resources.Workflow_attribute_missing, workflowType.Name));

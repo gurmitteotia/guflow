@@ -117,11 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Amazon_client_required" xml:space="preserve">
+    <value>Amazon client is required.</value>
+  </data>
   <data name="Cyclic_dependency" xml:space="preserve">
     <value>Workflow item {0} depends on itself</value>
   </data>
+  <data name="Domain_deprecated" xml:space="preserve">
+    <value>Domain {0} is decprecated.</value>
+  </data>
   <data name="Domain_name_missing" xml:space="preserve">
     <value>Domain is missing.</value>
+  </data>
+  <data name="Domain_name_required" xml:space="preserve">
+    <value>Domain name required.</value>
   </data>
   <data name="Duplicate_activity" xml:space="preserve">
     <value>Activity with name {0}, version {1} and positional markerName {2} is already added to workflowClosingActions.</value>
@@ -141,8 +150,17 @@
   <data name="Multiple_event_methods" xml:space="preserve">
     <value>Multiple workflow methods are found for event {0}. Please provide only one method.</value>
   </data>
+  <data name="Non_Workflow_type" xml:space="preserve">
+    <value>Workflow type {0} does not derive from {1} class.</value>
+  </data>
+  <data name="Read_strategy_required" xml:space="preserve">
+    <value>Read startegy is required.</value>
+  </data>
   <data name="Schedulable_item_missing" xml:space="preserve">
     <value>Can not find the schedulable item for {0}.</value>
+  </data>
+  <data name="TaskListName_required" xml:space="preserve">
+    <value>TaskList name is required.</value>
   </data>
   <data name="Workflow_already_hosted" xml:space="preserve">
     <value>Workflow name {0} and version {1} is already hosted.</value>
@@ -152,6 +170,9 @@
   </data>
   <data name="Workflow_deprecated" xml:space="preserve">
     <value>Workflow name {0} and version {1} is deprecated. </value>
+  </data>
+  <data name="Workflow_description_required" xml:space="preserve">
+    <value>Workflow description attribute required.</value>
   </data>
   <data name="Workflow_not_hosted" xml:space="preserve">
     <value>Workflow name {0} and version {1} is not hosted.</value>

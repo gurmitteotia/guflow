@@ -4,7 +4,6 @@ namespace Guflow
     {
         string Name { get; set; }
         string Version { get; set; }
-        string Domain { get; set; }
         string Description { get; set; }
         string DefaultTaskListName { get; set; }
         string DefaultChildPolicy { get; set; }

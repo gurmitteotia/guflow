@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 using Moq;
@@ -9,13 +10,13 @@ using NUnit.Framework;
 namespace Guflow.Tests
 {
     [TestFixture]
-    public class WorkflowTasksTests
+    public class WorkflowTaskTests
     {
-        private Mock<IWorkflowClient> _workflowClient;
+        private Mock<IAmazonSimpleWorkflow> _amazonWorkflowClient;
         [SetUp]
         public void Setup()
         {
-            _workflowClient = new Mock<IWorkflowClient>();
+            _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
         }
 
         [Test]
@@ -23,9 +24,9 @@ namespace Guflow.Tests
         {
             var decisionTask = CreateDecisionTaskWithSignalEvents("token");
             var hostedWorkflows = new HostedWorkflows(new []{new TestWorkflow()});
-            var workflowTasks = WorkflowTasks.CreateFor(decisionTask,_workflowClient.Object);
+            var workflowTasks = WorkflowTask.CreateFor(decisionTask);
 
-            workflowTasks.ExecuteFor(hostedWorkflows);
+            workflowTasks.ExecuteFor(hostedWorkflows, _amazonWorkflowClient.Object);
 
             AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token");
         }
@@ -36,22 +37,25 @@ namespace Guflow.Tests
             var decisionTask = CreateDecisionTaskWithSignalEvents("token");
             var hostedWorkflow = new TestWorkflow();
             var hostedWorkflows = new HostedWorkflows(new[] { hostedWorkflow });
-            var workflowTasks = WorkflowTasks.CreateFor(decisionTask, _workflowClient.Object);
-            workflowTasks.ExecuteFor(hostedWorkflows);
+            var workflowTasks = WorkflowTask.CreateFor(decisionTask);
+            workflowTasks.ExecuteFor(hostedWorkflows, _amazonWorkflowClient.Object);
 
             Assert.Throws<InvalidOperationException>(() => hostedWorkflow.AccessHistoryEvents());
         }
 
         private void AssertThatInterpretedDecisionsAreSentOverWorkflowClient(string token)
         {
-            Func<IEnumerable<Decision>, bool> decisions = (d) =>
+            Func<RespondDecisionTaskCompletedRequest, bool> decisions = (r) =>
             {
+                Assert.That(r.TaskToken,Is.EqualTo(token));
+                var d = r.Decisions;
                 Assert.That(d.Count(), Is.EqualTo(1));
                 var decision = d.First();
                 Assert.That(decision.DecisionType,Is.EqualTo(DecisionType.CompleteWorkflowExecution));
                 return true;
             };
-            _workflowClient.Verify(w=>w.RespondWithDecisions(token,It.Is<IEnumerable<Decision>>(d=>decisions(d))),Times.Once);
+            _amazonWorkflowClient.Verify(w=>w.RespondDecisionTaskCompletedAsync(It.Is<RespondDecisionTaskCompletedRequest>(r=>decisions(r)),
+                                                                                It.IsAny<CancellationToken>()),Times.Once);
         }
 
         private DecisionTask CreateDecisionTaskWithSignalEvents(string token)

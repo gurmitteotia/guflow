@@ -61,6 +61,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Amazon client is required..
+        /// </summary>
+        internal static string Amazon_client_required {
+            get {
+                return ResourceManager.GetString("Amazon_client_required", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Workflow item {0} depends on itself.
         /// </summary>
         internal static string Cyclic_dependency {
@@ -70,11 +79,29 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Domain {0} is decprecated..
+        /// </summary>
+        internal static string Domain_deprecated {
+            get {
+                return ResourceManager.GetString("Domain_deprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Domain is missing..
         /// </summary>
         internal static string Domain_name_missing {
             get {
                 return ResourceManager.GetString("Domain_name_missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Domain name required..
+        /// </summary>
+        internal static string Domain_name_required {
+            get {
+                return ResourceManager.GetString("Domain_name_required", resourceCulture);
             }
         }
         
@@ -133,11 +160,38 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Workflow type {0} does not derive from {1} class..
+        /// </summary>
+        internal static string Non_Workflow_type {
+            get {
+                return ResourceManager.GetString("Non_Workflow_type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read startegy is required..
+        /// </summary>
+        internal static string Read_strategy_required {
+            get {
+                return ResourceManager.GetString("Read_strategy_required", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can not find the schedulable item for {0}..
         /// </summary>
         internal static string Schedulable_item_missing {
             get {
                 return ResourceManager.GetString("Schedulable_item_missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TaskList name is required..
+        /// </summary>
+        internal static string TaskListName_required {
+            get {
+                return ResourceManager.GetString("TaskListName_required", resourceCulture);
             }
         }
         
@@ -165,6 +219,15 @@ namespace Guflow.Properties {
         internal static string Workflow_deprecated {
             get {
                 return ResourceManager.GetString("Workflow_deprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Workflow description attribute required..
+        /// </summary>
+        internal static string Workflow_description_required {
+            get {
+                return ResourceManager.GetString("Workflow_description_required", resourceCulture);
             }
         }
         
