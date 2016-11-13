@@ -88,6 +88,7 @@
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="AmbiguousWorkflowMethodException.cs" />
     <Compile Include="Domain.cs" />
+    <Compile Include="ErrorAction.cs" />
     <Compile Include="NonWorkflowTypeException.cs" />
     <Compile Include="TaskQueue.cs" />
     <Compile Include="WorkflowAlreadyHostedException.cs" />

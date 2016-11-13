@@ -9,8 +9,8 @@ namespace Guflow
     {
         private readonly string _taskListName;
         private readonly string _pollingIdentity;
-        private  ReadHistoryEvents _readHistoryEvents;
-
+        private ReadHistoryEvents _readHistoryEvents;
+        private OnError _onPollingError = (e, c) => ErrorAction.Unhandled;
         public static readonly ReadHistoryEvents ReadAllEvents = ReadAllEventsAsync;
         public static readonly ReadHistoryEvents ReadFirstPage = ReadFirstPageAsync; 
 
@@ -32,14 +32,23 @@ namespace Guflow
             }
         }
 
-        public async Task<WorkflowTask> PollForNewTasksAsync(Domain domain)
+        internal async Task<WorkflowTask> PollForNewTasksAsync(Domain domain)
         {
             var decisionTask = await domain.PollForDecisionTaskAsync(this);
             if (NewTasksAreReturned(decisionTask))
                 return WorkflowTask.CreateFor(decisionTask);
             return WorkflowTask.Empty;
         }
+        public void OnPollingError(OnError onError)
+        {
+            Ensure.NotNull(onError,()=>new ArgumentException("onError", "onError"));
+            _onPollingError = onError;
+        }
 
+        internal ErrorAction HandleError(Exception exception, int count)
+        {
+            return _onPollingError(exception, count);
+        }
         private static bool NewTasksAreReturned(DecisionTask decisionTask)
         {
             return !string.IsNullOrEmpty(decisionTask.TaskToken);
@@ -63,7 +72,7 @@ namespace Guflow
 
         internal PollForDecisionTaskRequest CreateRequest(string domain, string nextPageToken = null)
         {
-            return new PollForDecisionTaskRequest()
+            return new PollForDecisionTaskRequest
             {
                 Identity = _pollingIdentity,
                 Domain = domain,
@@ -75,5 +84,8 @@ namespace Guflow
         }
 
         public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue, string nextPageToken);
+
+        public delegate ErrorAction OnError(Exception exception, int count);
+
     }
 }

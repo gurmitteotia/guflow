@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Guflow.Properties;
 
 namespace Guflow
 {
     public class HostedWorkflows
     {
+        private readonly Domain _domain;
         private readonly Dictionary<string, Workflow> _hostedWorkflows = new Dictionary<string, Workflow>(); 
-        public HostedWorkflows(IEnumerable<Workflow> workflows)
+        public HostedWorkflows(Domain domain, IEnumerable<Workflow> workflows)
         {
+            _domain = domain;
             PopulateHostedWorkflows(workflows);
         }
 
-        public Workflow FindBy(string name, string version)
+        internal Workflow FindBy(string name, string version)
         {
             Workflow hostedWorkflow;
             var hostedWorkflowKey = name + version;
@@ -28,9 +31,14 @@ namespace Guflow
                 var workflowDescription = WorkflowDescriptionAttribute.FindOn(workflow.GetType());
                 var hostedWorkflowKey = workflowDescription.Name + workflowDescription.Version;
                 if(_hostedWorkflows.ContainsKey(hostedWorkflowKey))
-                    throw new WorkflowAlreadyHostedException(String.Format(Resources.Workflow_already_hosted, workflowDescription.Name,workflowDescription.Version));
+                    throw new WorkflowAlreadyHostedException(string.Format(Resources.Workflow_already_hosted, workflowDescription.Name,workflowDescription.Version));
                 _hostedWorkflows.Add(hostedWorkflowKey,workflow);
             }
+        }
+
+        public async Task StartExecutionAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

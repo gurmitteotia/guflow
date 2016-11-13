@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 using Moq;
@@ -26,22 +27,58 @@ namespace Guflow.Tests
             var hostedWorkflows = new HostedWorkflows(new []{new TestWorkflow()});
             var workflowTasks = WorkflowTask.CreateFor(decisionTask);
 
-            workflowTasks.ExecuteFor(hostedWorkflows, _amazonWorkflowClient.Object);
+            workflowTasks.ExecuteFor(hostedWorkflows);
 
-            AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token");
         }
 
         [Test]
-        public void Workflow_hisotry_events_can_not_be_queried_after_execution()
+        public void Interpret_new_events_for_hosted_workflow()
+        {
+            var decisionTask = CreateDecisionTaskWithSignalEvents("token");
+            var hostedWorkflows = new HostedWorkflows(new[] { new TestWorkflow("result") });
+            var workflowTasks = WorkflowTask.CreateFor(decisionTask);
+
+            var decisions= workflowTasks.ExecuteFor(hostedWorkflows);
+
+            Assert.That(decisions, Is.EqualTo(new[] {new CompleteWorkflowDecision("result")}));
+        }
+
+        [Test]
+        public void Workflow_history_events_can_not_be_queried_after_execution()
         {
             var decisionTask = CreateDecisionTaskWithSignalEvents("token");
             var hostedWorkflow = new TestWorkflow();
             var hostedWorkflows = new HostedWorkflows(new[] { hostedWorkflow });
             var workflowTasks = WorkflowTask.CreateFor(decisionTask);
-            workflowTasks.ExecuteFor(hostedWorkflows, _amazonWorkflowClient.Object);
+            workflowTasks.ExecuteFor(hostedWorkflows);
 
             Assert.Throws<InvalidOperationException>(() => hostedWorkflow.AccessHistoryEvents());
         }
+
+
+        [Test]
+        public async Task Send_response_to_amazon_swf_for_non_empty_tasks()
+        {
+            var workflowTasks = WorkflowTask.CreateFor(new DecisionTask() {TaskToken = "token"});
+            var decisions = new[] {new CompleteWorkflowDecision("result")};
+
+            await workflowTasks.SendDecisions(decisions,_amazonWorkflowClient.Object);
+
+            AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token");
+        }
+
+        [Test]
+        public async Task Does_not_send_response_to_amazon_swf_for_empty_tasks()
+        {
+            var workflowTasks = WorkflowTask.Empty;
+            var decisions = new[] { new CompleteWorkflowDecision("result") };
+
+            await workflowTasks.SendDecisions(decisions, _amazonWorkflowClient.Object);
+
+            _amazonWorkflowClient.Verify(w => w.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),
+                                                                               It.IsAny<CancellationToken>()), Times.Never);
+        }
+
 
         private void AssertThatInterpretedDecisionsAreSentOverWorkflowClient(string token)
         {
@@ -74,10 +111,17 @@ namespace Guflow.Tests
         [WorkflowDescription("1.0")]
         private class TestWorkflow:Workflow
         {
+            private readonly string _completeResult;
+
+            public TestWorkflow(string completeResult = null)
+            {
+                _completeResult = completeResult;
+            }
+
             [WorkflowEvent(EventName.Signal)]
             private WorkflowAction OnSignal()
             {
-                return CompleteWorkflow("result");
+                return CompleteWorkflow(_completeResult);
             }
 
             public void AccessHistoryEvents()
@@ -85,5 +129,7 @@ namespace Guflow.Tests
                 var active = IsActive;
             }
         }
+
+      
     }
 }

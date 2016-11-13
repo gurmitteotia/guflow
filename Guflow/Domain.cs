@@ -61,12 +61,37 @@ namespace Guflow
             return await taskQueue.ReadStrategy(this, taskQueue, null);
         }
 
-        internal async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)
+        public async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)
         {
-            var request = taskQueue.CreateRequest(_name, nextPageToken);
-            var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
-            return response.DecisionTask;
+            int retryAttempt = 0;
+            bool retry;
+            do
+            {
+                retry = false;
+                try
+                {
+                    var request = taskQueue.CreateRequest(_name, nextPageToken);
+                    var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
+                    return response.DecisionTask;
+                }
+                catch (Exception exception)
+                {
+                    var errorAction = taskQueue.HandleError(exception, retryAttempt);
+                    if (errorAction == ErrorAction.Unhandled)
+                        throw;
+                    if (errorAction == ErrorAction.Retry)
+                        retry = true;
+                }
+                retryAttempt++;
+            } while (retry);
+            return new DecisionTask();
         }
+        
+        public HostedWorkflows Host(IEnumerable<Workflow> workflows)
+        {
+            return new HostedWorkflows(this,workflows);
+        }
+
         private async Task RegisterDomainAsync(uint retentionPeriodInDays, string description)
         {
             var request = new RegisterDomainRequest()
@@ -121,6 +146,5 @@ namespace Guflow
                 taskList = new TaskList() {Name = taskListName};
             return taskList;
         }
-
     }
 }

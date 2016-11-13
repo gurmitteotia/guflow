@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    public class WorkflowTask
+    internal class WorkflowTask
     {
         private readonly DecisionTask _decisionTask;
-        private readonly Func<HostedWorkflows,IAmazonSimpleWorkflow,Task> _actionToExecute;  
+        private readonly Func<HostedWorkflows, IEnumerable<WorkflowDecision>> _actionToExecute;
         private WorkflowTask(DecisionTask decisionTask)
         {
             _decisionTask = decisionTask;
@@ -18,7 +20,7 @@ namespace Guflow
 
         private WorkflowTask()
         {
-            _actionToExecute = (w,c) => Task.FromResult(0);
+            _actionToExecute = (w) => Enumerable.Empty<WorkflowDecision>();
         }
 
         public static readonly WorkflowTask Empty = new WorkflowTask();
@@ -28,12 +30,12 @@ namespace Guflow
             return new WorkflowTask(decisionTask);
         }
 
-        public void ExecuteFor(HostedWorkflows hostedWorkflows, IAmazonSimpleWorkflow amazonSimpleWorkflow)
+        public IEnumerable<WorkflowDecision> ExecuteFor(HostedWorkflows hostedWorkflows)
         {
-            _actionToExecute(hostedWorkflows, amazonSimpleWorkflow);
+            return _actionToExecute(hostedWorkflows);
         }
 
-        private async Task ExecuteTasks(HostedWorkflows hostedWorkflows, IAmazonSimpleWorkflow amazonSimpleWorkflow)
+        private IEnumerable<WorkflowDecision> ExecuteTasks(HostedWorkflows hostedWorkflows)
         {
             var workflowType = _decisionTask.WorkflowType;
             var workflow = hostedWorkflows.FindBy(workflowType.Name, workflowType.Version);
@@ -41,15 +43,29 @@ namespace Guflow
 
             using (var execution = workflow.NewExecutionFor(historyEvents))
             {
-                var decisions = execution.Execute();
-                var swfDecisions = decisions.Select(s => s.Decision());
-                var responseRequest = new RespondDecisionTaskCompletedRequest()
-                {
-                    TaskToken = _decisionTask.TaskToken,
-                    Decisions = swfDecisions.ToList()
-                };
-                await amazonSimpleWorkflow.RespondDecisionTaskCompletedAsync(responseRequest);
+                return execution.Execute().ToArray();
             }
         }
+
+        private RespondDecisionTaskCompletedRequest CreateResponseRequest(IEnumerable<WorkflowDecision> decisions)
+        {
+            var swfDecisions = decisions.Select(s => s.Decision()).ToArray();
+            return new RespondDecisionTaskCompletedRequest()
+            {
+                TaskToken = _decisionTask.TaskToken,
+                Decisions = swfDecisions.ToList()
+            };
+        }
+
+        public async Task SendDecisions(IEnumerable<WorkflowDecision> decisions, IAmazonSimpleWorkflow amazonSimpleWorkflow, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (this == Empty)
+                return;
+
+            var request = CreateResponseRequest(decisions);
+            await amazonSimpleWorkflow.RespondDecisionTaskCompletedAsync(request,cancellationToken);
+        }
+
+        
     }
 }

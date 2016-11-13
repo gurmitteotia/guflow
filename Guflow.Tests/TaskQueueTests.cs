@@ -72,6 +72,7 @@ namespace Guflow.Tests
         {
             Assert.Throws<ArgumentException>(() => new TaskQueue(null));
             Assert.Throws<ArgumentException>(() => _taskQueue.ReadStrategy=null);
+            Assert.Throws<ArgumentException>(() => _taskQueue.OnPollingError(null));
         }
 
         private void AmazonSwfReturnsDecisionTask(DecisionTask decisionTask)
