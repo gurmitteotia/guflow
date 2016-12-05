@@ -5,21 +5,21 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    public class TaskQueue
+    public sealed class TaskQueue
     {
         private readonly string _taskListName;
         private readonly string _pollingIdentity;
         private ReadHistoryEvents _readHistoryEvents;
         private OnError _onPollingError = (e, c) => ErrorAction.Unhandled;
-        public static readonly ReadHistoryEvents ReadAllEvents = ReadAllEventsAsync;
-        public static readonly ReadHistoryEvents ReadFirstPage = ReadFirstPageAsync; 
+        public static readonly ReadHistoryEvents ReadAllEvents = (d,q) => ReadAllEventsAsync(d,q);
+        public static readonly ReadHistoryEvents ReadFirstPage = (d,q) => ReadFirstPageAsync(d, q); 
 
         public TaskQueue(string taskListName, string pollingIdentity = null)
         {
             Ensure.NotNullAndEmpty(taskListName,()=>new ArgumentException(Resources.TaskListName_required, "taskListName"));
             _taskListName = taskListName;
             _pollingIdentity = pollingIdentity??Environment.MachineName;
-            _readHistoryEvents = ReadAllEvents;
+            ReadStrategy = ReadAllEvents;
         }
 
         public ReadHistoryEvents ReadStrategy
@@ -54,7 +54,7 @@ namespace Guflow
             return !string.IsNullOrEmpty(decisionTask.TaskToken);
         }
 
-        private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskQueue taskQueue, string nextPageToken)
+        private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskQueue taskQueue, string nextPageToken=null)
         {
             var decisionTask = await domain.PollForDecisionTaskAsync(taskQueue, nextPageToken);
             if (!string.IsNullOrEmpty(decisionTask.NextPageToken))
@@ -65,7 +65,7 @@ namespace Guflow
             return decisionTask;
         }
 
-        private static async Task<DecisionTask> ReadFirstPageAsync(Domain domain, TaskQueue taskQueue, string nextPageToken)
+        private static async Task<DecisionTask> ReadFirstPageAsync(Domain domain, TaskQueue taskQueue, string nextPageToken= null)
         {
             return await domain.PollForDecisionTaskAsync(taskQueue, nextPageToken);
         }
@@ -83,7 +83,7 @@ namespace Guflow
             };
         }
 
-        public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue, string nextPageToken);
+        public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue);
 
         public delegate ErrorAction OnError(Exception exception, int count);
 

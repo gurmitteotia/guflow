@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
@@ -8,7 +9,7 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    public class Domain
+    public sealed class Domain
     {
         private readonly string _name;
         private readonly IAmazonSimpleWorkflow _amazonSimpleWorkflow;
@@ -16,7 +17,7 @@ namespace Guflow
         public Domain(string name, IAmazonSimpleWorkflow amazonSimpleWorkflow)
         {
             Ensure.NotNullAndEmpty(name, () => new ArgumentException(Resources.Domain_name_required, "name"));
-            Ensure.NotNull(amazonSimpleWorkflow,()=> new ArgumentException(Resources.Amazon_client_required, "amazonSimpleWorkflow"));
+            Ensure.NotNull(amazonSimpleWorkflow, "amazonSimpleWorkflow");
 
             _name = name;
             _amazonSimpleWorkflow = amazonSimpleWorkflow;
@@ -34,8 +35,7 @@ namespace Guflow
 
         public async Task RegisterWorkflowAsync(WorkflowDescriptionAttribute workflowDescription)
         {
-            Ensure.NotNull(workflowDescription, ()=>new ArgumentException(Resources.Workflow_description_required, "workflowDescription"));
-
+            Ensure.NotNull(workflowDescription, "workflowDescription");
             var registeredWorkflowInfos = await ListWorkflowFromAmazonBy(workflowDescription.Name, _name);
 
             var workflowToRegister = registeredWorkflowInfos.FirstOrDefault(w => w.WorkflowType.Version.Equals(workflowDescription.Version));
@@ -44,7 +44,7 @@ namespace Guflow
                 throw new WorkflowDeprecatedException(string.Format(Resources.Workflow_deprecated, workflowDescription.Name, workflowDescription.Version));
 
             if (workflowToRegister == null)
-                await RegisterWorkflow(workflowDescription);
+                await _amazonSimpleWorkflow.RegisterWorkflowTypeAsync(workflowDescription.RegisterRequest(_name));
         }
 
         public async Task RegisterAsync(uint retentionPeriodInDays, string description = null)
@@ -58,33 +58,41 @@ namespace Guflow
 
         internal async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue)
         {
-            return await taskQueue.ReadStrategy(this, taskQueue, null);
+            return await taskQueue.ReadStrategy(this, taskQueue);
         }
 
         public async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)
         {
-            int retryAttempt = 0;
-            bool retry;
-            do
+            //int retryAttempt = 0;
+            //bool retry;
+            //do
+            //{
+            //    retry = false;
+            //    try
+            //    {
+            //        var request = taskQueue.CreateRequest(_name, nextPageToken);
+            //        var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
+            //        return response.DecisionTask;
+            //    }
+            //    catch (Exception exception)
+            //    {
+            //        var errorAction = taskQueue.HandleError(exception, retryAttempt);
+            //        if (errorAction == ErrorAction.Unhandled)
+            //            throw;
+            //        if (errorAction == ErrorAction.Retry)
+            //            retry = true;
+            //    }
+            //    retryAttempt++;
+            //} while (retry);
+            //return new DecisionTask();
+
+            var retryableFunc = new RetryableFunc(taskQueue.OnPollingError);
+            return retryableFunc.Execute(async () =>
             {
-                retry = false;
-                try
-                {
-                    var request = taskQueue.CreateRequest(_name, nextPageToken);
-                    var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
-                    return response.DecisionTask;
-                }
-                catch (Exception exception)
-                {
-                    var errorAction = taskQueue.HandleError(exception, retryAttempt);
-                    if (errorAction == ErrorAction.Unhandled)
-                        throw;
-                    if (errorAction == ErrorAction.Retry)
-                        retry = true;
-                }
-                retryAttempt++;
-            } while (retry);
-            return new DecisionTask();
+                var request = taskQueue.CreateRequest(_name, nextPageToken);
+                var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
+                return response.DecisionTask;
+            });
         }
         
         public HostedWorkflows Host(IEnumerable<Workflow> workflows)
@@ -92,6 +100,30 @@ namespace Guflow
             return new HostedWorkflows(this,workflows);
         }
 
+        public async Task CancelWorkflowAsync(CancelWorkflowRequest cancelRequest)
+        {
+            Ensure.NotNull(cancelRequest, "cancelRequest");
+            await _amazonSimpleWorkflow.RequestCancelWorkflowExecutionAsync(cancelRequest.SwfFormat(_name));
+        }
+
+        public async Task StartWorkflowAsync(StartWorkflowRequest startRequest)
+        {
+            Ensure.NotNull(startRequest, "startRequest");
+            await _amazonSimpleWorkflow.StartWorkflowExecutionAsync(startRequest.SwfFormat(_name));
+        }
+
+        internal async Task RespondDecisionTaskCompletedAsync(RespondDecisionTaskCompletedRequest request, CancellationToken cancellationToken)
+        {
+            await _amazonSimpleWorkflow.RespondDecisionTaskCompletedAsync(request, cancellationToken);
+        }
+
+        public async Task SignalWorkflowAsync(SignalWorkflowRequest signalRequest)
+        {
+            Ensure.NotNull(signalRequest, "signalRequest");
+
+            await _amazonSimpleWorkflow.SignalWorkflowExecutionAsync(signalRequest.SwfFormat(_name));
+
+        }
         private async Task RegisterDomainAsync(uint retentionPeriodInDays, string description)
         {
             var request = new RegisterDomainRequest()
@@ -110,25 +142,6 @@ namespace Guflow
             return response.DomainInfos.Infos.FirstOrDefault(d => d.Name.Equals(domainName));
         }
 
-        private async Task RegisterWorkflow(WorkflowDescriptionAttribute workflowDescription)
-        {
-            var registerRequest = new RegisterWorkflowTypeRequest()
-            {
-                Name = workflowDescription.Name,
-                Version = workflowDescription.Version,
-                Description = workflowDescription.Description,
-                Domain = _name,
-                DefaultExecutionStartToCloseTimeout = workflowDescription.DefaultExecutionStartToCloseTimeout,
-                DefaultTaskList = TaskList(workflowDescription.DefaultTaskListName),
-                DefaultTaskStartToCloseTimeout = workflowDescription.DefaultTaskStartToCloseTimeout,
-                DefaultChildPolicy = workflowDescription.DefaultChildPolicy,
-                DefaultLambdaRole = workflowDescription.DefaultLambdaRole,
-                DefaultTaskPriority = workflowDescription.DefaultTaskPriority.ToString()
-            };
-
-            await _amazonSimpleWorkflow.RegisterWorkflowTypeAsync(registerRequest);
-        }
-
         private async Task<IEnumerable<WorkflowTypeInfo>> ListWorkflowFromAmazonBy(string workflowName, string domainName)
         {
             var listRequest = new ListWorkflowTypesRequest();
@@ -137,14 +150,6 @@ namespace Guflow
             listRequest.MaximumPageSize = 1000;
             var response = await _amazonSimpleWorkflow.ListWorkflowTypesAsync(listRequest);
             return response.WorkflowTypeInfos.TypeInfos;
-        }
-
-        private static TaskList TaskList(string taskListName)
-        {
-            TaskList taskList = null;
-            if (!string.IsNullOrEmpty(taskListName))
-                taskList = new TaskList() {Name = taskListName};
-            return taskList;
         }
     }
 }

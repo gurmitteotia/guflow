@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using NUnit.Framework;
 
 namespace Guflow.Tests
@@ -40,6 +41,12 @@ namespace Guflow.Tests
         public void Throws_exception_when_type_does_not_derive_from_workflow_class()
         {
            Assert.Throws<NonWorkflowTypeException>(()=> WorkflowDescriptionAttribute.FindOn(typeof (NonWorkflow)));
+        }
+
+        [Test]
+        public void Invalid_arguments_tests()
+        {
+            Assert.Throws<ArgumentException>(() => WorkflowDescriptionAttribute.FindOn(null));
         }
 
         private class WorkflowWithoutAttribute : Workflow

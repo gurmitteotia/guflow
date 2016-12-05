@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow", "Guflow\Guflow.csproj", "{107F1FED-A272-4046-9DA0-360A657853AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow.Tests", "Guflow.Tests\Guflow.Tests.csproj", "{5D1215A6-932B-4335-A7AE-1885F91B7E68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow.IntegrationTests", "Guflow.IntegrationTests\Guflow.IntegrationTests.csproj", "{FFF19166-CA47-4B4E-8531-3DF994E76AF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{5D1215A6-932B-4335-A7AE-1885F91B7E68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D1215A6-932B-4335-A7AE-1885F91B7E68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D1215A6-932B-4335-A7AE-1885F91B7E68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

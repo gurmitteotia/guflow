@@ -14,17 +14,19 @@ namespace Guflow.Tests
     public class WorkflowTaskTests
     {
         private Mock<IAmazonSimpleWorkflow> _amazonWorkflowClient;
+        private Domain _domain;
         [SetUp]
         public void Setup()
         {
             _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
+            _domain = new Domain("name",new Mock<IAmazonSimpleWorkflow>().Object);
         }
 
         [Test]
         public void Can_interpret_new_task_for_hosted_workflow()
         {
             var decisionTask = CreateDecisionTaskWithSignalEvents("token");
-            var hostedWorkflows = new HostedWorkflows(new []{new TestWorkflow()});
+            var hostedWorkflows = new HostedWorkflows(_domain, new []{new TestWorkflow()});
             var workflowTasks = WorkflowTask.CreateFor(decisionTask);
 
             workflowTasks.ExecuteFor(hostedWorkflows);
@@ -35,7 +37,7 @@ namespace Guflow.Tests
         public void Interpret_new_events_for_hosted_workflow()
         {
             var decisionTask = CreateDecisionTaskWithSignalEvents("token");
-            var hostedWorkflows = new HostedWorkflows(new[] { new TestWorkflow("result") });
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow("result") });
             var workflowTasks = WorkflowTask.CreateFor(decisionTask);
 
             var decisions= workflowTasks.ExecuteFor(hostedWorkflows);
@@ -48,7 +50,7 @@ namespace Guflow.Tests
         {
             var decisionTask = CreateDecisionTaskWithSignalEvents("token");
             var hostedWorkflow = new TestWorkflow();
-            var hostedWorkflows = new HostedWorkflows(new[] { hostedWorkflow });
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { hostedWorkflow });
             var workflowTasks = WorkflowTask.CreateFor(decisionTask);
             workflowTasks.ExecuteFor(hostedWorkflows);
 
@@ -62,7 +64,7 @@ namespace Guflow.Tests
             var workflowTasks = WorkflowTask.CreateFor(new DecisionTask() {TaskToken = "token"});
             var decisions = new[] {new CompleteWorkflowDecision("result")};
 
-            await workflowTasks.SendDecisions(decisions,_amazonWorkflowClient.Object);
+            await workflowTasks.SendDecisions(decisions, _domain);
 
             AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token");
         }
@@ -73,12 +75,11 @@ namespace Guflow.Tests
             var workflowTasks = WorkflowTask.Empty;
             var decisions = new[] { new CompleteWorkflowDecision("result") };
 
-            await workflowTasks.SendDecisions(decisions, _amazonWorkflowClient.Object);
+            await workflowTasks.SendDecisions(decisions, _domain);
 
             _amazonWorkflowClient.Verify(w => w.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),
                                                                                It.IsAny<CancellationToken>()), Times.Never);
         }
-
 
         private void AssertThatInterpretedDecisionsAreSentOverWorkflowClient(string token)
         {
@@ -95,7 +96,7 @@ namespace Guflow.Tests
                                                                                 It.IsAny<CancellationToken>()),Times.Once);
         }
 
-        private DecisionTask CreateDecisionTaskWithSignalEvents(string token)
+        private static DecisionTask CreateDecisionTaskWithSignalEvents(string token)
         {
             var historyEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input");
             return new DecisionTask()

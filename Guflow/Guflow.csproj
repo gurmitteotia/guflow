@@ -87,9 +87,14 @@
     <Compile Include="ActivityStartedEvent.cs" />
     <Compile Include="ActivityTimedoutEvent.cs" />
     <Compile Include="AmbiguousWorkflowMethodException.cs" />
+    <Compile Include="CancelWorkflowRequest.cs" />
+    <Compile Include="ChildPolicy.cs" />
     <Compile Include="Domain.cs" />
     <Compile Include="ErrorAction.cs" />
     <Compile Include="NonWorkflowTypeException.cs" />
+    <Compile Include="RetryableFunc.cs" />
+    <Compile Include="SignalWorkflowRequest.cs" />
+    <Compile Include="StartWorkflowRequest.cs" />
     <Compile Include="TaskQueue.cs" />
     <Compile Include="WorkflowAlreadyHostedException.cs" />
     <Compile Include="HostedWorkflows.cs" />
@@ -99,7 +104,7 @@
     <Compile Include="CyclicDependencyException.cs" />
     <Compile Include="EventName.cs" />
     <Compile Include="InvalidMethodSignatureException.cs" />
-    <Compile Include="SwfTimeoutExtensions.cs" />
+    <Compile Include="SwfExtensions.cs" />
     <Compile Include="WorkflowCancellationFailedEvent.cs" />
     <Compile Include="WorkflowCancelRequestFailedEvent.cs" />
     <Compile Include="WorkflowCompletionFailedEvent.cs" />

@@ -76,6 +76,8 @@
     <Compile Include="DomainTests.cs" />
     <Compile Include="HostedWorkflowsTests.cs" />
     <Compile Include="SignalTests.cs" />
+    <Compile Include="SignalWorkflowRequestTests.cs" />
+    <Compile Include="StartWorkflowRequestTests.cs" />
     <Compile Include="TaskQueueTests.cs" />
     <Compile Include="WorkflowCancellationFailedEventTests.cs" />
     <Compile Include="CancelWorkflowItemActionTests.cs" />

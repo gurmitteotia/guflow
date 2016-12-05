@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Reflection;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Properties;
 
 namespace Guflow
@@ -45,10 +46,10 @@ namespace Guflow
         {
             get
             {
-                return _defaultExecutionStartToCloseTimeout.ToAwsFormat();
+                return _defaultExecutionStartToCloseTimeout.SwfFormat();
             }
         }
-        public string DefaultTaskStartToCloseTimeout { get { return _defaultTaskStartToCloseTimeout.ToAwsFormat(); } }
+        public string DefaultTaskStartToCloseTimeout { get { return _defaultTaskStartToCloseTimeout.SwfFormat(); } }
 
         public static WorkflowDescriptionAttribute FindOn<TWorkflow>() where TWorkflow : Workflow
         {
@@ -56,6 +57,8 @@ namespace Guflow
         }
         public static WorkflowDescriptionAttribute FindOn(Type workflowType)
         {
+            Ensure.NotNull(workflowType, "workflowType");
+
             if(!typeof(Workflow).IsAssignableFrom(workflowType))
                 throw new NonWorkflowTypeException(string.Format(Resources.Non_Workflow_type,workflowType.Name,typeof(Workflow).Name));
 
@@ -63,12 +66,29 @@ namespace Guflow
             if (workflowDescription == null)
                 throw new WorkflowDescriptionMissingException(string.Format(Resources.Workflow_attribute_missing, workflowType.Name));
             
-            if (string.IsNullOrEmpty(workflowDescription.Version))
-                throw new ConfigurationErrorsException(Resources.Empty_version);
+            if (string.IsNullOrWhiteSpace(workflowDescription.Version))
+                throw new ConfigurationErrorsException(string.Format(Resources.Empty_version, workflowType.Name));
 
-            if (string.IsNullOrEmpty(workflowDescription.Name))
+            if (string.IsNullOrWhiteSpace(workflowDescription.Name))
                 workflowDescription.Name = workflowType.Name;
             return workflowDescription;
+        }
+
+        internal RegisterWorkflowTypeRequest RegisterRequest(string domainName)
+        {
+            return new RegisterWorkflowTypeRequest
+            {
+                Name = Name,
+                Version = Version,
+                Description = Description,
+                Domain = domainName,
+                DefaultExecutionStartToCloseTimeout = DefaultExecutionStartToCloseTimeout,
+                DefaultTaskList = DefaultTaskListName.TaskList(),
+                DefaultTaskStartToCloseTimeout = DefaultTaskStartToCloseTimeout,
+                DefaultChildPolicy = DefaultChildPolicy,
+                DefaultLambdaRole = DefaultLambdaRole,
+                DefaultTaskPriority = DefaultTaskPriority.ToString()
+            };
         }
     }
 }

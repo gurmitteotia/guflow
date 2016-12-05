@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Amazon_client_required" xml:space="preserve">
-    <value>Amazon client is required.</value>
-  </data>
   <data name="Cyclic_dependency" xml:space="preserve">
     <value>Workflow item {0} depends on itself</value>
   </data>
@@ -139,7 +136,7 @@
     <value>Timer with name {0} is already added to workflowClosingActions.</value>
   </data>
   <data name="Empty_version" xml:space="preserve">
-    <value>Version is empty.</value>
+    <value>Version is empty for workflow {0}.</value>
   </data>
   <data name="Invalid_parameter" xml:space="preserve">
     <value>Workflow method {0} has incompatible parameter {1}, which can not be deserialized from source event {2}</value>
@@ -170,9 +167,6 @@
   </data>
   <data name="Workflow_deprecated" xml:space="preserve">
     <value>Workflow name {0} and version {1} is deprecated. </value>
-  </data>
-  <data name="Workflow_description_required" xml:space="preserve">
-    <value>Workflow description attribute required.</value>
   </data>
   <data name="Workflow_not_hosted" xml:space="preserve">
     <value>Workflow name {0} and version {1} is not hosted.</value>

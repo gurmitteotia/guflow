@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -34,7 +33,14 @@ namespace Guflow
         {
             return _actionToExecute(hostedWorkflows);
         }
+        public async Task SendDecisions(IEnumerable<WorkflowDecision> decisions, Domain domain, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (this == Empty)
+                return;
 
+            var request = CreateResponseRequest(decisions);
+            await domain.RespondDecisionTaskCompletedAsync(request, cancellationToken);
+        }
         private IEnumerable<WorkflowDecision> ExecuteTasks(HostedWorkflows hostedWorkflows)
         {
             var workflowType = _decisionTask.WorkflowType;
@@ -49,23 +55,11 @@ namespace Guflow
 
         private RespondDecisionTaskCompletedRequest CreateResponseRequest(IEnumerable<WorkflowDecision> decisions)
         {
-            var swfDecisions = decisions.Select(s => s.Decision()).ToArray();
             return new RespondDecisionTaskCompletedRequest()
             {
                 TaskToken = _decisionTask.TaskToken,
-                Decisions = swfDecisions.ToList()
+                Decisions = decisions.Select(s => s.Decision()).ToList()
             };
         }
-
-        public async Task SendDecisions(IEnumerable<WorkflowDecision> decisions, IAmazonSimpleWorkflow amazonSimpleWorkflow, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (this == Empty)
-                return;
-
-            var request = CreateResponseRequest(decisions);
-            await amazonSimpleWorkflow.RespondDecisionTaskCompletedAsync(request,cancellationToken);
-        }
-
-        
     }
 }

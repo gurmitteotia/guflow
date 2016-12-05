@@ -278,7 +278,7 @@ namespace Guflow.Tests
                 EventType =  EventType.WorkflowExecutionStarted,
                 WorkflowExecutionStartedEventAttributes = new WorkflowExecutionStartedEventAttributes()
                 {
-                    ChildPolicy = ChildPolicy.TERMINATE,
+                    ChildPolicy = ChildPolicy.Terminate,
                     ContinuedExecutionRunId = "continue run id",
                     ExecutionStartToCloseTimeout = "100",
                     Input = input,
