@@ -111,9 +111,9 @@ namespace Guflow
             _parentItems.Add(parentItem);
         }
 
-        protected IWorkflowHistoryEvents WorkflowHistoryEvents
+        protected IWorkflowEvents WorkflowEvents
         {
-            get { return _workflow.CurrentHistoryEvents; }
+            get { return _workflow.WorkflowEvents; }
         }
 
         protected TimerItem RescheduleTimerItem

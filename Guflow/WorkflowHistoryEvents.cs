@@ -4,7 +4,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal class WorkflowHistoryEvents : IWorkflowHistoryEvents
+    internal class WorkflowHistoryEvents : IWorkflowEvents
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly long _newEventsStartId;

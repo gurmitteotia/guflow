@@ -129,7 +129,7 @@ namespace Guflow.Tests
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
             var workflow = new Mock<IWorkflow>();
-            workflow.SetupGet(w => w.CurrentHistoryEvents).Returns(workflowHistoryEvents);
+            workflow.SetupGet(w => w.WorkflowEvents).Returns(workflowHistoryEvents);
             return new TimerItem(_timerIdentity, workflow.Object);
         }
     }

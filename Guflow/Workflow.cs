@@ -5,10 +5,10 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    public abstract class Workflow : IWorkflow, IWorkflowClosingActions
+    public abstract class Workflow : IWorkflow, IWorkflowClosingActions, IPostExecutionEvents
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
-        private IWorkflowHistoryEvents _currentworkflowHistoryEvents;
+        private IWorkflowEvents _currentWorkflowEvents;
         private readonly WorkflowEventMethods _workflowEventMethods;
 
         protected Workflow()
@@ -96,7 +96,7 @@ namespace Guflow
                 : workflowEventMethod.Invoke(recordMarkerFailedEvent);
         }
 
-        public WorkflowAction OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent)
+        WorkflowAction IWorkflowActions.OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent)
         {
             var workflowEventMethod = _workflowEventMethods.FindFor(EventName.SignalFailed);
             return workflowEventMethod == null
@@ -104,7 +104,7 @@ namespace Guflow
                 : workflowEventMethod.Invoke(workflowSignalFailedEvent);
         }
 
-        public WorkflowAction OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent)
+        WorkflowAction IWorkflowActions.OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent)
         {
             var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CompletionFailed);
             return workflowEventMethod == null
@@ -112,7 +112,7 @@ namespace Guflow
                 : workflowEventMethod.Invoke(workflowCompletionFailedEvent);
         }
 
-        public WorkflowAction OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent)
+        WorkflowAction IWorkflowActions.OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent)
         {
             var workflowEventMethod = _workflowEventMethods.FindFor(EventName.FailureFailed);
             return workflowEventMethod == null
@@ -120,7 +120,7 @@ namespace Guflow
                 : workflowEventMethod.Invoke(workflowFailureFailedEvent);
         }
 
-        public WorkflowAction OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
+        WorkflowAction IWorkflowActions.OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
         {
             var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CancelRequestFailed);
             return workflowEventMethod == null
@@ -128,12 +128,19 @@ namespace Guflow
                 : workflowEventMethod.Invoke(workflowCancelRequestFailedEvent);
         }
 
-        public WorkflowAction OnWorkflowCancellationFailed(WorkflowCancellationFailedEvent workflowCancellationFailedEvent)
+        WorkflowAction IWorkflowActions.OnWorkflowCancellationFailed(WorkflowCancellationFailedEvent workflowCancellationFailedEvent)
         {
             var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CancellationFailed);
             return workflowEventMethod == null
                 ? FailWorkflow("FAILED_TO_CANCEL_WORKFLOW", workflowCancellationFailedEvent.Cause)
                 : workflowEventMethod.Invoke(workflowCancellationFailedEvent);
+        }
+
+        void IPostExecutionEvents.Completed(string workflowId, string workflowRunId, string result)
+        {
+            var completedHandler = Completed;
+            if(completedHandler!=null)
+                completedHandler(this, new WorkflowCompletedEventArgs(workflowId, workflowRunId, result));
         }
 
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
@@ -222,7 +229,7 @@ namespace Guflow
         protected IEnumerable<IWorkflowItem> AllTimers { get { return _allWorkflowItems.OfType<ITimerItem>(); } }
         protected bool IsActive
         {
-            get { return ((IWorkflow)this).CurrentHistoryEvents.IsActive(); }
+            get { return ((IWorkflow)this).WorkflowEvents.IsActive(); }
         }
         protected WorkflowAction RecordMarker(string markerName, object details)
         {
@@ -231,15 +238,15 @@ namespace Guflow
         }
         protected IEnumerable<MarkerRecordedEvent> AllMarkerEvents
         {
-            get { return ((IWorkflow)this).CurrentHistoryEvents.AllMarkerRecordedEvents(); }
+            get { return ((IWorkflow)this).WorkflowEvents.AllMarkerRecordedEvents(); }
         }
         protected IEnumerable<WorkflowSignaledEvent> AllSignalEvents
         {
-            get { return ((IWorkflow)this).CurrentHistoryEvents.AllSignalEvents(); }
+            get { return ((IWorkflow)this).WorkflowEvents.AllSignalEvents(); }
         }
         protected IEnumerable<WorkflowCancellationRequestedEvent> AllCancellationRequestedEvents
         {
-            get { return ((IWorkflow)this).CurrentHistoryEvents.AllWorkflowCancellationRequestedEvents(); }
+            get { return ((IWorkflow)this).WorkflowEvents.AllWorkflowCancellationRequestedEvents(); }
         }
         protected Signal Signal(string signalName, object input)
         {
@@ -266,13 +273,13 @@ namespace Guflow
         {
             return FindTimerFor(identity);
         }
-        IWorkflowHistoryEvents IWorkflow.CurrentHistoryEvents
+        IWorkflowEvents IWorkflow.WorkflowEvents
         {
             get
             {
-                if (_currentworkflowHistoryEvents == null)
+                if (_currentWorkflowEvents == null)
                     throw new InvalidOperationException("Current history events can be accessed only when workflow is executing.");
-                return _currentworkflowHistoryEvents;
+                return _currentWorkflowEvents;
             }
         }
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
@@ -302,16 +309,19 @@ namespace Guflow
             return CancelWorkflow(details);
         }
 
-        internal WorkflowEventsExecution NewExecutionFor(IWorkflowHistoryEvents workflowHistoryEvents)
+        internal WorkflowEventsExecution NewExecutionFor(IWorkflowEvents workflowEvents)
         {
-            _currentworkflowHistoryEvents = workflowHistoryEvents;
-            return new WorkflowEventsExecution(this, workflowHistoryEvents);
+            _currentWorkflowEvents = workflowEvents;
+            return new WorkflowEventsExecution(this, workflowEvents);
         }
 
         internal void FinishExecution()
         {
-            _currentworkflowHistoryEvents = null;
+            _currentWorkflowEvents = null;
         }
+
+        public event EventHandler<WorkflowCompletedEventArgs> Completed; 
+
         private ActivityItem FindActivity(Identity identity)
         {
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
@@ -369,10 +379,6 @@ namespace Guflow
         private ActivityItem FindActivity(WorkflowItemEvent activityEvent)
         {
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(activityEvent.IsFor);
-        }
-        private TimerItem FindTimer(WorkflowItemEvent activityEvent)
-        {
-            return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(activityEvent.IsFor);
         }
     }
 }

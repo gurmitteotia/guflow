@@ -30,6 +30,11 @@ namespace Guflow
             return workflowClosingActions.OnCompletion(_result, Proposal);
         }
 
+        internal override void Raise(IPostExecutionEvents postExecutionEvents)
+        {
+            postExecutionEvents.Completed("","", _result);
+        }
+
         public override string ToString()
         {
             return string.Format("{0} with result {1} and proposal {2}", GetType().Name, _result, Proposal);

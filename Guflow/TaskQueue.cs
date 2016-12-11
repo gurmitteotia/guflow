@@ -36,7 +36,7 @@ namespace Guflow
         {
             var decisionTask = await domain.PollForDecisionTaskAsync(this);
             if (NewTasksAreReturned(decisionTask))
-                return WorkflowTask.CreateFor(decisionTask);
+                return WorkflowTask.CreateFor(decisionTask, domain);
             return WorkflowTask.Empty;
         }
         public void OnPollingError(OnError onError)

@@ -28,7 +28,7 @@ namespace Guflow
             _onCancelledAction = c => WorkflowAction.CancelWorkflow(c.Details);
             _onCancellationFailedAction = c => WorkflowAction.FailWorkflow("ACTIVITY_CANCELLATION_FAILED", c.Cause);
             _onFailedSchedulingAction = c => WorkflowAction.FailWorkflow("ACTIVITY_SCHEDULING_FAILED", c.Cause);
-            _inputFunc = a => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
+            _inputFunc = a => WorkflowEvents.WorkflowStartedEvent().Input;
             _taskListFunc = a => null;
             _whenFunc = a => true;
             _priorityFunc = a => null;
@@ -39,8 +39,8 @@ namespace Guflow
         {
             get
             {
-                var latestActivityEvent = WorkflowHistoryEvents.LastActivityEventFor(this);
-                var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(RescheduleTimerItem);
+                var latestActivityEvent = WorkflowEvents.LastActivityEventFor(this);
+                var latestTimerEvent = WorkflowEvents.LastTimerEventFor(RescheduleTimerItem);
                 if (latestActivityEvent > latestTimerEvent)
                     return latestActivityEvent;
 
@@ -49,30 +49,30 @@ namespace Guflow
         }
         public ActivityCompletedEvent LastCompletedEvent
         {
-            get { return WorkflowHistoryEvents.LastCompletedEventFor(this); }
+            get { return WorkflowEvents.LastCompletedEventFor(this); }
         }
 
         public ActivityFailedEvent LastFailedEvent
         {
-            get { return WorkflowHistoryEvents.LastFailedEventFor(this); }
+            get { return WorkflowEvents.LastFailedEventFor(this); }
         }
 
         public ActivityTimedoutEvent LastTimedoutEvent
         {
-            get { return WorkflowHistoryEvents.LastTimedoutEventFor(this); }
+            get { return WorkflowEvents.LastTimedoutEventFor(this); }
         }
 
         public ActivityCancelledEvent LastCancelledEvent
         {
-            get { return WorkflowHistoryEvents.LastCancelledEventFor(this); }
+            get { return WorkflowEvents.LastCancelledEventFor(this); }
         }
 
         public override IEnumerable<WorkflowItemEvent> AllEvents
         {
             get
             {
-                var activityEvents = WorkflowHistoryEvents.AllActivityEventsFor(this);
-                var timerEvents = WorkflowHistoryEvents.AllTimerEventsFor(RescheduleTimerItem);
+                var activityEvents = WorkflowEvents.AllActivityEventsFor(this);
+                var timerEvents = WorkflowEvents.AllTimerEventsFor(RescheduleTimerItem);
                 return activityEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
             }
         }
@@ -197,7 +197,7 @@ namespace Guflow
         internal override WorkflowDecision GetCancelDecision()
         {
             var lastEvent = LastEvent;
-            var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(RescheduleTimerItem);
+            var latestTimerEvent = WorkflowEvents.LastTimerEventFor(RescheduleTimerItem);
             if (latestTimerEvent != WorkflowItemEvent.NotFound && lastEvent == latestTimerEvent)
                 return RescheduleTimerItem.GetCancelDecision();
 

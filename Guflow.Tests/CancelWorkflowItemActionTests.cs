@@ -21,7 +21,7 @@ namespace Guflow.Tests
         public void Setup()
         {
             _workflow = new Mock<IWorkflow>();
-            _workflow.SetupGet(w => w.CurrentHistoryEvents)
+            _workflow.SetupGet(w => w.WorkflowEvents)
                 .Returns(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
         }
 
@@ -146,7 +146,7 @@ namespace Guflow.Tests
         }
         private void SetupWorkflowToReturns(IEnumerable<HistoryEvent> historyEvents)
         {
-            _workflow.SetupGet(w => w.CurrentHistoryEvents).Returns(new WorkflowHistoryEvents(historyEvents));
+            _workflow.SetupGet(w => w.WorkflowEvents).Returns(new WorkflowHistoryEvents(historyEvents));
         }
         private class WorkflowToReturnCancelledTimerAction : Workflow
         {

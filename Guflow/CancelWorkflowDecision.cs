@@ -47,5 +47,10 @@ namespace Guflow
         {
             return workflowClosingActions.OnCancellation(_details);
         }
+
+        internal override void Raise(IPostExecutionEvents postExecutionEvents)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

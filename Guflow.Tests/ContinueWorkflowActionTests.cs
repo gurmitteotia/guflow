@@ -174,39 +174,39 @@ namespace Guflow.Tests
         }
 
 
-        private IWorkflowHistoryEvents CreateFailedActivityEventGraph(string activityName, string activityVersion, string positionalName)
+        private IWorkflowEvents CreateFailedActivityEventGraph(string activityName, string activityVersion, string positionalName)
         {
             return new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res", "detail"));
         }
-        private IWorkflowHistoryEvents CreateCompletedActivityEventGraph(string activityName, string activityVersion, string positionalName)
+        private IWorkflowEvents CreateCompletedActivityEventGraph(string activityName, string activityVersion, string positionalName)
         {
             return new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res"));
         }
-        private IWorkflowHistoryEvents CreateActivityCompletedAndActivityStartedEventGraph()
+        private IWorkflowEvents CreateActivityCompletedAndActivityStartedEventGraph()
         {
             return new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
                                             .Concat(HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New(_siblingActivityName,_siblingActivityVersion),"id")));
         }
 
-        private IWorkflowHistoryEvents CreateTimerFiredEventGraph(string timerName)
+        private IWorkflowEvents CreateTimerFiredEventGraph(string timerName)
         {
             return new WorkflowHistoryEvents(HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer(timerName), TimeSpan.FromSeconds(2)));
         }
 
-        private IWorkflowHistoryEvents CreateParentActivityCompletedAndFailedEventsGraph()
+        private IWorkflowEvents CreateParentActivityCompletedAndFailedEventsGraph()
         {
             var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res");
             var activityFailedEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2", "detail");
             return new WorkflowHistoryEvents(activityCompletedEventGraph.Concat(activityFailedEventGraph), activityCompletedEventGraph.First().EventId, activityCompletedEventGraph.Last().EventId);
         }
 
-        private IWorkflowHistoryEvents CreateParentActivityCompletedAndTimedoutEventsGraph()
+        private IWorkflowEvents CreateParentActivityCompletedAndTimedoutEventsGraph()
         {
             var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res");
             var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2", "detail");
             return new WorkflowHistoryEvents(activityCompletedEventGraph.Concat(activityTimedoutEventGraph), activityCompletedEventGraph.First().EventId, activityCompletedEventGraph.Last().EventId);
         }
-        private IWorkflowHistoryEvents CreateParentActivityCompletedAndCancelledEventsGraph()
+        private IWorkflowEvents CreateParentActivityCompletedAndCancelledEventsGraph()
         {
             var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res");
             var activityCancelledEventGraph = HistoryEventFactory.CreateActivityCancelledEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2");

@@ -24,12 +24,12 @@ namespace Guflow
         }
         public override WorkflowItemEvent LastEvent
         {
-            get { return WorkflowHistoryEvents.LastTimerEventFor(this); }
+            get { return WorkflowEvents.LastTimerEventFor(this); }
         }
 
         public override IEnumerable<WorkflowItemEvent> AllEvents
         {
-            get { return WorkflowHistoryEvents.AllTimerEventsFor(this); }
+            get { return WorkflowEvents.AllTimerEventsFor(this); }
         }
         public IFluentTimerItem FireAfter(TimeSpan fireAfter)
         {

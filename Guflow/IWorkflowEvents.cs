@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
 {
-    internal interface IWorkflowHistoryEvents
+    internal interface IWorkflowEvents
     {
         WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem);
         WorkflowItemEvent LastTimerEventFor(TimerItem timerItem);

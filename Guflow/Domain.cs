@@ -63,36 +63,28 @@ namespace Guflow
 
         public async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)
         {
-            //int retryAttempt = 0;
-            //bool retry;
-            //do
-            //{
-            //    retry = false;
-            //    try
-            //    {
-            //        var request = taskQueue.CreateRequest(_name, nextPageToken);
-            //        var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
-            //        return response.DecisionTask;
-            //    }
-            //    catch (Exception exception)
-            //    {
-            //        var errorAction = taskQueue.HandleError(exception, retryAttempt);
-            //        if (errorAction == ErrorAction.Unhandled)
-            //            throw;
-            //        if (errorAction == ErrorAction.Retry)
-            //            retry = true;
-            //    }
-            //    retryAttempt++;
-            //} while (retry);
-            //return new DecisionTask();
-
-            var retryableFunc = new RetryableFunc(taskQueue.OnPollingError);
-            return retryableFunc.Execute(async () =>
+            int retryAttempts = 0;
+            bool retry;
+            do
             {
-                var request = taskQueue.CreateRequest(_name, nextPageToken);
-                var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
-                return response.DecisionTask;
-            });
+                retry = false;
+                try
+                {
+                    var request = taskQueue.CreateRequest(_name, nextPageToken);
+                    var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
+                    return response.DecisionTask;
+                }
+                catch (Exception exception)
+                {
+                    var errorAction = taskQueue.HandleError(exception, retryAttempts);
+                    if (errorAction.IsRethrow)
+                        throw;
+                    if (errorAction.IsRetry)
+                        retry = true;
+                }
+                retryAttempts++;
+            } while (retry);
+            return new DecisionTask();
         }
         
         public HostedWorkflows Host(IEnumerable<Workflow> workflows)

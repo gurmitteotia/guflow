@@ -2,6 +2,6 @@
 {
     internal interface IWorkflow : IWorkflowItems, IWorkflowActions
     {
-        IWorkflowHistoryEvents CurrentHistoryEvents { get; }
+        IWorkflowEvents WorkflowEvents { get; }
     }
 }

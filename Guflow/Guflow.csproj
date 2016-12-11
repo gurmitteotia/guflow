@@ -91,13 +91,14 @@
     <Compile Include="ChildPolicy.cs" />
     <Compile Include="Domain.cs" />
     <Compile Include="ErrorAction.cs" />
+    <Compile Include="IPostExecutionEvents.cs" />
     <Compile Include="NonWorkflowTypeException.cs" />
-    <Compile Include="RetryableFunc.cs" />
     <Compile Include="SignalWorkflowRequest.cs" />
     <Compile Include="StartWorkflowRequest.cs" />
     <Compile Include="TaskQueue.cs" />
     <Compile Include="WorkflowAlreadyHostedException.cs" />
     <Compile Include="HostedWorkflows.cs" />
+    <Compile Include="WorkflowCompletedEventArgs.cs" />
     <Compile Include="WorkflowDescriptionMissingException.cs" />
     <Compile Include="CancelRequest.cs" />
     <Compile Include="CancelRequestWorkflowDecision.cs" />
@@ -135,7 +136,7 @@
     <Compile Include="ITimerItem.cs" />
     <Compile Include="IWorkflow.cs" />
     <Compile Include="IWorkflowClosingActions.cs" />
-    <Compile Include="IWorkflowHistoryEvents.cs" />
+    <Compile Include="IWorkflowEvents.cs" />
     <Compile Include="IWorkflowItem.cs" />
     <Compile Include="IWorkflowItems.cs" />
     <Compile Include="JsonExtension.cs" />
@@ -189,6 +190,7 @@
     <Compile Include="WorkflowStartedArgs.cs" />
     <Compile Include="WorkflowStartedEvent.cs" />
     <Compile Include="WorkflowTask.cs" />
+    <Compile Include="WorkflowTaskDecisions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

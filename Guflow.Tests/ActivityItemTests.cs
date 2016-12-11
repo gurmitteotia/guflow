@@ -22,7 +22,7 @@ namespace Guflow.Tests
         public void By_default_workflow_input_is_passed_as_activity_input()
         {
             const string workflowInput = "actvity";
-            _workflow.SetupGet(w => w.CurrentHistoryEvents).Returns(new WorkflowHistoryEvents(HistoryEventFactory.CreateWorkflowStartedEventGraph(workflowInput)));
+            _workflow.SetupGet(w => w.WorkflowEvents).Returns(new WorkflowHistoryEvents(HistoryEventFactory.CreateWorkflowStartedEventGraph(workflowInput)));
             var activityItem = new ActivityItem(_activityIdenity,_workflow.Object);
 
             var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
@@ -184,7 +184,7 @@ namespace Guflow.Tests
         {
             var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(_activityIdenity, "id");
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            _workflow.SetupGet(w => w.CurrentHistoryEvents).Returns(workflowHistoryEvents);
+            _workflow.SetupGet(w => w.WorkflowEvents).Returns(workflowHistoryEvents);
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
 
             var latestEvent = activityItem.LastEvent;
@@ -631,7 +631,7 @@ namespace Guflow.Tests
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            _workflow.SetupGet(w => w.CurrentHistoryEvents).Returns(workflowHistoryEvents);
+            _workflow.SetupGet(w => w.WorkflowEvents).Returns(workflowHistoryEvents);
             return new ActivityItem(_activityIdenity, _workflow.Object);
         }
         private class WorkflowWithParentActivity : Workflow
