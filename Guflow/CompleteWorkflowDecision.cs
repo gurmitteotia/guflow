@@ -30,9 +30,9 @@ namespace Guflow
             return workflowClosingActions.OnCompletion(_result, Proposal);
         }
 
-        internal override void Raise(IPostExecutionEvents postExecutionEvents)
+        internal override void Raise(PostExecutionEvents postExecutionEvents)
         {
-            postExecutionEvents.Completed("","", _result);
+            postExecutionEvents.Completed(_result);
         }
 
         public override string ToString()
@@ -48,11 +48,9 @@ namespace Guflow
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return (_result.GetHashCode() * 397) ^ Proposal.GetHashCode();
-            }
+            return string.IsNullOrEmpty(_result) ? GetType().GetHashCode() : _result.GetHashCode() ^ Proposal.GetHashCode();
         }
+
         private bool Equals(CompleteWorkflowDecision other)
         {
             return string.Equals(_result, other._result) && Proposal == other.Proposal;

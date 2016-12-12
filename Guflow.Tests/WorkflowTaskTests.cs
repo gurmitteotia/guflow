@@ -19,16 +19,16 @@ namespace Guflow.Tests
         public void Setup()
         {
             _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
-            _domain = new Domain("name",new Mock<IAmazonSimpleWorkflow>().Object);
+            _domain = new Domain("name", _amazonWorkflowClient.Object);
         }
 
         [Test]
-        public async Task Interpret_new_events_for_hosted_workflow_are_sent_to_amazon_swf()
+        public async Task Send_interpreted_events_to_amazon_swf()
         {
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow("result") });
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new WorkflowCompleteOnSignal("result") });
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
 
-             await workflowTasks.ExecuteFor(hostedWorkflows);
+             await workflowTasks.ExecuteForAsync(hostedWorkflows);
 
              AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token");
         }
@@ -36,10 +36,10 @@ namespace Guflow.Tests
         [Test]
         public async Task Workflow_history_events_can_not_be_queried_after_execution()
         {
-            var hostedWorkflow = new TestWorkflow();
+            var hostedWorkflow = new WorkflowCompleteOnSignal();
             var hostedWorkflows = new HostedWorkflows(_domain, new[] { hostedWorkflow });
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
-            await workflowTasks.ExecuteFor(hostedWorkflows);
+            await workflowTasks.ExecuteForAsync(hostedWorkflows);
 
             Assert.Throws<InvalidOperationException>(() => hostedWorkflow.AccessHistoryEvents());
         }
@@ -50,7 +50,7 @@ namespace Guflow.Tests
         {
             var workflowTasks = WorkflowTask.Empty;
 
-            await workflowTasks.ExecuteFor(new HostedWorkflows(_domain, new[] {new TestWorkflow("result")}));
+            await workflowTasks.ExecuteForAsync(new HostedWorkflows(_domain, new[] {new WorkflowCompleteOnSignal("result")}));
 
             _amazonWorkflowClient.Verify(w => w.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),
                                                                                It.IsAny<CancellationToken>()), Times.Never);
@@ -59,18 +59,55 @@ namespace Guflow.Tests
         [Test]
         public async Task Raise_workflow_completed_event_when_workflow_completed_decision_is_delivered_to_amazon_swf()
         {
-            var workflow = new TestWorkflow("result");
             WorkflowCompletedEventArgs eventArgs = null;
+            var workflow = new WorkflowCompleteOnSignal("result");
             workflow.Completed += (s, e) => { eventArgs = e; };
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] { workflow });
-            var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
 
-            await workflowTasks.ExecuteFor(hostedWorkflows);
+            await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
 
             Assert.That(eventArgs, Is.Not.Null);
             Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
             Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
             Assert.That(eventArgs.Result, Is.EqualTo("result"));
+        }
+
+        [Test]
+        public async Task Raise_workflow_failed_event_when_workflow_failed_decision_is_delivered_to_amazon_swf()
+        {
+            WorkflowFailedEventArgs eventArgs = null;
+            var workflow = new WorkflowFailOnSignal("reason","detail");
+            workflow.Failed += (s, e) => { eventArgs = e; };
+
+            await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
+            Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
+            Assert.That(eventArgs.Reason, Is.EqualTo("reason"));
+            Assert.That(eventArgs.Details, Is.EqualTo("detail"));
+        }
+
+
+        [Test]
+        public async Task Raise_workflow_cancelled_event_when_workflow_cancelled_decision_is_delivered_to_amazon_swf()
+        {
+            WorkflowCancelledEventArgs eventArgs = null;
+            var workflow = new WorkflowCancelOnSignal("detail");
+            workflow.Cancelled += (s, e) => { eventArgs = e; };
+
+            await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
+            Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
+            Assert.That(eventArgs.Details, Is.EqualTo("detail"));
+        }
+
+        private async Task ExecuteWorkflowOnSignalEvent(Workflow workflow, string workflowId, string runId)
+        {
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] {workflow});
+            var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents(workflowId, runId), _domain);
+            await workflowTasks.ExecuteForAsync(hostedWorkflows);
         }
 
         private void AssertThatInterpretedDecisionsAreSentOverWorkflowClient(string token)
@@ -79,7 +116,7 @@ namespace Guflow.Tests
             {
                 Assert.That(r.TaskToken,Is.EqualTo(token));
                 var d = r.Decisions;
-                Assert.That(d.Count(), Is.EqualTo(1));
+                Assert.That(d.Count, Is.EqualTo(1));
                 var decision = d.First();
                 Assert.That(decision.DecisionType,Is.EqualTo(DecisionType.CompleteWorkflowExecution));
                 return true;
@@ -91,7 +128,7 @@ namespace Guflow.Tests
         private static DecisionTask DecisionTasksWithSignalEvents(string token)
         {
             var historyEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input");
-            return new DecisionTask()
+            return new DecisionTask
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
                 Events = new List<HistoryEvent>(){ historyEvent},
@@ -101,12 +138,26 @@ namespace Guflow.Tests
             }; 
         }
 
-        [WorkflowDescription("1.0")]
-        private class TestWorkflow:Workflow
+        private static DecisionTask DecisionTasksWithSignalEvents(string workflowId, string runId)
+        {
+            var historyEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input");
+            return new DecisionTask
+            {
+                WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
+                Events = new List<HistoryEvent>() { historyEvent },
+                PreviousStartedEventId = historyEvent.EventId,
+                StartedEventId = historyEvent.EventId,
+                TaskToken = "token",
+                WorkflowExecution = new WorkflowExecution() {  WorkflowId = workflowId, RunId = runId}
+            };
+        }
+
+        [WorkflowDescription("1.0", Name = "TestWorkflow")]
+        private class WorkflowCompleteOnSignal:Workflow
         {
             private readonly string _completeResult;
 
-            public TestWorkflow(string completeResult = null)
+            public WorkflowCompleteOnSignal(string completeResult = null)
             {
                 _completeResult = completeResult;
             }
@@ -123,6 +174,39 @@ namespace Guflow.Tests
             }
         }
 
-      
+        [WorkflowDescription("1.0", Name = "TestWorkflow")]
+        private class WorkflowFailOnSignal : Workflow
+        {
+            private readonly string _reason;
+            private readonly string _details;
+
+            public WorkflowFailOnSignal(string reason, string details)
+            {
+                _reason = reason;
+                _details = details;
+            }
+
+            [WorkflowEvent(EventName.Signal)]
+            private WorkflowAction OnSignal()
+            {
+                return FailWorkflow(_reason, _details);
+            }
+        }
+        [WorkflowDescription("1.0", Name = "TestWorkflow")]
+        private class WorkflowCancelOnSignal : Workflow
+        {
+            private readonly string _details;
+
+            public WorkflowCancelOnSignal(string details)
+            {
+                _details = details;
+            }
+
+            [WorkflowEvent(EventName.Signal)]
+            private WorkflowAction OnSignal()
+            {
+                return CancelWorkflow(_details);
+            }
+        }
     }
 }

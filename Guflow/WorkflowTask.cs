@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow
@@ -10,12 +11,12 @@ namespace Guflow
     internal class WorkflowTask
     {
         private readonly DecisionTask _decisionTask;
-        private readonly Domain _domain;
+        private readonly IAmazonSimpleWorkflow _client;
         private readonly Func<HostedWorkflows,CancellationToken,Task> _actionToExecute;
-        private WorkflowTask(DecisionTask decisionTask, Domain domain)
+        private WorkflowTask(DecisionTask decisionTask, IAmazonSimpleWorkflow client)
         {
             _decisionTask = decisionTask;
-            _domain = domain;
+            _client = client;
             _actionToExecute = ExecuteTasks;
         }
 
@@ -28,10 +29,10 @@ namespace Guflow
 
         public static WorkflowTask CreateFor(DecisionTask decisionTask, Domain domain)
         {
-            return new WorkflowTask(decisionTask, domain);
+            return new WorkflowTask(decisionTask, domain.Client);
         }
 
-        public async Task ExecuteFor(HostedWorkflows hostedWorkflows, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ExecuteForAsync(HostedWorkflows hostedWorkflows, CancellationToken cancellationToken = default(CancellationToken))
         {
             await _actionToExecute(hostedWorkflows, cancellationToken);
         }
@@ -44,22 +45,25 @@ namespace Guflow
             using (var execution = workflow.NewExecutionFor(historyEvents))
             {
                 var decisions = execution.Execute().ToArray();
-                await SendDecisionsAsync(decisions, workflow, cancellationToken);
+                await SendDecisionsAsync(decisions, cancellationToken);
+                RaisePostExecutionEvents(decisions, workflow);
             }
         }
 
-        private async Task SendDecisionsAsync(IEnumerable<WorkflowDecision> decisions, IPostExecutionEvents postExecutionEvents, CancellationToken cancellationToken)
+        private async Task SendDecisionsAsync(IEnumerable<WorkflowDecision> decisions, CancellationToken cancellationToken)
         {
-            if (this == Empty)
-                return;
-
-            var request = CreateResponseRequest(decisions);
-            await _domain.RespondDecisionTaskCompletedAsync(request, cancellationToken);
-            var closingDecisions = decisions.OfType<WorkflowClosingDecision>().ToList();
-            closingDecisions.ForEach(d=>d.Raise(postExecutionEvents));
+            var decisionsResponse = ResponseFrom(decisions);
+            await _client.RespondDecisionTaskCompletedAsync(decisionsResponse, cancellationToken);
         }
 
-        private RespondDecisionTaskCompletedRequest CreateResponseRequest(IEnumerable<WorkflowDecision> decisions)
+        private void RaisePostExecutionEvents(IEnumerable<WorkflowDecision> workflowDecisions, Workflow workflow)
+        {
+            var postExecutionEvents = new PostExecutionEvents(workflow, _decisionTask.WorkflowExecution.WorkflowId, _decisionTask.WorkflowExecution.RunId);
+            var workflowClosingDecisions = workflowDecisions.OfType<WorkflowClosingDecision>().ToList();
+            workflowClosingDecisions.ForEach(d=>d.Raise(postExecutionEvents));
+        }
+
+        private RespondDecisionTaskCompletedRequest ResponseFrom(IEnumerable<WorkflowDecision> decisions)
         {
             return new RespondDecisionTaskCompletedRequest
             {

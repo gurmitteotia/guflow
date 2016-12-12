@@ -52,6 +52,20 @@ namespace Guflow.Tests
             Assert.That(workflowAction,Is.EqualTo(WorkflowAction.StartWorkflow(workflow)));
         }
 
+        [Test]
+        public void Raise_workflow_started_event()
+        {
+            var workflow = new EmptyWorkflow();
+            WorkflowStartedEventArgs eventArgs = null;
+            workflow.Started += (s, e) => { eventArgs = e; };
+            var workflowEvent = new WorkflowStartedEvent(HistoryEventFactory.CreateWorkflowStartedEvent());
+
+            workflowEvent.Interpret(workflow);
+
+            Assert.That(eventArgs,Is.Not.Null);
+            Assert.That(eventArgs.StartEvent, Is.EqualTo(workflowEvent));
+        }
+
         private class EmptyWorkflow : Workflow
         {
         }

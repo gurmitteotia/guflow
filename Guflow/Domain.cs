@@ -12,15 +12,20 @@ namespace Guflow
     public sealed class Domain
     {
         private readonly string _name;
-        private readonly IAmazonSimpleWorkflow _amazonSimpleWorkflow;
+        private readonly IAmazonSimpleWorkflow _simpleWorkflowClient;
 
-        public Domain(string name, IAmazonSimpleWorkflow amazonSimpleWorkflow)
+        public Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient)
         {
             Ensure.NotNullAndEmpty(name, () => new ArgumentException(Resources.Domain_name_required, "name"));
-            Ensure.NotNull(amazonSimpleWorkflow, "amazonSimpleWorkflow");
+            Ensure.NotNull(simpleWorkflowClient, "simpleWorkflowClient");
 
             _name = name;
-            _amazonSimpleWorkflow = amazonSimpleWorkflow;
+            _simpleWorkflowClient = simpleWorkflowClient;
+        }
+
+        internal IAmazonSimpleWorkflow Client
+        {
+            get { return _simpleWorkflowClient; }
         }
 
         public async Task RegisterWorkflowAsync<TWorkflow>() where TWorkflow : Workflow
@@ -44,7 +49,7 @@ namespace Guflow
                 throw new WorkflowDeprecatedException(string.Format(Resources.Workflow_deprecated, workflowDescription.Name, workflowDescription.Version));
 
             if (workflowToRegister == null)
-                await _amazonSimpleWorkflow.RegisterWorkflowTypeAsync(workflowDescription.RegisterRequest(_name));
+                await _simpleWorkflowClient.RegisterWorkflowTypeAsync(workflowDescription.RegisterRequest(_name));
         }
 
         public async Task RegisterAsync(uint retentionPeriodInDays, string description = null)
@@ -71,7 +76,7 @@ namespace Guflow
                 try
                 {
                     var request = taskQueue.CreateRequest(_name, nextPageToken);
-                    var response = await _amazonSimpleWorkflow.PollForDecisionTaskAsync(request);
+                    var response = await _simpleWorkflowClient.PollForDecisionTaskAsync(request);
                     return response.DecisionTask;
                 }
                 catch (Exception exception)
@@ -95,25 +100,19 @@ namespace Guflow
         public async Task CancelWorkflowAsync(CancelWorkflowRequest cancelRequest)
         {
             Ensure.NotNull(cancelRequest, "cancelRequest");
-            await _amazonSimpleWorkflow.RequestCancelWorkflowExecutionAsync(cancelRequest.SwfFormat(_name));
+            await _simpleWorkflowClient.RequestCancelWorkflowExecutionAsync(cancelRequest.SwfFormat(_name));
         }
 
         public async Task StartWorkflowAsync(StartWorkflowRequest startRequest)
         {
             Ensure.NotNull(startRequest, "startRequest");
-            await _amazonSimpleWorkflow.StartWorkflowExecutionAsync(startRequest.SwfFormat(_name));
+            await _simpleWorkflowClient.StartWorkflowExecutionAsync(startRequest.SwfFormat(_name));
         }
-
-        internal async Task RespondDecisionTaskCompletedAsync(RespondDecisionTaskCompletedRequest request, CancellationToken cancellationToken)
-        {
-            await _amazonSimpleWorkflow.RespondDecisionTaskCompletedAsync(request, cancellationToken);
-        }
-
         public async Task SignalWorkflowAsync(SignalWorkflowRequest signalRequest)
         {
             Ensure.NotNull(signalRequest, "signalRequest");
 
-            await _amazonSimpleWorkflow.SignalWorkflowExecutionAsync(signalRequest.SwfFormat(_name));
+            await _simpleWorkflowClient.SignalWorkflowExecutionAsync(signalRequest.SwfFormat(_name));
 
         }
         private async Task RegisterDomainAsync(uint retentionPeriodInDays, string description)
@@ -124,13 +123,13 @@ namespace Guflow
                 Description = description,
                 WorkflowExecutionRetentionPeriodInDays = retentionPeriodInDays.ToString()
             };
-            await _amazonSimpleWorkflow.RegisterDomainAsync(request);
+            await _simpleWorkflowClient.RegisterDomainAsync(request);
         }
 
         private async Task<DomainInfo> ListDomainFromAmazonBy(string domainName)
         {
             var request = new ListDomainsRequest() {MaximumPageSize = 1000};
-            var response = await _amazonSimpleWorkflow.ListDomainsAsync(request);
+            var response = await _simpleWorkflowClient.ListDomainsAsync(request);
             return response.DomainInfos.Infos.FirstOrDefault(d => d.Name.Equals(domainName));
         }
 
@@ -140,7 +139,7 @@ namespace Guflow
             listRequest.Name = workflowName;
             listRequest.Domain = domainName;
             listRequest.MaximumPageSize = 1000;
-            var response = await _amazonSimpleWorkflow.ListWorkflowTypesAsync(listRequest);
+            var response = await _simpleWorkflowClient.ListWorkflowTypesAsync(listRequest);
             return response.WorkflowTypeInfos.TypeInfos;
         }
     }

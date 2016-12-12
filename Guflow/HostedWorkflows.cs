@@ -44,7 +44,7 @@ namespace Guflow
             while (!Cancelled())
             {
                 var workflowTask = await taskQueue.PollForNewTasksAsync(_domain);
-                await workflowTask.ExecuteFor(this);
+                await workflowTask.ExecuteForAsync(this);
             }
         }
     }

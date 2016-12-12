@@ -4,10 +4,10 @@ namespace Guflow
 {
     public sealed class WorkflowCompletedEventArgs : EventArgs
     {
-        internal WorkflowCompletedEventArgs( string workflowId, string workflowRunId, string result)
+        public WorkflowCompletedEventArgs( string workflowId, string workflowRunId, string result)
         {
-            WorkflowRunId = workflowRunId;
             WorkflowId = workflowId;
+            WorkflowRunId = workflowRunId;
             Result = result;
         }
 

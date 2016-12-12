@@ -49,9 +49,9 @@ namespace Guflow
             return workflowClosingActions.OnFailure(_reason, _details);
         }
 
-        internal override void Raise(IPostExecutionEvents postExecutionEvents)
+        internal override void Raise(PostExecutionEvents postExecutionEvents)
         {
-            throw new System.NotImplementedException();
+            postExecutionEvents.Failed(_reason, _details);
         }
     }
 }

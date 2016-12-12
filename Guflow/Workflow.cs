@@ -5,7 +5,7 @@ using Guflow.Properties;
 
 namespace Guflow
 {
-    public abstract class Workflow : IWorkflow, IWorkflowClosingActions, IPostExecutionEvents
+    public abstract class Workflow : IWorkflow, IWorkflowClosingActions
     {
         private readonly HashSet<WorkflowItem> _allWorkflowItems = new HashSet<WorkflowItem>();
         private IWorkflowEvents _currentWorkflowEvents;
@@ -15,13 +15,26 @@ namespace Guflow
         {
             _workflowEventMethods = WorkflowEventMethods.For(this);
         }
+        public event EventHandler<WorkflowCompletedEventArgs> Completed;
+        public event EventHandler<WorkflowFailedEventArgs> Failed;
+        public event EventHandler<WorkflowCancelledEventArgs> Cancelled;
+        public event EventHandler<WorkflowStartedEventArgs> Started;
 
         WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
+            Raise(workflowStartedEvent);
+
             var workflowEventMethod = _workflowEventMethods.FindFor(EventName.WorkflowStarted);
             return workflowEventMethod == null
                 ? WorkflowAction.StartWorkflow(this)
                 : workflowEventMethod.Invoke(workflowStartedEvent);
+        }
+
+        private void Raise(WorkflowStartedEvent @event)
+        {
+            var eventHandler = Started;
+            if(eventHandler!=null)
+                eventHandler(this,new WorkflowStartedEventArgs(@event));
         }
 
         WorkflowAction IWorkflowActions.OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
@@ -136,11 +149,23 @@ namespace Guflow
                 : workflowEventMethod.Invoke(workflowCancellationFailedEvent);
         }
 
-        void IPostExecutionEvents.Completed(string workflowId, string workflowRunId, string result)
+        internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {
             var completedHandler = Completed;
             if(completedHandler!=null)
                 completedHandler(this, new WorkflowCompletedEventArgs(workflowId, workflowRunId, result));
+        }
+        internal void OnFailed(string workflowId, string workflowRunId, string reason, string details)
+        {
+            var eventHandler = Failed;
+            if (eventHandler != null)
+                eventHandler(this, new WorkflowFailedEventArgs(workflowId, workflowRunId, reason, details));
+        }
+        internal void OnCancelled(string workflowId, string workflowRunId, string details)
+        {
+            var eventHandler = Cancelled;
+            if (eventHandler != null)
+                eventHandler(this, new WorkflowCancelledEventArgs(workflowId, workflowRunId, details));
         }
 
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
@@ -320,8 +345,6 @@ namespace Guflow
             _currentWorkflowEvents = null;
         }
 
-        public event EventHandler<WorkflowCompletedEventArgs> Completed; 
-
         private ActivityItem FindActivity(Identity identity)
         {
             return _allWorkflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
@@ -329,10 +352,6 @@ namespace Guflow
         private TimerItem FindTimer(Identity identity)
         {
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
-        }
-        private TimerItem FindTimer(TimerEvent timerFiredEvent)
-        {
-            return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(timerFiredEvent.IsFor);
         }
         private ActivityItem FindActivityFor(ActivityEvent activityEvent)
         {

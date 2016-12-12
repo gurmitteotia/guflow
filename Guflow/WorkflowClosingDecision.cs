@@ -8,6 +8,6 @@
         }
         internal abstract WorkflowAction ProvideFinalActionFrom(IWorkflowClosingActions workflowClosingActions);
 
-        internal abstract void Raise(IPostExecutionEvents postExecutionEvents);
+        internal abstract void Raise(PostExecutionEvents postExecutionEvents);
     }
 }
