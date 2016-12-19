@@ -190,6 +190,15 @@ namespace Guflow.Tests
             Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Ignore));
         }
 
+        [Test]
+        public void Throws_actual_exception_thrown_by_target_method()
+        {
+            var targetWorkflow = new MethodThrowsException(new ApplicationException(""));
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+
+            Assert.Throws<ApplicationException>(()=>workflowMethod.Invoke(_argument));
+        }
+
         private class TestClassWithPublicMethod : Workflow
         {
             [WorkflowEvent(_eventName)]
@@ -300,7 +309,6 @@ namespace Guflow.Tests
             public void TestMethod(long reason, string someId)
             {
             }
-
         }
 
         private class MethodWithNonExistingArgument : Workflow
@@ -339,11 +347,23 @@ namespace Guflow.Tests
             }
         }
 
-        [AttributeUsage(AttributeTargets.Method)]
-        private class TestMethodAttribute : Attribute
+        private class MethodThrowsException : Workflow
         {
+            private readonly Exception _exception;
+
+            public MethodThrowsException(Exception exception)
+            {
+                _exception = exception;
+            }
+
+            [WorkflowEvent(_eventName)]
+            public WorkflowAction TestMethod()
+            {
+                throw _exception;
+            }
         }
 
+     
         private class TestArgument : WorkflowEvent
         {
             public TestArgument(long eventId) : base(eventId)

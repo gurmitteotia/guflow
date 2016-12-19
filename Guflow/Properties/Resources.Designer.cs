@@ -151,6 +151,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Empty workflows. Please provide at least one workflow to begin hosting..
+        /// </summary>
+        internal static string No_workflow_to_host {
+            get {
+                return ResourceManager.GetString("No_workflow_to_host", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Workflow type {0} does not derive from {1} class..
         /// </summary>
         internal static string Non_Workflow_type {

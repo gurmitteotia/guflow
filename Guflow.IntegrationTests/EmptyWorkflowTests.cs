@@ -3,7 +3,7 @@
 namespace Guflow.IntegrationTests
 {
     [TestFixture]
-    public class HostedWorkflowsTests
+    public class EmptyWorkflowTests
     {
 
     }

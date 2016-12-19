@@ -90,7 +90,11 @@
     <Compile Include="CancelWorkflowRequest.cs" />
     <Compile Include="ChildPolicy.cs" />
     <Compile Include="Domain.cs" />
+    <Compile Include="Error.cs" />
     <Compile Include="ErrorAction.cs" />
+    <Compile Include="ErrorHandler.cs" />
+    <Compile Include="IErrorHandler.cs" />
+    <Compile Include="HandleError.cs" />
     <Compile Include="PostExecutionEvents.cs" />
     <Compile Include="NonWorkflowTypeException.cs" />
     <Compile Include="SignalWorkflowRequest.cs" />
@@ -193,7 +197,6 @@
     <Compile Include="WorkflowStartedEvent.cs" />
     <Compile Include="WorkflowStartedEventArgs.cs" />
     <Compile Include="WorkflowTask.cs" />
-    <Compile Include="WorkflowTaskDecisions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

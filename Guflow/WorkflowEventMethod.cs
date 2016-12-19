@@ -19,8 +19,18 @@ namespace Guflow
         public WorkflowAction Invoke(WorkflowEvent argument)
         {
             var parameters = BuildParametersFrom(argument);
-            var returnType = _methodInfo.Invoke(_targetInstance, parameters);
-            return returnType == null ? WorkflowAction.Ignore : (WorkflowAction)returnType;
+
+            try
+            {
+                var returnType = _methodInfo.Invoke(_targetInstance, parameters);
+                return returnType == null ? WorkflowAction.Ignore : (WorkflowAction)returnType;
+            }
+            catch (TargetInvocationException ex)
+            {
+                if (ex.InnerException != null)
+                    throw ex.InnerException;
+                throw;
+            }
         }
 
         private object[] BuildParametersFrom(WorkflowEvent argument)

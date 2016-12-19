@@ -150,6 +150,9 @@
   <data name="Non_Workflow_type" xml:space="preserve">
     <value>Workflow type {0} does not derive from {1} class.</value>
   </data>
+  <data name="No_workflow_to_host" xml:space="preserve">
+    <value>Empty workflows. Please provide at least one workflow to begin hosting.</value>
+  </data>
   <data name="Read_strategy_required" xml:space="preserve">
     <value>Read startegy is required.</value>
   </data>

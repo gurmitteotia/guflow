@@ -46,7 +46,7 @@ namespace Guflow.Tests
         [Test]
         public void Invalid_arguments_tests()
         {
-            Assert.Throws<ArgumentException>(() => WorkflowDescriptionAttribute.FindOn(null));
+            Assert.Throws<ArgumentNullException>(() => WorkflowDescriptionAttribute.FindOn(null));
         }
 
         private class WorkflowWithoutAttribute : Workflow

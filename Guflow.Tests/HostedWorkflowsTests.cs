@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
-using Amazon.SimpleWorkflow.Model;
 using Moq;
 using NUnit.Framework;
 
@@ -51,55 +47,24 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public async Task Execute_the_workflow_for_new_tasks_in_loop()
+        public void Invalid_constructor_argument_tests()
         {
-            var hostedWorkflows = _domain.Host(new[] {new TestWorkflow1()});
-            var signalTasks1 = CreateDecisionTaskWithSignalEvents("token1");
-            var signalTasks2 = CreateDecisionTaskWithSignalEvents("token2");
-            SetupSimpleWorkflowToReturn(signalTasks1, signalTasks2);
-            int runAttempts = 0;
-            hostedWorkflows.Cancelled = ()=>++runAttempts > 2;
-            await hostedWorkflows.StartExecutionAsync(new TaskQueue("name"));
-
-            AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token1");
-            AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token2");
-        }
-
-        private void AssertThatInterpretedDecisionsAreSentOverWorkflowClient(string token)
-        {
-            Func<RespondDecisionTaskCompletedRequest, bool> decisions = (r) =>
-            {
-                Assert.That(r.TaskToken, Is.EqualTo(token));
-                var d = r.Decisions;
-                Assert.That(d.Count(), Is.EqualTo(1));
-                var decision = d.First();
-                Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.CancelWorkflowExecution));
-                return true;
-            };
-            _simpleWorkflow.Verify(w => w.RespondDecisionTaskCompletedAsync(It.Is<RespondDecisionTaskCompletedRequest>(r => decisions(r)),
-                                                                                It.IsAny<CancellationToken>()), Times.Once);
-        }
-
-        private void SetupSimpleWorkflowToReturn(DecisionTask decisionTask1, DecisionTask decisionTask2)
-        {
-            _simpleWorkflow.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new PollForDecisionTaskResponse {DecisionTask = decisionTask1}))
-                .Returns(Task.FromResult(new PollForDecisionTaskResponse {DecisionTask = decisionTask2}));
+            Assert.Throws<ArgumentNullException>(() => new HostedWorkflows(null, new[] {new TestWorkflow1()}));
+            Assert.Throws<ArgumentNullException>(() => new HostedWorkflows(_domain, null));
+            Assert.Throws<ArgumentException>(() => new HostedWorkflows(_domain, Enumerable.Empty<Workflow>()));
+            Assert.Throws<ArgumentException>(() => new HostedWorkflows(_domain, new []{(Workflow)null}));
 
         }
 
-
-        private static DecisionTask CreateDecisionTaskWithSignalEvents(string token)
+        [Test]
+        public void Invalid_error_handler_argument_tests()
         {
-            var historyEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input");
-            return new DecisionTask()
-            {
-                WorkflowType = new WorkflowType() { Name = "TestWorkflow1", Version = "2.0" },
-                Events = new List<HistoryEvent>() { historyEvent },
-                PreviousStartedEventId = historyEvent.EventId,
-                StartedEventId = historyEvent.EventId,
-                TaskToken = token
-            };
+            var hostedWorkflows = new HostedWorkflows(_domain, new []{new TestWorkflow1()});
+
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError((HandleError) null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError((IErrorHandler)null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError((HandleError)null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError((IErrorHandler)null));
         }
 
         [WorkflowDescription("2.0")]

@@ -1,6 +1,4 @@
-﻿using Amazon.Runtime.Internal;
-
-namespace Guflow
+﻿namespace Guflow
 {
     public class ErrorAction
     {

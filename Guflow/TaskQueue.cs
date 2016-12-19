@@ -10,7 +10,7 @@ namespace Guflow
         private readonly string _taskListName;
         private readonly string _pollingIdentity;
         private ReadHistoryEvents _readHistoryEvents;
-        private OnError _onPollingError = (e, c) => ErrorAction.Unhandled;
+        private IErrorHandler _errorHandler = ErrorHandler.NotHandled;
         public static readonly ReadHistoryEvents ReadAllEvents = (d,q) => ReadAllEventsAsync(d,q);
         public static readonly ReadHistoryEvents ReadFirstPage = (d,q) => ReadFirstPageAsync(d, q); 
 
@@ -39,15 +39,19 @@ namespace Guflow
                 return WorkflowTask.CreateFor(decisionTask, domain);
             return WorkflowTask.Empty;
         }
-        public void OnPollingError(OnError onError)
+        public void OnError(HandleError errorHandler)
         {
-            Ensure.NotNull(onError,()=>new ArgumentException("onError", "onError"));
-            _onPollingError = onError;
+            Ensure.NotNull(errorHandler, "errorHandler");
+            _errorHandler = ErrorHandler.Default(errorHandler);
         }
-
-        internal ErrorAction HandleError(Exception exception, int count)
+        public void OnError(IErrorHandler errorHandler)
         {
-            return _onPollingError(exception, count);
+            Ensure.NotNull(errorHandler, "errorHandler");
+            OnError(errorHandler.OnError);
+        }
+        internal ErrorAction HandlePollingError(Error error)
+        {
+            return _errorHandler.OnError(error);
         }
         private static bool NewTasksAreReturned(DecisionTask decisionTask)
         {
@@ -84,8 +88,6 @@ namespace Guflow
         }
 
         public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue);
-
-        public delegate ErrorAction OnError(Exception exception, int count);
 
     }
 }

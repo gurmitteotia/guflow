@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
@@ -13,7 +12,8 @@ namespace Guflow
     {
         private readonly string _name;
         private readonly IAmazonSimpleWorkflow _simpleWorkflowClient;
-
+        private static readonly DecisionTask DefaultDecisionTask = new DecisionTask();
+        
         public Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient)
         {
             Ensure.NotNullAndEmpty(name, () => new ArgumentException(Resources.Domain_name_required, "name"));
@@ -35,6 +35,7 @@ namespace Guflow
 
         public async Task RegisterWorkflowAsync(Type workflowType)
         {
+            Ensure.NotNull(workflowType, "workflowType");
             await RegisterWorkflowAsync(WorkflowDescriptionAttribute.FindOn(workflowType));
         }
 
@@ -68,6 +69,8 @@ namespace Guflow
 
         public async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)
         {
+            Ensure.NotNull(taskQueue, "taskQueue");
+            var error = new Error();
             int retryAttempts = 0;
             bool retry;
             do
@@ -75,13 +78,11 @@ namespace Guflow
                 retry = false;
                 try
                 {
-                    var request = taskQueue.CreateRequest(_name, nextPageToken);
-                    var response = await _simpleWorkflowClient.PollForDecisionTaskAsync(request);
-                    return response.DecisionTask;
+                    return await PollAmazonSwfForDecisionTaskAsync(taskQueue, nextPageToken);
                 }
                 catch (Exception exception)
                 {
-                    var errorAction = taskQueue.HandleError(exception, retryAttempts);
+                    var errorAction = taskQueue.HandlePollingError(error.Set(exception, retryAttempts));
                     if (errorAction.IsRethrow)
                         throw;
                     if (errorAction.IsRetry)
@@ -89,9 +90,16 @@ namespace Guflow
                 }
                 retryAttempts++;
             } while (retry);
-            return new DecisionTask();
+            return DefaultDecisionTask;
         }
-        
+
+        private async Task<DecisionTask> PollAmazonSwfForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)
+        {
+            var request = taskQueue.CreateRequest(_name, nextPageToken);
+            var response = await _simpleWorkflowClient.PollForDecisionTaskAsync(request);
+            return response.DecisionTask;
+        } 
+
         public HostedWorkflows Host(IEnumerable<Workflow> workflows)
         {
             return new HostedWorkflows(this,workflows);
