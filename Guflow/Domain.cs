@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Amazon;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
+using Guflow.Decider;
 using Guflow.Properties;
 
 namespace Guflow

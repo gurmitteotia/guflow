@@ -5,8 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
+using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
+using ChildPolicy = Guflow.Decider.ChildPolicy;
 
 namespace Guflow.Tests
 {

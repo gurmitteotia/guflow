@@ -2,7 +2,7 @@
 
 namespace Guflow
 {
-    public static class Ensure
+    internal static class Ensure
     {
         public static void NotNull(object argument, string argumentName)
         {

@@ -61,6 +61,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ActivityDescriptionAttribute is not applied on activity {0}..
+        /// </summary>
+        internal static string Activity_attribute_missing {
+            get {
+                return ResourceManager.GetString("Activity_attribute_missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can not determine the task list to poll on for new tasks when multiple workflows are hosted. Please explicitly pass the task list to begin the execution. .
         /// </summary>
         internal static string Can_not_determine_the_task_list_to_poll_on {
@@ -133,7 +142,7 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Version is empty for workflow {0}..
+        ///   Looks up a localized string similar to Version is empty for {0}..
         /// </summary>
         internal static string Empty_version {
             get {
@@ -174,6 +183,15 @@ namespace Guflow.Properties {
         internal static string No_workflow_to_host {
             get {
                 return ResourceManager.GetString("No_workflow_to_host", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Activity type {0} does not derive from {1} class..
+        /// </summary>
+        internal static string Non_activity_type {
+            get {
+                return ResourceManager.GetString("Non_activity_type", resourceCulture);
             }
         }
         

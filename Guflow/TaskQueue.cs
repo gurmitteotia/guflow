@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow.Model;
+using Guflow.Decider;
 using Guflow.Properties;
 
 namespace Guflow
@@ -27,7 +28,7 @@ namespace Guflow
             get { return _readHistoryEvents; }
             set
             {
-                Ensure.NotNull(value,()=>new ArgumentException(Resources.Read_strategy_required, "ReadStrategy"));
+                Ensure.NotNull(value,()=>new ArgumentNullException(Resources.Read_strategy_required, "ReadStrategy"));
                 _readHistoryEvents = value;
             }
         }
@@ -88,6 +89,5 @@ namespace Guflow
         }
 
         public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue);
-
     }
 }
