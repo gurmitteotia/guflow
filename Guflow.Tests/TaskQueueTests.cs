@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
+using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
 
@@ -71,7 +72,7 @@ namespace Guflow.Tests
         public void Invalid_arugments_tests()
         {
             Assert.Throws<ArgumentException>(() => new TaskQueue(null));
-            Assert.Throws<ArgumentException>(() => _taskQueue.ReadStrategy=null);
+            Assert.Throws<ArgumentNullException>(() => _taskQueue.ReadStrategy = null);
             Assert.Throws<ArgumentNullException>(() => _taskQueue.OnError((HandleError)null));
             Assert.Throws<ArgumentNullException>(() => _taskQueue.OnError((IErrorHandler)null));
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Amazon;
+using Guflow.Decider;
 
 namespace Guflow.IntegrationTests
 {

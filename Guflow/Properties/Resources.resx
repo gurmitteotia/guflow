@@ -136,7 +136,7 @@
     <value>Timer with name {0} is already added to workflowClosingActions.</value>
   </data>
   <data name="Empty_version" xml:space="preserve">
-    <value>Version is empty for workflow {0}.</value>
+    <value>Version is empty for {0}.</value>
   </data>
   <data name="Invalid_parameter" xml:space="preserve">
     <value>Workflow method {0} has incompatible parameter {1}, which can not be deserialized from source event {2}</value>
@@ -182,5 +182,11 @@
   </data>
   <data name="Workflow_execution_already_stopped" xml:space="preserve">
     <value>Workflow execution is already stopped.</value>
+  </data>
+  <data name="Activity_attribute_missing" xml:space="preserve">
+    <value>ActivityDescriptionAttribute is not applied on activity {0}.</value>
+  </data>
+  <data name="Non_activity_type" xml:space="preserve">
+    <value>Activity type {0} does not derive from {1} class.</value>
   </data>
 </root>
