@@ -47,6 +47,30 @@ namespace Guflow.Tests
         }
 
         [Test]
+        public void Throws_exception_multiple_hosted_workflows_execution_start_without_providing_the_task_queue()
+        {
+            var hostedWorkflows = _domain.Host(new Workflow[] {new TestWorkflow1(), new TestWorkflow2()});
+
+            Assert.Throws<InvalidOperationException>(() => hostedWorkflows.StartExecution());
+        }
+
+        [Test]
+        public void Throws_exception_when_default_task_list_is_not_provided_and_execution_start_without_providing_the_task_queue()
+        {
+            var hostedWorkflows = _domain.Host(new Workflow[] { new TestWorkflow1() });
+
+            Assert.Throws<InvalidOperationException>(() => hostedWorkflows.StartExecution());
+        }
+
+        [Test]
+        public void Throws_exception_when_execution_start_with_null_task_queue()
+        {
+            var hostedWorkflows = _domain.Host(new Workflow[] { new TestWorkflow1() });
+
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.StartExecution((TaskQueue)null));
+        }
+
+        [Test]
         public void Invalid_constructor_argument_tests()
         {
             Assert.Throws<ArgumentNullException>(() => new HostedWorkflows(null, new[] {new TestWorkflow1()}));

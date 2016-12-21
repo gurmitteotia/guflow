@@ -24,7 +24,7 @@ namespace Guflow.Tests
 
             var startupDecisions = startWorkflowAction.GetDecisions();
 
-            CollectionAssert.AreEqual(startupDecisions, new[] { new CompleteWorkflowDecision("Workflow is completed as no schedulable item is found.") });
+            CollectionAssert.AreEqual(startupDecisions, new[] { new CompleteWorkflowDecision("Workflow is completed because no schedulable item was found.") });
         }
 
         [Test]

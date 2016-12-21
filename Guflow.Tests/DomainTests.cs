@@ -38,13 +38,6 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Register_throws_exception_when_workflow_is_deprecated()
-        {
-            SetupAmazonSwfToReturn(new WorkflowTypeInfo { WorkflowType = new WorkflowType { Version = "1.0" }, Status = RegistrationStatus.DEPRECATED });
-
-            Assert.Throws<WorkflowDeprecatedException>(async () => await _domain.RegisterWorkflowAsync<TestWorkflow>());
-        }
-        [Test]
         public async Task Register_the_workflow_when_it_is_not_already_registered()
         {
             AmazonWorkflowReturnsEmptyListFor("TestWorkflow", _domainName);
@@ -82,14 +75,6 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public void Register_throws_exception_when_domain_is_deprecated()
-        {
-            SetupAmazonSwfToReturn(new DomainInfo { Name = _domainName, Status = RegistrationStatus.DEPRECATED});
-
-            Assert.Throws<DomainDeprecatedException>(async () => await _domain.RegisterAsync(1));
-        }
-
-        [Test]
         public async Task Register_the_domain_when_it_is_not_registered()
         {
             AmazonWorkflowReturnsEmptyDomainInfo();
@@ -113,10 +98,10 @@ namespace Guflow.Tests
         public void Invalid_arguments_tests()
         {
             Assert.Throws<ArgumentException>(() => new Domain(null, _amazonWorkflowClient.Object));
-            Assert.Throws<ArgumentNullException>(() => new Domain("name", null));
-            Assert.Throws<ArgumentNullException>(async () => await _domain.RegisterWorkflowAsync((WorkflowDescriptionAttribute) null));
-            Assert.Throws<ArgumentNullException>(async () => await _domain.SignalWorkflowAsync(null));
-            Assert.Throws<ArgumentNullException>(async () => await _domain.CancelWorkflowAsync(null));
+            Assert.Throws<ArgumentNullException>(() => new Domain("name", (IAmazonSimpleWorkflow)null));
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.RegisterWorkflowAsync((WorkflowDescriptionAttribute) null));
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.SignalWorkflowAsync(null));
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.CancelWorkflowAsync(null));
         }
 
         [Test]
@@ -319,6 +304,7 @@ namespace Guflow.Tests
                 Assert.That(r.Domain, Is.EqualTo(domainName));
                 Assert.That(r.MaximumPageSize, Is.EqualTo(1000));
                 Assert.That(c, Is.EqualTo(default(CancellationToken)));
+                Assert.That(r.RegistrationStatus, Is.EqualTo(RegistrationStatus.REGISTERED));
             };
             var emptyListResponse = new ListWorkflowTypesResponse() { WorkflowTypeInfos = new WorkflowTypeInfos() { TypeInfos = new List<WorkflowTypeInfo>() } };
             _amazonWorkflowClient.Setup(a => a.ListWorkflowTypesAsync(It.IsAny<ListWorkflowTypesRequest>(), default(CancellationToken)))

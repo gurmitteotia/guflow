@@ -70,7 +70,7 @@ namespace Guflow
         }
         private class StartWorkflowAction : WorkflowAction
         {
-            private const string _defaultCompleteResult = "Workflow is completed as no schedulable item is found.";
+            private const string _defaultCompleteResult = "Workflow is completed because no schedulable item was found.";
             private readonly IWorkflowItems _workflowItems;
 
             public StartWorkflowAction(IWorkflowItems workflowItems)

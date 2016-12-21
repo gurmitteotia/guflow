@@ -174,4 +174,13 @@
   <data name="Workflow_not_hosted" xml:space="preserve">
     <value>Workflow name {0} and version {1} is not hosted.</value>
   </data>
+  <data name="Can_not_determine_the_task_list_to_poll_on" xml:space="preserve">
+    <value>Can not determine the task list to poll on for new tasks when multiple workflows are hosted. Please explicitly pass the task list to begin the execution. </value>
+  </data>
+  <data name="Default_task_list_is_missing" xml:space="preserve">
+    <value>Default task list is missing. Please either provide default task list in workflow declaration or pass the one explicitly to begin the execution</value>
+  </data>
+  <data name="Workflow_execution_already_stopped" xml:space="preserve">
+    <value>Workflow execution is already stopped.</value>
+  </data>
 </root>

@@ -250,8 +250,8 @@ namespace Guflow
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(activityEvent.IsFor);
         }
         protected IEnumerable<IWorkflowItem> AllWorkflowItems { get { return _allWorkflowItems; } }
-        protected IEnumerable<IWorkflowItem> AllActivities { get { return _allWorkflowItems.OfType<IActivityItem>(); } }
-        protected IEnumerable<IWorkflowItem> AllTimers { get { return _allWorkflowItems.OfType<ITimerItem>(); } }
+        protected IEnumerable<IActivityItem> AllActivities { get { return _allWorkflowItems.OfType<IActivityItem>(); } }
+        protected IEnumerable<ITimerItem> AllTimers { get { return _allWorkflowItems.OfType<ITimerItem>(); } }
         protected bool IsActive
         {
             get { return ((IWorkflow)this).WorkflowEvents.IsActive(); }
