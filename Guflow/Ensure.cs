@@ -35,12 +35,5 @@ namespace Guflow
                 throw exception();
             }
         }
-        public static void ToThrowWhen<T>(bool condition, Func<T> exception) where T : Exception
-        {
-            if (condition)
-            {
-                throw exception();
-            }
-        }
     }
 }

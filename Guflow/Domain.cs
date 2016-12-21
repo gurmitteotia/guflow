@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Properties;
@@ -22,7 +23,9 @@ namespace Guflow
             _name = name;
             _simpleWorkflowClient = simpleWorkflowClient;
         }
-
+        public Domain(string name, RegionEndpoint regionEndpoint) : this(name, new AmazonSimpleWorkflowClient(regionEndpoint))
+        {
+        }
         internal IAmazonSimpleWorkflow Client
         {
             get { return _simpleWorkflowClient; }
@@ -46,20 +49,18 @@ namespace Guflow
 
             var workflowToRegister = registeredWorkflowInfos.FirstOrDefault(w => w.WorkflowType.Version.Equals(workflowDescription.Version));
 
-            if (workflowToRegister != null && workflowToRegister.Status == RegistrationStatus.DEPRECATED)
-                throw new WorkflowDeprecatedException(string.Format(Resources.Workflow_deprecated, workflowDescription.Name, workflowDescription.Version));
+            if (workflowToRegister != null)
+                return;
 
-            if (workflowToRegister == null)
-                await _simpleWorkflowClient.RegisterWorkflowTypeAsync(workflowDescription.RegisterRequest(_name));
+            await _simpleWorkflowClient.RegisterWorkflowTypeAsync(workflowDescription.RegisterRequest(_name));
         }
 
         public async Task RegisterAsync(uint retentionPeriodInDays, string description = null)
         {
-            var domainInfo = await ListDomainFromAmazonBy(_name);
-            if(domainInfo != null && domainInfo.Status == RegistrationStatus.DEPRECATED)
-                throw new DomainDeprecatedException(string.Format(Resources.Domain_deprecated,_name));
-            if (domainInfo == null)
-                await RegisterDomainAsync(retentionPeriodInDays, description);
+            var domainInfo = await ListDomainFromAmazonBy(_name, RegistrationStatus.REGISTERED);
+            if (domainInfo != null)
+                return;
+            await RegisterDomainAsync(retentionPeriodInDays, description);
         }
 
         internal async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue)
@@ -134,9 +135,9 @@ namespace Guflow
             await _simpleWorkflowClient.RegisterDomainAsync(request);
         }
 
-        private async Task<DomainInfo> ListDomainFromAmazonBy(string domainName)
+        private async Task<DomainInfo> ListDomainFromAmazonBy(string domainName, RegistrationStatus registrationStatus)
         {
-            var request = new ListDomainsRequest() {MaximumPageSize = 1000};
+            var request = new ListDomainsRequest() {RegistrationStatus = registrationStatus};
             var response = await _simpleWorkflowClient.ListDomainsAsync(request);
             return response.DomainInfos.Infos.FirstOrDefault(d => d.Name.Equals(domainName));
         }
@@ -147,6 +148,7 @@ namespace Guflow
             listRequest.Name = workflowName;
             listRequest.Domain = domainName;
             listRequest.MaximumPageSize = 1000;
+            listRequest.RegistrationStatus = RegistrationStatus.REGISTERED;
             var response = await _simpleWorkflowClient.ListWorkflowTypesAsync(listRequest);
             return response.WorkflowTypeInfos.TypeInfos;
         }

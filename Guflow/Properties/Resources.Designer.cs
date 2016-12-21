@@ -61,11 +61,29 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can not determine the task list to poll on for new tasks when multiple workflows are hosted. Please explicitly pass the task list to begin the execution. .
+        /// </summary>
+        internal static string Can_not_determine_the_task_list_to_poll_on {
+            get {
+                return ResourceManager.GetString("Can_not_determine_the_task_list_to_poll_on", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Workflow item {0} depends on itself.
         /// </summary>
         internal static string Cyclic_dependency {
             get {
                 return ResourceManager.GetString("Cyclic_dependency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default task list is missing. Please either provide default task list in workflow declaration or pass the one explicitly to begin the execution.
+        /// </summary>
+        internal static string Default_task_list_is_missing {
+            get {
+                return ResourceManager.GetString("Default_task_list_is_missing", resourceCulture);
             }
         }
         
@@ -219,6 +237,15 @@ namespace Guflow.Properties {
         internal static string Workflow_deprecated {
             get {
                 return ResourceManager.GetString("Workflow_deprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Workflow execution is already stopped..
+        /// </summary>
+        internal static string Workflow_execution_already_stopped {
+            get {
+                return ResourceManager.GetString("Workflow_execution_already_stopped", resourceCulture);
             }
         }
         

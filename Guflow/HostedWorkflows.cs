@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Guflow.Properties;
 
 namespace Guflow
 {
-    public sealed class HostedWorkflows
+    public sealed class HostedWorkflows : IDisposable
     {
         private readonly Domain _domain;
         private readonly Dictionary<string, Workflow> _hostedWorkflows = new Dictionary<string, Workflow>();
         private volatile bool _cancelled = false;
         private ErrorHandler _responseErrorHandler = ErrorHandler.NotHandled;
         private ErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
-
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private bool _disposed = false;
         public HostedWorkflows(Domain domain, IEnumerable<Workflow> workflows)
         {
             Ensure.NotNull(domain, "domain");
@@ -47,15 +49,57 @@ namespace Guflow
                 _hostedWorkflows.Add(hostedWorkflowKey,workflow);
             }
         }
-        public async Task StartExecutionAsync(TaskQueue taskQueue)
+
+        public void StartExecution()
         {
-            Ensure.NotNull(taskQueue, "taskQueue");
-            while (!_cancelled)
+            if (_hostedWorkflows.Count() != 1)
             {
-                var workflowTask = await PollForTaskOnAsync(taskQueue);
-                await workflowTask.ExecuteForAsync(this);
+                throw new InvalidOperationException(Resources.Can_not_determine_the_task_list_to_poll_on);
+            }
+            var singleHostedWorkflow = _hostedWorkflows.Values.First();
+            var defaultTaskListName = WorkflowDescriptionAttribute.FindOn(singleHostedWorkflow.GetType()).DefaultTaskListName;
+            if(string.IsNullOrEmpty(defaultTaskListName))
+                throw new InvalidOperationException(Resources.Default_task_list_is_missing);
+            
+            StartExecution(new TaskQueue(defaultTaskListName));
+        }
+        public void StartExecution(TaskQueue taskQueue)
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+            if(_cancelled)
+                throw new InvalidOperationException(Resources.Workflow_execution_already_stopped);
+
+            Ensure.NotNull(taskQueue, "taskQueue");
+            Task.Run(async () =>
+            {
+                while (!_cancelled)
+                {
+                    var workflowTask = await PollForTaskOnAsync(taskQueue);
+                    await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
+                }
+            });
+        }
+
+        public void StopExecution()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+
+            _cancelled = true;
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _disposed = true;
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                StopExecution();
             }
         }
+
         public void OnResponseError(HandleError errorHandler)
         {
             Ensure.NotNull(errorHandler, "errorHandler");
