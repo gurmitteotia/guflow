@@ -1,0 +1,11 @@
+﻿using Amazon.SimpleWorkflow.Model;
+using NUnit.Framework;
+
+namespace Guflow.Tests.Worker
+{
+    [TestFixture]
+    public class WorkerTaskTests
+    {
+       
+    }
+}

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Guflow.Properties;
+using Guflow.Worker;
 
 namespace Guflow
 {
@@ -33,12 +34,21 @@ namespace Guflow
             }
         }
 
-        internal async Task<WorkflowTask> PollForNewTasksAsync(Domain domain)
+        internal async Task<WorkflowTask> PollForWorkflowTaskAsync(Domain domain)
         {
             var decisionTask = await domain.PollForDecisionTaskAsync(this);
             if (NewTasksAreReturned(decisionTask))
                 return WorkflowTask.CreateFor(decisionTask, domain);
             return WorkflowTask.Empty;
+        }
+
+        internal async Task<WorkerTask> PollForWorkerTaskAsync(Domain domain)
+        {
+            var activityTask = await domain.PollForActivityTaskAsync(this);
+            if (NewTasksAreReturned(activityTask))
+                return WorkerTask.CreateFor(activityTask);
+
+            return WorkerTask.Empty;
         }
         public void OnError(HandleError errorHandler)
         {
@@ -58,6 +68,10 @@ namespace Guflow
         {
             return !string.IsNullOrEmpty(decisionTask.TaskToken);
         }
+        private static bool NewTasksAreReturned(ActivityTask activityTask)
+        {
+            return !string.IsNullOrEmpty(activityTask.TaskToken);
+        }
 
         private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskQueue taskQueue, string nextPageToken=null)
         {
@@ -75,7 +89,7 @@ namespace Guflow
             return await domain.PollForDecisionTaskAsync(taskQueue, nextPageToken);
         }
 
-        internal PollForDecisionTaskRequest CreateRequest(string domain, string nextPageToken = null)
+        internal PollForDecisionTaskRequest DecisionTaskPollingRequest(string domain, string nextPageToken = null)
         {
             return new PollForDecisionTaskRequest
             {
@@ -85,6 +99,16 @@ namespace Guflow
                 MaximumPageSize = 1000,
                 ReverseOrder = true,
                 NextPageToken = nextPageToken
+            };
+        }
+
+        internal PollForActivityTaskRequest ActivityTaskPollingRequest(string forDomain)
+        {
+            return new PollForActivityTaskRequest()
+            {
+                Identity = _pollingIdentity,
+                Domain = forDomain,
+                TaskList = new TaskList() {Name = _taskListName}
             };
         }
 

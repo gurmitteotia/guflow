@@ -16,6 +16,7 @@ namespace Guflow.Decider
         private ErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private bool _disposed = false;
+
         public HostedWorkflows(Domain domain, IEnumerable<Workflow> workflows)
         {
             Ensure.NotNull(domain, "domain");
@@ -123,7 +124,7 @@ namespace Guflow.Decider
         }
         private async Task<WorkflowTask> PollForTaskOnAsync(TaskQueue taskQueue)
         {
-            var workflowTask = await taskQueue.PollForNewTasksAsync(_domain);
+            var workflowTask = await taskQueue.PollForWorkflowTaskAsync(_domain);
             workflowTask.OnResponseError(_responseErrorHandler);
             workflowTask.OnExecutionError(_genericErrorHandler);
             return workflowTask;

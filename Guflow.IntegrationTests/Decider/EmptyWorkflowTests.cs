@@ -24,6 +24,12 @@ namespace Guflow.IntegrationTests
             _hostedWorkflows.StartExecution(new TaskQueue(_taskListName));
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            _hostedWorkflows.StopExecution();
+        }
+
         [Test]
         public async Task Empty_workflow_is_completed_immediatly_when_started()
         {
