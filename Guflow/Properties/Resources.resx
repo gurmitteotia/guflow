@@ -189,4 +189,13 @@
   <data name="Non_activity_type" xml:space="preserve">
     <value>Activity type {0} does not derive from {1} class.</value>
   </data>
+  <data name="Activity_already_hosted" xml:space="preserve">
+    <value>Activity name {0} and version {1} is already hosted.</value>
+  </data>
+  <data name="Activity_not_hosted" xml:space="preserve">
+    <value>Activity name {0} and version {1} is not hosted.</value>
+  </data>
+  <data name="No_activity_to_host" xml:space="preserve">
+    <value>Empty activities. Please provide at least one activity to begin hosting.</value>
+  </data>
 </root>

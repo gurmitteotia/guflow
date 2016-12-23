@@ -61,11 +61,29 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Activity name {0} and version {1} is already hosted..
+        /// </summary>
+        internal static string Activity_already_hosted {
+            get {
+                return ResourceManager.GetString("Activity_already_hosted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ActivityDescriptionAttribute is not applied on activity {0}..
         /// </summary>
         internal static string Activity_attribute_missing {
             get {
                 return ResourceManager.GetString("Activity_attribute_missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Activity name {0} and version {1} is not hosted..
+        /// </summary>
+        internal static string Activity_not_hosted {
+            get {
+                return ResourceManager.GetString("Activity_not_hosted", resourceCulture);
             }
         }
         
@@ -174,6 +192,15 @@ namespace Guflow.Properties {
         internal static string Multiple_event_methods {
             get {
                 return ResourceManager.GetString("Multiple_event_methods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty activities. Please provide at least one activity to begin hosting..
+        /// </summary>
+        internal static string No_activity_to_host {
+            get {
+                return ResourceManager.GetString("No_activity_to_host", resourceCulture);
             }
         }
         

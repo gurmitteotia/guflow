@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
+using Guflow.Worker;
 using Moq;
 using NUnit.Framework;
 using ChildPolicy = Guflow.Decider.ChildPolicy;
@@ -18,44 +19,34 @@ namespace Guflow.Tests
         private Mock<IAmazonSimpleWorkflow> _amazonWorkflowClient;
         private Domain _domain;
         private const string _domainName = "name1";
-        private WorkflowDescriptionAttribute _descriptionForTestWorkflow;
         private TaskQueue _taskQueue;
+        private const string _workflowName = "TestWorkflow";
+        private const string _activityName = "TestActivity";
         [SetUp]
         public void Setup()
         {
             _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
             _domain = new Domain(_domainName, _amazonWorkflowClient.Object);
             _taskQueue = new TaskQueue("queuename");
-            _descriptionForTestWorkflow = new WorkflowDescriptionAttribute("1.0")
-            {
-                Name = "TestWorkflow",
-                DefaultChildPolicy = "ChildPolicy",
-                DefaultLambdaRole = "lambda",
-                DefaultTaskListName = "tname",
-                DefaultTaskPriority = 10,
-                Description = "desc",
-                DefaultTaskStartToCloseTimeoutInSeconds = 11,
-                DefaultExecutionStartToCloseTimeoutInSeconds = 12
-            };
         }
 
         [Test]
         public async Task Register_the_workflow_when_it_is_not_already_registered()
         {
-            AmazonWorkflowReturnsEmptyListFor("TestWorkflow", _domainName);
+            AmazonSwfReturnsWorkflowEmptyListFor(_workflowName, _domainName);
 
             await _domain.RegisterWorkflowAsync<TestWorkflow>();
 
-            AssertThatAmazonSwfIsSendRegistrationRequest(_descriptionForTestWorkflow);
+            AssertThatAmazonSwfIsSendRegistrationRequestFor(WorkflowDescription());
         }
         [Test]
         public async Task Can_register_the_workflow_using_workflow_description()
         {
-            AmazonWorkflowReturnsEmptyListFor("TestWorkflow", _domainName);
+            AmazonSwfReturnsWorkflowEmptyListFor(_workflowName, _domainName);
 
-            await _domain.RegisterWorkflowAsync(_descriptionForTestWorkflow);
+            await _domain.RegisterWorkflowAsync(WorkflowDescription());
 
-            AssertThatAmazonSwfIsSendRegistrationRequest(_descriptionForTestWorkflow);
+            AssertThatAmazonSwfIsSendRegistrationRequestFor(WorkflowDescription());
         }
         [Test]
         public async Task Register_the_workflow_when_version_is_different()
@@ -64,7 +55,7 @@ namespace Guflow.Tests
 
             await _domain.RegisterWorkflowAsync<TestWorkflow>();
 
-            AssertThatAmazonSwfIsSendRegistrationRequest(_descriptionForTestWorkflow);
+            AssertThatAmazonSwfIsSendRegistrationRequestFor(WorkflowDescription());
         }
         [Test]
         public async Task Does_not_register_workflow_when_a_workflow_with_same_name_and_version_is_already_registered()
@@ -72,6 +63,43 @@ namespace Guflow.Tests
             SetupAmazonSwfToReturn(new WorkflowTypeInfo { WorkflowType = new WorkflowType { Version = "1.0" }, Status = RegistrationStatus.REGISTERED });
 
             await _domain.RegisterWorkflowAsync<TestWorkflow>();
+
+            _amazonWorkflowClient.Verify(w => w.RegisterWorkflowTypeAsync(It.IsAny<RegisterWorkflowTypeRequest>(), default(CancellationToken)), Times.Never);
+        }
+
+        [Test]
+        public async Task Register_the_activity_when_it_is_not_already_registered()
+        {
+            AmazonSwfReturnsActivityEmptyListFor(_activityName, _domainName);
+
+            await _domain.RegisterActivityAsync<TestActivity>();
+
+            AssertThatAmazonSwfIsSendRegistrationRequestFor(ActivityDescription());
+        }
+        [Test]
+        public async Task Can_register_the_activity_using_activity_description()
+        {
+            AmazonSwfReturnsActivityEmptyListFor(_activityName, _domainName);
+
+            await _domain.RegisterActivityAsync(ActivityDescription());
+
+            AssertThatAmazonSwfIsSendRegistrationRequestFor(ActivityDescription());
+        }
+        [Test]
+        public async Task Register_the_activity_when_version_is_different()
+        {
+            SetupAmazonSwfToReturn(new ActivityTypeInfo() { ActivityType = new ActivityType() { Version = "2.0" }, Status = RegistrationStatus.REGISTERED });
+
+            await _domain.RegisterActivityAsync<TestActivity>();
+
+            AssertThatAmazonSwfIsSendRegistrationRequestFor(ActivityDescription());
+        }
+        [Test]
+        public async Task Does_not_register_activity_when_a_activity_with_same_name_and_version_is_already_registered()
+        {
+            SetupAmazonSwfToReturn(new ActivityTypeInfo() { ActivityType = new ActivityType { Version = "1.0" }, Status = RegistrationStatus.REGISTERED });
+
+            await _domain.RegisterActivityAsync<TestActivity>();
 
             _amazonWorkflowClient.Verify(w => w.RegisterWorkflowTypeAsync(It.IsAny<RegisterWorkflowTypeRequest>(), default(CancellationToken)), Times.Never);
         }
@@ -102,6 +130,7 @@ namespace Guflow.Tests
             Assert.Throws<ArgumentException>(() => new Domain(null, _amazonWorkflowClient.Object));
             Assert.Throws<ArgumentNullException>(() => new Domain("name", (IAmazonSimpleWorkflow)null));
             Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.RegisterWorkflowAsync((WorkflowDescriptionAttribute) null));
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.RegisterActivityAsync((ActivityDescriptionAttribute)null));
             Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.SignalWorkflowAsync(null));
             Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.CancelWorkflowAsync(null));
         }
@@ -178,6 +207,35 @@ namespace Guflow.Tests
             await _domain.StartWorkflowAsync(startRequest);
 
             AssertThatAmazonSwfIsSend(startRequest);
+        }
+        private static WorkflowDescriptionAttribute WorkflowDescription()
+        {
+            return new WorkflowDescriptionAttribute("1.0")
+            {
+                Name = _workflowName,
+                DefaultChildPolicy = "ChildPolicy",
+                DefaultLambdaRole = "lambda",
+                DefaultTaskListName = "tname",
+                DefaultTaskPriority = 10,
+                Description = "desc",
+                DefaultTaskStartToCloseTimeoutInSeconds = 11,
+                DefaultExecutionStartToCloseTimeoutInSeconds = 12
+            };
+        }
+
+        private static ActivityDescriptionAttribute ActivityDescription()
+        {
+            return new ActivityDescriptionAttribute("1.0")
+            {
+                Name = _activityName,
+                DefaultTaskListName = "tname",
+                DefaultTaskPriority = 10,
+                Description = "desc",
+                DefaultHeartbeatTimeoutInSeconds = 5,
+                DefaultScheduleToCloseTimeoutInSeconds = 6,
+                DefaultScheduleToStartTimeoutInSeconds = 7,
+                DefaultStartToCloseTimeoutInSeconds = 8
+            };
         }
 
         private void AmazonSwfReturnsDecisionTask(DecisionTask decisionTask1, DecisionTask decisionTask2, DecisionTask decisionTask3)
@@ -272,7 +330,7 @@ namespace Guflow.Tests
         {
             Action<ListDomainsRequest, CancellationToken> requestParameters = (r, c) =>
             {
-                Assert.That(r.MaximumPageSize,Is.EqualTo(1000));
+                Assert.That(r.MaximumPageSize,Is.EqualTo(0));
                 Assert.That(r.NextPageToken,Is.Null);
                 Assert.That(r.ReverseOrder,Is.False);
             };
@@ -297,8 +355,18 @@ namespace Guflow.Tests
             _amazonWorkflowClient.Setup(a => a.ListWorkflowTypesAsync(It.IsAny<ListWorkflowTypesRequest>(), default(CancellationToken)))
                 .Returns(Task.FromResult(listWorkflowTypeResponse));
         }
+         private void SetupAmazonSwfToReturn(params ActivityTypeInfo[] activityTypeInfos)
+        {
+            var listActivityTypesResponse = new ListActivityTypesResponse();
+            listActivityTypesResponse.ActivityTypeInfos = new ActivityTypeInfos()
+            {
+                TypeInfos = activityTypeInfos.ToList()
+            };
+            _amazonWorkflowClient.Setup(a => a.ListActivityTypesAsync(It.IsAny<ListActivityTypesRequest>(), default(CancellationToken)))
+                .Returns(Task.FromResult(listActivityTypesResponse));
+        }
 
-        private void AmazonWorkflowReturnsEmptyListFor(string workflowName, string domainName)
+        private void AmazonSwfReturnsWorkflowEmptyListFor(string workflowName, string domainName)
         {
             Action<ListWorkflowTypesRequest, CancellationToken> requestedParameters = (r, c) =>
             {
@@ -312,7 +380,22 @@ namespace Guflow.Tests
             _amazonWorkflowClient.Setup(a => a.ListWorkflowTypesAsync(It.IsAny<ListWorkflowTypesRequest>(), default(CancellationToken)))
                 .Returns(Task.FromResult(emptyListResponse)).Callback(requestedParameters);
         }
-        private void AssertThatAmazonSwfIsSendRegistrationRequest(WorkflowDescriptionAttribute attribute)
+
+        private void AmazonSwfReturnsActivityEmptyListFor(string activityName, string domainName)
+        {
+            Action<ListActivityTypesRequest, CancellationToken> requestedParameters = (r, c) =>
+            {
+                Assert.That(r.Name, Is.EqualTo(activityName));
+                Assert.That(r.Domain, Is.EqualTo(domainName));
+                Assert.That(r.MaximumPageSize, Is.EqualTo(1000));
+                Assert.That(c, Is.EqualTo(default(CancellationToken)));
+                Assert.That(r.RegistrationStatus, Is.EqualTo(RegistrationStatus.REGISTERED));
+            };
+            var emptyListResponse = new ListActivityTypesResponse { ActivityTypeInfos = new ActivityTypeInfos { TypeInfos = new List<ActivityTypeInfo>() } };
+            _amazonWorkflowClient.Setup(a => a.ListActivityTypesAsync(It.IsAny<ListActivityTypesRequest>(), default(CancellationToken)))
+                .Returns(Task.FromResult(emptyListResponse)).Callback(requestedParameters);
+        }
+        private void AssertThatAmazonSwfIsSendRegistrationRequestFor(WorkflowDescriptionAttribute attribute)
         {
             Func<RegisterWorkflowTypeRequest, bool> parameter = (r) =>
             {
@@ -331,11 +414,32 @@ namespace Guflow.Tests
             _amazonWorkflowClient.Verify(a => a.RegisterWorkflowTypeAsync(It.Is<RegisterWorkflowTypeRequest>(req => parameter(req)), default(CancellationToken)), Times.Once);
         }
 
+        private void AssertThatAmazonSwfIsSendRegistrationRequestFor(ActivityDescriptionAttribute attribute)
+        {
+            Func<RegisterActivityTypeRequest, bool> parameter = (r) =>
+            {
+                Assert.That(r.Name, Is.EqualTo(attribute.Name));
+                Assert.That(r.Version, Is.EqualTo(attribute.Version));
+                Assert.That(r.Description, Is.EqualTo(attribute.Description));
+                Assert.That(r.Domain, Is.EqualTo(_domainName));
+                Assert.That(r.DefaultTaskList.Name, Is.EqualTo(attribute.DefaultTaskListName));
+                return true;
+            };
+
+            _amazonWorkflowClient.Verify(a => a.RegisterActivityTypeAsync(It.Is<RegisterActivityTypeRequest>(req => parameter(req)), default(CancellationToken)), Times.Once);
+        }
 
         [WorkflowDescription("1.0", DefaultChildPolicy = "ChildPolicy", DefaultLambdaRole = "lambda", DefaultTaskListName = "tname", DefaultTaskPriority = 10,
             Description = "desc", DefaultTaskStartToCloseTimeoutInSeconds = 11, DefaultExecutionStartToCloseTimeoutInSeconds = 12)]
         private class TestWorkflow : Workflow
         {
+        }
+
+        [ActivityDescription("1.0", DefaultTaskListName = "tname", DefaultTaskPriority = 10, Description = "desc", DefaultHeartbeatTimeoutInSeconds = 5,
+            DefaultScheduleToCloseTimeoutInSeconds = 6, DefaultScheduleToStartTimeoutInSeconds = 7, DefaultStartToCloseTimeoutInSeconds = 8)]
+        private class TestActivity : Activity
+        {
+            
         }
     }
 }

@@ -78,7 +78,6 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => new HostedWorkflows(_domain, null));
             Assert.Throws<ArgumentException>(() => new HostedWorkflows(_domain, Enumerable.Empty<Workflow>()));
             Assert.Throws<ArgumentException>(() => new HostedWorkflows(_domain, new []{(Workflow)null}));
-
         }
 
         [Test]

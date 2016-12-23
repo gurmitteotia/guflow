@@ -76,21 +76,21 @@ namespace Guflow.Worker
             return activityDescription;
         }
 
-        //internal RegisterActivityTypeRequest RegisterRequest(string domainName)
-        //{
-        //    return new RegisterActivityTypeRequest
-        //    {
-        //        Name = Name,
-        //        Version = Version,
-        //        Description = Description,
-        //        Domain = domainName,
-        //        DefaultTaskList = DefaultTaskListName.TaskList(),
-        //        DefaultTaskStartToCloseTimeout = DefaultStartToCloseTimeout,
-        //        DefaultTaskPriority = DefaultTaskPriority.ToString(),
-        //        DefaultTaskHeartbeatTimeout = DefaultHeartbeatTimeout,
-        //        DefaultTaskScheduleToCloseTimeout = DefaultScheduleToCloseTimeout,
-        //        DefaultTaskScheduleToStartTimeout = DefaultScheduleToStartTimeout
-        //    };
-        //}
+        internal RegisterActivityTypeRequest RegisterRequest(string domainName)
+        {
+            return new RegisterActivityTypeRequest
+            {
+                Name = Name,
+                Version = Version,
+                Description = Description,
+                Domain = domainName,
+                DefaultTaskList = DefaultTaskListName.TaskList(),
+                DefaultTaskStartToCloseTimeout = DefaultStartToCloseTimeout,
+                DefaultTaskPriority = DefaultTaskPriority.ToString(),
+                DefaultTaskHeartbeatTimeout = DefaultHeartbeatTimeout,
+                DefaultTaskScheduleToCloseTimeout = DefaultScheduleToCloseTimeout,
+                DefaultTaskScheduleToStartTimeout = DefaultScheduleToStartTimeout
+            };
+        }
     }
 }

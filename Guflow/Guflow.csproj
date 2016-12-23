@@ -195,9 +195,13 @@
     <Compile Include="Decider\WorkflowStartedEventArgs.cs" />
     <Compile Include="Decider\WorkflowTask.cs" />
     <Compile Include="Worker\Activity.cs" />
+    <Compile Include="Worker\ActivityAlreadyHostedException.cs" />
     <Compile Include="Worker\ActivityDescriptionAttribute.cs" />
     <Compile Include="Worker\ActivityDescriptionMissingException.cs" />
+    <Compile Include="Worker\ActivityNotHostedException.cs" />
+    <Compile Include="Worker\HostedActivities.cs" />
     <Compile Include="Worker\NonActivityTypeException.cs" />
+    <Compile Include="Worker\WorkerTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
