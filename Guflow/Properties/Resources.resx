@@ -198,4 +198,16 @@
   <data name="No_activity_to_host" xml:space="preserve">
     <value>Empty activities. Please provide at least one activity to begin hosting.</value>
   </data>
+  <data name="Activity_execution_method_missing" xml:space="preserve">
+    <value>Activity {0} does not have execution method. Please define a method with valid signature and decorate it with ExecuteAttribute</value>
+  </data>
+  <data name="Activity_instance_creation_failed" xml:space="preserve">
+    <value>Failed to create instance for activity name {0} and version {1}.</value>
+  </data>
+  <data name="Activity_instance_mismatch" xml:space="preserve">
+    <value>Activity instance of type {0} does not match with activity name {1} and version {2}.</value>
+  </data>
+  <data name="Multiple_activity_execution_methods_defined" xml:space="preserve">
+    <value>Activity {0} has multiple execution method defined. Please provide only one execution method.</value>
+  </data>
 </root>

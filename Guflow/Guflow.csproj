@@ -99,6 +99,7 @@
     <Compile Include="Decider\NonWorkflowTypeException.cs" />
     <Compile Include="Decider\SignalWorkflowRequest.cs" />
     <Compile Include="Decider\StartWorkflowRequest.cs" />
+    <Compile Include="MethodInfoExtensions.cs" />
     <Compile Include="TaskQueue.cs" />
     <Compile Include="Decider\WorkflowAlreadyHostedException.cs" />
     <Compile Include="Decider\HostedWorkflows.cs" />
@@ -145,7 +146,6 @@
     <Compile Include="JsonExtension.cs" />
     <Compile Include="Decider\MarkerRecordedEvent.cs" />
     <Compile Include="Decider\ParentItemMissingException.cs" />
-    <Compile Include="Decider\IActivityHost.cs" />
     <Compile Include="Decider\IActivityTaskPoller.cs" />
     <Compile Include="Decider\IWorkflowActions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -194,11 +194,19 @@
     <Compile Include="Decider\WorkflowStartedEvent.cs" />
     <Compile Include="Decider\WorkflowStartedEventArgs.cs" />
     <Compile Include="Decider\WorkflowTask.cs" />
+    <Compile Include="Worker\Activities.cs" />
     <Compile Include="Worker\Activity.cs" />
     <Compile Include="Worker\ActivityAlreadyHostedException.cs" />
+    <Compile Include="Worker\ActivityArgs.cs" />
     <Compile Include="Worker\ActivityDescriptionAttribute.cs" />
     <Compile Include="Worker\ActivityDescriptionMissingException.cs" />
+    <Compile Include="Worker\ActivityExecutionMethod.cs" />
+    <Compile Include="Worker\ActivityExecutionMethodException.cs" />
+    <Compile Include="Worker\ActivityInstanceCreationException.cs" />
+    <Compile Include="Worker\ActivityInstanceMismatchedException.cs" />
     <Compile Include="Worker\ActivityNotHostedException.cs" />
+    <Compile Include="Worker\ActivityResponse.cs" />
+    <Compile Include="Worker\ExecuteAttribute.cs" />
     <Compile Include="Worker\HostedActivities.cs" />
     <Compile Include="Worker\NonActivityTypeException.cs" />
     <Compile Include="Worker\WorkerTask.cs" />

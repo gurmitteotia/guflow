@@ -3,8 +3,8 @@
 namespace Guflow.Tests.Worker
 {
     [TestFixture]
-    public class WorkerTaskTests
+    public class ActivityHeartbeatTests
     {
-       
+        
     }
 }

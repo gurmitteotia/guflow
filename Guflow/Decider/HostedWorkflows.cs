@@ -64,7 +64,7 @@ namespace Guflow.Decider
             
             StartExecution(new TaskQueue(defaultTaskListName));
         }
-        public void StartExecution(TaskQueue taskQueue)
+        public async void StartExecution(TaskQueue taskQueue)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -72,7 +72,7 @@ namespace Guflow.Decider
                 throw new InvalidOperationException(Resources.Workflow_execution_already_stopped);
 
             Ensure.NotNull(taskQueue, "taskQueue");
-            Task.Run(async () =>
+            await Task.Run(async () =>
             {
                 while (!_cancelled)
                 {

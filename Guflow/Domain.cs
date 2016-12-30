@@ -166,6 +166,15 @@ namespace Guflow
         {
             return new HostedActivities(this, activities);
         }
+
+        public HostedActivities Host(IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
+        {
+            return new HostedActivities(this, activitiesTypes, instanceCreator);
+        }
+        public HostedActivities Host(IEnumerable<Type> activitiesTypes)
+        {
+            return new HostedActivities(this, activitiesTypes);
+        }
         public async Task CancelWorkflowAsync(CancelWorkflowRequest cancelRequest)
         {
             Ensure.NotNull(cancelRequest, "cancelRequest");

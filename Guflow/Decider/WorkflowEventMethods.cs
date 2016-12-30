@@ -22,7 +22,7 @@ namespace Guflow.Decider
 
         public WorkflowEventMethod FindFor(EventName eventName)
         {
-            var matchingMethods =_allTargetMethods.Where(m => CustomAttributeExtensions.GetCustomAttributes<WorkflowEventAttribute>((MemberInfo) m).Any(e=>e.IsFor(eventName)));
+            var matchingMethods =_allTargetMethods.Where(m => m.GetCustomAttributes<WorkflowEventAttribute>().Any(e=>e.IsFor(eventName)));
             if (!matchingMethods.Any())
                 return null;
             if(matchingMethods.Count()>1)
@@ -34,7 +34,7 @@ namespace Guflow.Decider
             return new WorkflowEventMethod(_targetInstance,foundMethod);
         }
 
-        private bool HasValidReturnType(MethodInfo targetMethod)
+        private static bool HasValidReturnType(MethodInfo targetMethod)
         {
             var workflowActionType = typeof (WorkflowAction);
             var targetMethodReturnType = targetMethod.ReturnType;
