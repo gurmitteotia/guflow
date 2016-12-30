@@ -23,5 +23,10 @@ namespace Guflow
                 return inputAsString;
             return instance.ToJson();
         }
+
+        internal static bool IsPrimitive(this object obj)
+        {
+            return obj.GetType().IsPrimitive || obj is string;
+        }
     }
 }

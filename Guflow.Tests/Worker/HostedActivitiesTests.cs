@@ -18,7 +18,7 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
-        public void Returns_matching_hosted_workflow_by_name_and_version()
+        public void Returns_matching_hosted_activity_by_name_and_version()
         {
             var hostedActivity1 = new TestActivity1();
             var hostedActivity2 = new TestActivity2();
@@ -29,7 +29,7 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
-        public void Throws_exception_when_hosted_workflow_is_not_found()
+        public void Throws_exception_when_hosted_activity_is_not_found()
         {
             var hostedActivity = new TestActivity1();
             var hostedActivities = _domain.Host(new[] {hostedActivity});
@@ -38,13 +38,12 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
-        public void Throws_exception_when_same_workflow_is_hosted_twice()
+        public void Throws_exception_when_same_activity_is_hosted_twice()
         {
             var hostedActivity1 = new TestActivity1();
             var hostedActivity2 = new TestActivity1();
             Assert.Throws<ActivityAlreadyHostedException>(() => _domain.Host(new []{hostedActivity1, hostedActivity2}));
         }
-
 
         [Test]
         public void Invalid_constructor_argument_tests()
@@ -52,16 +51,74 @@ namespace Guflow.Tests.Worker
             Assert.Throws<ArgumentNullException>(() => _domain.Host((IEnumerable<Activity>)null));
             Assert.Throws<ArgumentException>(() => _domain.Host(Enumerable.Empty<Activity>()));
             Assert.Throws<ArgumentException>(() => _domain.Host(new[] { (Activity)null }));
+
+            Assert.Throws<ArgumentNullException>(() => _domain.Host((IEnumerable<Type>)null));
+            Assert.Throws<ArgumentException>(() => _domain.Host(Enumerable.Empty<Type>()));
+            Assert.Throws<ArgumentException>(() => _domain.Host(new[] { (Type)null }));
+
+            Assert.Throws<ArgumentNullException>(() => _domain.Host(new[] { typeof(TestActivity1) }, null));
         }
+
+        [Test]
+        public void Return_the_new_instance_of_activity_type_by_name_and_version()
+        {
+            var hostedActivities = _domain.Host(new[] {typeof(TestActivity1), typeof(TestActivity2)});
+
+            var hostedActivity = hostedActivities.FindBy("TestActivity1", "1.0");
+
+            Assert.That(hostedActivity.GetType(), Is.EqualTo(typeof(TestActivity1)));
+        }
+        [Test]
+        public void Throws_exception_when_hosted_activity_type_is_not_found()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+
+            Assert.Throws<ActivityNotHostedException>(()=> hostedActivities.FindBy("TestActivity1", "5.0"));
+        }
+
+        [Test]
+        public void Throws_exception_when_same_activity_type_is_hosted_twice()
+        {
+            Assert.Throws<ActivityAlreadyHostedException>(() => _domain.Host(new[] { typeof(TestActivity1), typeof(TestActivity1)}));
+        }
+
+        [Test]
+        public void Return_the_instance_of_activity_type_from_activity_creator()
+        {
+            var expectedInstance = new TestActivity1();
+            Func<Type, Activity> instanceCreator = t =>
+            {
+                Assert.That(t, Is.EqualTo(typeof(TestActivity1)));
+                return expectedInstance;
+            };
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1)}, instanceCreator);
+
+            var actualInstance = hostedActivities.FindBy("TestActivity1", "1.0");
+
+            Assert.That(actualInstance, Is.EqualTo(expectedInstance));
+        }
+
+        [Test]
+        public void Throws_exception_when_instance_creator_returns_null_activity_instance()
+        {
+            var hostedActivities = _domain.Host(new[] {typeof(TestActivity1)}, t => null);
+            Assert.Throws<ActivityInstanceCreationException>(() => hostedActivities.FindBy("TestActivity1", "1.0"));
+        }
+
+        [Test]
+        public void Throws_exception_when_instance_creator_returns_instance_for_different_activity()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) }, t=>new TestActivity2());
+            Assert.Throws<ActivityInstanceMismatchedException>(() => hostedActivities.FindBy("TestActivity1", "1.0"));
+        }
+
         [ActivityDescription("1.0")]
         private class TestActivity1 : Activity
         {
-            
         }
         [ActivityDescription("2.0")]
         private class TestActivity2 : Activity
         {
-
         }
     }
 }

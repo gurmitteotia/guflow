@@ -79,6 +79,33 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Activity {0} does not have execution method. Please define a method with valid signature and decorate it with ExecuteAttribute.
+        /// </summary>
+        internal static string Activity_execution_method_missing {
+            get {
+                return ResourceManager.GetString("Activity_execution_method_missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to create instance for activity name {0} and version {1}..
+        /// </summary>
+        internal static string Activity_instance_creation_failed {
+            get {
+                return ResourceManager.GetString("Activity_instance_creation_failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Activity instance of type {0} does not match with activity name {1} and version {2}..
+        /// </summary>
+        internal static string Activity_instance_mismatch {
+            get {
+                return ResourceManager.GetString("Activity_instance_mismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Activity name {0} and version {1} is not hosted..
         /// </summary>
         internal static string Activity_not_hosted {
@@ -183,6 +210,15 @@ namespace Guflow.Properties {
         internal static string Invalid_return_type {
             get {
                 return ResourceManager.GetString("Invalid_return_type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Activity {0} has multiple execution method defined. Please provide only one execution method..
+        /// </summary>
+        internal static string Multiple_activity_execution_methods_defined {
+            get {
+                return ResourceManager.GetString("Multiple_activity_execution_methods_defined", resourceCulture);
             }
         }
         
