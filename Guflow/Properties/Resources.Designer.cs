@@ -196,7 +196,7 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Workflow method {0} has incompatible parameter {1}, which can not be deserialized from source event {2}.
+        ///   Looks up a localized string similar to Target method {0} has incompatible parameter {1} which can&apos;t be assigned from source object {2}&apos;s property..
         /// </summary>
         internal static string Invalid_parameter {
             get {

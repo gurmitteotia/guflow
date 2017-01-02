@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Guflow
 {
@@ -14,6 +16,27 @@ namespace Guflow
             return JsonConvert.DeserializeObject<T>(jsonData);
         }
 
+        internal static object FromJson(this string jsonData, Type targetType)
+        {
+            return JsonConvert.DeserializeObject(jsonData, targetType);
+        }
+
+        internal static bool IsValidJson(this object value)
+        {
+            var strValue = value as string;
+            if (string.IsNullOrWhiteSpace(strValue))
+                return false;
+            try
+            {
+                JToken.Parse(strValue);
+                return true;
+            }
+            catch (JsonReaderException exception)
+            {
+                return false;
+            }
+        }
+
         internal static string ToAwsString(this object instance)
         {
             if (instance == null)
@@ -24,9 +47,17 @@ namespace Guflow
             return instance.ToJson();
         }
 
-        internal static bool IsPrimitive(this object obj)
+        internal static bool Primitive(this object obj)
         {
-            return obj.GetType().IsPrimitive || obj is string;
+            return obj.GetType().IsPrimitive || obj is string|| obj is DateTime;
+        }
+        internal static bool Primitive(this Type type)
+        {
+            return type.IsPrimitive || type == typeof(string) || type == typeof(DateTime);
+        }
+        internal static bool IsString(this Type type)
+        {
+            return type == typeof(string);
         }
     }
 }
