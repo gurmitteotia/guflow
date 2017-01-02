@@ -25,10 +25,14 @@ namespace Guflow
                 {
                     if (propertyValue != null && parameterInfo.ParameterType.IsInstanceOfType(propertyValue))
                         parameters.Add(propertyValue);
-                    else if (propertyValue == null && !parameterInfo.ParameterType.IsValueType)
-                        parameters.Add(propertyValue);
+                    else if(propertyValue.IsValidJson() && !parameterInfo.ParameterType.Primitive())
+                        parameters.Add(((string)propertyValue).FromJson(parameterInfo.ParameterType));
+                    else if (propertyValue == null)
+                        parameters.Add(DefaultValueFor(parameterInfo.ParameterType));
+                    else if (propertyValue.Primitive() && parameterInfo.ParameterType.IsString())
+                        parameters.Add(propertyValue.ToString());
                     else
-                        throw new InvalidMethodSignatureException(string.Format(Resources.Invalid_parameter, method.Name, parameterInfo.Name, invokedArgumentType.Name));
+                        throw new InvalidMethodSignatureException(string.Format(Resources.Invalid_parameter, method.Name, parameterInfo.Name, invokedArgumentType.Name ));
 
                 }
                 else

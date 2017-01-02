@@ -113,14 +113,14 @@ namespace Guflow.Worker
                 var task = (Task)targetMethod.Execute(targetInstance, parameters);
                 await task;
                 var result = task.GetType().GetProperty("Result").GetValue(task);
-                if(result.IsPrimitive())
+                if(result.Primitive())
                     return ActivityResponse.Complete(result.ToString());
                 return ActivityResponse.Complete(result.ToJson());
             }
             private static async Task<ActivityResponse> GenericTypeReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters)
             {
                 var result = targetMethod.Execute(targetInstance, parameters);
-                if (result.IsPrimitive())
+                if (result.Primitive())
                     return ActivityResponse.Complete(result.ToString());
                 return ActivityResponse.Complete(result.ToJson());
             }

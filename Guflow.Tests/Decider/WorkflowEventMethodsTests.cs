@@ -52,7 +52,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Returns_ignore_workflow_action_when_target_method_return_type_is_void()
+        public void Returns_ignore_workflow_action_when_target_method_returns_void()
         {
             var workflowMethod = WorkflowEventMethods.For(new TestClassWithPrivateMethod()).FindFor(_eventName);
 
@@ -105,7 +105,7 @@ namespace Guflow.Tests.Decider
         {
             var targetWorkflow = new MethodWithDeserializedArguments();
             _argument.Reason = "reason3";
-            _argument.SomeId = 56;
+            _argument.EventId = 56;
             var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
 
             workflowMethod.Invoke(_argument);
@@ -119,7 +119,7 @@ namespace Guflow.Tests.Decider
         {
             var targetWorkflow = new MethodWithDeserializedArgumentsAndSourcEvent();
             _argument.Reason = "reason3";
-            _argument.SomeId = 56;
+            _argument.EventId = 56;
             var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
 
             workflowMethod.Invoke(_argument);
@@ -134,7 +134,7 @@ namespace Guflow.Tests.Decider
         {
             var targetWorkflow = new MethodWithDeserializedArguments();
             _argument.Reason = null;
-            _argument.SomeId = 56;
+            _argument.EventId = 56;
             var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
 
             workflowMethod.Invoke(_argument);
@@ -144,11 +144,27 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Deserialize_the_json_string_in_to_complex_argument()
+        {
+            var targetWorkflow = new MethodDeserializeJsonInToComplextObject();
+
+            _argument.Reason = new Reason(){Id=10, Details = "details"}.ToJson();
+            _argument.EventId = 56;
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+
+            workflowMethod.Invoke(_argument);
+
+            Assert.That(targetWorkflow.EventId, Is.EqualTo(56));
+            Assert.That(targetWorkflow.Reason.Id, Is.EqualTo(10));
+            Assert.That(targetWorkflow.Reason.Details, Is.EqualTo("details"));
+        }
+
+        [Test]
         public void Throws_exception_when_deserialized_property_can_not_be_assigned_to_method_parameter()
         {
             var targetWorkflow = new MethodWithIncompatibleArgumentType();
             _argument.Reason = "reason3";
-            _argument.SomeId = 56;
+            _argument.EventId = 56;
             var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
 
             Assert.Throws<InvalidMethodSignatureException>(()=> workflowMethod.Invoke(_argument));
@@ -159,7 +175,7 @@ namespace Guflow.Tests.Decider
         {
             var targetWorkflow = new MethodWithNonExistingArgument();
             _argument.Reason = "reason3";
-            _argument.SomeId = 56;
+            _argument.EventId = 56;
             var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
 
             workflowMethod.Invoke(_argument);
@@ -167,6 +183,9 @@ namespace Guflow.Tests.Decider
             Assert.That(targetWorkflow.NotExistString,Is.Null);
             Assert.That(targetWorkflow.NotExistLong, Is.EqualTo(0));
             Assert.That(targetWorkflow.NotExistBool, Is.EqualTo(false));
+            Assert.That(targetWorkflow.NonExistReason, Is.Null);
+            Assert.That(targetWorkflow.NonExistStructArg.Id, Is.EqualTo(0));
+            Assert.That(targetWorkflow.NonExistStructArg.Details, Is.Null);
         }
 
         [Test]
@@ -198,6 +217,32 @@ namespace Guflow.Tests.Decider
             var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
 
             Assert.Throws<ApplicationException>(()=>workflowMethod.Invoke(_argument));
+        }
+
+        [Test]
+        public void Pass_default_value_in_struct_when_source_string_property_is_null()
+        {
+            var targetWorkflow = new MethodDeserialingStringInToStruct();
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            _argument.Reason = null;
+
+            workflowMethod.Invoke(_argument);
+
+            Assert.That(targetWorkflow.Reason.Id, Is.EqualTo(0));
+            Assert.That(targetWorkflow.Reason.Details, Is.Null);
+        }
+
+        [Test]
+        public void Can_pass_source_primitive_type_to_string_parameters()
+        {
+            var targetWorkflow = new MethodWithStringParamemtersForPrimitiveStructType();
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            _argument.EventTime = DateTime.Now;
+
+            workflowMethod.Invoke(_argument);
+
+            Assert.That(targetWorkflow.EventId, Is.EqualTo(_argument.EventId.ToString()));
+            Assert.That(targetWorkflow.EventTime, Is.EqualTo(_argument.EventTime.ToString()));
         }
 
         private class TestClassWithPublicMethod : Workflow
@@ -279,10 +324,10 @@ namespace Guflow.Tests.Decider
         private class MethodWithDeserializedArguments : Workflow
         {
             [WorkflowEvent(_eventName)]
-            public void TestMethod(string reason, long someId)
+            public void TestMethod(string reason, long eventId)
             {
                 Argument1 = reason;
-                Argument2 = someId;
+                Argument2 = eventId;
             }
 
             public string Argument1 { get; private set; }
@@ -292,10 +337,10 @@ namespace Guflow.Tests.Decider
         private class MethodWithDeserializedArgumentsAndSourcEvent : Workflow
         {
             [WorkflowEvent(_eventName)]
-            public void TestMethod(string reason, long someId, TestArgument @event)
+            public void TestMethod(string reason, long eventId, TestArgument @event)
             {
                 Argument1 = reason;
-                Argument2 = someId;
+                Argument2 = eventId;
                 Argument3 = @event;
             }
 
@@ -307,7 +352,7 @@ namespace Guflow.Tests.Decider
         private class MethodWithIncompatibleArgumentType : Workflow
         {
             [WorkflowEvent(_eventName)]
-            public void TestMethod(long reason, string someId)
+            public void TestMethod(long reason, string eventId)
             {
             }
         }
@@ -315,22 +360,26 @@ namespace Guflow.Tests.Decider
         private class MethodWithNonExistingArgument : Workflow
         {
             [WorkflowEvent(_eventName)]
-            public void TestMethod(string notExistString, long notExistLong, bool notExistBool)
+            public void TestMethod(string notExistString, long notExistLong, bool notExistBool, Reason nonExistReason, StructArg nonExistStructArg)
             {
                 NotExistString = notExistString;
                 NotExistLong = notExistLong;
                 NotExistBool = notExistBool;
+                NonExistReason = nonExistReason;
+                NonExistStructArg = nonExistStructArg;
             }
 
             public string NotExistString { get; private set; }
             public long NotExistLong { get; private set; }
             public bool NotExistBool { get; private set; }
+            public Reason NonExistReason { get; private set; }
+            public StructArg NonExistStructArg { get; private set; }
         }
 
         private class TestClassWithMultipleMethods : Workflow
         {
             [WorkflowEvent(_eventName)]
-            public void TestMethod(string reason, long someId)
+            public void TestMethod(string reason, long eventId)
             {
             }
             [WorkflowEvent(_eventName)]
@@ -364,6 +413,51 @@ namespace Guflow.Tests.Decider
             }
         }
 
+        private class MethodDeserializeJsonInToComplextObject : Workflow
+        {
+            [WorkflowEvent(_eventName)]
+            public void TestMethod(Reason reason, long eventId)
+            {
+                Reason = reason;
+                EventId = eventId;
+            }
+
+            public Reason Reason { get; private set; }
+            public long EventId { get; private set; }
+        }
+
+        private class MethodDeserialingStringInToStruct : Workflow
+        {
+            [WorkflowEvent(_eventName)]
+            public void TestMethod(StructArg reason)
+            {
+                Reason = reason;
+            }
+            public StructArg Reason { get; private set; }
+        }
+
+        private class MethodWithStringParamemtersForPrimitiveStructType : Workflow
+        {
+            [WorkflowEvent(_eventName)]
+            public void TestMethod(string eventId, string eventTime)
+            {
+                EventId = eventId;
+                EventTime = eventTime;
+            }
+            public string EventId { get; private set; }
+            public string EventTime { get; private set; }
+        }
+
+        private class Reason
+        {
+            public int Id;
+            public string Details;
+        }
+        private struct StructArg
+        {
+            public int Id;
+            public string Details;
+        }
      
         private class TestArgument : WorkflowEvent
         {
@@ -377,10 +471,8 @@ namespace Guflow.Tests.Decider
             }
 
             public string Reason { get; set; }
-
-            public long SomeId { get; set; }
+            public long EventId { get; set; }
+            public DateTime EventTime { get; set; }
         }
-
-        
     }
 }

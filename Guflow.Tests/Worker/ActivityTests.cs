@@ -14,7 +14,7 @@ namespace Guflow.Tests.Worker
         [SetUp]
         public void Setup()
         {
-            _activityArgs = new ActivityArgs();
+            _activityArgs = new ActivityArgs("input","id" ,"wid", "rid", "token");
         }
 
         [Test]
@@ -129,6 +129,18 @@ namespace Guflow.Tests.Worker
             Assert.ThrowsAsync<IndexOutOfRangeException>(async ()=> await activity.ExecuteAsync(_activityArgs));
         }
 
+        [Test]
+        public async Task Activity_args_can_be_deserialized_into_method_parameters()
+        {
+            var activityArgs = new ActivityArgs(new Input {Id = 10, Details = "det"}.ToJson(), "id", "wid", "rid", "token");
+            var activity = new ActivityMethodWithArgs();
+
+            await activity.ExecuteAsync(activityArgs);
+
+            Assert.That(activity.Input.Id, Is.EqualTo(10));
+            Assert.That(activity.Input.Details, Is.EqualTo("det"));
+            Assert.That(activity.TaskToken, Is.EqualTo("token"));
+        }
 
         private class NoExecutionMethodActivity : Activity
         {
@@ -274,6 +286,25 @@ namespace Guflow.Tests.Worker
             {
                 throw _exception;
             }
+        }
+
+        private class ActivityMethodWithArgs : Activity
+        {
+            [Execute]
+            public void ActivityMethod(Input input, string taskToken)
+            {
+                Input = input;
+                TaskToken = taskToken;
+            }
+
+            public Input Input { get; private set; }
+            public string TaskToken { get; private set; }
+        }
+
+        private class Input
+        {
+            public int Id;
+            public string Details;
         }
     }
 }

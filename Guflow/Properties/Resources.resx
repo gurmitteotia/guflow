@@ -139,7 +139,7 @@
     <value>Version is empty for {0}.</value>
   </data>
   <data name="Invalid_parameter" xml:space="preserve">
-    <value>Workflow method {0} has incompatible parameter {1}, which can not be deserialized from source event {2}</value>
+    <value>Target method {0} has incompatible parameter {1} which can't be assigned from source object {2}'s property.</value>
   </data>
   <data name="Invalid_return_type" xml:space="preserve">
     <value>Workflow method {0} has invalid return type. Only {1} and {2} are allowed as return types.</value>
