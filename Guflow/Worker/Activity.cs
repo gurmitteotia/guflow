@@ -8,6 +8,7 @@ namespace Guflow.Worker
     {
         private readonly ActivityExecutionMethod _executionMethod;
         protected bool FailOnException;
+        protected readonly ActivityHeartbeat Hearbeat = new ActivityHeartbeat();
         protected Activity()
         {
            _executionMethod = new ActivityExecutionMethod(GetType());

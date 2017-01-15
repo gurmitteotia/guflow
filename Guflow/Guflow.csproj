@@ -202,6 +202,7 @@
     <Compile Include="Worker\ActivityDescriptionMissingException.cs" />
     <Compile Include="Worker\ActivityExecutionMethod.cs" />
     <Compile Include="Worker\ActivityExecutionMethodException.cs" />
+    <Compile Include="Worker\ActivityHeartbeat.cs" />
     <Compile Include="Worker\ActivityInstanceCreationException.cs" />
     <Compile Include="Worker\ActivityInstanceMismatchedException.cs" />
     <Compile Include="Worker\ActivityNotHostedException.cs" />

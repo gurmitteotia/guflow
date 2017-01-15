@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Guflow.Worker;
 using Moq;
@@ -142,11 +143,15 @@ namespace Guflow.Tests.Worker
             Assert.That(activity.TaskToken, Is.EqualTo("token"));
         }
 
-        private class NoExecutionMethodActivity : Activity
+        [Test]
+        public void Heartbeat_started_when_it_it_enabled_on_activity()
         {
             
         }
 
+        private class NoExecutionMethodActivity : Activity
+        {
+        }
         private class MoreThanOnExecutionMethod : Activity
         {
             [Execute]
@@ -161,7 +166,6 @@ namespace Guflow.Tests.Worker
             {
             }
         }
-
         private class ExecutionMethodWithTaskReturnTypeActivity : Activity
         {
             [Execute]
@@ -299,6 +303,23 @@ namespace Guflow.Tests.Worker
 
             public Input Input { get; private set; }
             public string TaskToken { get; private set; }
+        }
+
+        [EnableHeartbeat]
+        private class ActivityWithHeartbeat : Activity
+        {
+            private readonly TimeSpan _activityExecutionTime;
+
+            public ActivityWithHeartbeat(string details, TimeSpan activityExecutionTime)
+            {
+                _activityExecutionTime = activityExecutionTime;
+                Hearbeat.ProvideDetailsFrom(()=>details);
+            }
+            [Execute]
+            public void TranscodeMe()
+            {
+                Thread.Sleep(_activityExecutionTime);
+            }
         }
 
         private class Input
