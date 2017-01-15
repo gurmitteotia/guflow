@@ -51,7 +51,7 @@ namespace Guflow.Decider
             }
         }
 
-        public void StartExecution()
+        public async Task StartExecution()
         {
             if (_hostedWorkflows.Count() != 1)
             {
@@ -62,9 +62,9 @@ namespace Guflow.Decider
             if(string.IsNullOrEmpty(defaultTaskListName))
                 throw new InvalidOperationException(Resources.Default_task_list_is_missing);
             
-            StartExecution(new TaskQueue(defaultTaskListName));
+            await StartExecution(new TaskQueue(defaultTaskListName));
         }
-        public async void StartExecution(TaskQueue taskQueue)
+        public async Task StartExecution(TaskQueue taskQueue)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -72,14 +72,11 @@ namespace Guflow.Decider
                 throw new InvalidOperationException(Resources.Workflow_execution_already_stopped);
 
             Ensure.NotNull(taskQueue, "taskQueue");
-            await Task.Run(async () =>
+            while (!_cancelled)
             {
-                while (!_cancelled)
-                {
-                    var workflowTask = await PollForTaskOnAsync(taskQueue);
-                    await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
-                }
-            });
+                var workflowTask = await PollForTaskOnAsync(taskQueue);
+                await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
+            }
         }
 
         public void StopExecution()
