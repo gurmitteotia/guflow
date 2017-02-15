@@ -12,6 +12,7 @@ namespace Guflow.Worker
         private IAmazonSimpleWorkflow _amazonSimpleWorkflow;
         protected bool FailOnException;
         protected readonly ActivityHeartbeat Hearbeat = new ActivityHeartbeat();
+        private string _currentTaskToken = string.Empty;
         protected Activity()
         {
             _executionMethod = new ActivityExecutionMethod(GetType());
@@ -28,14 +29,14 @@ namespace Guflow.Worker
         {
             try
             {
-
+                _currentTaskToken = activityArgs.TaskToken;
                 Hearbeat.StartHeartbeatAsync(_amazonSimpleWorkflow, activityArgs.TaskToken);
                 return await _executionMethod.Execute(this, activityArgs);
             }
             catch (Exception exception)
             {
                 if (FailOnException)
-                    return ActivityResponse.Fail(exception.GetType().Name, exception.Message);
+                    return new ActivityFailedResponse(activityArgs.TaskToken, exception.GetType().Name, exception.Message);
                 throw;
             }
             finally
@@ -44,6 +45,10 @@ namespace Guflow.Worker
             }
         }
 
+        protected ActivityResponse Completed(string result)
+        {
+            return new ActivityCompletedResponse(_currentTaskToken, result);
+        }
         private void ConfigureHeartbeatInterval()
         {
             var enableHearbeatAttribute = GetType().GetCustomAttribute<EnableHeartbeatAttribute>();

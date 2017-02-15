@@ -9,7 +9,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Can_limit_the_activity_execution()
         {
-           
+            var concurrentExecution = ConcurrentExecution.LimitTo(5);
 
 
         }
