@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
+using Guflow.Properties;
 
 namespace Guflow.Worker
 {
@@ -25,11 +26,13 @@ namespace Guflow.Worker
 
         public void SetInterval(TimeSpan interval)
         {
+            if(interval <= TimeSpan.Zero)
+                throw new ArgumentException(Resources.Invalid_heartbeat_interval, "interval");
             _interval = interval;
             _enabled = true;
         }
 
-        public void ProvideDetailsFrom(Func<string> getDetailsFunc)
+        public void ProvideDetails(Func<string> getDetailsFunc)
         {
             Ensure.NotNull(getDetailsFunc, "getDetailsFunc");
             _activityDetailsFunc = getDetailsFunc;

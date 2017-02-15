@@ -210,4 +210,7 @@
   <data name="Multiple_activity_execution_methods_defined" xml:space="preserve">
     <value>Activity {0} has multiple execution method defined. Please provide only one execution method.</value>
   </data>
+  <data name="Invalid_heartbeat_interval" xml:space="preserve">
+    <value>Invalid heartbeat interval. Interval must be greater than zero.</value>
+  </data>
 </root>
