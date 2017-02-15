@@ -196,6 +196,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid heartbeat interval. Interval must be greater than zero..
+        /// </summary>
+        internal static string Invalid_heartbeat_interval {
+            get {
+                return ResourceManager.GetString("Invalid_heartbeat_interval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Target method {0} has incompatible parameter {1} which can&apos;t be assigned from source object {2}&apos;s property..
         /// </summary>
         internal static string Invalid_parameter {

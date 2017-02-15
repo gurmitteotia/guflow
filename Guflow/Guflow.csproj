@@ -208,6 +208,7 @@
     <Compile Include="Worker\ActivityNotHostedException.cs" />
     <Compile Include="Worker\ActivityResponse.cs" />
     <Compile Include="Worker\ConcurrentExecution.cs" />
+    <Compile Include="Worker\EnableHeartbeatAttribute.cs" />
     <Compile Include="Worker\ExecuteAttribute.cs" />
     <Compile Include="Worker\HostedActivities.cs" />
     <Compile Include="Worker\NonActivityTypeException.cs" />

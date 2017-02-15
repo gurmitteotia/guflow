@@ -5,6 +5,10 @@ namespace Guflow.Worker
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class EnableHeartbeatAttribute : Attribute
     {
-        public ulong HeartbeatIntervalInMilliSeconds { get; set; }
+        public EnableHeartbeatAttribute(ulong heartbeatIntervalInMilliSeconds)
+        {
+            HeartbeatIntervalInMilliSeconds = heartbeatIntervalInMilliSeconds;
+        }
+        public ulong HeartbeatIntervalInMilliSeconds { get; private set; }
     }
 }

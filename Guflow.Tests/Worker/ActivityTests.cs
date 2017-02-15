@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Worker;
 using Moq;
 using NUnit.Framework;
@@ -11,10 +13,12 @@ namespace Guflow.Tests.Worker
     public class ActivityTests
     {
         private ActivityArgs _activityArgs;
+        private Mock<IAmazonSimpleWorkflow> _amazonSimpleWorkflow;
 
         [SetUp]
         public void Setup()
         {
+            _amazonSimpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
             _activityArgs = new ActivityArgs("input","id" ,"wid", "rid", "token");
         }
 
@@ -144,9 +148,52 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
-        public void Heartbeat_started_when_it_it_enabled_on_activity()
+        public async Task Heartbeat_started_when_it_it_enabled_on_activity_by_attribute()
         {
-            
+            var activity = new ActivityWithHeartbeatEnabledByAttribute("details", TimeSpan.FromSeconds(1));
+            activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
+            await activity.ExecuteAsync(_activityArgs);
+
+            AssertThatHearbeatIsSendToAmazonSwf("details");
+        }
+
+
+        [Test]
+        public async Task Does_not_send_hearbeat_to_amazon_swf_when_not_enabled()
+        {
+            var activity = new ActivityWithoutHearbeat("details", TimeSpan.FromSeconds(1));
+            activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
+            await activity.ExecuteAsync(_activityArgs);
+
+            AssertThatNoHearbeatIsSendToAmazonSwf();
+        }
+
+        [Test]
+        public async Task Heartbeat_started_when_it_it_enabled_on_activity_programmatically()
+        {
+            var activity = new ActivityWithHeartbeatEnabledProgrammatically("details", TimeSpan.FromSeconds(1));
+            activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
+            await activity.ExecuteAsync(_activityArgs);
+
+            AssertThatHearbeatIsSendToAmazonSwf("details");
+        }
+
+        private void AssertThatHearbeatIsSendToAmazonSwf(string details)
+        {
+            Func<RecordActivityTaskHeartbeatRequest, bool> req = r =>
+            {
+                Assert.That(r.Details, Is.EqualTo(details));
+                Assert.That(r.TaskToken, Is.EqualTo(_activityArgs.TaskToken));
+                return true;
+            };
+            _amazonSimpleWorkflow.Verify(s=>s.RecordActivityTaskHeartbeatAsync(It.Is<RecordActivityTaskHeartbeatRequest>(r=>req(r)), It.IsAny<CancellationToken>()));
+        }
+
+        private void AssertThatNoHearbeatIsSendToAmazonSwf()
+        {
+            _amazonSimpleWorkflow.Verify(s => 
+                            s.RecordActivityTaskHeartbeatAsync(It.IsAny<RecordActivityTaskHeartbeatRequest>(),
+                            It.IsAny<CancellationToken>()), Times.Never);
         }
 
         private class NoExecutionMethodActivity : Activity
@@ -305,15 +352,48 @@ namespace Guflow.Tests.Worker
             public string TaskToken { get; private set; }
         }
 
-        [EnableHeartbeat]
-        private class ActivityWithHeartbeat : Activity
+        [EnableHeartbeat(10)]
+        private class ActivityWithHeartbeatEnabledByAttribute : Activity
         {
             private readonly TimeSpan _activityExecutionTime;
 
-            public ActivityWithHeartbeat(string details, TimeSpan activityExecutionTime)
+            public ActivityWithHeartbeatEnabledByAttribute(string details, TimeSpan activityExecutionTime)
             {
                 _activityExecutionTime = activityExecutionTime;
-                Hearbeat.ProvideDetailsFrom(()=>details);
+                Hearbeat.ProvideDetails(()=>details);
+            }
+            [Execute]
+            public void TranscodeMe()
+            {
+                Thread.Sleep(_activityExecutionTime);
+            }
+        }
+
+        private class ActivityWithoutHearbeat : Activity
+        {
+            private readonly TimeSpan _activityExecutionTime;
+
+            public ActivityWithoutHearbeat(string details, TimeSpan activityExecutionTime)
+            {
+                _activityExecutionTime = activityExecutionTime;
+                Hearbeat.ProvideDetails(() => details);
+            }
+            [Execute]
+            public void TranscodeMe()
+            {
+                Thread.Sleep(_activityExecutionTime);
+            }
+        }
+
+        private class ActivityWithHeartbeatEnabledProgrammatically : Activity
+        {
+            private readonly TimeSpan _activityExecutionTime;
+
+            public ActivityWithHeartbeatEnabledProgrammatically(string details, TimeSpan activityExecutionTime)
+            {
+                _activityExecutionTime = activityExecutionTime;
+                Hearbeat.SetInterval(TimeSpan.FromMilliseconds(10));
+                Hearbeat.ProvideDetails(() => details);
             }
             [Execute]
             public void TranscodeMe()
