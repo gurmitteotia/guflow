@@ -115,7 +115,7 @@ namespace Guflow
 
         private async Task<ActivityTask> PollAmazonSwfForActivityTaskAsync(TaskQueue taskQueue)
         {
-            var activityTaskPollingRequest = taskQueue.ActivityTaskPollingRequest(_name);
+            var activityTaskPollingRequest = taskQueue.CreateActivityTaskPollingRequest(_name);
             var response = await _simpleWorkflowClient.PollForActivityTaskAsync(activityTaskPollingRequest);
             return response.ActivityTask;
         }
@@ -153,7 +153,7 @@ namespace Guflow
 
         private async Task<DecisionTask> PollAmazonSwfForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)
         {
-            var request = taskQueue.DecisionTaskPollingRequest(_name, nextPageToken);
+            var request = taskQueue.CreateDecisionTaskPollingRequest(_name, nextPageToken);
             var response = await _simpleWorkflowClient.PollForDecisionTaskAsync(request);
             return response.DecisionTask;
         } 

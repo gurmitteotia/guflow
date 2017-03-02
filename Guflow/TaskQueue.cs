@@ -12,7 +12,7 @@ namespace Guflow
         private readonly string _taskListName;
         private readonly string _pollingIdentity;
         private ReadHistoryEvents _readHistoryEvents;
-        private IErrorHandler _errorHandler = ErrorHandler.NotHandled;
+        private ErrorHandler _errorHandler = ErrorHandler.NotHandled;
         public static readonly ReadHistoryEvents ReadAllEvents = (d,q) => ReadAllEventsAsync(d,q);
         public static readonly ReadHistoryEvents ReadFirstPage = (d,q) => ReadFirstPageAsync(d, q); 
 
@@ -50,19 +50,27 @@ namespace Guflow
 
             return WorkerTask.Empty;
         }
-        public void OnError(HandleError errorHandler)
+        public void OnPollingError(HandleError errorHandler)
         {
             Ensure.NotNull(errorHandler, "errorHandler");
             _errorHandler = ErrorHandler.Default(errorHandler);
         }
-        public void OnError(IErrorHandler errorHandler)
+        public void OnPollingError(IErrorHandler errorHandler)
         {
             Ensure.NotNull(errorHandler, "errorHandler");
-            OnError(errorHandler.OnError);
+            OnPollingError(errorHandler.OnError);
         }
         internal ErrorAction HandlePollingError(Error error)
         {
             return _errorHandler.OnError(error);
+        }
+
+        internal TaskQueue SetFallbackErrorHandler(IErrorHandler errorHandler)
+        {
+            var taskQueue = new TaskQueue(_taskListName, _pollingIdentity);
+            taskQueue._readHistoryEvents = _readHistoryEvents;
+            taskQueue._errorHandler = _errorHandler.WithFallback(errorHandler);
+            return taskQueue;
         }
         private static bool NewTasksAreReturned(DecisionTask decisionTask)
         {
@@ -89,7 +97,7 @@ namespace Guflow
             return await domain.PollForDecisionTaskAsync(taskQueue, nextPageToken);
         }
 
-        internal PollForDecisionTaskRequest DecisionTaskPollingRequest(string domain, string nextPageToken = null)
+        internal PollForDecisionTaskRequest CreateDecisionTaskPollingRequest(string domain, string nextPageToken = null)
         {
             return new PollForDecisionTaskRequest
             {
@@ -102,7 +110,7 @@ namespace Guflow
             };
         }
 
-        internal PollForActivityTaskRequest ActivityTaskPollingRequest(string forDomain)
+        internal PollForActivityTaskRequest CreateActivityTaskPollingRequest(string forDomain)
         {
             return new PollForActivityTaskRequest()
             {

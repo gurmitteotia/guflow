@@ -72,6 +72,7 @@ namespace Guflow.Decider
                 throw new InvalidOperationException(Resources.Workflow_execution_already_stopped);
 
             Ensure.NotNull(taskQueue, "taskQueue");
+            taskQueue = taskQueue.SetFallbackErrorHandler(_genericErrorHandler);
             while (!_cancelled)
             {
                 var workflowTask = await PollForTaskOnAsync(taskQueue);

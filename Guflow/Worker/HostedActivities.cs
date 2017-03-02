@@ -9,7 +9,8 @@ namespace Guflow.Worker
         private readonly Domain _domain;
         private readonly Activities _activities;
         private volatile bool _stopped;
-        private CancellationTokenSource _cancellationTokenSource  = new CancellationTokenSource(); 
+        private CancellationTokenSource _cancellationTokenSource  = new CancellationTokenSource();
+        private IErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
         internal HostedActivities(Domain domain, IEnumerable<Activity> activities)
         {
             Ensure.NotNull(domain, "domain");
@@ -22,21 +23,6 @@ namespace Guflow.Worker
             : this(domain, activitiesTypes, t=>(Activity)Activator.CreateInstance(t))
         {
         }
-
-        public void StartExecution(TaskQueue taskQueue)
-        {
-            
-        }
-
-        private async void ExecuteHostedActivities(TaskQueue taskQueue)
-        {
-            while (_stopped)
-            {
-                var workerTask = await taskQueue.PollForWorkerTaskAsync(_domain);
-                await workerTask.ExecuteFor(this);
-            }
-        }
-
         internal HostedActivities(Domain domain, IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
         {
             Ensure.NotNull(domain, "domain");
@@ -47,6 +33,32 @@ namespace Guflow.Worker
             _activities = Activities.Transient(activitiesTypes, instanceCreator);
         }
 
+        public void StartExecution(TaskQueue taskQueue)
+        {
+            Ensure.NotNull(taskQueue, "taskQueue");
+            taskQueue = taskQueue.SetFallbackErrorHandler(_genericErrorHandler);
+            ExecuteHostedActivitiesAsync(taskQueue);
+        }
+
+        public void OnError(IErrorHandler errorHandler)
+        {
+            Ensure.NotNull(errorHandler, "errorHandler");
+            _genericErrorHandler = errorHandler;
+        }
+        public void OnError(HandleError handleError)
+        {
+            Ensure.NotNull(handleError, "handleError");
+            OnError(ErrorHandler.Default(handleError));
+        }
+        private async void ExecuteHostedActivitiesAsync(TaskQueue taskQueue)
+        {
+            while (_stopped)
+            {
+                var workerTask = await taskQueue.PollForWorkerTaskAsync(_domain);
+                var activityResponse = await workerTask.ExecuteFor(this);
+                await activityResponse.SendAsync(_domain.Client);
+            }
+        }
         internal Activity FindBy(string activityName, string activityVersion)
         {
             return _activities.FindBy(activityName, activityVersion);
