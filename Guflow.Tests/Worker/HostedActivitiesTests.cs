@@ -112,6 +112,22 @@ namespace Guflow.Tests.Worker
             Assert.Throws<ActivityInstanceMismatchedException>(() => hostedActivities.FindBy("TestActivity1", "1.0"));
         }
 
+        [Test]
+        public void Start_execution_throws_exception_when_task_queue_is_null()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.StartExecution(null));
+        }
+
+        [Test]
+        public void Throws_exception_when_null_error_handler_are_set()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+
+            Assert.Throws<ArgumentNullException>(()=> hostedActivities.OnError((IErrorHandler)null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnError((HandleError)null));
+        }
         [ActivityDescription("1.0")]
         private class TestActivity1 : Activity
         {

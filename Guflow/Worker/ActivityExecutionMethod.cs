@@ -86,13 +86,10 @@ namespace Guflow.Worker
                 return new ExecutionStrategy(GenericTypeReturnType);
             }
 
-            private static async Task<ActivityResponse> VoidReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
+            private static Task<ActivityResponse> VoidReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
-                return await Task.Run(() =>
-                {
-                    targetMethod.Execute(targetInstance, parameters);
-                    return ActivityResponse.Defferred;
-                });
+                targetMethod.Execute(targetInstance, parameters);
+                return Task.FromResult(ActivityResponse.Defferred);
             }
             private static async Task<ActivityResponse> TaskReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
@@ -100,9 +97,9 @@ namespace Guflow.Worker
                 return ActivityResponse.Defferred;
             }
 
-            private static async Task<ActivityResponse> ActivityResponseReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
+            private static Task<ActivityResponse> ActivityResponseReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
-                return await Task.Run(() => (ActivityResponse)targetMethod.Execute(targetInstance, parameters));
+                return  Task.FromResult((ActivityResponse)targetMethod.Execute(targetInstance, parameters));
             }
             private static async Task<ActivityResponse> TaskOfActivityResponseReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
@@ -117,12 +114,13 @@ namespace Guflow.Worker
                     return new ActivityCompletedResponse(taskToken, result.ToString());
                 return new ActivityCompletedResponse(taskToken, result.ToJson());
             }
-            private static async Task<ActivityResponse> GenericTypeReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
+            private static Task<ActivityResponse> GenericTypeReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
                 var result = targetMethod.Execute(targetInstance, parameters);
                 if (result.Primitive())
-                    return new ActivityCompletedResponse(taskToken, result.ToString());
-                return new ActivityCompletedResponse(taskToken, result.ToJson());
+                    return Task.FromResult((ActivityResponse)new ActivityCompletedResponse(taskToken, result.ToString()));
+
+                return Task.FromResult((ActivityResponse)new ActivityCompletedResponse(taskToken, result.ToJson()));
             }
         }
     }

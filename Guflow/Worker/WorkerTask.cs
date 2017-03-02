@@ -39,6 +39,7 @@ namespace Guflow.Worker
                                                 _activityTask.WorkflowExecution.WorkflowId,
                                                 _activityTask.WorkflowExecution.RunId,
                                                 _activityTask.TaskToken);
+            activityArgs.StartedEventId = _activityTask.StartedEventId;
             return await activity.ExecuteAsync(activityArgs);
         }
     }
