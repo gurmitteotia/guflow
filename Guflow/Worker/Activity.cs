@@ -45,7 +45,7 @@ namespace Guflow.Worker
             }
         }
 
-        protected ActivityResponse Completed(string result)
+        protected ActivityResponse Complete(string result)
         {
             return new ActivityCompletedResponse(_currentTaskToken, result);
         }

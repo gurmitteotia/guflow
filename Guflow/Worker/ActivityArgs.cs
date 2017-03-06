@@ -11,7 +11,6 @@ namespace Guflow.Worker
             WorkflowId = workflowId;
             WorkflowRunId = workflowRunId;
             TaskToken = taskToken;
-            IAmazonSimpleWorkflow sw;
         }
 
         public string ActivityId { get; private set; }

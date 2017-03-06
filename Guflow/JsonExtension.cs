@@ -31,7 +31,7 @@ namespace Guflow
                 JToken.Parse(strValue);
                 return true;
             }
-            catch (JsonReaderException exception)
+            catch (JsonReaderException)
             {
                 return false;
             }

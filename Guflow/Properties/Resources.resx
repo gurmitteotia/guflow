@@ -213,4 +213,7 @@
   <data name="Invalid_heartbeat_interval" xml:space="preserve">
     <value>Invalid heartbeat interval. Interval must be greater than zero.</value>
   </data>
+  <data name="Concurrent_execution_limit_should_be_than_zero" xml:space="preserve">
+    <value>Concurrent execution limit should be more than zero.</value>
+  </data>
 </root>
