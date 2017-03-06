@@ -77,7 +77,7 @@ namespace Guflow.Tests.Worker
             {
                 await Task.Delay(10);
                 ActivityArgs = args;
-                return Completed("result");
+                return Complete("result");
             }
 
             public static ActivityArgs ActivityArgs;

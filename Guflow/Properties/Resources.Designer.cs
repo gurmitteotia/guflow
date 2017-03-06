@@ -124,6 +124,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Concurrent execution limit should be more than zero..
+        /// </summary>
+        internal static string Concurrent_execution_limit_should_be_than_zero {
+            get {
+                return ResourceManager.GetString("Concurrent_execution_limit_should_be_than_zero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Workflow item {0} depends on itself.
         /// </summary>
         internal static string Cyclic_dependency {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Guflow.Worker
 {
@@ -62,6 +63,11 @@ namespace Guflow.Worker
         internal Activity FindBy(string activityName, string activityVersion)
         {
             return _activities.FindBy(activityName, activityVersion);
+        }
+
+        internal async Task SendAsync(ActivityResponse response)
+        {
+            await response.SendAsync(_domain.Client);
         }
     }
 }
