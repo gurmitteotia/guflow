@@ -1,4 +1,7 @@
-﻿namespace Guflow.Worker
+﻿using System.Threading.Tasks;
+using Amazon.SimpleWorkflow;
+
+namespace Guflow.Worker
 {
     public sealed class ActivityFailedResponse : ActivityResponse
     {
@@ -11,6 +14,11 @@
             _reason = reason;
             _details = details;
             _taskToken = taskToken;
+        }
+
+        public override Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow)
+        {
+            throw new System.NotImplementedException();
         }
         private bool Equals(ActivityFailedResponse other)
         {

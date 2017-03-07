@@ -3,14 +3,18 @@ using Amazon.SimpleWorkflow;
 
 namespace Guflow.Worker
 {
-    public class ActivityResponse
+    public abstract class ActivityResponse
     {
-        public static readonly ActivityResponse Defferred = new ActivityResponse();
+        public static readonly ActivityResponse Defferred = new DeferredResponse();
 
-        public async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow)
+        public abstract Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow);
+
+        private class DeferredResponse : ActivityResponse
         {
-            
+            public override Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow)
+            {
+                return Task.FromResult(false);
+            }
         }
-
     }
 }

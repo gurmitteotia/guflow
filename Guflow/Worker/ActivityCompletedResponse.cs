@@ -1,3 +1,7 @@
+using System.Threading.Tasks;
+using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
+
 namespace Guflow.Worker
 {
     public sealed class ActivityCompletedResponse : ActivityResponse
@@ -9,6 +13,11 @@ namespace Guflow.Worker
         {
             _result = result;
             _taskToken = taskToken;
+        }
+        public override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow)
+        {
+            var request = new RespondActivityTaskCompletedRequest() {Result = _result, TaskToken = _taskToken};
+            await simpleWorkflow.RespondActivityTaskCompletedAsync(request);
         }
         private bool Equals(ActivityCompletedResponse other)
         {
@@ -30,5 +39,6 @@ namespace Guflow.Worker
             }
         }
 
+      
     }
 }

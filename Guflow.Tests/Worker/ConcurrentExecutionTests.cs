@@ -17,12 +17,13 @@ namespace Guflow.Tests.Worker
     {
         private HostedActivities _hostedActivities;
         private Mock<IAmazonSimpleWorkflow> _amazonSimpleWorkflow;
-
+        private const string _activityResult = "result";
+        private const string _taskToken = "token";
         [SetUp]
         public void Setup()
         {
             _amazonSimpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
-            _hostedActivities = new HostedActivities(new Domain("name", new Mock<IAmazonSimpleWorkflow>().Object), new[] { typeof(TestActivity) }, t=> new TestActivity("result"));
+            _hostedActivities = new HostedActivities(new Domain("name", _amazonSimpleWorkflow.Object), new[] { typeof(TestActivity) }, t=> new TestActivity(_activityResult));
             TestActivity.Reset();
         }
         [Test]
@@ -31,10 +32,10 @@ namespace Guflow.Tests.Worker
             var concurrentExecution = ConcurrentExecution.LimitTo(2);
             concurrentExecution.Set(_hostedActivities);
 
-            await concurrentExecution.Execute(CreateWorkerTask());
-            await concurrentExecution.Execute(CreateWorkerTask());
-            await concurrentExecution.Execute(CreateWorkerTask());
-            await concurrentExecution.Execute(CreateWorkerTask());
+            await concurrentExecution.Execute(NewWorkerTask());
+            await concurrentExecution.Execute(NewWorkerTask());
+            await concurrentExecution.Execute(NewWorkerTask());
+            await concurrentExecution.Execute(NewWorkerTask());
 
 
             Assert.That(TestActivity.MaxConcurrentExecution , Is.EqualTo(2));
@@ -46,10 +47,10 @@ namespace Guflow.Tests.Worker
             var concurrentExecution = ConcurrentExecution.LimitTo(1);
             concurrentExecution.Set(_hostedActivities);
 
-            await concurrentExecution.Execute(CreateWorkerTask());
-            await concurrentExecution.Execute(CreateWorkerTask());
-            await concurrentExecution.Execute(CreateWorkerTask());
-            await concurrentExecution.Execute(CreateWorkerTask());
+            await concurrentExecution.Execute(NewWorkerTask());
+            await concurrentExecution.Execute(NewWorkerTask());
+            await concurrentExecution.Execute(NewWorkerTask());
+            await concurrentExecution.Execute(NewWorkerTask());
 
 
             Assert.That(TestActivity.MaxConcurrentExecution, Is.EqualTo(1));
@@ -66,9 +67,19 @@ namespace Guflow.Tests.Worker
         {
             var concurrentExecution = ConcurrentExecution.LimitTo(1);
             concurrentExecution.Set(_hostedActivities);
+
+            await concurrentExecution.Execute(NewWorkerTask());
+
+            Func<RespondActivityTaskCompletedRequest, bool> request = r =>
+            {
+                Assert.That(r.Result, Is.EqualTo(_activityResult));
+                Assert.That(r.TaskToken, Is.EqualTo(_taskToken));
+                return true;
+            };
+            _amazonSimpleWorkflow.Verify(w=>w.RespondActivityTaskCompleted(It.Is<RespondActivityTaskCompletedRequest>(r=>request(r))), Times.Once);
         }
 
-        private static WorkerTask CreateWorkerTask()
+        private static WorkerTask NewWorkerTask()
         {
             return WorkerTask.CreateFor(new ActivityTask()
             {
