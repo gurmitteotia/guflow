@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
@@ -42,9 +43,9 @@ namespace Guflow
             return WorkflowTask.Empty;
         }
 
-        internal async Task<WorkerTask> PollForWorkerTaskAsync(Domain domain)
+        internal async Task<WorkerTask> PollForWorkerTaskAsync(Domain domain, CancellationToken cancellationToken)
         {
-            var activityTask = await domain.PollForActivityTaskAsync(this);
+            var activityTask = await domain.PollForActivityTaskAsync(this, cancellationToken);
             if (NewTasksAreReturned(activityTask))
                 return WorkerTask.CreateFor(activityTask);
 

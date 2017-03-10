@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
@@ -11,13 +12,14 @@ namespace Guflow.Worker
         private readonly string _taskToken;
         public ActivityCompletedResponse(string taskToken, string result)
         {
+            Ensure.NotNullAndEmpty(taskToken, "taskToken");
             _result = result;
             _taskToken = taskToken;
         }
-        public override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow)
+        public override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
         {
             var request = new RespondActivityTaskCompletedRequest() {Result = _result, TaskToken = _taskToken};
-            await simpleWorkflow.RespondActivityTaskCompletedAsync(request);
+            await simpleWorkflow.RespondActivityTaskCompletedAsync(request, cancellationToken);
         }
         private bool Equals(ActivityCompletedResponse other)
         {

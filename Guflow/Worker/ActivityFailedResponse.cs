@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Worker
 {
@@ -11,18 +13,27 @@ namespace Guflow.Worker
 
         public ActivityFailedResponse(string taskToken, string reason, string details)
         {
+            Ensure.NotNullAndEmpty(taskToken, "taskToken");
             _reason = reason;
             _details = details;
             _taskToken = taskToken;
         }
 
-        public override Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow)
+        public override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var request = new RespondActivityTaskFailedRequest()
+            {
+                TaskToken = _taskToken,
+                Reason = _reason,
+                Details = _details
+            };
+
+            await simpleWorkflow.RespondActivityTaskFailedAsync(request, cancellationToken);
         }
+
         private bool Equals(ActivityFailedResponse other)
         {
-            return string.Equals(_reason, other._reason) && string.Equals(_details, other._details);
+            return string.Equals(_taskToken, other._taskToken) && string.Equals(_reason, other._reason) && string.Equals(_details, other._details);
         }
 
         public override bool Equals(object obj)

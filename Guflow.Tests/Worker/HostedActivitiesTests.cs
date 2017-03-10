@@ -121,12 +121,13 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
-        public void Throws_exception_when_null_error_handler_are_set()
+        public void Invalid_parameters_tests()
         {
             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
 
             Assert.Throws<ArgumentNullException>(()=> hostedActivities.OnError((IErrorHandler)null));
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnError((HandleError)null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.Execution = null);
         }
         [ActivityDescription("1.0")]
         private class TestActivity1 : Activity

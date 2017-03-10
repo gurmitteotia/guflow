@@ -79,6 +79,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Mismatch in activity execution count. It is a bug..
+        /// </summary>
+        internal static string Activity_execution_count_mismatch {
+            get {
+                return ResourceManager.GetString("Activity_execution_count_mismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Activity {0} does not have execution method. Please define a method with valid signature and decorate it with ExecuteAttribute.
         /// </summary>
         internal static string Activity_execution_method_missing {
@@ -309,6 +318,15 @@ namespace Guflow.Properties {
         internal static string TaskListName_required {
             get {
                 return ResourceManager.GetString("TaskListName_required", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Crashing out because of unhandled exception in activity execution..
+        /// </summary>
+        internal static string Unhandled_activity_exception {
+            get {
+                return ResourceManager.GetString("Unhandled_activity_exception", resourceCulture);
             }
         }
         
