@@ -17,6 +17,7 @@ namespace Guflow.Tests
         private const string _domainName = "domain";
         private const string _pollingIdentity = "id";
         private Mock<IAmazonSimpleWorkflow> _amazonWorkflowClient;
+        private CancellationTokenSource _cancellationTokenSource;
         private TaskQueue _taskQueue;
         private Domain _domain;
 
@@ -25,6 +26,7 @@ namespace Guflow.Tests
         {
             _taskQueue = new TaskQueue(_taskListName, _pollingIdentity);
             _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
+            _cancellationTokenSource = new CancellationTokenSource();
             _domain = new Domain(_domainName,_amazonWorkflowClient.Object);
         }
 
@@ -53,7 +55,7 @@ namespace Guflow.Tests
         {
             AmazonSwfReturns(new ActivityTask());
 
-            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain);
+            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
 
             Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
         }
@@ -63,7 +65,7 @@ namespace Guflow.Tests
         {
             AmazonSwfReturns(new ActivityTask { TaskToken = "token"});
 
-            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain);
+            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
 
             Assert.That(workerTask, Is.Not.EqualTo(WorkerTask.Empty));
         }
@@ -178,7 +180,7 @@ namespace Guflow.Tests
             _amazonWorkflowClient.Setup(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
                                  .Throws(new UnknownResourceException("not found"));
 
-            Assert.ThrowsAsync<UnknownResourceException>(async () => await _taskQueue.PollForWorkerTaskAsync(_domain));
+            Assert.ThrowsAsync<UnknownResourceException>(async () => await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token));
         }
 
 
@@ -190,7 +192,7 @@ namespace Guflow.Tests
                                  .Returns(Task.FromResult(new PollForActivityTaskResponse() { ActivityTask = new ActivityTask() }));
             _taskQueue.OnPollingError((e) => ErrorAction.Retry);
 
-            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain);
+            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
 
             Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
         }
@@ -203,7 +205,7 @@ namespace Guflow.Tests
 
             _taskQueue.OnPollingError((e) => e.RetryAttempts < 1 ? ErrorAction.Retry : ErrorAction.Continue);
 
-            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain);
+            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
 
             Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
         }
@@ -215,7 +217,7 @@ namespace Guflow.Tests
                                  .Throws(new UnknownResourceException("not found"));
 
             _taskQueue.OnPollingError((e) => ErrorAction.Continue);
-            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain);
+            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
 
             Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
         }

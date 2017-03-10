@@ -216,4 +216,10 @@
   <data name="Concurrent_execution_limit_should_be_than_zero" xml:space="preserve">
     <value>Concurrent execution limit should be more than zero.</value>
   </data>
+  <data name="Unhandled_activity_exception" xml:space="preserve">
+    <value>Crashing out because of unhandled exception in activity execution.</value>
+  </data>
+  <data name="Activity_execution_count_mismatch" xml:space="preserve">
+    <value>Mismatch in activity execution count. It is a bug.</value>
+  </data>
 </root>

@@ -198,6 +198,7 @@
     <Compile Include="Worker\Activity.cs" />
     <Compile Include="Worker\ActivityAlreadyHostedException.cs" />
     <Compile Include="Worker\ActivityArgs.cs" />
+    <Compile Include="Worker\ActivityCancelledResponse.cs" />
     <Compile Include="Worker\ActivityCompletedResponse.cs" />
     <Compile Include="Worker\ActivityDescriptionAttribute.cs" />
     <Compile Include="Worker\ActivityDescriptionMissingException.cs" />
@@ -209,7 +210,7 @@
     <Compile Include="Worker\ActivityInstanceMismatchedException.cs" />
     <Compile Include="Worker\ActivityNotHostedException.cs" />
     <Compile Include="Worker\ActivityResponse.cs" />
-    <Compile Include="Worker\ConcurrentExecution.cs" />
+    <Compile Include="Worker\ActivityExecution.cs" />
     <Compile Include="Worker\EnableHeartbeatAttribute.cs" />
     <Compile Include="Worker\ExecuteAttribute.cs" />
     <Compile Include="Worker\HostedActivities.cs" />

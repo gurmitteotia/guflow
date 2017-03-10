@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.SimpleWorkflow;
@@ -87,7 +88,7 @@ namespace Guflow
             await RegisterDomainAsync(retentionPeriodInDays, description);
         }
 
-        internal async Task<ActivityTask> PollForActivityTaskAsync(TaskQueue taskQueue)
+        internal async Task<ActivityTask> PollForActivityTaskAsync(TaskQueue taskQueue, CancellationToken cancellationToken)
         {
             Ensure.NotNull(taskQueue, "taskQueue");
             var error = new Error();
@@ -98,7 +99,7 @@ namespace Guflow
                 retry = false;
                 try
                 {
-                    return await PollAmazonSwfForActivityTaskAsync(taskQueue);
+                    return await PollAmazonSwfForActivityTaskAsync(taskQueue, cancellationToken);
                 }
                 catch (Exception exception)
                 {
@@ -113,10 +114,10 @@ namespace Guflow
             return DefaultActivityTask;
         }
 
-        private async Task<ActivityTask> PollAmazonSwfForActivityTaskAsync(TaskQueue taskQueue)
+        private async Task<ActivityTask> PollAmazonSwfForActivityTaskAsync(TaskQueue taskQueue, CancellationToken cancellationToken)
         {
             var activityTaskPollingRequest = taskQueue.CreateActivityTaskPollingRequest(_name);
-            var response = await _simpleWorkflowClient.PollForActivityTaskAsync(activityTaskPollingRequest);
+            var response = await _simpleWorkflowClient.PollForActivityTaskAsync(activityTaskPollingRequest, cancellationToken);
             return response.ActivityTask;
         }
 

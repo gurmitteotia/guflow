@@ -12,12 +12,14 @@ namespace Guflow.Worker
         private volatile bool _stopped;
         private CancellationTokenSource _cancellationTokenSource  = new CancellationTokenSource();
         private IErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
+        private ActivityExecution _activityExecution;
         internal HostedActivities(Domain domain, IEnumerable<Activity> activities)
         {
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(activities, "activities");
             _domain = domain;
             _activities = Activities.Singleton(activities);
+            Execution = ActivityExecution.Sequencial;
         }
 
         internal HostedActivities(Domain domain, IEnumerable<Type> activitiesTypes)
@@ -32,6 +34,16 @@ namespace Guflow.Worker
 
             _domain = domain;
             _activities = Activities.Transient(activitiesTypes, instanceCreator);
+        }
+
+        public ActivityExecution Execution
+        {
+            get { return _activityExecution; }
+            set
+            {
+                Ensure.NotNull(value, "Execution");
+                _activityExecution = value;
+            }
         }
 
         public void StartExecution(TaskQueue taskQueue)
@@ -53,11 +65,13 @@ namespace Guflow.Worker
         }
         private async void ExecuteHostedActivitiesAsync(TaskQueue taskQueue)
         {
+            var activityExecution = Execution;
+            activityExecution.Set(hostedActivities: this);
+
             while (_stopped)
             {
-                var workerTask = await taskQueue.PollForWorkerTaskAsync(_domain);
-                var activityResponse = await workerTask.ExecuteFor(this);
-                await activityResponse.SendAsync(_domain.Client);
+                var workerTask = await taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
+                await activityExecution.ExecuteAsync(workerTask);
             }
         }
         internal Activity FindBy(string activityName, string activityVersion)
@@ -67,7 +81,7 @@ namespace Guflow.Worker
 
         internal async Task SendAsync(ActivityResponse response)
         {
-            await response.SendAsync(_domain.Client);
+            await response.SendAsync(_domain.Client, _cancellationTokenSource.Token);
         }
     }
 }

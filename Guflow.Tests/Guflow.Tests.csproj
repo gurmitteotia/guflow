@@ -123,11 +123,14 @@
     <Compile Include="Decider\WorkflowStartedEventTests.cs" />
     <Compile Include="Decider\WorkflowTaskTests.cs" />
     <Compile Include="Decider\WorkflowTests.cs" />
+    <Compile Include="Worker\ActivityCancelledResponseTests.cs" />
+    <Compile Include="Worker\ActivityCompletedResponseTests.cs" />
     <Compile Include="Worker\ActivityDescriptionTests.cs" />
     <Compile Include="Worker\ActivityExecutionMethodTests.cs" />
+    <Compile Include="Worker\ActivityFailedResponseTests.cs" />
     <Compile Include="Worker\ActivityHeartbeatTests.cs" />
     <Compile Include="Worker\ActivityTests.cs" />
-    <Compile Include="Worker\ConcurrentExecutionTests.cs" />
+    <Compile Include="Worker\ActivityExecutionTests.cs" />
     <Compile Include="Worker\HostedActivitiesTests.cs" />
     <Compile Include="Worker\WorkerTaskTests.cs" />
   </ItemGroup>
