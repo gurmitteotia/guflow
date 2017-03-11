@@ -89,12 +89,12 @@ namespace Guflow.Worker
             private static Task<ActivityResponse> VoidReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
                 targetMethod.Execute(targetInstance, parameters);
-                return Task.FromResult(ActivityResponse.Defferred);
+                return Task.FromResult(ActivityResponse.Defer);
             }
             private static async Task<ActivityResponse> TaskReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
                 await (Task)targetMethod.Execute(targetInstance, parameters);
-                return ActivityResponse.Defferred;
+                return ActivityResponse.Defer;
             }
 
             private static Task<ActivityResponse> ActivityResponseReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
@@ -111,16 +111,16 @@ namespace Guflow.Worker
                 await task;
                 var result = task.GetType().GetProperty("Result").GetValue(task);
                 if(result.Primitive())
-                    return new ActivityCompletedResponse(taskToken, result.ToString());
-                return new ActivityCompletedResponse(taskToken, result.ToJson());
+                    return new ActivityCompleteResponse(taskToken, result.ToString());
+                return new ActivityCompleteResponse(taskToken, result.ToJson());
             }
             private static Task<ActivityResponse> GenericTypeReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
                 var result = targetMethod.Execute(targetInstance, parameters);
                 if (result.Primitive())
-                    return Task.FromResult((ActivityResponse)new ActivityCompletedResponse(taskToken, result.ToString()));
+                    return Task.FromResult((ActivityResponse)new ActivityCompleteResponse(taskToken, result.ToString()));
 
-                return Task.FromResult((ActivityResponse)new ActivityCompletedResponse(taskToken, result.ToJson()));
+                return Task.FromResult((ActivityResponse)new ActivityCompleteResponse(taskToken, result.ToJson()));
             }
         }
     }

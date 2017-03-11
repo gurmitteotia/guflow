@@ -26,7 +26,7 @@ namespace Guflow.Tests.Worker
 
             var response = await workerTask.ExecuteFor(_hostedActivities);
 
-            Assert.That(response, Is.EqualTo(ActivityResponse.Defferred));
+            Assert.That(response, Is.EqualTo(ActivityResponse.Defer));
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace Guflow.Tests.Worker
 
             var response = await workerTask.ExecuteFor(_hostedActivities);
 
-            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse("token" ,"result")));
+            Assert.That(response, Is.EqualTo(new ActivityCompleteResponse("token" ,"result")));
         }
 
         [Test]
