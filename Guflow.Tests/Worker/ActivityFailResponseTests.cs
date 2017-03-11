@@ -11,24 +11,24 @@ using NUnit.Framework;
 namespace Guflow.Tests.Worker
 {
     [TestFixture]
-    public class ActivityFailedResponseTests
+    public class ActivityFailResponseTests
     {
 
         [Test]
         public void Equality_tests()
         {
-            Assert.IsTrue(new ActivityFailedResponse("token", "reason" ,"details").Equals(new ActivityFailedResponse("token", "reason", "details")));
+            Assert.IsTrue(new ActivityFailResponse("token", "reason" ,"details").Equals(new ActivityFailResponse("token", "reason", "details")));
 
-            Assert.IsFalse(new ActivityFailedResponse("token", "reason", "details").Equals(new ActivityFailedResponse("token", "reason", "details1")));
-            Assert.IsFalse(new ActivityFailedResponse("token", "reason", "details").Equals(new ActivityFailedResponse("token", "reason1", "details")));
-            Assert.IsFalse(new ActivityFailedResponse("token", "reason", "details").Equals(new ActivityFailedResponse("token1", "reason", "details")));
-            Assert.IsFalse(new ActivityFailedResponse("token", "reason", "details").Equals(new ActivityFailedResponse("token1", null, null)));
+            Assert.IsFalse(new ActivityFailResponse("token", "reason", "details").Equals(new ActivityFailResponse("token", "reason", "details1")));
+            Assert.IsFalse(new ActivityFailResponse("token", "reason", "details").Equals(new ActivityFailResponse("token", "reason1", "details")));
+            Assert.IsFalse(new ActivityFailResponse("token", "reason", "details").Equals(new ActivityFailResponse("token1", "reason", "details")));
+            Assert.IsFalse(new ActivityFailResponse("token", "reason", "details").Equals(new ActivityFailResponse("token1", null, null)));
         }
 
         [Test]
         public void Invalid_argument_tests()
         {
-            Assert.Throws<ArgumentException>(() => new ActivityFailedResponse(null, "reason", "details"));
+            Assert.Throws<ArgumentException>(() => new ActivityFailResponse(null, "reason", "details"));
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace Guflow.Tests.Worker
         {
             var cancellationTokenSource = new CancellationTokenSource();
             var simpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
-            var response = new ActivityFailedResponse("token", "reason", "details");
+            var response = new ActivityFailResponse("token", "reason", "details");
 
             await response.SendAsync(simpleWorkflow.Object, cancellationTokenSource.Token);
 

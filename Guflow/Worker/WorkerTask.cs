@@ -13,7 +13,7 @@ namespace Guflow.Worker
 
         private WorkerTask()
         {
-            _execute = (a) => Task.FromResult(ActivityResponse.Defferred);
+            _execute = (a) => Task.FromResult(ActivityResponse.Defer);
         }
         private WorkerTask(ActivityTask activityTask)
         {

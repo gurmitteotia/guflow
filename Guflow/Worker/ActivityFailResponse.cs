@@ -5,13 +5,13 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Worker
 {
-    public sealed class ActivityFailedResponse : ActivityResponse
+    public sealed class ActivityFailResponse : ActivityResponse
     {
         private readonly string _reason;
         private readonly string _details;
         private readonly string _taskToken;
 
-        public ActivityFailedResponse(string taskToken, string reason, string details)
+        public ActivityFailResponse(string taskToken, string reason, string details)
         {
             Ensure.NotNullAndEmpty(taskToken, "taskToken");
             _reason = reason;
@@ -31,7 +31,7 @@ namespace Guflow.Worker
             await simpleWorkflow.RespondActivityTaskFailedAsync(request, cancellationToken);
         }
 
-        private bool Equals(ActivityFailedResponse other)
+        private bool Equals(ActivityFailResponse other)
         {
             return string.Equals(_taskToken, other._taskToken) && string.Equals(_reason, other._reason) && string.Equals(_details, other._details);
         }
@@ -40,7 +40,7 @@ namespace Guflow.Worker
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is ActivityFailedResponse && Equals((ActivityFailedResponse)obj);
+            return obj is ActivityFailResponse && Equals((ActivityFailResponse)obj);
         }
 
         public override int GetHashCode()

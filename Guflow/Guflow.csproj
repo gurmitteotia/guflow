@@ -198,13 +198,13 @@
     <Compile Include="Worker\Activity.cs" />
     <Compile Include="Worker\ActivityAlreadyHostedException.cs" />
     <Compile Include="Worker\ActivityArgs.cs" />
-    <Compile Include="Worker\ActivityCancelledResponse.cs" />
-    <Compile Include="Worker\ActivityCompletedResponse.cs" />
+    <Compile Include="Worker\ActivityCancelResponse.cs" />
+    <Compile Include="Worker\ActivityCompleteResponse.cs" />
     <Compile Include="Worker\ActivityDescriptionAttribute.cs" />
     <Compile Include="Worker\ActivityDescriptionMissingException.cs" />
     <Compile Include="Worker\ActivityExecutionMethod.cs" />
     <Compile Include="Worker\ActivityExecutionMethodException.cs" />
-    <Compile Include="Worker\ActivityFailedResponse.cs" />
+    <Compile Include="Worker\ActivityFailResponse.cs" />
     <Compile Include="Worker\ActivityHeartbeat.cs" />
     <Compile Include="Worker\ActivityInstanceCreationException.cs" />
     <Compile Include="Worker\ActivityInstanceMismatchedException.cs" />

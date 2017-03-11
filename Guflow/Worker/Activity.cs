@@ -36,7 +36,7 @@ namespace Guflow.Worker
             catch (Exception exception)
             {
                 if (FailOnException)
-                    return new ActivityFailedResponse(activityArgs.TaskToken, exception.GetType().Name, exception.Message);
+                    return new ActivityFailResponse(activityArgs.TaskToken, exception.GetType().Name, exception.Message);
                 throw;
             }
             finally
@@ -47,8 +47,19 @@ namespace Guflow.Worker
 
         protected ActivityResponse Complete(string result)
         {
-            return new ActivityCompletedResponse(_currentTaskToken, result);
+            return new ActivityCompleteResponse(_currentTaskToken, result);
         }
+
+        protected ActivityResponse Cancel(string details)
+        {
+            return new ActivityCancelResponse(_currentTaskToken, details);
+        }
+        protected ActivityResponse Fail(string reason,string details)
+        {
+            return new ActivityFailResponse(_currentTaskToken, reason, details);
+        }
+        protected ActivityResponse Defer { get { return ActivityResponse.Defer;} }
+
         private void ConfigureHeartbeatInterval()
         {
             var enableHearbeatAttribute = GetType().GetCustomAttribute<EnableHeartbeatAttribute>();

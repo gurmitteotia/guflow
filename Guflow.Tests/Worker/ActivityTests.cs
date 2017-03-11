@@ -42,7 +42,7 @@ namespace Guflow.Tests.Worker
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(ActivityResponse.Defferred));
+            Assert.That(response, Is.EqualTo(ActivityResponse.Defer));
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace Guflow.Tests.Worker
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(ActivityResponse.Defferred));
+            Assert.That(response, Is.EqualTo(ActivityResponse.Defer));
         }
 
         [Test]
@@ -84,7 +84,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(_taskToken, "10")));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityCompleteResponse(_taskToken, "10")));
         }
 
         [Test]
@@ -95,7 +95,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(_taskToken, customData.ToJson())));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityCompleteResponse(_taskToken, customData.ToJson())));
         }
 
         [Test]
@@ -105,7 +105,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(_taskToken, "10")));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityCompleteResponse(_taskToken, "10")));
         }
         [Test]
         public async Task Execution_method_can_return_custom_data_type_in_activity_response_synchronously()
@@ -115,7 +115,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(_taskToken, customData.ToJson())));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityCompleteResponse(_taskToken, customData.ToJson())));
         }
         [Test]
         public async Task By_default_execution_method_convert_exception_to_failed_response()
@@ -124,7 +124,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityFailedResponse(_taskToken, "IndexOutOfRangeException", "blah")));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityFailResponse(_taskToken, "IndexOutOfRangeException", "blah")));
         }
 
         [Test]
@@ -177,6 +177,36 @@ namespace Guflow.Tests.Worker
             await activity.ExecuteAsync(_activityArgs);
 
             AssertThatHearbeatIsSendToAmazonSwf("details");
+        }
+
+        [Test]
+        public async Task Activity_can_return_complete_response()
+        {
+            var activity = new ActivityReturningCompleteResponse("result");
+
+            var response = await activity.ExecuteAsync(_activityArgs);
+
+            Assert.That(response, Is.EqualTo(new ActivityCompleteResponse(_taskToken, "result")));
+        }
+
+        [Test]
+        public async Task Activity_can_return_cancel_response()
+        {
+            var activity = new ActivityReturningCancelResponse("details");
+
+            var response = await activity.ExecuteAsync(_activityArgs);
+
+            Assert.That(response, Is.EqualTo(new ActivityCancelResponse(_taskToken, "details")));
+        }
+
+        [Test]
+        public async Task Activity_can_return_fail_response()
+        {
+            var activity = new ActivityReturningFailResponse("details", "reason");
+
+            var response = await activity.ExecuteAsync(_activityArgs);
+
+            Assert.That(response, Is.EqualTo(new ActivityFailResponse(_taskToken, "reason", "details")));
         }
 
         private void AssertThatHearbeatIsSendToAmazonSwf(string details)
@@ -407,6 +437,69 @@ namespace Guflow.Tests.Worker
         {
             public int Id;
             public string Details;
+        }
+
+        private class ActivityReturningCompleteResponse : Activity
+        {
+            private readonly string _result;
+
+            public ActivityReturningCompleteResponse(string result)
+            {
+                _result = result;
+            }
+
+            [Execute]
+            public ActivityResponse Execute()
+            {
+                return Complete(_result);
+            }
+        }
+
+        private class ActivityReturningCancelResponse : Activity
+        {
+            private readonly string _details;
+
+            public ActivityReturningCancelResponse(string details)
+            {
+                _details = details;
+            }
+
+            [Execute]
+            public ActivityResponse Execute()
+            {
+                return Cancel(_details);
+            }
+        }
+
+        private class ActivityReturningFailResponse : Activity
+        {
+            private readonly string _reason;
+            private readonly string _details;
+
+            public ActivityReturningFailResponse(string details, string reason)
+            {
+                _details = details;
+                _reason = reason;
+            }
+
+            [Execute]
+            public ActivityResponse Execute()
+            {
+                return Fail(_reason, _details);
+            }
+        }
+
+        private class ActivityReturningDeferResponse : Activity
+        {
+            public ActivityReturningDeferResponse()
+            {
+            }
+
+            [Execute]
+            public ActivityResponse Execute()
+            {
+                return Defer;
+            }
         }
     }
 }
