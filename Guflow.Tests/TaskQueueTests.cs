@@ -96,8 +96,6 @@ namespace Guflow.Tests
         {
             Assert.Throws<ArgumentException>(() => new TaskQueue(null));
             Assert.Throws<ArgumentNullException>(() => _taskQueue.ReadStrategy = null);
-            Assert.Throws<ArgumentNullException>(() => _taskQueue.OnPollingError((HandleError)null));
-            Assert.Throws<ArgumentNullException>(() => _taskQueue.OnPollingError((IErrorHandler)null));
         }
 
         [Test]
@@ -107,119 +105,6 @@ namespace Guflow.Tests
                                  .Throws(new UnknownResourceException("not found"));
 
             Assert.ThrowsAsync<UnknownResourceException>(async () => await _taskQueue.PollForWorkflowTaskAsync(_domain));
-        }
-
-        [Test]
-        public async Task Workflow_task_polling_exception_can_be_handled_to_retry()
-        {
-            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"))
-                                 .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = new DecisionTask() }));
-            _taskQueue.OnPollingError((e) => ErrorAction.Retry);
-
-            var workflowTask = await _taskQueue.PollForWorkflowTaskAsync(_domain);
-
-            Assert.That(workflowTask, Is.EqualTo(WorkflowTask.Empty));
-        }
-
-        [Test]
-        public async Task Workflow_task_polling_exception_can_be_handled_to_retry_by_fallback_error_handler()
-        {
-            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"))
-                                 .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = new DecisionTask() }));
-            _taskQueue.OnPollingError((e) => ErrorAction.Unhandled);
-            var taskQueue = _taskQueue.SetFallbackErrorHandler(ErrorHandler.Default(e=>ErrorAction.Retry));
-
-
-            var workflowTask = await taskQueue.PollForWorkflowTaskAsync(_domain);
-
-            Assert.That(workflowTask, Is.EqualTo(WorkflowTask.Empty));
-        }
-
-        [Test]
-        public async Task Workflow_task_polling_exception_can_be_handled_to_retry_up_to_a_limit()
-        {
-            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"))
-                                 .Throws(new UnknownResourceException("not found"));
-
-            _taskQueue.OnPollingError((e) => e.RetryAttempts < 1 ? ErrorAction.Retry : ErrorAction.Continue);
-
-            var workflowTask = await _taskQueue.PollForWorkflowTaskAsync(_domain);
-
-            Assert.That(workflowTask, Is.EqualTo(WorkflowTask.Empty));
-        }
-
-        [Test]
-        public async Task Workflow_task_polling_exception_can_be_handled_to_continue()
-        {
-            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"));
-
-            _taskQueue.OnPollingError((e) => ErrorAction.Continue);
-            var workflowTask = await _taskQueue.PollForWorkflowTaskAsync(_domain);
-
-            Assert.That(workflowTask, Is.EqualTo(WorkflowTask.Empty));
-        }
-
-        [Test]
-        public void Workflow_task_polling_exception_are_thrown_when_not_handled()
-        {
-            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"));
-
-            _taskQueue.OnPollingError((e) => ErrorAction.Unhandled);
-
-            Assert.ThrowsAsync<UnknownResourceException>(async () => await _taskQueue.PollForWorkflowTaskAsync(_domain));
-        }
-
-        [Test]
-        public void By_default_worker_task_polling_exception_are_not_handled()
-        {
-            _amazonWorkflowClient.Setup(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"));
-
-            Assert.ThrowsAsync<UnknownResourceException>(async () => await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token));
-        }
-
-
-        [Test]
-        public async Task Worker_task_polling_exception_can_be_handled_to_retry()
-        {
-            _amazonWorkflowClient.SetupSequence(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"))
-                                 .Returns(Task.FromResult(new PollForActivityTaskResponse() { ActivityTask = new ActivityTask() }));
-            _taskQueue.OnPollingError((e) => ErrorAction.Retry);
-
-            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
-
-            Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
-        }
-        [Test]
-        public async Task Worker_task_polling_exception_can_be_handled_to_retry_up_to_a_limit()
-        {
-            _amazonWorkflowClient.SetupSequence(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"))
-                                 .Throws(new UnknownResourceException("not found"));
-
-            _taskQueue.OnPollingError((e) => e.RetryAttempts < 1 ? ErrorAction.Retry : ErrorAction.Continue);
-
-            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
-
-            Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
-        }
-
-        [Test]
-        public async Task Worker_task_polling_exception_can_be_handled_to_continue()
-        {
-            _amazonWorkflowClient.SetupSequence(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
-                                 .Throws(new UnknownResourceException("not found"));
-
-            _taskQueue.OnPollingError((e) => ErrorAction.Continue);
-            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
-
-            Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
         }
 
 

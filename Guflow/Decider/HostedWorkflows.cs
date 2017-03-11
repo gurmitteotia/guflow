@@ -14,6 +14,7 @@ namespace Guflow.Decider
         private volatile bool _cancelled = false;
         private ErrorHandler _responseErrorHandler = ErrorHandler.NotHandled;
         private ErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
+        private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private bool _disposed = false;
 
@@ -51,7 +52,7 @@ namespace Guflow.Decider
             }
         }
 
-        public async Task StartExecution()
+        public void StartExecution()
         {
             if (_hostedWorkflows.Count() != 1)
             {
@@ -62,9 +63,9 @@ namespace Guflow.Decider
             if(string.IsNullOrEmpty(defaultTaskListName))
                 throw new InvalidOperationException(Resources.Default_task_list_is_missing);
             
-            await StartExecution(new TaskQueue(defaultTaskListName));
+            StartExecution(new TaskQueue(defaultTaskListName));
         }
-        public async Task StartExecution(TaskQueue taskQueue)
+        public void StartExecution(TaskQueue taskQueue)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
@@ -72,12 +73,8 @@ namespace Guflow.Decider
                 throw new InvalidOperationException(Resources.Workflow_execution_already_stopped);
 
             Ensure.NotNull(taskQueue, "taskQueue");
-            taskQueue = taskQueue.SetFallbackErrorHandler(_genericErrorHandler);
-            while (!_cancelled)
-            {
-                var workflowTask = await PollForTaskOnAsync(taskQueue);
-                await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
-            }
+            var domain = _domain.OnPollingError(_pollingErrorHandler);
+            ExecuteHostedWorkfowsAsync(taskQueue, domain);
         }
 
         public void StopExecution()
@@ -99,30 +96,51 @@ namespace Guflow.Decider
             }
         }
 
-        public void OnResponseError(HandleError errorHandler)
+        public void OnPollingError(HandleError handleError)
+        {
+            Ensure.NotNull(handleError, "handleError");
+            _pollingErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
+        }
+        public void OnPollingError(IErrorHandler errorHandler)
         {
             Ensure.NotNull(errorHandler, "errorHandler");
-            _responseErrorHandler = ErrorHandler.Default(errorHandler).WithFallback(_genericErrorHandler);
+            OnPollingError(errorHandler.OnError);
+        }
+
+        public void OnResponseError(HandleError handleError)
+        {
+            Ensure.NotNull(handleError, "handleError");
+            _responseErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
         }
         public void OnResponseError(IErrorHandler errorHandler)
         {
             Ensure.NotNull(errorHandler, "errorHandler");
             OnResponseError(errorHandler.OnError);
         }
-        public void OnError(HandleError errorHandler)
+        public void OnError(HandleError handleError)
         {
-            Ensure.NotNull(errorHandler, "errorHandler");
-            _genericErrorHandler = ErrorHandler.Default(errorHandler);
-            _responseErrorHandler = _genericErrorHandler.WithFallback(_genericErrorHandler);
+            Ensure.NotNull(handleError, "handleError");
+            _genericErrorHandler = ErrorHandler.Default(handleError);
+            _responseErrorHandler = _responseErrorHandler.WithFallback(_genericErrorHandler);
+            _pollingErrorHandler = _pollingErrorHandler.WithFallback(_genericErrorHandler);
         }
         public void OnError(IErrorHandler errorHandler)
         {
             Ensure.NotNull(errorHandler, "errorHandler");
             OnError(errorHandler.OnError);
         }
-        private async Task<WorkflowTask> PollForTaskOnAsync(TaskQueue taskQueue)
+
+        private async void ExecuteHostedWorkfowsAsync(TaskQueue taskQueue, Domain domain)
         {
-            var workflowTask = await taskQueue.PollForWorkflowTaskAsync(_domain);
+            while (!_cancelled)
+            {
+                var workflowTask = await PollForTaskAsync(taskQueue, domain);
+                await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
+            }
+        }
+        private async Task<WorkflowTask> PollForTaskAsync(TaskQueue taskQueue, Domain domain)
+        {
+            var workflowTask = await taskQueue.PollForWorkflowTaskAsync(domain);
             workflowTask.OnResponseError(_responseErrorHandler);
             workflowTask.OnExecutionError(_genericErrorHandler);
             return workflowTask;

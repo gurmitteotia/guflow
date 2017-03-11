@@ -56,7 +56,7 @@ namespace Guflow.Worker
 
             task.Start();
 
-            if (_runningTasks.Count >= _maximumLimit)
+            while (_runningTasks.Count >= _maximumLimit)
                 await Task.WhenAny(_runningTasks.Keys);
         }
         private async Task ExecuteInSequence(WorkerTask workerTask)

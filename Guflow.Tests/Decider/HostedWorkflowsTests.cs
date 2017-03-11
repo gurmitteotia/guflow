@@ -89,6 +89,8 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError((IErrorHandler)null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError((HandleError)null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError((IErrorHandler)null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnPollingError((HandleError)null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnPollingError((IErrorHandler)null));
         }
 
         [WorkflowDescription("2.0")]

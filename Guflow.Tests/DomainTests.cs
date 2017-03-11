@@ -22,9 +22,11 @@ namespace Guflow.Tests
         private TaskQueue _taskQueue;
         private const string _workflowName = "TestWorkflow";
         private const string _activityName = "TestActivity";
+        private CancellationToken _cancellationToken;
         [SetUp]
         public void Setup()
         {
+            _cancellationToken = new CancellationToken();
             _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
             _domain = new Domain(_domainName, _amazonWorkflowClient.Object);
             _taskQueue = new TaskQueue("queuename");
@@ -208,6 +210,107 @@ namespace Guflow.Tests
 
             AssertThatAmazonSwfIsSend(startRequest);
         }
+
+
+        [Test]
+        public async Task Decision_task_polling_exception_can_be_handled_to_retry()
+        {
+            var expectedDecisionTask = new DecisionTask();
+            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
+                                 .Throws(new UnknownResourceException("not found"))
+                                 .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = expectedDecisionTask }));
+            var domain =  _domain.OnPollingError((e) => ErrorAction.Retry);
+
+            var decisionTask = await domain.PollForDecisionTaskAsync(_taskQueue);
+
+            Assert.That(decisionTask, Is.EqualTo(expectedDecisionTask));
+        }
+
+        [Test]
+        public async Task Decision_task_polling_exception_can_be_handled_to_retry_up_to_a_limit()
+        {
+            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
+                                 .Throws(new UnknownResourceException("not found"))
+                                 .Throws(new UnknownResourceException("not found"));
+
+            var domain = _domain.OnPollingError((e) => e.RetryAttempts < 1 ? ErrorAction.Retry : ErrorAction.Continue);
+
+            var decisionTask = await domain.PollForDecisionTaskAsync(_taskQueue);
+
+            Assert.That(decisionTask, Is.EqualTo(Domain.EmptyDecisionTask));
+        }
+
+        [Test]
+        public async Task Decision_task_polling_exception_can_be_handled_to_continue()
+        {
+            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
+                                 .Throws(new UnknownResourceException("not found"));
+
+            var domain = _domain.OnPollingError((e) => ErrorAction.Continue);
+            var decisionTask = await domain.PollForDecisionTaskAsync(_taskQueue);
+
+            Assert.That(decisionTask, Is.EqualTo(Domain.EmptyDecisionTask));
+        }
+
+        [Test]
+        public void Decision_task_polling_exception_are_thrown_when_not_handled()
+        {
+            _amazonWorkflowClient.SetupSequence(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
+                                 .Throws(new UnknownResourceException("not found"));
+
+            var domain = _domain.OnPollingError((e) => ErrorAction.Unhandled);
+
+            Assert.ThrowsAsync<UnknownResourceException>(async () => await domain.PollForDecisionTaskAsync(_taskQueue));
+        }
+
+        [Test]
+        public void By_default_activity_task_polling_exception_are_not_handled()
+        {
+            _amazonWorkflowClient.Setup(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
+                                 .Throws(new UnknownResourceException("not found"));
+
+            Assert.ThrowsAsync<UnknownResourceException>(async () => await _domain.PollForActivityTaskAsync(_taskQueue, _cancellationToken) );
+        }
+
+
+        [Test]
+        public async Task Activity_task_polling_exception_can_be_handled_to_retry()
+        {
+            _amazonWorkflowClient.SetupSequence(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
+                                 .Throws(new UnknownResourceException("not found"))
+                                 .Returns(Task.FromResult(new PollForActivityTaskResponse() { ActivityTask = new ActivityTask() }));
+            var domain = _domain.OnPollingError((e) => ErrorAction.Retry);
+
+            var activityTask = await domain.PollForActivityTaskAsync(_taskQueue, _cancellationToken);
+
+            Assert.That(activityTask, Is.EqualTo(Domain.EmptyActivityTask));
+        }
+        [Test]
+        public async Task Actvity_task_polling_exception_can_be_handled_to_retry_up_to_a_limit()
+        {
+            _amazonWorkflowClient.SetupSequence(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
+                                 .Throws(new UnknownResourceException("not found"))
+                                 .Throws(new UnknownResourceException("not found"));
+
+            var domain = _domain.OnPollingError((e) => e.RetryAttempts < 1 ? ErrorAction.Retry : ErrorAction.Continue);
+
+            var activityTask = await domain.PollForActivityTaskAsync(_taskQueue, _cancellationToken);
+
+            Assert.That(activityTask, Is.EqualTo(Domain.EmptyActivityTask));
+        }
+
+        [Test]
+        public async Task Activity_task_polling_exception_can_be_handled_to_continue()
+        {
+            _amazonWorkflowClient.SetupSequence(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
+                                 .Throws(new UnknownResourceException("not found"));
+
+            var domain = _domain.OnPollingError((e) => ErrorAction.Continue);
+            var workerTask = await domain.PollForActivityTaskAsync(_taskQueue, _cancellationToken);
+
+            Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
+        }
+
         private static WorkflowDescriptionAttribute WorkflowDescription()
         {
             return new WorkflowDescriptionAttribute("1.0")
