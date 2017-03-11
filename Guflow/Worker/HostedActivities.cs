@@ -10,8 +10,9 @@ namespace Guflow.Worker
         private readonly Domain _domain;
         private readonly Activities _activities;
         private volatile bool _stopped;
-        private CancellationTokenSource _cancellationTokenSource  = new CancellationTokenSource();
-        private IErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
+        private readonly CancellationTokenSource _cancellationTokenSource  = new CancellationTokenSource();
+        private ErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
+        private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private ActivityExecution _activityExecution;
         internal HostedActivities(Domain domain, IEnumerable<Activity> activities)
         {
@@ -49,28 +50,38 @@ namespace Guflow.Worker
         public void StartExecution(TaskQueue taskQueue)
         {
             Ensure.NotNull(taskQueue, "taskQueue");
-            taskQueue = taskQueue.SetFallbackErrorHandler(_genericErrorHandler);
             ExecuteHostedActivitiesAsync(taskQueue);
         }
 
+        public void OnPollingError(IErrorHandler errorHandler)
+        {
+            Ensure.NotNull(errorHandler, "errorHandler");
+            OnPollingError(errorHandler.OnError);
+        }
+        public void OnPollingError(HandleError handleError)
+        {
+            Ensure.NotNull(handleError, "handleError");
+            _pollingErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
+        }
         public void OnError(IErrorHandler errorHandler)
         {
             Ensure.NotNull(errorHandler, "errorHandler");
-            _genericErrorHandler = errorHandler;
+            OnError(errorHandler.OnError);
         }
         public void OnError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
-            OnError(ErrorHandler.Default(handleError));
+            _genericErrorHandler = ErrorHandler.Default(handleError);
+            _pollingErrorHandler = _pollingErrorHandler.WithFallback(_genericErrorHandler);
         }
         private async void ExecuteHostedActivitiesAsync(TaskQueue taskQueue)
         {
             var activityExecution = Execution;
             activityExecution.Set(hostedActivities: this);
-
+            var domain = _domain.OnPollingError(_pollingErrorHandler);
             while (_stopped)
             {
-                var workerTask = await taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
+                var workerTask = await taskQueue.PollForWorkerTaskAsync(domain, _cancellationTokenSource.Token);
                 await activityExecution.ExecuteAsync(workerTask);
             }
         }

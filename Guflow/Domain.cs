@@ -16,18 +16,26 @@ namespace Guflow
     {
         private readonly string _name;
         private readonly IAmazonSimpleWorkflow _simpleWorkflowClient;
-        private static readonly DecisionTask DefaultDecisionTask = new DecisionTask();
-        private static readonly ActivityTask DefaultActivityTask = new ActivityTask();
+        private readonly IErrorHandler _errorHandler;
+        internal static readonly DecisionTask EmptyDecisionTask = new DecisionTask();
+        internal static readonly ActivityTask EmptyActivityTask = new ActivityTask();
+       
         public Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient)
+            :this(name, simpleWorkflowClient, ErrorHandler.NotHandled)
+        {
+        }
+        public Domain(string name, RegionEndpoint regionEndpoint) : this(name, new AmazonSimpleWorkflowClient(regionEndpoint))
+        {
+        }
+        internal Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient, IErrorHandler errorHandler)
         {
             Ensure.NotNullAndEmpty(name, () => new ArgumentException(Resources.Domain_name_required, "name"));
             Ensure.NotNull(simpleWorkflowClient, "simpleWorkflowClient");
             _name = name;
             _simpleWorkflowClient = simpleWorkflowClient;
+            _errorHandler = errorHandler;
         }
-        public Domain(string name, RegionEndpoint regionEndpoint) : this(name, new AmazonSimpleWorkflowClient(regionEndpoint))
-        {
-        }
+
         internal IAmazonSimpleWorkflow Client
         {
             get { return _simpleWorkflowClient; }
@@ -91,27 +99,19 @@ namespace Guflow
         internal async Task<ActivityTask> PollForActivityTaskAsync(TaskQueue taskQueue, CancellationToken cancellationToken)
         {
             Ensure.NotNull(taskQueue, "taskQueue");
-            var error = new Error();
-            int retryAttempts = 0;
-            bool retry;
-            do
-            {
-                retry = false;
-                try
-                {
-                    return await PollAmazonSwfForActivityTaskAsync(taskQueue, cancellationToken);
-                }
-                catch (Exception exception)
-                {
-                    var errorAction = taskQueue.HandlePollingError(error.Set(exception, retryAttempts));
-                    if (errorAction.IsRethrow)
-                        throw;
-                    if (errorAction.IsRetry)
-                        retry = true;
-                }
-                retryAttempts++;
-            } while (retry);
-            return DefaultActivityTask;
+            var retryableFunc = new RetryableFunc(_errorHandler);
+            return  await retryableFunc.ExecuteAsync(
+                    async () => await PollAmazonSwfForActivityTaskAsync(taskQueue, cancellationToken),
+                    EmptyActivityTask);
+        }
+
+        internal Domain OnPollingError(IErrorHandler errorHandler)
+        {
+            return new Domain(_name, _simpleWorkflowClient, errorHandler);
+        }
+        internal Domain OnPollingError(HandleError handleError)
+        {
+            return new Domain(_name, _simpleWorkflowClient, ErrorHandler.Default(handleError));
         }
 
         private async Task<ActivityTask> PollAmazonSwfForActivityTaskAsync(TaskQueue taskQueue, CancellationToken cancellationToken)
@@ -129,27 +129,10 @@ namespace Guflow
         public async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)
         {
             Ensure.NotNull(taskQueue, "taskQueue");
-            var error = new Error();
-            int retryAttempts = 0;
-            bool retry;
-            do
-            {
-                retry = false;
-                try
-                {
-                    return await PollAmazonSwfForDecisionTaskAsync(taskQueue, nextPageToken);
-                }
-                catch (Exception exception)
-                {
-                    var errorAction = taskQueue.HandlePollingError(error.Set(exception, retryAttempts));
-                    if (errorAction.IsRethrow)
-                        throw;
-                    if (errorAction.IsRetry)
-                        retry = true;
-                }
-                retryAttempts++;
-            } while (retry);
-            return DefaultDecisionTask;
+            var retryableFunc = new RetryableFunc(_errorHandler);
+            return await retryableFunc.ExecuteAsync(
+                    async () => await PollAmazonSwfForDecisionTaskAsync(taskQueue, nextPageToken),
+                    EmptyDecisionTask);
         }
 
         private async Task<DecisionTask> PollAmazonSwfForDecisionTaskAsync(TaskQueue taskQueue, string nextPageToken)

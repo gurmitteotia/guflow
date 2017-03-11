@@ -127,6 +127,9 @@ namespace Guflow.Tests.Worker
 
             Assert.Throws<ArgumentNullException>(()=> hostedActivities.OnError((IErrorHandler)null));
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnError((HandleError)null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError((IErrorHandler)null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError((HandleError)null));
+
             Assert.Throws<ArgumentNullException>(() => hostedActivities.Execution = null);
         }
         [ActivityDescription("1.0")]
