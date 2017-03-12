@@ -212,6 +212,7 @@
     <Compile Include="Worker\ActivityNotHostedException.cs" />
     <Compile Include="Worker\ActivityResponse.cs" />
     <Compile Include="Worker\ActivityExecution.cs" />
+    <Compile Include="Worker\AsyncAutoResetEvent.cs" />
     <Compile Include="Worker\EnableHeartbeatAttribute.cs" />
     <Compile Include="Worker\ExecuteAttribute.cs" />
     <Compile Include="Worker\HostedActivities.cs" />

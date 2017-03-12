@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using Guflow.Properties;
 
@@ -10,13 +10,14 @@ namespace Guflow.Worker
         private readonly uint _maximumLimit;
         private readonly Func<WorkerTask, Task> _executeFunc;
         private HostedActivities _hostedActivities;
-        private readonly ConcurrentDictionary<Task,string> _runningTasks = new ConcurrentDictionary<Task, string>();
+        private AsyncAutoResetEvent _completedEvent = new AsyncAutoResetEvent();
+        private int _totalRunningTasks =0 ;
         private ActivityExecution(uint maximumLimit)
         {
             if (maximumLimit > 1)
-                _executeFunc = ExecuteConcurrently;
+                _executeFunc = ExecuteConcurrentlyAsync;
             else
-                _executeFunc = ExecuteInSequence;
+                _executeFunc = ExecuteInSequenceSync;
 
             _maximumLimit = maximumLimit;
         }
@@ -39,27 +40,30 @@ namespace Guflow.Worker
             _hostedActivities = hostedActivities;
         }
 
-        private async Task ExecuteConcurrently(WorkerTask workerTask)
+        private async Task ExecuteConcurrentlyAsync(WorkerTask workerTask)
         {
-            var task = new Task(async () =>await ExecuteInSequence(workerTask));
-            
-            var exceptionTask = task.ContinueWith(t => Environment.FailFast(Resources.Unhandled_activity_exception, t.Exception),
-                TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
-            var adjustCountTask = task.ContinueWith(t =>
+            var totalRunningTasks = Interlocked.Increment(ref _totalRunningTasks);
+            var activityExecution = Task.Run(async () =>
             {
-                string value;
-                if (!_runningTasks.TryRemove(t, out value))
-                        Environment.FailFast(Resources.Activity_execution_count_mismatch);
-            }, TaskContinuationOptions.ExecuteSynchronously);
+                try
+                {
+                    await ExecuteInSequenceSync(workerTask);
+                    var remainRunningTasks = Interlocked.Decrement(ref _totalRunningTasks);
+                    if (remainRunningTasks < _maximumLimit)
+                        _completedEvent.Set();
 
-            _runningTasks.TryAdd(task, "any_dummy_value");
+                }
+                catch (Exception exception)
+                {
+                    Environment.FailFast(Resources.Unhandled_activity_exception, exception);
+                }
+            });
 
-            task.Start();
-
-            while (_runningTasks.Count >= _maximumLimit)
-                await Task.WhenAny(_runningTasks.Keys);
+            if (totalRunningTasks >= _maximumLimit)
+                await _completedEvent.WaitAsync();
         }
-        private async Task ExecuteInSequence(WorkerTask workerTask)
+
+        private async Task ExecuteInSequenceSync(WorkerTask workerTask)
         {
             var response = await workerTask.ExecuteFor(_hostedActivities);
             await _hostedActivities.SendAsync(response);

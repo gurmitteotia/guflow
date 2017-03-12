@@ -36,6 +36,7 @@ namespace Guflow.Tests.Worker
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
+            await concurrentExecution.ExecuteAsync(NewWorkerTask());
 
 
             Assert.That(TestActivity.MaxConcurrentExecution , Is.EqualTo(2));
@@ -122,7 +123,7 @@ namespace Guflow.Tests.Worker
             public async Task<ActivityResponse> Execute()
             {
                 _concurrentTaskRecords.Add(Interlocked.Increment(ref _noOfConcurrentTasks));
-                await Task.Delay(_random.Next(20,60));
+                await Task.Delay(_random.Next(20,70));
                 Interlocked.Decrement(ref _noOfConcurrentTasks);
                 return Complete(_result);
             }
