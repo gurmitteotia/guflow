@@ -1,12 +1,29 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Guflow.Decider
 {
-    internal static class IdentityExtensions
+    internal class IdentityFormat
     {
-        public static string ToJson(this Identity identity)
+        private readonly Func<Identity, string> _serializeFunc;
+        private readonly Func<string, Identity> _deserializeFunc;
+
+        public static IdentityFormat Json = new IdentityFormat(ToJson, FromJson);
+
+        private IdentityFormat(Func<Identity, string> serializeFunc, Func<string, Identity> deserializeFunc)
+        {
+            _serializeFunc = serializeFunc;
+            _deserializeFunc = deserializeFunc;
+        }
+
+        private static Identity FromJson(string data)
+        {
+            var jsonObject = data.FromJson<JsonFormat>();
+            return Identity.New(jsonObject.Name, jsonObject.Ver, jsonObject.PName);
+        }
+
+        private static string ToJson(Identity identity)
         {
             var jsonObject = new JsonFormat()
             {
@@ -17,12 +34,27 @@ namespace Guflow.Decider
 
             return jsonObject.ToJson();
         }
-        public static Identity FromJson(this string jsonIdenity)
+
+        public string Serialize(Identity identity)
         {
-            var jsonObject = jsonIdenity.FromJson<JsonFormat>();
-            return Identity.New(jsonObject.Name,jsonObject.Ver,jsonObject.PName);
+            return _serializeFunc(identity);
         }
 
+        public Identity Deserialize(string data)
+        {
+            return _deserializeFunc(data);
+        }
+        internal class JsonFormat
+        {
+            public string Name;
+            public string Ver;
+            public string PName;
+        }
+
+    }
+    internal static class IdentityExtensions
+    {
+      
         public static string GetMd5Hash(this string data)
         {
             using (var md5 = MD5.Create())
@@ -37,15 +69,6 @@ namespace Guflow.Decider
             }
         }
 
-        [DataContract]
-        private class JsonFormat
-        {
-            [DataMember]
-            public string Name;
-            [DataMember]
-            public string Ver;
-            [DataMember]
-            public string PName;
-        }
+        
     }
 }

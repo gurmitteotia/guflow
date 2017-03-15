@@ -135,10 +135,20 @@ namespace Guflow.Tests.Worker
         [ActivityDescription("1.0")]
         private class TestActivity1 : Activity
         {
+            [Execute]
+            public void Execute()
+            {
+                
+            }
         }
         [ActivityDescription("2.0")]
         private class TestActivity2 : Activity
         {
+            [Execute]
+            public void Execute()
+            {
+
+            }
         }
     }
 }

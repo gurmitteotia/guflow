@@ -24,8 +24,8 @@ namespace Guflow.Tests.Decider
         public void Json_tests()
         {
             var originalIdentity = Identity.New("transcode", "1.0", "first");
-            string jsonIdentity = originalIdentity.ToJson();
-            var recreatedFromJson = jsonIdentity.FromJson();
+            string jsonIdentity = originalIdentity.To(IdentityFormat.Json);
+            var recreatedFromJson = Identity.From(jsonIdentity, IdentityFormat.Json);
 
             Assert.That(recreatedFromJson,Is.EqualTo(originalIdentity));
         }
