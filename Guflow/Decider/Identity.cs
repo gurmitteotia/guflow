@@ -24,7 +24,6 @@
         {
             return new Identity(name, version, positionalName);
         }
-        
         public override bool Equals(object other)
         {
             var otherIdentity = other as Identity;
@@ -39,6 +38,15 @@
         public override string ToString()
         {
             return string.Format("Name {0}, Version {1} and Positional Name {2}", Name, Version, PositionalName);
+        }
+
+        public string To(IdentityFormat format)
+        {
+            return format.Serialize(this);
+        }
+        public static Identity From(string data, IdentityFormat format)
+        {
+            return format.Deserialize(data);
         }
     }
 }

@@ -51,28 +51,7 @@ namespace Guflow
 
             return WorkerTask.Empty;
         }
-        //public void OnPollingError(HandleError errorHandler)
-        //{
-        //    Ensure.NotNull(errorHandler, "errorHandler");
-        //    _errorHandler = ErrorHandler.Default(errorHandler);
-        //}
-        //public void OnPollingError(IErrorHandler errorHandler)
-        //{
-        //    Ensure.NotNull(errorHandler, "errorHandler");
-        //    OnPollingError(errorHandler.OnError);
-        //}
-        //internal ErrorAction HandlePollingError(Error error)
-        //{
-        //    return _errorHandler.OnError(error);
-        //}
-
-        //internal TaskQueue SetFallbackErrorHandler(IErrorHandler errorHandler)
-        //{
-        //    var taskQueue = new TaskQueue(_taskListName, _pollingIdentity);
-        //    taskQueue._readHistoryEvents = _readHistoryEvents;
-        //    taskQueue._errorHandler = _errorHandler.WithFallback(errorHandler);
-        //    return taskQueue;
-        //}
+       
         private static bool NewTasksAreReturned(DecisionTask decisionTask)
         {
             return !string.IsNullOrEmpty(decisionTask.TaskToken);

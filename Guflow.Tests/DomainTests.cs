@@ -276,14 +276,15 @@ namespace Guflow.Tests
         [Test]
         public async Task Activity_task_polling_exception_can_be_handled_to_retry()
         {
+            var expectedActivityTask = new ActivityTask();
             _amazonWorkflowClient.SetupSequence(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(), It.IsAny<CancellationToken>()))
                                  .Throws(new UnknownResourceException("not found"))
-                                 .Returns(Task.FromResult(new PollForActivityTaskResponse() { ActivityTask = new ActivityTask() }));
+                                 .Returns(Task.FromResult(new PollForActivityTaskResponse() { ActivityTask = expectedActivityTask }));
             var domain = _domain.OnPollingError((e) => ErrorAction.Retry);
 
             var activityTask = await domain.PollForActivityTaskAsync(_taskQueue, _cancellationToken);
 
-            Assert.That(activityTask, Is.EqualTo(Domain.EmptyActivityTask));
+            Assert.That(activityTask, Is.EqualTo(expectedActivityTask));
         }
         [Test]
         public async Task Actvity_task_polling_exception_can_be_handled_to_retry_up_to_a_limit()
@@ -306,9 +307,9 @@ namespace Guflow.Tests
                                  .Throws(new UnknownResourceException("not found"));
 
             var domain = _domain.OnPollingError((e) => ErrorAction.Continue);
-            var workerTask = await domain.PollForActivityTaskAsync(_taskQueue, _cancellationToken);
+            var activityTask = await domain.PollForActivityTaskAsync(_taskQueue, _cancellationToken);
 
-            Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
+            Assert.That(activityTask, Is.EqualTo(Domain.EmptyActivityTask));
         }
 
         private static WorkflowDescriptionAttribute WorkflowDescription()
