@@ -10,7 +10,7 @@ namespace Guflow.Worker
         private readonly uint _maximumLimit;
         private readonly Func<WorkerTask, Task> _executeFunc;
         private HostedActivities _hostedActivities;
-        private AsyncAutoResetEvent _completedEvent = new AsyncAutoResetEvent();
+        private readonly AsyncAutoResetEvent _completedEvent = new AsyncAutoResetEvent();
         private int _totalRunningTasks =0 ;
         private ActivityExecution(uint maximumLimit)
         {

@@ -9,21 +9,23 @@ namespace Guflow.Worker
     {
         private readonly ActivityTask _activityTask;
         private readonly Func<HostedActivities, Task<ActivityResponse>> _execute;
+        private IErrorHandler _errorHandler;
         public static readonly WorkerTask Empty = new WorkerTask();
 
         private WorkerTask()
         {
             _execute = (a) => Task.FromResult(ActivityResponse.Defer);
         }
-        private WorkerTask(ActivityTask activityTask)
+        private WorkerTask(ActivityTask activityTask, IErrorHandler errorHandler)
         {
             _activityTask = activityTask;
+            _errorHandler = errorHandler;
             _execute = ExecuteActivityTask;
         }
 
         public static WorkerTask CreateFor(ActivityTask activityTask)
         {
-            return new WorkerTask(activityTask);
+            return new WorkerTask(activityTask, ErrorHandler.Default(e=>ErrorAction.Unhandled));
         }
 
         public async Task<ActivityResponse> ExecuteFor(HostedActivities hostedActivities)
@@ -40,7 +42,14 @@ namespace Guflow.Worker
                                                 _activityTask.WorkflowExecution.RunId,
                                                 _activityTask.TaskToken);
             activityArgs.StartedEventId = _activityTask.StartedEventId;
-            return await activity.ExecuteAsync(activityArgs);
+            
+            var retryableFunc = new RetryableFunc(_errorHandler);
+            return await retryableFunc.ExecuteAsync(()=>activity.ExecuteAsync(activityArgs), ActivityResponse.Defer);
+        }
+
+        public void SetErrorHandler(IErrorHandler errorHandler)
+        {
+            _errorHandler = errorHandler;
         }
     }
 }
