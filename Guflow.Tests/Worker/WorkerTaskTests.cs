@@ -12,12 +12,13 @@ namespace Guflow.Tests.Worker
     public class WorkerTaskTests
     {
         private HostedActivities _hostedActivities;
+        private Domain _domain;
 
         [SetUp]
         public void Setup()
         {
-            var domain = new Domain("name", new Mock<IAmazonSimpleWorkflow>().Object);
-            _hostedActivities = new HostedActivities(domain, new Type[] { typeof(TestActivity) });
+            _domain = new Domain("name", new Mock<IAmazonSimpleWorkflow>().Object);
+            _hostedActivities = new HostedActivities(_domain, new Type[] { typeof(TestActivity) });
         }
         [Test]
         public async Task On_execution_Empty_worker_task_return_deferred_activity_response()
@@ -68,6 +69,38 @@ namespace Guflow.Tests.Worker
            Assert.That(TestActivity.ActivityArgs.StartedEventId, Is.EqualTo(activityTask.StartedEventId));
         }
 
+        [Test]
+        public async Task Execution_exception_can_be_handled_to_retry()
+        {
+            var workerTask = WorkerTask.CreateFor(new ActivityTask
+            {
+                ActivityType = new ActivityType() { Name = "ActivityThrowsException", Version = "1.0" },
+                WorkflowExecution = new WorkflowExecution() { RunId = "runid", WorkflowId = "wid" },
+                TaskToken = "token"
+            });
+            var hostedActivities = new HostedActivities(_domain, new [] { typeof(ActivityThrowsException) });
+            workerTask.SetErrorHandler(ErrorHandler.Default(e => ErrorAction.Retry));
+            
+            var response = await workerTask.ExecuteFor(hostedActivities);
+
+            Assert.That(response, Is.EqualTo(new ActivityCompleteResponse("token", "result")));
+
+        }
+
+        [Test]
+        public void By_default_execution_exception_are_not_handled()
+        {
+            var workerTask = WorkerTask.CreateFor(new ActivityTask
+            {
+                ActivityType = new ActivityType() { Name = "ActivityThrowsException", Version = "1.0" },
+                WorkflowExecution = new WorkflowExecution() { RunId = "runid", WorkflowId = "wid" },
+                TaskToken = "token"
+            });
+            var hostedActivities = new HostedActivities(_domain, new[] { typeof(ActivityThrowsException) });
+
+            Assert.ThrowsAsync<InvalidOperationException>(async ()=>await workerTask.ExecuteFor(hostedActivities));
+        }
+
         [ActivityDescription("1.0")]
         private class TestActivity : Activity
         {
@@ -81,6 +114,25 @@ namespace Guflow.Tests.Worker
             }
 
             public static ActivityArgs ActivityArgs;
+        }
+
+        [ActivityDescription("1.0")]
+        private class ActivityThrowsException : Activity
+        {
+            private int _retryCount = 0;
+
+            public ActivityThrowsException()
+            {
+                FailOnException = false;
+            }
+            [Execute]
+            public ActivityResponse Execute(ActivityArgs args)
+            {
+                _retryCount++;
+                if(_retryCount == 1)
+                    throw new InvalidOperationException("exception");
+                return Complete("result");
+            }
         }
     }
 }

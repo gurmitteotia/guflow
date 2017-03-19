@@ -118,10 +118,12 @@ namespace Guflow.Tests.Decider
             _amazonWorkflowClient.SetupSequence(c => c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
                                 .Throws(new UnknownResourceException("msg"))
                                 .Returns(Task.FromResult(new RespondDecisionTaskCompletedResponse()));
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] {new WorkflowCompleteOnSignal()});
+            hostedWorkflows.OnResponseError(ErrorHandler.Default(e => ErrorAction.Retry));
+            
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
-            workflowTasks.OnResponseError(ErrorHandler.Default(e=>ErrorAction.Retry));
 
-            await workflowTasks.ExecuteForAsync(new HostedWorkflows(_domain, new[] { new WorkflowCompleteOnSignal()}));
+            await workflowTasks.ExecuteForAsync(hostedWorkflows);
 
             AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token", Times.Exactly(2));
         }
@@ -132,10 +134,11 @@ namespace Guflow.Tests.Decider
             _amazonWorkflowClient.SetupSequence(c => c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
                                 .Throws(new UnknownResourceException("msg"))
                                 .Returns(Task.FromResult(new RespondDecisionTaskCompletedResponse()));
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new WorkflowCompleteOnSignal() });
+            hostedWorkflows.OnResponseError(ErrorHandler.Default(e => ErrorAction.Continue));
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
-            workflowTasks.OnResponseError(ErrorHandler.Default(e=>ErrorAction.Continue));
 
-            await workflowTasks.ExecuteForAsync(new HostedWorkflows(_domain, new[] { new WorkflowCompleteOnSignal() }));
+            await workflowTasks.ExecuteForAsync(hostedWorkflows);
 
             AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token", Times.Once());
         }
@@ -150,14 +153,16 @@ namespace Guflow.Tests.Decider
             Assert.ThrowsAsync<ApplicationException>(async ()=>await workflowTasks.ExecuteForAsync(hostedWorkflows));
         }
 
-        [Test][Ignore("It is failing")]
-        public void Execution_exception_can_handled_to_retry()
+        [Test]
+        public async Task Execution_exception_can_handled_to_retry()
         {
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
             var hostedWorkflows = new HostedWorkflows(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new ApplicationException("")) });
             workflowTasks.OnExecutionError(ErrorHandler.Default(e=>ErrorAction.Retry));
-            
-            Assert.ThrowsAsync<ApplicationException>(async ()=> await workflowTasks.ExecuteForAsync(hostedWorkflows));
+
+            await workflowTasks.ExecuteForAsync(hostedWorkflows);
+
+            AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token", Times.Once());
         }
 
         private async Task ExecuteWorkflowOnSignalEvent(Workflow workflow, string workflowId, string runId)
@@ -267,6 +272,7 @@ namespace Guflow.Tests.Decider
         private class WorkflowThrowsExceptionOnSignal : Workflow
         {
             private readonly Exception _exception;
+            private int _signalCounts = 0;
             public WorkflowThrowsExceptionOnSignal(Exception exception)
             {
                 _exception = exception;
@@ -274,6 +280,9 @@ namespace Guflow.Tests.Decider
             [WorkflowEvent(EventName.Signal)]
             private WorkflowAction OnSignal()
             {
+                _signalCounts++;
+                if (_signalCounts == 2)
+                    return CompleteWorkflow("something");
                 throw _exception;
             }
         }

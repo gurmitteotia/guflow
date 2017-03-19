@@ -35,5 +35,53 @@ namespace Guflow
             } while (retry);
             return defaultValue;
         }
+
+        public async Task ExecuteAsync(Func<Task> func)
+        {
+            var error = new Error();
+            int retryAttempts = 0;
+            bool retry;
+            do
+            {
+                retry = false;
+                try
+                {
+                    await func();
+                }
+                catch (Exception exception)
+                {
+                    var errorAction = _errorHandler.OnError(error.Set(exception, retryAttempts));
+                    if (errorAction.IsRethrow)
+                        throw;
+                    if (errorAction.IsRetry)
+                        retry = true;
+                }
+                retryAttempts++;
+            } while (retry);
+        }
+        public T Execute<T>(Func<T> func, T defaultValue)
+        {
+            var error = new Error();
+            int retryAttempts = 0;
+            bool retry;
+            do
+            {
+                retry = false;
+                try
+                {
+                    return func();
+                }
+                catch (Exception exception)
+                {
+                    var errorAction = _errorHandler.OnError(error.Set(exception, retryAttempts));
+                    if (errorAction.IsRethrow)
+                        throw;
+                    if (errorAction.IsRetry)
+                        retry = true;
+                }
+                retryAttempts++;
+            } while (retry);
+            return defaultValue;
+        }
     }
 }
