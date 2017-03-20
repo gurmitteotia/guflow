@@ -117,6 +117,7 @@ namespace Guflow
         private async Task<ActivityTask> PollAmazonSwfForActivityTaskAsync(TaskQueue taskQueue, CancellationToken cancellationToken)
         {
             var activityTaskPollingRequest = taskQueue.CreateActivityTaskPollingRequest(_name);
+            Console.WriteLine("Polling for activity task on queue {0} and on domain {1}", activityTaskPollingRequest.TaskList.Name, activityTaskPollingRequest.Domain);
             var response = await _simpleWorkflowClient.PollForActivityTaskAsync(activityTaskPollingRequest, cancellationToken);
             return response.ActivityTask;
         }

@@ -52,7 +52,7 @@
     <Compile Include="Decider\EmptyWorkflowTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDomain.cs" />
-    <Compile Include="WorkflowWithOneActivityTests.cs" />
+    <Compile Include="ActivityInputTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

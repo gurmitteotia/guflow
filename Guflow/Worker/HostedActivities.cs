@@ -111,7 +111,7 @@ namespace Guflow.Worker
             var activityExecution = Execution;
             activityExecution.Set(hostedActivities: this);
             var domain = _domain.OnPollingError(_pollingErrorHandler);
-            while (_stopped)
+            while (!_stopped)
             {
                 var workerTask = await taskQueue.PollForWorkerTaskAsync(domain, _cancellationTokenSource.Token);
                 workerTask.SetErrorHandler(_genericErrorHandler);
