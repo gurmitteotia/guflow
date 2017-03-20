@@ -202,6 +202,11 @@ namespace Guflow.Decider
 
             return timerItem;
         }
+
+        protected IFluentWorkflowActionItem ScheduleAction(WorkflowAction workflowAction)
+        {
+            return new WorkflowActionItem(workflowAction);
+        }
         protected WorkflowAction Continue(WorkflowItemEvent workflowItemEvent)
         {
             Ensure.NotNull(workflowItemEvent, "workflowItemEvent");
