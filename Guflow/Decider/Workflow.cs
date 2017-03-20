@@ -19,6 +19,7 @@ namespace Guflow.Decider
         public event EventHandler<WorkflowFailedEventArgs> Failed;
         public event EventHandler<WorkflowCancelledEventArgs> Cancelled;
         public event EventHandler<WorkflowStartedEventArgs> Started;
+        public event EventHandler<WorkflowClosedEventArgs> Closed;
 
         WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
@@ -154,18 +155,31 @@ namespace Guflow.Decider
             var completedHandler = Completed;
             if(completedHandler!=null)
                 completedHandler(this, new WorkflowCompletedEventArgs(workflowId, workflowRunId, result));
+
+            RaiseClosed(workflowId, workflowRunId);
         }
         internal void OnFailed(string workflowId, string workflowRunId, string reason, string details)
         {
             var eventHandler = Failed;
             if (eventHandler != null)
                 eventHandler(this, new WorkflowFailedEventArgs(workflowId, workflowRunId, reason, details));
+
+            RaiseClosed(workflowId, workflowRunId);
         }
         internal void OnCancelled(string workflowId, string workflowRunId, string details)
         {
             var eventHandler = Cancelled;
             if (eventHandler != null)
                 eventHandler(this, new WorkflowCancelledEventArgs(workflowId, workflowRunId, details));
+
+            RaiseClosed(workflowId, workflowRunId);
+        }
+
+        private void RaiseClosed(string workflowId, string workflowRunId)
+        {
+            var closedHandler = Closed;
+            if (closedHandler != null)
+                closedHandler(this, new WorkflowClosedEventArgs(workflowId, workflowRunId));
         }
 
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")

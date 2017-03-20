@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Threading;
 
 namespace Guflow.Decider
 {
@@ -14,7 +15,7 @@ namespace Guflow.Decider
         }
         public WorkflowAction Invoke(WorkflowEvent argument)
         {
-            var parameters = _methodInfo.BuildParametersFrom(argument);
+            var parameters = _methodInfo.BuildParametersFrom(argument, default(CancellationToken));
 
             try
             {

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Amazon;
 using Guflow.Decider;
+using Guflow.Worker;
 
 namespace Guflow.IntegrationTests
 {
@@ -23,6 +24,16 @@ namespace Guflow.IntegrationTests
                 await _domain.RegisterWorkflowAsync(workflow.GetType());
             }
             return _domain.Host(workflows);
+        }
+
+        public async Task<HostedActivities> Host(Type[] activityTypes)
+        {
+            await _domain.RegisterAsync(2);
+            foreach (var activityType in activityTypes)
+            {
+                await _domain.RegisterActivityAsync(activityType);
+            }
+            return _domain.Host(activityTypes);
         }
 
         public async Task StartWorkflow<TWorkflow>(string input, string taskListName) where TWorkflow :Workflow

@@ -42,9 +42,8 @@ namespace Guflow.Worker
                                                 _activityTask.WorkflowExecution.RunId,
                                                 _activityTask.TaskToken);
             activityArgs.StartedEventId = _activityTask.StartedEventId;
-            
-            var retryableFunc = new RetryableFunc(_errorHandler);
-            return await retryableFunc.ExecuteAsync(()=>activity.ExecuteAsync(activityArgs), ActivityResponse.Defer);
+            activity.SetErrorHandler(_errorHandler);
+            return await activity.ExecuteAsync(activityArgs);
         }
 
         public void SetErrorHandler(IErrorHandler errorHandler)

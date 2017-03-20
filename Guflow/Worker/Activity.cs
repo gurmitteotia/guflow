@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
 
@@ -10,13 +11,16 @@ namespace Guflow.Worker
     {
         private readonly ActivityExecutionMethod _executionMethod;
         private IAmazonSimpleWorkflow _amazonSimpleWorkflow;
+        private IErrorHandler _errorHandler = ErrorHandler.NotHandled;
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
         protected bool FailOnException;
         protected readonly ActivityHeartbeat Hearbeat = new ActivityHeartbeat();
         private string _currentTaskToken = string.Empty;
         protected Activity()
         {
             _executionMethod = new ActivityExecutionMethod(GetType());
-            ConfigureHeartbeatInterval();
+            ConfigureHeartbeat();
             FailOnException = true;
         }
 
@@ -24,19 +28,29 @@ namespace Guflow.Worker
         {
             _amazonSimpleWorkflow = amazonSwf;
         }
+        internal void SetErrorHandler(IErrorHandler errorHandler)
+        {
+            _errorHandler = errorHandler;
+        }
 
         internal async Task<ActivityResponse> ExecuteAsync(ActivityArgs activityArgs)
         {
             try
             {
                 _currentTaskToken = activityArgs.TaskToken;
-                Hearbeat.StartHeartbeatAsync(_amazonSimpleWorkflow, activityArgs.TaskToken);
-                return await _executionMethod.Execute(this, activityArgs);
+                Hearbeat.SetFallbackErrorHandler(_errorHandler);
+                Hearbeat.StartHeartbeatIfEnabled(_amazonSimpleWorkflow, activityArgs.TaskToken);
+                var retryableFunc = new RetryableFunc(_errorHandler);
+                return await retryableFunc.ExecuteAsync(()=>_executionMethod.ExecuteAsync(this, activityArgs, _cancellationTokenSource.Token), Defer);
+            }
+            catch (OperationCanceledException exception)
+            {
+                return Cancel(exception.Message);
             }
             catch (Exception exception)
             {
                 if (FailOnException)
-                    return new ActivityFailResponse(activityArgs.TaskToken, exception.GetType().Name, exception.Message);
+                    return Fail(exception.GetType().Name, exception.Message);
                 throw;
             }
             finally
@@ -60,13 +74,14 @@ namespace Guflow.Worker
         }
         protected ActivityResponse Defer { get { return ActivityResponse.Defer;} }
 
-        private void ConfigureHeartbeatInterval()
+        private void ConfigureHeartbeat()
         {
             var enableHearbeatAttribute = GetType().GetCustomAttribute<EnableHeartbeatAttribute>();
             if (enableHearbeatAttribute != null)
             {
                 Hearbeat.SetInterval(TimeSpan.FromMilliseconds(enableHearbeatAttribute.HeartbeatIntervalInMilliSeconds));
             }
+            Hearbeat.CancellationRequested += (s, e) => _cancellationTokenSource.Cancel();
         }
     }
 }

@@ -42,5 +42,9 @@ namespace Guflow.Worker
             return  _taskToken.GetHashCode() ^ (_details != null ? _details.GetHashCode() : 0);
         }
 
+        public override string ToString()
+        {
+            return string.Format("ActivityCancelResponse: token {0}, details {1}", _taskToken, _details);
+        }
     }
 }

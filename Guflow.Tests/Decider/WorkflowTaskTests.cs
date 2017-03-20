@@ -73,6 +73,20 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public async Task Raise_workflow_closed_event_when_workflow_completed_decision_is_delivered_to_amazon_swf()
+        {
+            WorkflowClosedEventArgs eventArgs = null;
+            var workflow = new WorkflowCompleteOnSignal("result");
+            workflow.Closed += (s, e) => { eventArgs = e; };
+
+            await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
+            Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
+        }
+
+        [Test]
         public async Task Raise_workflow_failed_event_when_workflow_failed_decision_is_delivered_to_amazon_swf()
         {
             WorkflowFailedEventArgs eventArgs = null;
@@ -89,6 +103,20 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public async Task Raise_workflow_closed_event_when_workflow_failed_decision_is_delivered_to_amazon_swf()
+        {
+            WorkflowClosedEventArgs eventArgs = null;
+            var workflow = new WorkflowFailOnSignal("reason", "detail");
+            workflow.Closed += (s, e) => { eventArgs = e; };
+
+            await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
+            Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
+        }
+
+        [Test]
         public async Task Raise_workflow_cancelled_event_when_workflow_cancelled_decision_is_delivered_to_amazon_swf()
         {
             WorkflowCancelledEventArgs eventArgs = null;
@@ -101,6 +129,20 @@ namespace Guflow.Tests.Decider
             Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
             Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
             Assert.That(eventArgs.Details, Is.EqualTo("detail"));
+        }
+
+        [Test]
+        public async Task Raise_workflow_closed_event_when_workflow_cancelled_decision_is_delivered_to_amazon_swf()
+        {
+            WorkflowClosedEventArgs eventArgs = null;
+            var workflow = new WorkflowCancelOnSignal("detail");
+            workflow.Closed += (s, e) => { eventArgs = e; };
+
+            await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
+            Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
         }
 
         [Test]

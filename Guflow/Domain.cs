@@ -146,11 +146,6 @@ namespace Guflow
         {
             return new HostedWorkflows(this,workflows);
         }
-        public HostedActivities Host(IEnumerable<Activity> activities)
-        {
-            return new HostedActivities(this, activities);
-        }
-
         public HostedActivities Host(IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
         {
             return new HostedActivities(this, activitiesTypes, instanceCreator);

@@ -245,6 +245,27 @@ namespace Guflow.Tests.Decider
             Assert.That(targetWorkflow.EventTime, Is.EqualTo(_argument.EventTime.ToString()));
         }
 
+        [Test]
+        public void Can_pass_source_string_type_to_primitive_type_parameters()
+        {
+            var targetWorkflow = new MethodWithPrimitiveType();
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var argument = new ArgumentInStringFormat(10)
+            {
+                Duration = TimeSpan.FromSeconds(2).ToString(),
+                EventId = 10.ToString(),
+                EventTime = DateTime.Now.ToString(),
+                Reason = true.ToString()
+            };
+
+            workflowMethod.Invoke(argument);
+
+            Assert.That(targetWorkflow.EventId, Is.EqualTo(10));
+            Assert.That(targetWorkflow.EventTime, Is.EqualTo(DateTime.Parse(argument.EventTime)));
+            Assert.That(targetWorkflow.Duration, Is.EqualTo(TimeSpan.Parse(argument.Duration)));
+            Assert.That(targetWorkflow.Reason, Is.EqualTo(bool.Parse(argument.Reason)));
+        }
+
         private class TestClassWithPublicMethod : Workflow
         {
             [WorkflowEvent(_eventName)]
@@ -448,6 +469,22 @@ namespace Guflow.Tests.Decider
             public string EventTime { get; private set; }
         }
 
+        private class MethodWithPrimitiveType : Workflow
+        {
+            [WorkflowEvent(_eventName)]
+            public void TestMethod(int eventId, DateTime eventTime, TimeSpan duration, bool reason)
+            {
+                EventId = eventId;
+                EventTime = eventTime;
+                Duration = duration;
+                Reason = reason;
+            }
+            public int EventId { get; private set; }
+            public DateTime EventTime { get; private set; }
+            public TimeSpan Duration { get; private set; }
+            public bool Reason { get; private set; }
+        }
+
         private class Reason
         {
             public int Id;
@@ -473,6 +510,23 @@ namespace Guflow.Tests.Decider
             public string Reason { get; set; }
             public long EventId { get; set; }
             public DateTime EventTime { get; set; }
+        }
+
+        private class ArgumentInStringFormat : WorkflowEvent
+        {
+            public ArgumentInStringFormat(long eventId)
+                : base(eventId)
+            {
+            }
+
+            internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+            {
+                throw new NotImplementedException();
+            }
+            public string EventId { get; set; }
+            public string EventTime { get; set; }
+            public string Duration { get; set; }
+            public string Reason { get; set; }
         }
     }
 }
