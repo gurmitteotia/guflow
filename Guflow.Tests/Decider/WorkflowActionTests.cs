@@ -15,5 +15,19 @@ namespace Guflow.Tests.Decider
 
             Assert.That(workflowDecisions,Is.EquivalentTo(new WorkflowDecision []{new FailWorkflowDecision("reason","detail"),new CompleteWorkflowDecision("result")}));
         }
+
+        [Test]
+        public void Can_be_scheduled_like_schedulable_items()
+        {
+            
+        }
+
+        private class WorkflowToScheduleAction : Workflow
+        {
+            public WorkflowToScheduleAction(string result)
+            {
+                ScheduleAction(CompleteWorkflow(result));
+            }
+        }
     }
 }
