@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Guflow.Properties;
 
@@ -14,29 +14,23 @@ namespace Guflow.Worker
         {
              _executeMethod = FindExecutionMethod(activityType);
         }
-        private ActivityExecutionMethod(MethodInfo executeMethod)
-        {
-            _executeMethod = executeMethod;
-        }
         private static MethodInfo FindExecutionMethod(Type activityType)
         {
             var allMethods = activityType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
             var executionMethods = allMethods.Where(m => m.GetCustomAttributes<ExecuteAttribute>().Any()).ToArray();
-
             if (!executionMethods.Any())
                 throw new ActivityExecutionMethodException(string.Format(Resources.Activity_execution_method_missing, activityType.Name));
-
             if (executionMethods.Length > 1)
                 throw new ActivityExecutionMethodException(string.Format(Resources.Multiple_activity_execution_methods_defined, activityType.Name));
 
             return executionMethods.First();
         }
 
-        public async Task<ActivityResponse> Execute(Activity activity, ActivityArgs activityArgs)
+        public async Task<ActivityResponse> ExecuteAsync(Activity activity, ActivityArgs activityArgs, CancellationToken cancellationToken)
         {
             var executionStrategy = ExecutionStrategy.CreateFor(_executeMethod);
-            var parameters = _executeMethod.BuildParametersFrom(activityArgs);
+            var parameters = _executeMethod.BuildParametersFrom(activityArgs, cancellationToken);
             return await executionStrategy.Execute(this, activity, parameters, activityArgs.TaskToken);
         }
 

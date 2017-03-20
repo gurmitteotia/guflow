@@ -79,6 +79,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Activity execution is already stopped. Start with new instance to begin execution..
+        /// </summary>
+        internal static string Activity_execution_already_stopped {
+            get {
+                return ResourceManager.GetString("Activity_execution_already_stopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mismatch in activity execution count. It is a bug..
         /// </summary>
         internal static string Activity_execution_count_mismatch {
@@ -124,11 +133,20 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can not determine the task list to poll on for new tasks when multiple workflows are hosted. Please explicitly pass the task list to begin the execution. .
+        ///   Looks up a localized string similar to Can not determine the task list to poll on for new task when multiple activities are hosted. Please explicitly pass the task list to begin the execution..
         /// </summary>
-        internal static string Can_not_determine_the_task_list_to_poll_on {
+        internal static string Can_not_determine_the_task_list_to_poll_for_activity_task {
             get {
-                return ResourceManager.GetString("Can_not_determine_the_task_list_to_poll_on", resourceCulture);
+                return ResourceManager.GetString("Can_not_determine_the_task_list_to_poll_for_activity_task", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not determine the task list to poll on for new decisions when multiple workflows are hosted. Please explicitly pass the task list to begin the execution. .
+        /// </summary>
+        internal static string Can_not_determine_the_task_list_to_poll_for_workflow_decisions {
+            get {
+                return ResourceManager.GetString("Can_not_determine_the_task_list_to_poll_for_workflow_decisions", resourceCulture);
             }
         }
         
@@ -151,7 +169,7 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default task list is missing. Please either provide default task list in workflow declaration or pass the one explicitly to begin the execution.
+        ///   Looks up a localized string similar to Default task list is missing. Please either provide default task list in description or pass the one explicitly to begin the execution.
         /// </summary>
         internal static string Default_task_list_is_missing {
             get {
@@ -358,7 +376,7 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Workflow execution is already stopped..
+        ///   Looks up a localized string similar to Workflow execution is already stopped. Start with new instance to begin execution..
         /// </summary>
         internal static string Workflow_execution_already_stopped {
             get {

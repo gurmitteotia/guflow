@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Worker;
 using Moq;
 using NUnit.Framework;
@@ -11,54 +14,13 @@ namespace Guflow.Tests.Worker
     public class HostedActivitiesTests
     {
         private Domain _domain;
+        private Mock<IAmazonSimpleWorkflow> _simpleWorkflow;
         [SetUp]
         public void Setup()
         {
-            _domain = new Domain("name", new Mock<IAmazonSimpleWorkflow>().Object);
+            _simpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
+            _domain = new Domain("name", _simpleWorkflow.Object);
         }
-
-        [Test]
-        public void Returns_matching_hosted_activity_by_name_and_version()
-        {
-            var hostedActivity1 = new TestActivity1();
-            var hostedActivity2 = new TestActivity2();
-            var hostedActivities = _domain.Host(new Activity[] {hostedActivity1, hostedActivity2});
-
-            Assert.That(hostedActivities.FindBy("TestActivity1", "1.0"), Is.EqualTo(hostedActivity1));
-            Assert.That(hostedActivities.FindBy("TestActivity2", "2.0"), Is.EqualTo(hostedActivity2));
-        }
-
-        [Test]
-        public void Throws_exception_when_hosted_activity_is_not_found()
-        {
-            var hostedActivity = new TestActivity1();
-            var hostedActivities = _domain.Host(new[] {hostedActivity});
-
-            Assert.Throws<ActivityNotHostedException>(() => hostedActivities.FindBy("TestWorkflow2", "2.0"));
-        }
-
-        [Test]
-        public void Throws_exception_when_same_activity_is_hosted_twice()
-        {
-            var hostedActivity1 = new TestActivity1();
-            var hostedActivity2 = new TestActivity1();
-            Assert.Throws<ActivityAlreadyHostedException>(() => _domain.Host(new []{hostedActivity1, hostedActivity2}));
-        }
-
-        [Test]
-        public void Invalid_constructor_argument_tests()
-        {
-            Assert.Throws<ArgumentNullException>(() => _domain.Host((IEnumerable<Activity>)null));
-            Assert.Throws<ArgumentException>(() => _domain.Host(Enumerable.Empty<Activity>()));
-            Assert.Throws<ArgumentException>(() => _domain.Host(new[] { (Activity)null }));
-
-            Assert.Throws<ArgumentNullException>(() => _domain.Host((IEnumerable<Type>)null));
-            Assert.Throws<ArgumentException>(() => _domain.Host(Enumerable.Empty<Type>()));
-            Assert.Throws<ArgumentException>(() => _domain.Host(new[] { (Type)null }));
-
-            Assert.Throws<ArgumentNullException>(() => _domain.Host(new[] { typeof(TestActivity1) }, null));
-        }
-
         [Test]
         public void Return_the_new_instance_of_activity_type_by_name_and_version()
         {
@@ -121,6 +83,68 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
+        public void Throws_exception_when_starting_execution_without_task_queue_for_multiple_hosted_activities()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1), typeof(TestActivity2) }, t => new TestActivity2());
+            Assert.Throws<InvalidOperationException>(() => hostedActivities.StartExecution());
+        }
+
+        [Test]
+        public void Throws_exception_when_starting_execution_without_task_queue_and_hosted_activity_does_not_have_default_task_queue()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) }, t => new TestActivity2());
+            Assert.Throws<InvalidOperationException>(() => hostedActivities.StartExecution());
+        }
+
+        [Test]
+        public void By_default_response_errors_are_unhandled()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            _simpleWorkflow.Setup(s=>s.RespondActivityTaskCompletedAsync(It.IsAny<RespondActivityTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
+                            .Throws(new UnknownResourceException(""));
+
+            Assert.ThrowsAsync<UnknownResourceException>(() => hostedActivities.SendAsync(new ActivityCompleteResponse("token", "result")));
+        }
+
+        [Test]
+        public async Task Response_error_can_be_handled_to_retry()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            _simpleWorkflow.SetupSequence(s => s.RespondActivityTaskCompletedAsync(It.IsAny<RespondActivityTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
+                            .Throws(new UnknownResourceException(""))
+                            .Returns(Task.FromResult(new RespondActivityTaskCompletedResponse()));
+            hostedActivities.OnResponseError(e => ErrorAction.Retry);
+
+            await hostedActivities.SendAsync(new ActivityCompleteResponse("token", "result"));
+
+            _simpleWorkflow.Verify(w=>w.RespondActivityTaskCompletedAsync(It.IsAny<RespondActivityTaskCompletedRequest>(), It.IsAny<CancellationToken>()),Times.Exactly(2));
+        }
+
+        [Test]
+        public async Task Response_error_can_be_handled_to_retry_by_generic_error_handler()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            _simpleWorkflow.SetupSequence(s => s.RespondActivityTaskCompletedAsync(It.IsAny<RespondActivityTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
+                            .Throws(new UnknownResourceException(""))
+                            .Returns(Task.FromResult(new RespondActivityTaskCompletedResponse()));
+            hostedActivities.OnError(e => ErrorAction.Retry);
+
+            await hostedActivities.SendAsync(new ActivityCompleteResponse("token", "result"));
+
+            _simpleWorkflow.Verify(w => w.RespondActivityTaskCompletedAsync(It.IsAny<RespondActivityTaskCompletedRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        }
+
+        [Test]
+        public void Invalid_constructor_argument_tests()
+        {
+            Assert.Throws<ArgumentNullException>(() => _domain.Host((IEnumerable<Type>)null));
+            Assert.Throws<ArgumentException>(() => _domain.Host(Enumerable.Empty<Type>()));
+            Assert.Throws<ArgumentException>(() => _domain.Host(new[] { (Type)null }));
+
+            Assert.Throws<ArgumentNullException>(() => _domain.Host(new[] { typeof(TestActivity1) }, null));
+        }
+
+        [Test]
         public void Invalid_parameters_tests()
         {
             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
@@ -129,9 +153,17 @@ namespace Guflow.Tests.Worker
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnError((HandleError)null));
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError((IErrorHandler)null));
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError((HandleError)null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnResponseError((IErrorHandler)null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnResponseError((HandleError)null));
 
             Assert.Throws<ArgumentNullException>(() => hostedActivities.Execution = null);
         }
+
+        private void SetupAmazonSwfToThrowsExceptionOnResponse()
+        {
+                
+        }
+
         [ActivityDescription("1.0")]
         private class TestActivity1 : Activity
         {

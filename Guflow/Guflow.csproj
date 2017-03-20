@@ -89,6 +89,7 @@
     <Compile Include="Decider\AmbiguousWorkflowMethodException.cs" />
     <Compile Include="Decider\CancelWorkflowRequest.cs" />
     <Compile Include="Decider\ChildPolicy.cs" />
+    <Compile Include="Decider\WorkflowClosedEventArgs.cs" />
     <Compile Include="Domain.cs" />
     <Compile Include="Error.cs" />
     <Compile Include="ErrorAction.cs" />
@@ -144,7 +145,7 @@
     <Compile Include="Decider\IWorkflowEvents.cs" />
     <Compile Include="Decider\IWorkflowItem.cs" />
     <Compile Include="Decider\IWorkflowItems.cs" />
-    <Compile Include="JsonExtension.cs" />
+    <Compile Include="SerializationExtension.cs" />
     <Compile Include="Decider\MarkerRecordedEvent.cs" />
     <Compile Include="Decider\ParentItemMissingException.cs" />
     <Compile Include="Decider\IActivityTaskPoller.cs" />
@@ -216,6 +217,7 @@
     <Compile Include="Worker\EnableHeartbeatAttribute.cs" />
     <Compile Include="Worker\ExecuteAttribute.cs" />
     <Compile Include="Worker\HostedActivities.cs" />
+    <Compile Include="IHostedItems.cs" />
     <Compile Include="Worker\NonActivityTypeException.cs" />
     <Compile Include="Worker\WorkerTask.cs" />
   </ItemGroup>

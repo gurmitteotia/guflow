@@ -13,7 +13,8 @@ namespace Guflow.Worker
         private TimeSpan _interval;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private bool _stopped;
-        private IErrorHandler _errorHandler;
+        private ErrorHandler _errorHandler;
+        private IErrorHandler _fallbackErrorHandler = ErrorHandler.NotHandled;
         private bool _enabled = false;
         public ActivityHeartbeat()
         {
@@ -40,27 +41,32 @@ namespace Guflow.Worker
         public void OnError(IErrorHandler errorHandler)
         {
             Ensure.NotNull(errorHandler, "errorHandler");
-            _errorHandler = errorHandler;
+            OnError(errorHandler.OnError);
         }
         public void OnError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
-            OnError(ErrorHandler.Default(handleError));
+            _errorHandler = ErrorHandler.Default(handleError).WithFallback(_fallbackErrorHandler);
         }
 
-        internal async void StartHeartbeatAsync(IAmazonSimpleWorkflow amazonSimpleWorkflow, string taskToken)
+        internal void StartHeartbeatIfEnabled(IAmazonSimpleWorkflow amazonSimpleWorkflow, string taskToken)
         {
             if(!_enabled)
                 return;
-            var interval = _interval;
-            while (! _stopped)
-            {
-                await WaitFor(interval);
-
-                await ExecuteInRetryLoop(async () => await RecordHeartbeat(amazonSimpleWorkflow, taskToken));
-            }
+            StartHeartbeat(amazonSimpleWorkflow, taskToken);
         }
 
+        private async void StartHeartbeat(IAmazonSimpleWorkflow amazonSimpleWorkflow, string taskToken)
+        {
+            var interval = _interval;
+            while (!_stopped)
+            {
+               var waited = await WaitFor(interval);
+                if (!waited)
+                        continue;
+               await ExecuteInRetryLoop(async () => await RecordHeartbeat(amazonSimpleWorkflow, taskToken));
+            }
+        }
         private async Task ExecuteInRetryLoop(Func<Task> action)
         {
             var error = new Error();
@@ -79,7 +85,7 @@ namespace Guflow.Worker
                     RaiseActivityTerminatedEvent();
                     StopHeartbeat();
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                     //it means we are stopping the heartbeat.
                 }
@@ -95,15 +101,17 @@ namespace Guflow.Worker
             } while (retry);
         }
 
-        private async Task WaitFor(TimeSpan interval)
+        private async Task<bool> WaitFor(TimeSpan interval)
         {
             try
             {
                 await Task.Delay(interval, _cancellationTokenSource.Token);
+                return true;
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 //it means we are stopping the heartbeat.
+                return false;
             }
         }
 
@@ -115,7 +123,11 @@ namespace Guflow.Worker
                 _cancellationTokenSource.Cancel();
             }
         }
-
+        internal void SetFallbackErrorHandler(IErrorHandler errorHandler)
+        {
+            _fallbackErrorHandler = errorHandler;
+            _errorHandler = _errorHandler.WithFallback(errorHandler);
+        }
         private async Task RecordHeartbeat(IAmazonSimpleWorkflow amazonSimpleWorkflow, string token)
         {
             var details = _activityDetailsFunc();
@@ -151,5 +163,7 @@ namespace Guflow.Worker
                 Details = details
             };
         }
+
+       
     }
 }

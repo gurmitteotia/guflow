@@ -140,7 +140,7 @@ namespace Guflow.Tests.Worker
         {
             var activityArgs = new ActivityArgs(new Input {Id = 10, Details = "det"}.ToJson(), "id", "wid", "rid", "token");
             var activity = new ActivityMethodWithArgs();
-
+            
             await activity.ExecuteAsync(activityArgs);
 
             Assert.That(activity.Input.Id, Is.EqualTo(10));
@@ -207,6 +207,28 @@ namespace Guflow.Tests.Worker
             var response = await activity.ExecuteAsync(_activityArgs);
 
             Assert.That(response, Is.EqualTo(new ActivityFailResponse(_taskToken, "reason", "details")));
+        }
+
+        [Test]
+        public async Task By_default_execution_method_convert_task_cancellation_exception_to_activity_cancel_response()
+        {
+            var activity = new CancelledActivity();
+
+            var response = await activity.ExecuteAsync(_activityArgs);
+
+            Assert.That(response, Is.EqualTo(new ActivityCancelResponse(_taskToken, "The operation was canceled.")));
+        }
+
+        [Test]
+        public async Task Cancellation_token_is_set_when_heartbeat_returns_cancellation_request()
+        {
+            AmazonSwfReturnActivityCancellationRequested();
+            var activity = new ActivityWithCancellationToken(executionTime: TimeSpan.FromSeconds(1));
+            activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
+           
+            await activity.ExecuteAsync(_activityArgs);
+
+            Assert.That(activity.CancellationRequested, Is.True);
         }
 
         private void AssertThatHearbeatIsSendToAmazonSwf(string details)
@@ -500,6 +522,56 @@ namespace Guflow.Tests.Worker
             {
                 return Defer;
             }
+        }
+
+        [EnableHeartbeat(10)]
+        private class ActivityWithCancellationToken : Activity
+        {
+            private CancellationToken _cancellationToken;
+            private readonly TimeSpan _executionTime;
+
+            public ActivityWithCancellationToken(TimeSpan executionTime)
+            {
+                _executionTime = executionTime;
+            }
+
+            [Execute]
+            public void Execute(CancellationToken cancellationToken)
+            {
+                _cancellationToken = cancellationToken;
+                Thread.Sleep(_executionTime);
+            }
+
+            public bool CancellationRequested { get { return _cancellationToken.IsCancellationRequested; } }
+
+        }
+
+        private class CancelledActivity : Activity
+        {
+            private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+            public CancelledActivity()
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            [Execute]
+            public void Execute()
+            {
+                if(_cancellationTokenSource.IsCancellationRequested)
+                    _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+            }
+        }
+
+        private void AmazonSwfReturnActivityCancellationRequested()
+        {
+            var response = new RecordActivityTaskHeartbeatResponse()
+            {
+                ActivityTaskStatus = new ActivityTaskStatus() { CancelRequested = true }
+            };
+
+            _amazonSimpleWorkflow.Setup(
+                w => w.RecordActivityTaskHeartbeatAsync(It.IsAny<RecordActivityTaskHeartbeatRequest>(),
+                    It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
         }
     }
 }

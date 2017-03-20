@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using Guflow.Decider;
 using Guflow.Properties;
 
@@ -8,7 +9,7 @@ namespace Guflow
 {
     internal static class MethodInfoExtensions
     {
-        public static object[] BuildParametersFrom(this MethodInfo method, object sourceArguments)
+        public static object[] BuildParametersFrom(this MethodInfo method, object sourceArguments, CancellationToken cancellationToken)
         {
             var parameters = new List<object>();
             var invokedArgumentType = sourceArguments.GetType();
@@ -18,6 +19,11 @@ namespace Guflow
                 if (parameterInfo.ParameterType.IsAssignableFrom(invokedArgumentType))
                 {
                     parameters.Add(sourceArguments);
+                    continue;
+                }
+                if (parameterInfo.ParameterType == typeof(CancellationToken))
+                {
+                    parameters.Add(cancellationToken);
                     continue;
                 }
                 object propertyValue;
@@ -31,6 +37,8 @@ namespace Guflow
                         parameters.Add(DefaultValueFor(parameterInfo.ParameterType));
                     else if (propertyValue.Primitive() && parameterInfo.ParameterType.IsString())
                         parameters.Add(propertyValue.ToString());
+                    else if(parameterInfo.ParameterType.Primitive() && propertyValue.IsString())
+                        parameters.Add(ChangeType((string)propertyValue, parameterInfo.ParameterType));
                     else
                         throw new InvalidMethodSignatureException(string.Format(Resources.Invalid_parameter, method.Name, parameterInfo.Name, invokedArgumentType.Name ));
 
@@ -60,6 +68,13 @@ namespace Guflow
         private static object DefaultValueFor(Type type)
         {
             return type.IsValueType ? Activator.CreateInstance(type) : null;
+        }
+
+        private static object ChangeType(string value, Type targetType)
+        {
+            if (targetType == typeof(TimeSpan))
+                return TimeSpan.Parse(value);
+            return Convert.ChangeType(value, targetType);
         }
     }
 }

@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Guflow
 {
-    public static class JsonExtension
+    public static class SerializationExtension
     {
         public static string ToJson<T>(this T instance)
         {
@@ -49,15 +49,19 @@ namespace Guflow
 
         internal static bool Primitive(this object obj)
         {
-            return obj.GetType().IsPrimitive || obj is string|| obj is DateTime;
+            return Primitive(obj.GetType());
         }
         internal static bool Primitive(this Type type)
         {
-            return type.IsPrimitive || type == typeof(string) || type == typeof(DateTime);
+            return type.IsPrimitive || type == typeof(string) || type == typeof(DateTime)|| type==typeof(TimeSpan);
         }
         internal static bool IsString(this Type type)
         {
             return type == typeof(string);
+        }
+        internal static bool IsString(this object obj)
+        {
+            return IsString(obj.GetType());
         }
     }
 }

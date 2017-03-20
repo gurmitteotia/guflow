@@ -37,7 +37,7 @@ namespace Guflow.Tests.Worker
         {
             SetupAmazonSwfToRecordHeartbeat("details", "token");
 
-            _activityHearbeat.StartHeartbeatAsync(_simpleWorkflow.Object, "token");
+            _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Thread.Sleep(HeartbeatIntervel * 50);
 
            _simpleWorkflow.VerifyAll();
@@ -49,7 +49,7 @@ namespace Guflow.Tests.Worker
             SetupAmazonSwfToRecordHeartbeat("details", "token");
             var activityHearbeat = new ActivityHeartbeat();
 
-            activityHearbeat.StartHeartbeatAsync(_simpleWorkflow.Object, "token");
+            activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Thread.Sleep(HeartbeatIntervel * 50);
 
             AsserThatHearbeatIsNotRecorded();
@@ -62,7 +62,7 @@ namespace Guflow.Tests.Worker
             var cancellelationRequestedEvent = new ManualResetEvent(false);
             _activityHearbeat.CancellationRequested += (s, e) => cancellelationRequestedEvent.Set();
             
-            _activityHearbeat.StartHeartbeatAsync(_simpleWorkflow.Object, "token");
+            _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
 
             Assert.That(cancellelationRequestedEvent.WaitOne(HeartbeatIntervel * 50), "Cancellation request event is not raised");
         }
@@ -74,7 +74,7 @@ namespace Guflow.Tests.Worker
             var terminatedEvent = new ManualResetEvent(false);
             _activityHearbeat.ActivityTerminated += (s, e) => terminatedEvent.Set();
 
-            _activityHearbeat.StartHeartbeatAsync(_simpleWorkflow.Object, "token");
+            _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
 
             Assert.That(terminatedEvent.WaitOne(HeartbeatIntervel * 50), "Activity terminated event is not raised");
         }
@@ -84,7 +84,7 @@ namespace Guflow.Tests.Worker
         {
             RecordHeartbeatThrows(new UnknownResourceException("Activity terminated"));
           
-            _activityHearbeat.StartHeartbeatAsync(_simpleWorkflow.Object, "token");
+            _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Thread.Sleep(HeartbeatIntervel * 80);
             
             AsserThatHearbeatIsRecordedOnleOnce();
@@ -98,7 +98,38 @@ namespace Guflow.Tests.Worker
             HandleError errorHandler = e => { retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
             _activityHearbeat.OnError(ErrorHandler.Default(errorHandler));
            
-            _activityHearbeat.StartHeartbeatAsync(_simpleWorkflow.Object, "token");
+            _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
+            Thread.Sleep(HeartbeatIntervel * 50);
+
+            Assert.That(retryAttempts, Is.GreaterThan(2));
+            AsserThatHearbeatIsRecordedMultipleTimes();
+        }
+
+        [Test]
+        public void Error_raised_in_reporting_the_heartbeat_can_be_retried_using_fallback_error_handler()
+        {
+            RecordHeartbeatThrows(new AmazonServiceException("network error"));
+            int retryAttempts = 0;
+            HandleError errorHandler = e => { retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
+            _activityHearbeat.SetFallbackErrorHandler(ErrorHandler.Default(errorHandler));
+
+            _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
+            Thread.Sleep(HeartbeatIntervel * 50);
+
+            Assert.That(retryAttempts, Is.GreaterThan(2));
+            AsserThatHearbeatIsRecordedMultipleTimes();
+        }
+
+        [Test]
+        public void Error_raised_in_reporting_the_heartbeat_can_be_retried_using_fallback_error_handler_even_if_was_set_before_user_handler()
+        {
+            RecordHeartbeatThrows(new AmazonServiceException("network error"));
+            int retryAttempts = 0;
+            HandleError errorHandler = e => { retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
+            _activityHearbeat.SetFallbackErrorHandler(ErrorHandler.Default(errorHandler));
+            _activityHearbeat.OnError(ErrorHandler.NotHandled);
+
+            _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Thread.Sleep(HeartbeatIntervel * 50);
 
             Assert.That(retryAttempts, Is.GreaterThan(2));
@@ -113,7 +144,7 @@ namespace Guflow.Tests.Worker
             HandleError errorHandler = e => {retryAttempts = e.RetryAttempts; return ErrorAction.Continue;};
             _activityHearbeat.OnError(ErrorHandler.Default(errorHandler));
             
-            _activityHearbeat.StartHeartbeatAsync(_simpleWorkflow.Object, "token");
+            _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Thread.Sleep(HeartbeatIntervel * 50);
 
             Assert.That(retryAttempts, Is.EqualTo(0));
