@@ -1,6 +1,6 @@
 ﻿namespace Guflow.Decider
 {
-    public interface IFluentWorkflowItem<T>
+    public interface IFluentWorkflowItem<out T>
     {
         T After(string timerName);
         T After(string activityName, string activityVersion, string positionalName = "");

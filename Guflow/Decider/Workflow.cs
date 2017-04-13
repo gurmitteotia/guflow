@@ -214,15 +214,15 @@ namespace Guflow.Decider
             var workfowItem = FindWorkflowItemFor(workflowItemEvent);
             return WorkflowAction.ContinueWorkflow(workfowItem);
         }
-        protected WorkflowAction FailWorkflow(string reason, string details)
+        protected static WorkflowAction FailWorkflow(string reason, string details)
         {
             return WorkflowAction.FailWorkflow(reason, details);
         }
-        protected WorkflowAction CompleteWorkflow(string result)
+        protected static WorkflowAction CompleteWorkflow(string result)
         {
             return WorkflowAction.CompleteWorkflow(result);
         }
-        protected WorkflowAction CancelWorkflow(string details)
+        protected static WorkflowAction CancelWorkflow(string details)
         {
             return WorkflowAction.CancelWorkflow(details);
         }
@@ -236,7 +236,7 @@ namespace Guflow.Decider
         {
             return WorkflowAction.StartWorkflow(this);
         }
-        protected WorkflowAction Ignore()
+        protected static WorkflowAction Ignore()
         {
             return WorkflowAction.Ignore;
         }

@@ -5,7 +5,7 @@ using Guflow.Properties;
 
 namespace Guflow.Decider
 {
-    internal abstract class WorkflowItem : IWorkflowItem
+    internal abstract class  WorkflowItem : IWorkflowItem
     {
         private readonly IWorkflow _workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
