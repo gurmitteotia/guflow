@@ -16,7 +16,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_schedule_timer_to_fire_immediately()
         {
-            var timerItem = new TimerItem(_timerIdentity,null);
+            var timerItem = TimerItem.New(_timerIdentity,null);
 
             var decision = timerItem.GetScheduleDecision();
 
@@ -26,7 +26,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_configured_to_schedule_timer_to_fire_after_timeout()
         {
-            var timerItem = new TimerItem(_timerIdentity, null);
+            var timerItem = TimerItem.New(_timerIdentity, null);
             timerItem.FireAfter(TimeSpan.FromSeconds(3));
             var decision = timerItem.GetScheduleDecision();
 
@@ -36,7 +36,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Return_empty_when_when_condiation_is_evaluated_to_false()
         {
-            var timerItem = new TimerItem(_timerIdentity, null);
+            var timerItem = TimerItem.New(_timerIdentity, null);
             timerItem.When(t => false);
 
             var decision = timerItem.GetScheduleDecision();
@@ -113,7 +113,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Invalid_arguments_test()
         {
-            var timerItem = (IFluentTimerItem) new TimerItem(_timerIdentity, null);
+            var timerItem = (IFluentTimerItem) TimerItem.New(_timerIdentity, null);
 
             Assert.Throws<ArgumentNullException>(() => timerItem.OnCancelled(null));
             Assert.Throws<ArgumentNullException>(() => timerItem.OnFailedCancellation(null));
@@ -131,7 +131,7 @@ namespace Guflow.Tests.Decider
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
             var workflow = new Mock<IWorkflow>();
             workflow.SetupGet(w => w.WorkflowEvents).Returns(workflowHistoryEvents);
-            return new TimerItem(_timerIdentity, workflow.Object);
+            return TimerItem.New(_timerIdentity, workflow.Object);
         }
     }
 }

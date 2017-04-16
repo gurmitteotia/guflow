@@ -29,8 +29,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Equality_tests()
         {
-            var workflowItem1 = new TimerItem(Identity.Timer("TimerName"), _workflow.Object);
-            var workflowItem2 = new TimerItem(Identity.Timer("TimerName2"), _workflow.Object);
+            var workflowItem1 = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
+            var workflowItem2 = TimerItem.New(Identity.Timer("TimerName2"), _workflow.Object);
             Assert.That(WorkflowAction.Cancel(workflowItem1).Equals(WorkflowAction.Cancel(workflowItem1)));
             Assert.False(WorkflowAction.Cancel(workflowItem1).Equals(WorkflowAction.Cancel(workflowItem2)));
         }
@@ -39,7 +39,7 @@ namespace Guflow.Tests.Decider
         public void Returns_cancel_timer_decision_for_timer_item_when_it_is_active()
         {
             SetupWorkflowToReturns(HistoryEventFactory.CreateTimerStartedEventGraph(Identity.Timer("TimerName"), TimeSpan.FromSeconds(2)));
-            var timerItem = new TimerItem(Identity.Timer("TimerName"), _workflow.Object);
+            var timerItem = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(timerItem);
 
             var decisions = workflowAction.GetDecisions();
@@ -102,7 +102,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Cancel(new TimerItem(Identity.Timer("SomeTimer"), null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Cancel(TimerItem.New(Identity.Timer("SomeTimer"), null))));
         }
 
         [Test]

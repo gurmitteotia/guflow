@@ -40,53 +40,54 @@ namespace Guflow.Decider
 
         WorkflowAction IWorkflowActions.OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
         {
-            var workflowActivity = FindActivityFor(activityCompletedEvent);
-            return workflowActivity.Completed(activityCompletedEvent);
+            var activity = FindActivityFor(activityCompletedEvent);
+            return activity.Completed(activityCompletedEvent);
         }
         WorkflowAction IWorkflowActions.OnActivityFailure(ActivityFailedEvent activityFailedEvent)
         {
-            var workflowActivity = FindActivityFor(activityFailedEvent);
-            return workflowActivity.Failed(activityFailedEvent);
+            var activity = FindActivityFor(activityFailedEvent);
+            return activity.Failed(activityFailedEvent);
         }
         WorkflowAction IWorkflowActions.OnActivityTimeout(ActivityTimedoutEvent activityTimedoutEvent)
         {
-            var workflowActivity = FindActivityFor(activityTimedoutEvent);
-            return workflowActivity.Timedout(activityTimedoutEvent);
+            var activity = FindActivityFor(activityTimedoutEvent);
+            return activity.Timedout(activityTimedoutEvent);
         }
         WorkflowAction IWorkflowActions.OnActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
         {
-            var workflowActivity = FindActivityFor(activityCancelledEvent);
-            return workflowActivity.Cancelled(activityCancelledEvent);
-        }
-        WorkflowAction IWorkflowActions.OnTimerFired(TimerFiredEvent timerFiredEvent)
-        {
-            var workflowItem = FindWorkflowItemFor(timerFiredEvent);
-            return workflowItem.TimerFired(timerFiredEvent);
-        }
-        WorkflowAction IWorkflowActions.OnTimerStartFailure(TimerStartFailedEvent timerStartFailedEvent)
-        {
-            var workflowItem = FindWorkflowItemFor(timerStartFailedEvent);
-            return workflowItem.TimerStartFailed(timerStartFailedEvent);
-        }
-        WorkflowAction IWorkflowActions.OnTimerCancelled(TimerCancelledEvent timerCancelledEvent)
-        {
-            var workflowItem = FindWorkflowItemFor(timerCancelledEvent);
-            return workflowItem.TimerCancelled(timerCancelledEvent);
+            var activity = FindActivityFor(activityCancelledEvent);
+            return activity.Cancelled(activityCancelledEvent);
         }
         WorkflowAction IWorkflowActions.OnActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
         {
             var workflowActivity = FindActivityFor(activityCancellationFailedEvent);
             return workflowActivity.CancellationFailed(activityCancellationFailedEvent);
         }
-        WorkflowAction IWorkflowActions.OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
-        {
-            var workflowItem = FindWorkflowItemFor(timerCancellationFailedEvent);
-            return workflowItem.TimerCancellationFailed(timerCancellationFailedEvent);
-        }
+
         WorkflowAction IWorkflowActions.OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
         {
             var workflowActivity = FindActivityFor(activitySchedulingFailedEvent);
             return workflowActivity.SchedulingFailed(activitySchedulingFailedEvent);
+        }
+        WorkflowAction IWorkflowActions.OnTimerFired(TimerFiredEvent timerFiredEvent)
+        {
+            var timer = FindTimerFor(timerFiredEvent);
+            return timer.Fired(timerFiredEvent);
+        }
+        WorkflowAction IWorkflowActions.OnTimerStartFailure(TimerStartFailedEvent timerStartFailedEvent)
+        {
+            var timer = FindTimerFor(timerStartFailedEvent);
+            return timer.StartFailed(timerStartFailedEvent);
+        }
+        WorkflowAction IWorkflowActions.OnTimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        {
+            var timer = FindTimerFor(timerCancelledEvent);
+            return timer.Cancelled(timerCancelledEvent);
+        }
+        WorkflowAction IWorkflowActions.OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        {
+            var timer = FindTimerFor(timerCancellationFailedEvent);
+            return timer.CancellationFailed(timerCancellationFailedEvent);
         }
         WorkflowAction IWorkflowActions.OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent)
         {
@@ -196,7 +197,7 @@ namespace Guflow.Decider
         {
             Ensure.NotNullAndEmpty(name, "name");
 
-            var timerItem = new TimerItem(Identity.Timer(name), this);
+            var timerItem = TimerItem.New(Identity.Timer(name), this);
             if (!_allWorkflowItems.Add(timerItem))
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_timer, name));
 
@@ -372,7 +373,7 @@ namespace Guflow.Decider
         {
             return _allWorkflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
         }
-        private ActivityItem FindActivityFor(ActivityEvent activityEvent)
+        private IActivity FindActivityFor(ActivityEvent activityEvent)
         {
             var workflowActivity = FindActivity(activityEvent);
 
@@ -381,7 +382,7 @@ namespace Guflow.Decider
 
             return workflowActivity;
         }
-        private ActivityItem FindActivityFor(WorkflowItemEvent workflowItemEvent)
+        private IActivity FindActivityFor(WorkflowItemEvent workflowItemEvent)
         {
             var workflowActivity = FindActivity(workflowItemEvent);
 
@@ -408,6 +409,15 @@ namespace Guflow.Decider
         private WorkflowItem FindWorkflowItemFor(WorkflowItemEvent workflowItemEvent)
         {
             var workflowItem = _allWorkflowItems.FirstOrDefault(workflowItemEvent.IsFor);
+
+            if (workflowItem == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find workflow item for event {0}", workflowItemEvent));
+
+            return workflowItem;
+        }
+        private ITimer FindTimerFor(WorkflowItemEvent workflowItemEvent)
+        {
+            var workflowItem = _allWorkflowItems.Where(workflowItemEvent.IsFor).OfType<ITimer>().FirstOrDefault();
 
             if (workflowItem == null)
                 throw new IncompatibleWorkflowException(string.Format("Can not find workflow item for event {0}", workflowItemEvent));

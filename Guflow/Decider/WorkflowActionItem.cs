@@ -6,7 +6,7 @@ namespace Guflow.Decider
     {
         private readonly WorkflowAction _workflowAction;
 
-        public WorkflowActionItem(WorkflowAction workflowAction): base(Identity.New(""),)
+        public WorkflowActionItem(WorkflowAction workflowAction): base(Identity.New("fdf", "ver"),null)
         {
             _workflowAction = workflowAction;
         }
@@ -29,36 +29,6 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowItemEvent> AllEvents
         {
             get { throw new System.NotImplementedException(); }
-        }
-
-        internal override WorkflowDecision GetScheduleDecision()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        internal override WorkflowDecision GetCancelDecision()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        internal override WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        internal override WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        internal override WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

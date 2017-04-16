@@ -17,13 +17,13 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Equality_tests()
         {
-            Assert.True(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"),_workflow.Object)).Equals(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"),_workflow.Object))));
-            Assert.False(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename"), _workflow.Object)).Equals(WorkflowAction.Schedule(new TimerItem(Identity.Timer("Somename1"), _workflow.Object))));
+            Assert.True(WorkflowAction.Schedule(TimerItem.New(Identity.Timer("Somename"),_workflow.Object)).Equals(WorkflowAction.Schedule(TimerItem.New(Identity.Timer("Somename"),_workflow.Object))));
+            Assert.False(WorkflowAction.Schedule(TimerItem.New(Identity.Timer("Somename"), _workflow.Object)).Equals(WorkflowAction.Schedule(TimerItem.New(Identity.Timer("Somename1"), _workflow.Object))));
         }
         [Test]
         public void Should_return_the_scheduling_decision_for_workflow_item()
         {
-            var workflowItem = new TimerItem(Identity.Timer("Somename"),_workflow.Object);
+            var workflowItem = TimerItem.New(Identity.Timer("Somename"),_workflow.Object);
             var workflowAction = WorkflowAction.Schedule(workflowItem);
 
             var decisions = workflowAction.GetDecisions();
@@ -72,7 +72,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new TimerItem(Identity.Timer("SomeTimer"),null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(TimerItem.New(Identity.Timer("SomeTimer"),null))));
         }
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)

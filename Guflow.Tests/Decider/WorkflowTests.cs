@@ -59,7 +59,7 @@ namespace Guflow.Tests.Decider
 
             var activity = workflow.GetTimerOf(activityCompletedEvent);
 
-            Assert.That(activity, Is.EqualTo(new TimerItem(Identity.Timer("Timer1"), workflow)));
+            Assert.That(activity, Is.EqualTo(TimerItem.New(Identity.Timer("Timer1"), workflow)));
         }
 
         [Test]

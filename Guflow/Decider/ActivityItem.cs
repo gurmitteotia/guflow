@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
-    internal sealed class ActivityItem : WorkflowItem, IFluentActivityItem, IActivityItem
+    internal sealed class ActivityItem : WorkflowItem, IFluentActivityItem, IActivityItem, ITimer, IActivity, ISchedulableItem
     {
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
@@ -17,7 +17,7 @@ namespace Guflow.Decider
         private Func<IActivityItem, bool> _whenFunc;
         private Func<IActivityItem, int?> _priorityFunc;
         private Func<IActivityItem, ScheduleActivityTimeouts> _timeoutsFunc;
-
+        private readonly TimerItem _rescheduleTimer;
         internal ActivityItem(Identity identity, IWorkflow workflow)
             : base(identity, workflow)
         {
@@ -32,6 +32,8 @@ namespace Guflow.Decider
             _whenFunc = a => true;
             _priorityFunc = a => null;
             _timeoutsFunc = a => new ScheduleActivityTimeouts();
+            SchedulableItem = this;
+            _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
         }
 
         public override WorkflowItemEvent LastEvent
@@ -39,7 +41,7 @@ namespace Guflow.Decider
             get
             {
                 var latestActivityEvent = WorkflowEvents.LastActivityEventFor(this);
-                var latestTimerEvent = WorkflowEvents.LastTimerEventFor(RescheduleTimerItem);
+                var latestTimerEvent = WorkflowEvents.LastTimerEventFor(_rescheduleTimer);
                 if (latestActivityEvent > latestTimerEvent)
                     return latestActivityEvent;
 
@@ -71,7 +73,7 @@ namespace Guflow.Decider
             get
             {
                 var activityEvents = WorkflowEvents.AllActivityEventsFor(this);
-                var timerEvents = WorkflowEvents.AllTimerEventsFor(RescheduleTimerItem);
+                var timerEvents = WorkflowEvents.AllTimerEventsFor(_rescheduleTimer);
                 return activityEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
             }
         }
@@ -179,66 +181,55 @@ namespace Guflow.Decider
 
         public IFluentTimerItem RescheduleTimer
         {
-            get { return RescheduleTimerItem; }
+            get { return _rescheduleTimer; }
         }
-        internal override WorkflowDecision GetScheduleDecision()
+        WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
-            if (!_whenFunc(this))
-                return WorkflowDecision.Empty;
+            ITimer timer = _rescheduleTimer;
+            return timer.Fired(timerFiredEvent);
+        }
+        WorkflowAction ITimer.Cancelled(TimerCancelledEvent timerCancelledEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.Cancelled(timerCancelledEvent);
+        }
+        WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.StartFailed(timerStartFailedEvent);
+        }
+        WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.CancellationFailed(timerCancellationFailedEvent);
+        }
 
-            var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
-            scheduleActivityDecision.UseInputFunc(GetActivityInput);
-            scheduleActivityDecision.TaskList = _taskListFunc(this);
-            scheduleActivityDecision.TaskPriority = _priorityFunc(this);
-            scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
-            return scheduleActivityDecision;
-        }
-        internal override WorkflowDecision GetCancelDecision()
-        {
-            var lastEvent = LastEvent;
-            var latestTimerEvent = WorkflowEvents.LastTimerEventFor(RescheduleTimerItem);
-            if (latestTimerEvent != WorkflowItemEvent.NotFound && lastEvent == latestTimerEvent)
-                return RescheduleTimerItem.GetCancelDecision();
-
-            return new CancelActivityDecision(Identity);
-        }
-        internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
-        {
-            return RescheduleTimerItem.TimerFired(timerFiredEvent);
-        }
-        internal override WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
-        {
-            return RescheduleTimerItem.TimerCancelled(timerCancelledEvent);
-        }
-        internal override WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent)
-        {
-            return RescheduleTimerItem.TimerStartFailed(timerStartFailedEvent);
-        }
-        internal override WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
-        {
-            return RescheduleTimerItem.TimerCancellationFailed(timerCancellationFailedEvent);
-        }
-        internal WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent)
+        WorkflowAction IActivity.Completed(ActivityCompletedEvent activityCompletedEvent)
         {
             return _onCompletionAction(activityCompletedEvent);
         }
-        internal WorkflowAction Failed(ActivityFailedEvent activityFailedEvent)
+
+        WorkflowAction IActivity.Failed(ActivityFailedEvent activityFailedEvent)
         {
             return _onFailedAction(activityFailedEvent);
         }
-        internal WorkflowAction Timedout(ActivityTimedoutEvent activityTimedoutEvent)
+
+        WorkflowAction IActivity.Timedout(ActivityTimedoutEvent activityTimedoutEvent)
         {
             return _onTimedoutAction(activityTimedoutEvent);
         }
-        internal WorkflowAction Cancelled(ActivityCancelledEvent activityCancelledEvent)
+
+        WorkflowAction IActivity.Cancelled(ActivityCancelledEvent activityCancelledEvent)
         {
             return _onCancelledAction(activityCancelledEvent);
         }
-        internal WorkflowAction CancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
+
+        WorkflowAction IActivity.CancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
         {
             return _onCancellationFailedAction(activityCancellationFailedEvent);
         }
-        internal WorkflowAction SchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
+
+        WorkflowAction IActivity.SchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
         {
             return _onFailedSchedulingAction(activitySchedulingFailedEvent);
         }
@@ -246,6 +237,35 @@ namespace Guflow.Decider
         {
             var inputObject = _inputFunc(this);
             return inputObject.ToAwsString();
+        }
+
+        WorkflowDecision ISchedulableItem.ScheduleDecision(Identity identity)
+        {
+            if (!_whenFunc(this))
+                return WorkflowDecision.Empty;
+
+            var scheduleActivityDecision = new ScheduleActivityDecision(identity);
+            scheduleActivityDecision.UseInputFunc(GetActivityInput);
+            scheduleActivityDecision.TaskList = _taskListFunc(this);
+            scheduleActivityDecision.TaskPriority = _priorityFunc(this);
+            scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
+            return scheduleActivityDecision;
+        }
+
+        WorkflowDecision ISchedulableItem.RescheduleDecision(Identity identity, TimeSpan afterTimeout)
+        {
+            _rescheduleTimer.FireAfter(afterTimeout);
+            return _rescheduleTimer.GetScheduleDecision();
+        }
+
+        WorkflowDecision ISchedulableItem.CancelDecision(Identity identity)
+        {
+            var lastEvent = LastEvent;
+            var latestTimerEvent = WorkflowEvents.LastTimerEventFor(_rescheduleTimer);
+            if (latestTimerEvent != WorkflowItemEvent.NotFound && lastEvent == latestTimerEvent)
+                return _rescheduleTimer.GetCancelDecision();
+
+            return new CancelActivityDecision(identity);
         }
     }
 }

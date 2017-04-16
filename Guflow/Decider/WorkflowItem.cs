@@ -10,7 +10,7 @@ namespace Guflow.Decider
         private readonly IWorkflow _workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
         protected readonly Identity Identity;
-        private TimerItem _resheduleTimerItem;
+        protected ISchedulableItem SchedulableItem;
         protected WorkflowItem(Identity identity, IWorkflow workflow)
         {
             Identity = identity;
@@ -39,41 +39,40 @@ namespace Guflow.Decider
 
         public abstract IEnumerable<WorkflowItemEvent> AllEvents { get; }
 
-        internal bool HasNoParents()
+        public bool HasNoParents()
         {
             return _parentItems.Count == 0;
         }
-        internal bool IsChildOf(WorkflowItem workflowItem)
+        public bool IsChildOf(WorkflowItem workflowItem)
         {
             return _parentItems.Contains(workflowItem);
         }
 
-        internal IEnumerable<WorkflowItem> GetChildlern()
+        public IEnumerable<WorkflowItem> GetChildlern()
         {
             return _workflow.GetChildernOf(this);
         }
 
-        internal abstract WorkflowDecision GetScheduleDecision();
-        internal WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
+        public WorkflowDecision GetScheduleDecision()
         {
-            RescheduleTimerItem.FireAfter(afterTimeout);
-            return RescheduleTimerItem.GetScheduleDecision();
+            return SchedulableItem.ScheduleDecision(Identity);
         }
-        internal abstract WorkflowDecision GetCancelDecision();
-
-        internal bool Has(AwsIdentity identity)
+        public WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
+        {
+            return SchedulableItem.RescheduleDecision(Identity, afterTimeout);
+        }
+        public WorkflowDecision GetCancelDecision()
+        {
+            return SchedulableItem.CancelDecision(Identity);
+        }
+        public bool Has(AwsIdentity identity)
         {
             return Identity.Id == identity;
         }
-        internal bool Has(Identity identity)
+        public bool Has(Identity identity)
         {
             return Identity.Equals(identity);
         }
-        internal abstract WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent);
-        internal abstract WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent);
-        internal abstract WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent);
-        internal abstract WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);
-
         public override bool Equals(object other)
         {
             var otherItem = other as WorkflowItem;
@@ -86,7 +85,7 @@ namespace Guflow.Decider
             return Identity.GetHashCode();
         }
 
-        internal bool SchedulingIsAllowedByAllParents()
+        public bool SchedulingIsAllowedByAllParents()
         {
             return _parentItems.All(p => p.AllowSchedulingOfChildWorkflowItem());
         }
@@ -115,22 +114,5 @@ namespace Guflow.Decider
         {
             get { return _workflow.WorkflowEvents; }
         }
-
-        protected TimerItem RescheduleTimerItem
-        {
-            get
-            {
-                if (_resheduleTimerItem == null)
-                {
-                    _resheduleTimerItem = new TimerItem(Identity, _workflow, true);
-                    _resheduleTimerItem.OnStartFailure(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
-                    _resheduleTimerItem.OnCancelled(e => WorkflowAction.CancelWorkflow("RESCHEDULE_TIMER_CANCELLED"));
-                    _resheduleTimerItem.OnFailedCancellation(e=>WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_CANCELLATION_FAILED",e.Cause));
-                    _resheduleTimerItem.OnFired(e => WorkflowAction.Schedule(this));
-                }
-                return _resheduleTimerItem;
-            }
-        }
-
     }
 }

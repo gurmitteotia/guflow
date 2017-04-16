@@ -228,4 +228,7 @@
   <data name="Activity_execution_already_stopped" xml:space="preserve">
     <value>Activity execution is already stopped. Start with new instance to begin execution.</value>
   </data>
+  <data name="Parameter_can_not_be_deserialized" xml:space="preserve">
+    <value>Parameter {0} can not be deserialized from string value {1}.</value>
+  </data>
 </root>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Guflow.Decider
 {
@@ -9,6 +10,28 @@ namespace Guflow.Decider
         WorkflowItemEvent LastEvent { get; }
         IEnumerable<WorkflowItemEvent> AllEvents { get; }
         bool IsActive { get; }
-        string Name { get; }
+    }
+
+    internal interface ITimer
+    {
+        WorkflowAction Fired(TimerFiredEvent timerFiredEvent);
+        WorkflowAction Cancelled(TimerCancelledEvent timerCancelledEvent);
+        WorkflowAction StartFailed(TimerStartFailedEvent timerStartFailedEvent);
+        WorkflowAction CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);
+    }
+    internal interface IActivity
+    {
+        WorkflowAction Completed(ActivityCompletedEvent activityCompletedEvent);
+        WorkflowAction Failed(ActivityFailedEvent activityFailedEvent);
+        WorkflowAction Timedout(ActivityTimedoutEvent activityTimedoutEvent);
+        WorkflowAction Cancelled(ActivityCancelledEvent activityCancelledEvent);
+        WorkflowAction CancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent);
+        WorkflowAction SchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);
+    }
+    internal interface ISchedulableItem
+    {
+        WorkflowDecision ScheduleDecision(Identity identity);
+        WorkflowDecision RescheduleDecision(Identity identity, TimeSpan afterTimeout);
+        WorkflowDecision CancelDecision(Identity identity);
     }
 }

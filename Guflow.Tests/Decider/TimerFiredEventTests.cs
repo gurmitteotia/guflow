@@ -50,7 +50,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = _timerFiredEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(new TimerItem(Identity.Timer(_timerName),null))));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(TimerItem.New(Identity.Timer(_timerName),null))));
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = rescheduleTimer.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new TimerItem(Identity.Timer(_timerName),null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(TimerItem.New(Identity.Timer(_timerName),null))));
         }
 
         [Test]
