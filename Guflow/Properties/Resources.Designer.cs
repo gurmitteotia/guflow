@@ -313,6 +313,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Parameter {0} can not be deserialized from string value {1}..
+        /// </summary>
+        internal static string Parameter_can_not_be_deserialized {
+            get {
+                return ResourceManager.GetString("Parameter_can_not_be_deserialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Read startegy is required..
         /// </summary>
         internal static string Read_strategy_required {

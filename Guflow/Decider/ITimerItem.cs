@@ -2,5 +2,6 @@
 {
     public interface ITimerItem : IWorkflowItem
     {
+        string Name { get; }
     }
 }

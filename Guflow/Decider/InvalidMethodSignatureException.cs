@@ -6,6 +6,11 @@ namespace Guflow.Decider
     {
         public InvalidMethodSignatureException(string message):base(message)
         {
-        } 
+        }
+
+        public InvalidMethodSignatureException(string message, Exception innerException)
+            :base(message, innerException)
+        {
+        }
     }
 }

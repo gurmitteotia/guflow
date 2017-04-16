@@ -38,7 +38,7 @@ namespace Guflow
                     else if (propertyValue.Primitive() && parameterInfo.ParameterType.IsString())
                         parameters.Add(propertyValue.ToString());
                     else if(parameterInfo.ParameterType.Primitive() && propertyValue.IsString())
-                        parameters.Add(ChangeType((string)propertyValue, parameterInfo.ParameterType));
+                        parameters.Add(ChangeType((string)propertyValue, parameterInfo.ParameterType, parameterInfo.Name));
                     else
                         throw new InvalidMethodSignatureException(string.Format(Resources.Invalid_parameter, method.Name, parameterInfo.Name, invokedArgumentType.Name ));
 
@@ -70,11 +70,23 @@ namespace Guflow
             return type.IsValueType ? Activator.CreateInstance(type) : null;
         }
 
-        private static object ChangeType(string value, Type targetType)
+        private static object ChangeType(string value, Type targetType, string targetName)
         {
             if (targetType == typeof(TimeSpan))
                 return TimeSpan.Parse(value);
-            return Convert.ChangeType(value, targetType);
+
+            try
+            {
+                return Convert.ChangeType(value, targetType);
+            }
+            catch (InvalidCastException exception)
+            {
+                throw new InvalidMethodSignatureException(string.Format(Resources.Parameter_can_not_be_deserialized, targetName, value), exception);
+            }
+            catch (FormatException exception)
+            {
+                throw new InvalidMethodSignatureException(string.Format(Resources.Parameter_can_not_be_deserialized, targetName, value), exception);
+            }
         }
     }
 }

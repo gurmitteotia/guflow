@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Guflow.Decider
 {
-    internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem
+    internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer, ISchedulableItem
     {
         private TimeSpan _fireAfter= new TimeSpan();
         private Func<TimerFiredEvent, WorkflowAction> _onFiredAction;
@@ -11,16 +11,35 @@ namespace Guflow.Decider
         private Func<TimerStartFailedEvent, WorkflowAction> _onStartFailureAction;
         private Func<TimerCancelledEvent, WorkflowAction> _onTimerCancelledAction; 
         private Func<TimerItem, bool> _whenFunc;
-        private readonly bool _isRescheduleTimer;
-        internal TimerItem(Identity identity, IWorkflow workflow, bool isRescheduleTimer=false):base(identity,workflow)
+        private TimerItem _rescheduleTimer;
+        private TimerItem(Identity identity, IWorkflow workflow)
+                     : base(identity, workflow)
         {
-            _isRescheduleTimer = isRescheduleTimer;
-            _onFiredAction = f=>WorkflowAction.ContinueWorkflow(this);
-            _onCanellationFailedAction = c => WorkflowAction.FailWorkflow("TIMER_CANCELLATION_FAILED", c.Cause);
-            _onStartFailureAction = c => WorkflowAction.FailWorkflow("TIMER_START_FAILED", c.Cause);
-            _onTimerCancelledAction = c => WorkflowAction.CancelWorkflow("TIMER_CANCELLED");
             _whenFunc = t => true;
+            SchedulableItem = this;
         }
+
+        public static TimerItem Reschedule(WorkflowItem ownerItem, Identity identity, IWorkflow workflow)
+        {
+            var timerItem = new TimerItem(identity, workflow);
+            timerItem._rescheduleTimer = timerItem;
+            timerItem.OnStartFailure(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
+            timerItem.OnCancelled(e => WorkflowAction.CancelWorkflow("RESCHEDULE_TIMER_CANCELLED"));
+            timerItem.OnFailedCancellation(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_CANCELLATION_FAILED", e.Cause));
+            timerItem.OnFired(e => WorkflowAction.Schedule(ownerItem));
+            return timerItem;
+        }
+        public static TimerItem New(Identity identity, IWorkflow workflow)
+        {
+            var timerItem = new TimerItem(identity, workflow);
+            timerItem._rescheduleTimer = Reschedule(timerItem, identity, workflow);
+            timerItem.OnStartFailure(e => WorkflowAction.FailWorkflow("TIMER_START_FAILED", e.Cause));
+            timerItem.OnCancelled(e => WorkflowAction.CancelWorkflow("TIMER_CANCELLED"));
+            timerItem.OnFailedCancellation(e => WorkflowAction.FailWorkflow("TIMER_CANCELLATION_FAILED", e.Cause));
+            timerItem.OnFired(e => WorkflowAction.ContinueWorkflow(timerItem));
+            return timerItem;
+        }
+
         public override WorkflowItemEvent LastEvent
         {
             get { return WorkflowEvents.LastTimerEventFor(this); }
@@ -86,40 +105,46 @@ namespace Guflow.Decider
             _onStartFailureAction = onStartFailureAction;
             return this;
         }
-
-        internal override WorkflowDecision GetScheduleDecision()
-        {
-            if(!_whenFunc(this))
-                return WorkflowDecision.Empty;
-
-            return new ScheduleTimerDecision(Identity, _fireAfter,_isRescheduleTimer);
-        }
-        internal override WorkflowDecision GetCancelDecision()
-        {
-            return new CancelTimerDecision(Identity);
-        }
-
-        internal override WorkflowAction TimerFired(TimerFiredEvent timerFiredEvent)
+        WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
             if (timerFiredEvent.IsARescheduledTimer)
-                return RescheduleTimerItem._onFiredAction(timerFiredEvent);
+                return _rescheduleTimer._onFiredAction(timerFiredEvent);
 
             return _onFiredAction(timerFiredEvent);
         }
 
-        internal override WorkflowAction TimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        WorkflowAction ITimer.Cancelled(TimerCancelledEvent timerCancelledEvent)
         {
             return _onTimerCancelledAction(timerCancelledEvent);
         }
 
-        internal override WorkflowAction TimerStartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
         {
             return _onStartFailureAction(timerStartFailedEvent);
         }
 
-        internal override WorkflowAction TimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
             return _onCanellationFailedAction(timerCancellationFailedEvent);
+        }
+
+        WorkflowDecision ISchedulableItem.ScheduleDecision(Identity identity)
+        {
+            if (!_whenFunc(this))
+                return WorkflowDecision.Empty;
+
+            return new ScheduleTimerDecision(identity, _fireAfter, this == _rescheduleTimer);
+        }
+
+        WorkflowDecision ISchedulableItem.RescheduleDecision(Identity identity, TimeSpan afterTimeout)
+        {
+            _rescheduleTimer.FireAfter(afterTimeout);
+            return _rescheduleTimer.GetScheduleDecision();
+        }
+
+        WorkflowDecision ISchedulableItem.CancelDecision(Identity identity)
+        {
+            return new CancelTimerDecision(identity);
         }
     }
 }

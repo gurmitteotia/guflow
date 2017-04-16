@@ -176,7 +176,7 @@ namespace Guflow.Tests.Decider
 
             var parentActivities = childActivity.ParentTimers;
 
-            Assert.That(parentActivities, Is.EquivalentTo(new[] { new TimerItem(Identity.Timer("parent1"), null),  }));
+            Assert.That(parentActivities, Is.EquivalentTo(new[] { TimerItem.New(Identity.Timer("parent1"), null),  }));
             Assert.That(parentActivities.First().Name, Is.EqualTo("parent1"));
         }
 

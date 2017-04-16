@@ -6,6 +6,7 @@
         ActivityFailedEvent LastFailedEvent { get; }
         ActivityTimedoutEvent LastTimedoutEvent { get; }
         ActivityCancelledEvent LastCancelledEvent { get; }
+        string Name { get; }
         string Version { get; }
         string PositionalName { get; }
     }
