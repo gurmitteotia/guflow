@@ -49,6 +49,25 @@ namespace Guflow.Tests.Decider
 
             Assert.That(workflowAction,Is.EqualTo(WorkflowAction.StartWorkflow(workflow)));
         }
+
+        [Test]
+        public void Can_return_the_decisions_for_startup_schedulable_workflow_action()
+        {
+            var workflow = new WorkflowToScheduleAction("reason", "detailss");
+            var startWorkflowAction = WorkflowAction.StartWorkflow(workflow);
+
+            var action = startWorkflowAction.GetDecisions();
+
+            Assert.That(action, Is.EqualTo(new []{new FailWorkflowDecision("reason", "detailss")}));
+        }
+
+        private class WorkflowToScheduleAction : Workflow
+        {
+            public WorkflowToScheduleAction(string reason, string details)
+            {
+                ScheduleAction(FailWorkflow(reason, details));
+            }
+        }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion), "id", "res");

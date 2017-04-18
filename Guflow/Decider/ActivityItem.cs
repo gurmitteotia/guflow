@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
-    internal sealed class ActivityItem : WorkflowItem, IFluentActivityItem, IActivityItem, ITimer, IActivity, ISchedulableItem
+    internal sealed class ActivityItem : WorkflowItem, IFluentActivityItem, IActivityItem, ITimer, IActivity
     {
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
@@ -32,7 +32,6 @@ namespace Guflow.Decider
             _whenFunc = a => true;
             _priorityFunc = a => null;
             _timeoutsFunc = a => new ScheduleActivityTimeouts();
-            SchedulableItem = this;
             _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
         }
 
@@ -68,7 +67,7 @@ namespace Guflow.Decider
             get { return WorkflowEvents.LastCancelledEventFor(this); }
         }
 
-        public override IEnumerable<WorkflowItemEvent> AllEvents
+        public IEnumerable<WorkflowItemEvent> AllEvents
         {
             get
             {
@@ -239,12 +238,12 @@ namespace Guflow.Decider
             return inputObject.ToAwsString();
         }
 
-        WorkflowDecision ISchedulableItem.ScheduleDecision(Identity identity)
+        public override WorkflowDecision GetScheduleDecision()
         {
             if (!_whenFunc(this))
                 return WorkflowDecision.Empty;
 
-            var scheduleActivityDecision = new ScheduleActivityDecision(identity);
+            var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.UseInputFunc(GetActivityInput);
             scheduleActivityDecision.TaskList = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);
@@ -252,20 +251,20 @@ namespace Guflow.Decider
             return scheduleActivityDecision;
         }
 
-        WorkflowDecision ISchedulableItem.RescheduleDecision(Identity identity, TimeSpan afterTimeout)
+        public override WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
         {
             _rescheduleTimer.FireAfter(afterTimeout);
             return _rescheduleTimer.GetScheduleDecision();
         }
 
-        WorkflowDecision ISchedulableItem.CancelDecision(Identity identity)
+        public override WorkflowDecision GetCancelDecision()
         {
             var lastEvent = LastEvent;
             var latestTimerEvent = WorkflowEvents.LastTimerEventFor(_rescheduleTimer);
             if (latestTimerEvent != WorkflowItemEvent.NotFound && lastEvent == latestTimerEvent)
                 return _rescheduleTimer.GetCancelDecision();
 
-            return new CancelActivityDecision(identity);
+            return new CancelActivityDecision(Identity);
         }
     }
 }

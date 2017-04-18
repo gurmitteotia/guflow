@@ -1,4 +1,6 @@
-﻿namespace Guflow.Decider
+﻿using System.Collections.Generic;
+
+namespace Guflow.Decider
 {
     public interface IActivityItem : IWorkflowItem
     {
@@ -6,6 +8,7 @@
         ActivityFailedEvent LastFailedEvent { get; }
         ActivityTimedoutEvent LastTimedoutEvent { get; }
         ActivityCancelledEvent LastCancelledEvent { get; }
+        IEnumerable<WorkflowItemEvent> AllEvents { get; }
         string Name { get; }
         string Version { get; }
         string PositionalName { get; }
