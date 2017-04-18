@@ -43,7 +43,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Return_workflow_started_action()
+        public void Return_start_workflow_action()
         {
             var workflow = new EmptyWorkflow();
             var workflowEvent = new WorkflowStartedEvent(HistoryEventFactory.CreateWorkflowStartedEvent());

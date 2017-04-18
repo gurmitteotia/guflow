@@ -8,7 +8,6 @@ namespace Guflow.Decider
         IEnumerable<IActivityItem> ParentActivities { get; }
         IEnumerable<ITimerItem> ParentTimers{ get; }
         WorkflowItemEvent LastEvent { get; }
-        IEnumerable<WorkflowItemEvent> AllEvents { get; }
         bool IsActive { get; }
     }
 
@@ -27,11 +26,5 @@ namespace Guflow.Decider
         WorkflowAction Cancelled(ActivityCancelledEvent activityCancelledEvent);
         WorkflowAction CancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent);
         WorkflowAction SchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);
-    }
-    internal interface ISchedulableItem
-    {
-        WorkflowDecision ScheduleDecision(Identity identity);
-        WorkflowDecision RescheduleDecision(Identity identity, TimeSpan afterTimeout);
-        WorkflowDecision CancelDecision(Identity identity);
     }
 }

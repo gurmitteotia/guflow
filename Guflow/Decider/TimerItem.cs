@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Guflow.Decider
 {
-    internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer, ISchedulableItem
+    internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer
     {
         private TimeSpan _fireAfter= new TimeSpan();
         private Func<TimerFiredEvent, WorkflowAction> _onFiredAction;
@@ -16,7 +16,6 @@ namespace Guflow.Decider
                      : base(identity, workflow)
         {
             _whenFunc = t => true;
-            SchedulableItem = this;
         }
 
         public static TimerItem Reschedule(WorkflowItem ownerItem, Identity identity, IWorkflow workflow)
@@ -45,7 +44,7 @@ namespace Guflow.Decider
             get { return WorkflowEvents.LastTimerEventFor(this); }
         }
 
-        public override IEnumerable<WorkflowItemEvent> AllEvents
+        public IEnumerable<WorkflowItemEvent> AllEvents
         {
             get { return WorkflowEvents.AllTimerEventsFor(this); }
         }
@@ -128,23 +127,23 @@ namespace Guflow.Decider
             return _onCanellationFailedAction(timerCancellationFailedEvent);
         }
 
-        WorkflowDecision ISchedulableItem.ScheduleDecision(Identity identity)
+        public override WorkflowDecision GetScheduleDecision()
         {
             if (!_whenFunc(this))
                 return WorkflowDecision.Empty;
 
-            return new ScheduleTimerDecision(identity, _fireAfter, this == _rescheduleTimer);
+            return new ScheduleTimerDecision(Identity, _fireAfter, this == _rescheduleTimer);
         }
 
-        WorkflowDecision ISchedulableItem.RescheduleDecision(Identity identity, TimeSpan afterTimeout)
+        public override WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
         {
             _rescheduleTimer.FireAfter(afterTimeout);
             return _rescheduleTimer.GetScheduleDecision();
         }
 
-        WorkflowDecision ISchedulableItem.CancelDecision(Identity identity)
+        public override WorkflowDecision GetCancelDecision()
         {
-            return new CancelTimerDecision(identity);
+            return new CancelTimerDecision(Identity);
         }
     }
 }

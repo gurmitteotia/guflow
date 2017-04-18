@@ -10,7 +10,6 @@ namespace Guflow.Decider
         private readonly IWorkflow _workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
         protected readonly Identity Identity;
-        protected ISchedulableItem SchedulableItem;
         protected WorkflowItem(Identity identity, IWorkflow workflow)
         {
             Identity = identity;
@@ -37,8 +36,6 @@ namespace Guflow.Decider
 
         public abstract WorkflowItemEvent LastEvent { get; }
 
-        public abstract IEnumerable<WorkflowItemEvent> AllEvents { get; }
-
         public bool HasNoParents()
         {
             return _parentItems.Count == 0;
@@ -53,18 +50,9 @@ namespace Guflow.Decider
             return _workflow.GetChildernOf(this);
         }
 
-        public WorkflowDecision GetScheduleDecision()
-        {
-            return SchedulableItem.ScheduleDecision(Identity);
-        }
-        public WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
-        {
-            return SchedulableItem.RescheduleDecision(Identity, afterTimeout);
-        }
-        public WorkflowDecision GetCancelDecision()
-        {
-            return SchedulableItem.CancelDecision(Identity);
-        }
+        public abstract WorkflowDecision GetScheduleDecision();
+        public abstract WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout);
+        public abstract WorkflowDecision GetCancelDecision();
         public bool Has(AwsIdentity identity)
         {
             return Identity.Id == identity;
