@@ -30,7 +30,7 @@ namespace Guflow.Decider
                 return new[]{new CompleteWorkflowDecision(_defaultWorkflowCompletedResult,true)};
            
             var schedulableChildItems = childItems.Where(s => s.SchedulingIsAllowedByAllParents());
-            return schedulableChildItems.Select(f => f.GetScheduleDecision());
+            return schedulableChildItems.SelectMany(f => f.GetContinuedDecisions());
         }
 
         internal override bool AllowSchedulingOfChildWorkflowItem()

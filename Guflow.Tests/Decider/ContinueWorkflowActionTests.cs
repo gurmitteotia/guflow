@@ -152,7 +152,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_the_scheduling_decision_for_child_timer_when_parent_activity_is_completed()
+        public void Can_return_the_scheduling_decision_for_child_timer_when_parent_activity_is_completed()
         {
             const string timerName = "timer";
             var workflow = new WorkflowWithParentActivityAndChildTimers(timerName);
@@ -174,6 +174,19 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(new ActivityItem(Identity.New(_activityName,_activityVersion,_positionalName),workflow)).GetDecisions()));
         }
 
+
+        [Test]
+        public void Can_return_scheduling_decision_for_workflow_action_when_all_of_its_parents_are_completed()
+        {
+            var workflow = new WorkflowForSchedulableWorkflowActionWithMultipleParents("result");
+            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
+                                   .Concat(HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2"));
+
+
+            var decisions = workflow.NewExecutionFor(new WorkflowHistoryEvents(allHistoryEvents)).Execute();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new CompleteWorkflowDecision("result")}));
+        }
 
         private IWorkflowEvents CreateFailedActivityEventGraph(string activityName, string activityVersion, string positionalName)
         {
@@ -230,6 +243,16 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion);
                 ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+            }
+        }
+
+        private class WorkflowForSchedulableWorkflowActionWithMultipleParents : Workflow
+        {
+            public WorkflowForSchedulableWorkflowActionWithMultipleParents(string workflowActionResult)
+            {
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
+                ScheduleActivity(_siblingActivityName, _siblingActivityVersion);
+                ScheduleAction(CompleteWorkflow(workflowActionResult)).After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
             }
         }
 

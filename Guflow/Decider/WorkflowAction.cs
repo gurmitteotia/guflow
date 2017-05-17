@@ -95,7 +95,7 @@ namespace Guflow.Decider
                 if (!startupWorkflowItems.Any())
                     return new[] { new CompleteWorkflowDecision(_defaultCompleteResult) };
 
-                return startupWorkflowItems.Select(s => s.GetScheduleDecision());
+                return startupWorkflowItems.SelectMany(s => s.GetContinuedDecisions());
             }
         }
 
