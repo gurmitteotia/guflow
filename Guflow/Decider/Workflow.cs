@@ -203,7 +203,9 @@ namespace Guflow.Decider
 
         protected IFluentWorkflowActionItem ScheduleAction(WorkflowAction workflowAction)
         {
-            return new SchedulableWorkflowAction(workflowAction);
+            var workflowActionItem = new WorkflowActionItem(workflowAction, this);
+            _allWorkflowItems.Add(workflowActionItem);
+            return workflowActionItem;
         }
         protected WorkflowAction Continue(WorkflowItemEvent workflowItemEvent)
         {
