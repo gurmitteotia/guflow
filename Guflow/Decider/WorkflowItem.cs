@@ -53,7 +53,6 @@ namespace Guflow.Decider
         public abstract WorkflowDecision GetScheduleDecision();
         public abstract WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout);
         public abstract WorkflowDecision GetCancelDecision();
-
         public virtual IEnumerable<WorkflowDecision> GetContinuedDecisions()
         {
             return new[] {GetScheduleDecision()};

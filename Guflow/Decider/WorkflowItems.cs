@@ -11,7 +11,7 @@ namespace Guflow.Decider
         {
             return _workflowItems.Add(workflowItem);
         }
-        public ActivityItem FindActivityFor(WorkflowItemEvent workflowItemEvent)
+        public ActivityItem ActivityItemFor(WorkflowItemEvent workflowItemEvent)
         {
             var workflowActivity = ActivityOf(workflowItemEvent);
 
@@ -20,8 +20,7 @@ namespace Guflow.Decider
 
             return workflowActivity;
         }
-
-        public ActivityItem FindActivityFor(Identity identity)
+        public ActivityItem ActivityItemFor(Identity identity)
         {
             var workflowActivity = ActivityOf(identity);
 
@@ -29,21 +28,38 @@ namespace Guflow.Decider
                 throw new WorkflowItemNotFoundException(string.Format("Can not find activity by name {0}, version {1} and positional markerName {2} in workflow.", identity.Name, identity.Version, identity.PositionalName));
             return workflowActivity;
         }
-        public TimerItem FindTimerFor(Identity identity)
+        public TimerItem TimerItemFor(Identity identity)
         {
             var workflowTimer = TimerOf(identity);
             if (workflowTimer == null)
                 throw new WorkflowItemNotFoundException(string.Format("Can not find timer by name {0}.", identity.Name));
             return workflowTimer;
         }
-        public TimerItem FindTimerFor(WorkflowItemEvent workflowItemEvent)
+        public ITimer TimerFor(WorkflowItemEvent workflowItemEvent)
         {
-            var workflowItem = TimerOf(workflowItemEvent);
+            var timer = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor) as ITimer;
+
+            if (timer == null)
+                throw new IncompatibleWorkflowException(string.Format("Can not find timer for event {0}", workflowItemEvent));
+
+            return timer;
+        }
+        public TimerItem TimerItemFor(WorkflowItemEvent timerEvent)
+        {
+            return _workflowItems.OfType<TimerItem>().FirstOrDefault(timerEvent.IsFor);
+        }
+        public WorkflowItem WorkflowItemFor(WorkflowItemEvent workflowItemEvent)
+        {
+            var workflowItem = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor);
 
             if (workflowItem == null)
                 throw new IncompatibleWorkflowException(string.Format("Can not find workflow item for event {0}", workflowItemEvent));
 
             return workflowItem;
+        }
+        public WorkflowItem WorkflowItemFor(Identity identity)
+        {
+            return _workflowItems.FirstOrDefault(i => i.Has(identity));
         }
 
         public IEnumerable<WorkflowItem> StartupItems()
@@ -55,34 +71,10 @@ namespace Guflow.Decider
         {
             return _workflowItems.Where(i => i.IsChildOf(workflowItem));
         }
-        public WorkflowItem FindWorkflowItemFor(WorkflowItemEvent workflowItemEvent)
-        {
-            var workflowItem = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor);
-
-            if (workflowItem == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find workflow item for event {0}", workflowItemEvent));
-
-            return workflowItem;
-        }
-
-        public WorkflowItem WorkflowItemOf(Identity identity)
-        {
-            return _workflowItems.FirstOrDefault(i => i.Has(identity));
-        }
         public ActivityItem ActivityOf(WorkflowItemEvent activityEvent)
         {
             return _workflowItems.OfType<ActivityItem>().FirstOrDefault(activityEvent.IsFor);
         }
-
-        private TimerItem TimerOf(Identity identity)
-        {
-            return _workflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
-        }
-        public TimerItem TimerOf(WorkflowItemEvent timerEvent)
-        {
-            return _workflowItems.OfType<TimerItem>().FirstOrDefault(timerEvent.IsFor);
-        }
-
         public IEnumerable<IWorkflowItem> AllItems
         {
             get { return _workflowItems; }
@@ -96,6 +88,10 @@ namespace Guflow.Decider
         public IEnumerable<ITimerItem> AllTimers
         {
             get { return _workflowItems.OfType<TimerItem>(); }
+        }
+        private TimerItem TimerOf(Identity identity)
+        {
+            return _workflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
         }
         private ActivityItem ActivityOf(Identity identity)
         {
