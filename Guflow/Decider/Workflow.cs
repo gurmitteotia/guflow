@@ -19,6 +19,7 @@ namespace Guflow.Decider
         public event EventHandler<WorkflowCancelledEventArgs> Cancelled;
         public event EventHandler<WorkflowStartedEventArgs> Started;
         public event EventHandler<WorkflowClosedEventArgs> Closed;
+        public event EventHandler<WorkflowRestartedEventArgs> Restarted;
 
         WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
@@ -173,6 +174,14 @@ namespace Guflow.Decider
             RaiseClosed(workflowId, workflowRunId);
         }
 
+        internal void OnRestarted(string workflowId, string workflowRunId)
+        {
+            var eventHandler = Restarted;
+            if(eventHandler != null)
+                eventHandler(this, new WorkflowRestartedEventArgs(workflowId, workflowRunId));
+            RaiseClosed(workflowId, workflowRunId);
+        }
+
         private void RaiseClosed(string workflowId, string workflowRunId)
         {
             var closedHandler = Closed;
@@ -225,6 +234,12 @@ namespace Guflow.Decider
         protected static WorkflowAction CancelWorkflow(string details)
         {
             return WorkflowAction.CancelWorkflow(details);
+        }
+
+        protected RestartWorkflowAction RestartWorkflow()
+        {
+            IWorkflow workflow = this;
+            return WorkflowAction.RestartWorkflow(workflow.WorkflowEvents);
         }
         protected ScheduleWorkflowItemAction Reschedule(WorkflowItemEvent workflowItemEvent)
         {

@@ -61,6 +61,21 @@ namespace Guflow.Decider
         {
             return new GenericWorkflowAction(new CancelRequestWorkflowDecision(workflowId, runId));
         }
+        internal static RestartWorkflowAction RestartWorkflow(IWorkflowEvents workflowEvents)
+        {
+            var workflowStartedEvent = workflowEvents.WorkflowStartedEvent();
+            var restartWorkflowAction = new RestartWorkflowAction()
+            {
+                Input = workflowStartedEvent.Input,
+                TaskList = workflowStartedEvent.TaskList,
+                ExecutionStartToCloseTimeout = workflowStartedEvent.ExecutionStartToCloseTimeout,
+                TaskPriority = workflowStartedEvent.TaskPriority,
+                TaskStartToCloseTimeout = workflowStartedEvent.TaskStartToCloseTimeout,
+                ChildPolicy = workflowStartedEvent.ChildPolicy,
+            };
+            workflowStartedEvent.TagList.ToList().ForEach(tag=>restartWorkflowAction.AddTag(tag));
+            return restartWorkflowAction;
+        }
         private class EmptyWorkflowAction : WorkflowAction
         {
             internal override IEnumerable<WorkflowDecision> GetDecisions()

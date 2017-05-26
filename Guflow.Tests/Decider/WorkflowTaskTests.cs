@@ -146,6 +146,35 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public async Task Raise_workflow_restarted_event_when_workflow_restarted_decision_is_delivered_to_amazon_swf()
+        {
+            WorkflowRestartedEventArgs eventArgs = null;
+            var workflow = new WorkflowRestartOnSignal();
+            workflow.Restarted += (s, e) => { eventArgs = e; };
+
+            await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
+            Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
+        }
+
+
+        [Test]
+        public async Task Raise_workflow_closed_event_when_workflow_restarted_decision_is_delivered_to_amazon_swf()
+        {
+            WorkflowClosedEventArgs eventArgs = null;
+            var workflow = new WorkflowRestartOnSignal();
+            workflow.Closed += (s, e) => { eventArgs = e; };
+
+            await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
+
+            Assert.That(eventArgs, Is.Not.Null);
+            Assert.That(eventArgs.WorkflowId, Is.EqualTo("wid"));
+            Assert.That(eventArgs.WorkflowRunId, Is.EqualTo("runid"));
+        }
+
+        [Test]
         public void By_default_response_exception_are_unhandled()
         {
             _amazonWorkflowClient.Setup(c=>c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
@@ -245,11 +274,12 @@ namespace Guflow.Tests.Decider
 
         private static DecisionTask DecisionTasksWithSignalEvents(string workflowId, string runId)
         {
+            var workflowStartedEvent = HistoryEventFactory.CreateWorkflowStartedEvent("input");
             var historyEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input");
             return new DecisionTask
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
-                Events = new List<HistoryEvent>() { historyEvent },
+                Events = new List<HistoryEvent>() { historyEvent, workflowStartedEvent },
                 PreviousStartedEventId = historyEvent.EventId,
                 StartedEventId = historyEvent.EventId,
                 TaskToken = "token",
@@ -309,6 +339,17 @@ namespace Guflow.Tests.Decider
             {
                 return CancelWorkflow(_details);
             }
+        }
+
+        [WorkflowDescription("1.0", Name = "TestWorkflow")]
+        private class WorkflowRestartOnSignal : Workflow
+        {
+            [WorkflowEvent(EventName.Signal)]
+            private WorkflowAction OnSignal()
+            {
+                return RestartWorkflow();
+            }
+           
         }
         [WorkflowDescription("1.0", Name = "TestWorkflow")]
         private class WorkflowThrowsExceptionOnSignal : Workflow

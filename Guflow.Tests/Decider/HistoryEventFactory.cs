@@ -9,7 +9,7 @@ namespace Guflow.Tests.Decider
 {
     internal class HistoryEventFactory
     {
-        public static IEnumerable<HistoryEvent> CreateActivityCompletedEventGraph(Identity activityIdentity, string identity, string result, string input="")
+        public static IEnumerable<HistoryEvent> CreateActivityCompletedEventGraph(Identity activityIdentity, string workerIdentity, string result, string input="")
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.NewEventIds;
@@ -31,7 +31,7 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.StartedId,
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
-                    Identity = identity,
+                    Identity = workerIdentity,
                     ScheduledEventId = eventIds.ScheduledId
 
                 }
