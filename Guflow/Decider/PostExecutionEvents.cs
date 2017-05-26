@@ -27,5 +27,10 @@
         {
             _workflow.OnCancelled(_workflowId, _workflowRunId, details);
         }
+
+        public void Restarted()
+        {
+            _workflow.OnRestarted(_workflowId, _workflowRunId);
+        }
     }
 }

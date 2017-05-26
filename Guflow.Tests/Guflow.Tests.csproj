@@ -73,6 +73,8 @@
     <Compile Include="Decider\CancelTimerDecisionTests.cs" />
     <Compile Include="Decider\CancelWorkflowActionTests.cs" />
     <Compile Include="Decider\CancelWorkflowDecisionTests.cs" />
+    <Compile Include="Decider\RestartWorkflowActionTests.cs" />
+    <Compile Include="Decider\RestartWorkflowDecisionTests.cs" />
     <Compile Include="DomainTests.cs" />
     <Compile Include="ErrorHandlerTests.cs" />
     <Compile Include="Decider\HostedWorkflowsTests.cs" />
