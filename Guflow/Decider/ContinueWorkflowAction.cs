@@ -6,7 +6,7 @@ namespace Guflow.Decider
     internal class ContinueWorkflowAction : WorkflowAction
     {
         private readonly WorkflowItem _completedWorkflowItem;
-        private const string _defaultWorkflowCompletedResult = "Workflow is completed.";
+        private const string DefaultWorkflowCompletedResult = "Workflow is completed.";
         public ContinueWorkflowAction(WorkflowItem completedWorkflowItem)
         {
             _completedWorkflowItem = completedWorkflowItem;
@@ -27,9 +27,9 @@ namespace Guflow.Decider
         {
             var childItems = _completedWorkflowItem.GetChildlern();
             if(!childItems.Any())
-                return new[]{new CompleteWorkflowDecision(_defaultWorkflowCompletedResult,true)};
+                return new[]{new CompleteWorkflowDecision(DefaultWorkflowCompletedResult,true)};
            
-            var schedulableChildItems = childItems.Where(s => s.SchedulingIsAllowedByAllParents());
+            var schedulableChildItems = childItems.Where(s => s.AreAllParentBranchesInactive(exceptBranchOf: _completedWorkflowItem));
             return schedulableChildItems.SelectMany(f => f.GetContinuedDecisions());
         }
 

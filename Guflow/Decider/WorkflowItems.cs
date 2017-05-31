@@ -71,6 +71,10 @@ namespace Guflow.Decider
         {
             return _workflowItems.Where(i => i.IsChildOf(workflowItem));
         }
+        public IEnumerable<WorkflowItem> ParentsOf(WorkflowItem workflowItem)
+        {
+            return _workflowItems.Where(workflowItem.IsChildOf);
+        }
         public ActivityItem ActivityOf(WorkflowItemEvent activityEvent)
         {
             return _workflowItems.OfType<ActivityItem>().FirstOrDefault(activityEvent.IsFor);

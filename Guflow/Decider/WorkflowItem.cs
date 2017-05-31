@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Guflow.Properties;
 
 namespace Guflow.Decider
 {
-    internal abstract class  WorkflowItem : IWorkflowItem
+    internal abstract class WorkflowItem : IWorkflowItem
     {
         private readonly IWorkflow _workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
@@ -55,7 +56,7 @@ namespace Guflow.Decider
         public abstract WorkflowDecision GetCancelDecision();
         public virtual IEnumerable<WorkflowDecision> GetContinuedDecisions()
         {
-            return new[] {GetScheduleDecision()};
+            return new[] { GetScheduleDecision() };
         }
         public bool Has(AwsIdentity identity)
         {
@@ -77,19 +78,52 @@ namespace Guflow.Decider
             return Identity.GetHashCode();
         }
 
-        public bool SchedulingIsAllowedByAllParents()
+        //public bool SchedulingIsAllowedByAllParents()
+        //{
+        //    return _parentItems.All(p => p.AllowSchedulingOfChildWorkflowItem());
+        //}
+
+        public bool AreAllParentBranchesInactive(WorkflowItem exceptBranchOf)
         {
-            return _parentItems.All(p => p.AllowSchedulingOfChildWorkflowItem());
+            var parentsItems = _parentItems.Except(new[] { exceptBranchOf });
+            var parentBranches = parentsItems.SelectMany(p => WorkflowItemsBranch.BuildParentBranchStartingWith(p, _workflow)).ToArray();
+
+            return parentBranches.All(p => p.IsInactive(parentBranches));
         }
-        private bool AllowSchedulingOfChildWorkflowItem()
+
+        //private IEnumerable<WorkflowItem> AllParentItemsInBranchOf(WorkflowItem workflowItem)
+        //{
+        //    var list = new List<WorkflowItem> {workflowItem};
+
+        //    var parentWorkflowItems = _workflow.GetParentsOf(workflowItem);
+        //    foreach (var parentWorkflowItem in parentWorkflowItems)
+        //    {
+        //        list.AddRange(AllParentItemsInBranchOf(parentWorkflowItem));
+        //    }
+
+        //    return list;
+        //}
+
+        //private bool AllowSchedulingOfChildWorkflowItem()
+        //{
+        //    var lastEvent = LastEvent;
+        //    if (lastEvent != WorkflowItemEvent.NotFound && !lastEvent.IsActive)
+        //    {
+        //        var lastEventAction = lastEvent.Interpret(_workflow);
+        //        return lastEventAction.AllowSchedulingOfChildWorkflowItem();
+        //    }
+
+        //    return false;
+        //}
+
+        public bool IsLastEventTriggerSchedulingOfAny(IEnumerable<WorkflowItem> workflowItems)
         {
             var lastEvent = LastEvent;
             if (lastEvent != WorkflowItemEvent.NotFound && !lastEvent.IsActive)
             {
-                var lastEventAction = lastEvent.Interpret(_workflow);
-                return lastEventAction.AllowSchedulingOfChildWorkflowItem();
+                var lastEventDecisions = lastEvent.Interpret(_workflow).GetDecisions();
+                return lastEventDecisions.Any(d => workflowItems.Any(d.IsFor));
             }
-
             return false;
         }
         protected void AddParent(Identity identity)
@@ -97,7 +131,7 @@ namespace Guflow.Decider
             var parentItem = _workflow.Find(identity);
             if (parentItem == null)
                 throw new ParentItemMissingException(string.Format(Resources.Schedulable_item_missing, identity));
-            if(Equals(parentItem))
+            if (Equals(parentItem))
                 throw new CyclicDependencyException(string.Format(Resources.Cyclic_dependency, identity));
             _parentItems.Add(parentItem);
         }
@@ -105,6 +139,52 @@ namespace Guflow.Decider
         protected IWorkflowEvents WorkflowEvents
         {
             get { return _workflow.WorkflowEvents; }
+        }
+
+
+    }
+
+    internal class WorkflowItemsBranch
+    {
+        private readonly IWorkflow _workflow;
+        private readonly List<WorkflowItem> _workflowItems = new List<WorkflowItem>();
+
+        private WorkflowItemsBranch(IWorkflow workflow, params WorkflowItem[] workflowItems)
+        {
+            _workflow = workflow;
+            _workflowItems.AddRange(workflowItems);
+        }
+
+        public static IEnumerable<WorkflowItemsBranch> BuildParentBranchStartingWith(WorkflowItem startItem, IWorkflow workflow)
+        {
+            var allBranches = new List<WorkflowItemsBranch>();
+
+            var parentBranch = new WorkflowItemsBranch(workflow, startItem);
+            if (parentBranch.Parents().Any())
+                foreach (var parent in parentBranch.Parents())
+                    allBranches.Add(parentBranch.Add(parent));
+            else
+                allBranches.Add(parentBranch);
+
+            return allBranches;
+        }
+
+        private IEnumerable<WorkflowItemsBranch> Parents()
+        {
+            return _workflow.GetParentsOf(_workflowItems.Last())
+                    .SelectMany(p => BuildParentBranchStartingWith(p, _workflow));
+        }
+
+        private WorkflowItemsBranch Add(WorkflowItemsBranch workflowItemsBranch)
+        {
+            return new WorkflowItemsBranch(_workflow, _workflowItems.Concat(workflowItemsBranch._workflowItems).ToArray());
+        }
+
+        public bool IsInactive(IEnumerable<WorkflowItemsBranch> allBranches)
+        {
+            var allItemsInBranches = allBranches.SelectMany(b => b._workflowItems);
+
+            return _workflowItems.All(w => !w.IsActive && !w.IsLastEventTriggerSchedulingOfAny(allItemsInBranches));
         }
     }
 }
