@@ -19,6 +19,12 @@ namespace Guflow.Decider
         public string TaskList { get; set; }
         public int? TaskPriority { get; set; }
 
+
+        public override bool IsFor(WorkflowItem workflowItem)
+        {
+            return workflowItem.Has(_identity);
+        }
+
         internal void UseInputFunc(Func<string> inputFunc)
         {
             _inputFunc = inputFunc;

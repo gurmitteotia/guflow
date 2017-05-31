@@ -320,6 +320,11 @@ namespace Guflow.Decider
         {
             return _allWorkflowItems.ChilderenOf(item);
         }
+
+        IEnumerable<WorkflowItem> IWorkflowItems.GetParentsOf(WorkflowItem item)
+        {
+            return _allWorkflowItems.ParentsOf(item);
+        }
         WorkflowItem IWorkflowItems.Find(Identity identity)
         {
             return _allWorkflowItems.WorkflowItemFor(identity);
