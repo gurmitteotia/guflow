@@ -19,7 +19,7 @@ namespace Guflow.Decider
                 DecisionType = DecisionType.RequestCancelActivityTask,
                 RequestCancelActivityTaskDecisionAttributes = new RequestCancelActivityTaskDecisionAttributes()
                 {
-                    ActivityId = _activityIdentiy.Id.ToString()
+                    ActivityId = _activityIdentiy.Id.ToString(),
                 }
             };
         }

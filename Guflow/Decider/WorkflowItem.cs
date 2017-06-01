@@ -86,9 +86,14 @@ namespace Guflow.Decider
         public bool AreAllParentBranchesInactive(WorkflowItem exceptBranchOf)
         {
             var parentsItems = _parentItems.Except(new[] { exceptBranchOf });
-            var parentBranches = parentsItems.SelectMany(p => WorkflowItemsBranch.BuildParentBranchStartingWith(p, _workflow)).ToArray();
+            foreach (var parentsItem in parentsItems)
+            {
+                var parentBranches = WorkflowItemsBranch.BuildParentBranchStartingWith(parentsItem, _workflow).ToArray();
+                if (!parentBranches.All(p => p.IsInactive(parentBranches)))
+                    return false;
 
-            return parentBranches.All(p => p.IsInactive(parentBranches));
+            }
+            return true;
         }
 
         //private IEnumerable<WorkflowItem> AllParentItemsInBranchOf(WorkflowItem workflowItem)
@@ -104,17 +109,17 @@ namespace Guflow.Decider
         //    return list;
         //}
 
-        //private bool AllowSchedulingOfChildWorkflowItem()
-        //{
-        //    var lastEvent = LastEvent;
-        //    if (lastEvent != WorkflowItemEvent.NotFound && !lastEvent.IsActive)
-        //    {
-        //        var lastEventAction = lastEvent.Interpret(_workflow);
-        //        return lastEventAction.AllowSchedulingOfChildWorkflowItem();
-        //    }
+        public bool AllowSchedulingOfChildWorkflowItem()
+        {
+            var lastEvent = LastEvent;
+            if (lastEvent != WorkflowItemEvent.NotFound && !lastEvent.IsActive)
+            {
+                var lastEventAction = lastEvent.Interpret(_workflow);
+                return lastEventAction.AllowSchedulingOfChildWorkflowItem();
+            }
 
-        //    return false;
-        //}
+            return false;
+        }
 
         public bool IsLastEventTriggerSchedulingOfAny(IEnumerable<WorkflowItem> workflowItems)
         {
@@ -182,9 +187,17 @@ namespace Guflow.Decider
 
         public bool IsInactive(IEnumerable<WorkflowItemsBranch> allBranches)
         {
-            var allItemsInBranches = allBranches.SelectMany(b => b._workflowItems);
+            var immediateParent = _workflowItems[0];
 
-            return _workflowItems.All(w => !w.IsActive && !w.IsLastEventTriggerSchedulingOfAny(allItemsInBranches));
+            if (immediateParent.IsActive)
+                return false;
+            if (immediateParent.AllowSchedulingOfChildWorkflowItem())
+                return true;
+
+            var allItemsInBranches = allBranches.SelectMany(b => b._workflowItems);
+            
+            return _workflowItems.Skip(1).All(w => !w.IsActive && !w.IsLastEventTriggerSchedulingOfAny(allItemsInBranches));
         }
+     
     }
 }

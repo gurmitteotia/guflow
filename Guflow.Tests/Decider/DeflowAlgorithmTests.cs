@@ -64,6 +64,25 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.Empty);
 
         }
+
+        [Test]
+        public void Schedule_a_child_item_when_all_its_parent_branches_are_not_active_because_all_items_are_completed()
+        {
+            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
+            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
+            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
+            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
+            var allEvents =
+                addDinnerActivity.Concat(bookHotelActivityCompletedGraph)
+                    .Concat(bookFlightActivityCompletedGraph)
+                    .Concat(chooseSeatActivityCompletedGraph);
+
+            var decisions =
+                new TestWorkflow().NewExecutionFor(new WorkflowHistoryEvents(allEvents,
+                    addDinnerActivity.First().EventId, addDinnerActivity.Last().EventId)).Execute();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
+        }
         private static IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
         {
             return HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, Version), "id", "result");
