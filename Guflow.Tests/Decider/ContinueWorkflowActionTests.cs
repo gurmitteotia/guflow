@@ -47,14 +47,15 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions,Is.EqualTo(new []{new CompleteWorkflowDecision("Workflow is completed.",true)}));
         }
         [Test]
-        public void Should_not_schedule_the_child_when_one_of_its_parent_activity_is_not_completed()
+        public void Should_schedule_the_child_when_one_of_its_parents_branch_is_completed_and_other_parent_branch_is_not_active_at_all()
         {
             var workflow = new WorkflowWithMultipleParents();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
             var decisions = workflow.NewExecutionFor(workflowHistoryEvents).Execute();
 
-            CollectionAssert.IsEmpty(decisions);
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0"))}));
+
         }
         [Test]
         public void Should_not_schedule_the_child_when_one_of_its_parent_activity_ignores_the_action()

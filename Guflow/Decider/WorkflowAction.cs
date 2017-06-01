@@ -137,6 +137,12 @@ namespace Guflow.Decider
                 _left = left;
                 _right = right;
             }
+
+            internal override bool AllowSchedulingOfChildWorkflowItem()
+            {
+                return _left.AllowSchedulingOfChildWorkflowItem() || _right.AllowSchedulingOfChildWorkflowItem();
+            }
+
             internal override IEnumerable<WorkflowDecision> GetDecisions()
             {
                 return _left.GetDecisions().Concat(_right.GetDecisions());
