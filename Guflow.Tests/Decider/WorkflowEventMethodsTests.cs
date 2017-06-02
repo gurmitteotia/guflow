@@ -58,7 +58,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction =workflowMethod.Invoke(_argument);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Ignore));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Ignore(true)));
         }
 
         [Test]
@@ -207,7 +207,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflowMethod.Invoke(_argument);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Ignore));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Ignore(true)));
         }
 
         [Test]
