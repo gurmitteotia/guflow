@@ -10,13 +10,17 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Equality_tests()
         {
-            Assert.That(WorkflowAction.Ignore.Equals(WorkflowAction.Ignore));
+            Assert.That(WorkflowAction.Ignore(true).Equals(WorkflowAction.Ignore(true)));
+
+            Assert.That(WorkflowAction.Ignore(false).Equals(WorkflowAction.Ignore(false)));
+
+            Assert.IsFalse(WorkflowAction.Ignore(true).Equals(WorkflowAction.Ignore(false)));
         }
         [Test]
         public void Return_empty_decisions()
         {
-            var workflowAction = WorkflowAction.Ignore;
-            Assert.That(workflowAction.GetDecisions(),Is.EqualTo(new[]{WorkflowDecision.Empty}));
+            var workflowAction = WorkflowAction.Ignore(true);
+            Assert.That(workflowAction.GetDecisions(),Is.Empty);
         }
 
         [Test]
@@ -27,7 +31,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = activityCompletedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Ignore));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Ignore(true)));
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {
@@ -40,7 +44,7 @@ namespace Guflow.Tests.Decider
             public const string ActivityVersion = "1.0";
             public WorkflowReturningStartWorkflowAction()
             {
-                ScheduleActivity(ActivityName, ActivityVersion).OnCompletion(e => Ignore());
+                ScheduleActivity(ActivityName, ActivityVersion).OnCompletion(e => Ignore(true));
             }
         }
     }

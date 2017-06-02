@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
@@ -7,18 +8,13 @@ namespace Guflow.Decider
 {
     internal sealed class RestartWorkflowDecision : WorkflowClosingDecision
     {
-        private List<string> _tags = new List<string>();
         private readonly RestartWorkflowAction _restartWorkflowAction;
 
         public RestartWorkflowDecision(RestartWorkflowAction restartWorkflowAction)
         {
             _restartWorkflowAction = restartWorkflowAction;
         }
-
-        public void AddTag(string tag)
-        {
-            _tags.Add(tag);
-        }
+     
         internal override Decision Decision()
         {
             return new Decision
@@ -34,7 +30,7 @@ namespace Guflow.Decider
                             _restartWorkflowAction.ExecutionStartToCloseTimeout.HasValue
                                 ? _restartWorkflowAction.ExecutionStartToCloseTimeout.Value.TotalSeconds.ToString()
                                 : null,
-                       TagList =  _tags,
+                       TagList =  _restartWorkflowAction.TagList.ToList(),
                         TaskPriority = _restartWorkflowAction.TaskPriority.HasValue ? _restartWorkflowAction.TaskPriority.Value.ToString() : null,
                         TaskStartToCloseTimeout = _restartWorkflowAction.TaskStartToCloseTimeout.HasValue ? _restartWorkflowAction.TaskStartToCloseTimeout.Value.TotalSeconds.ToString() : null,
                         WorkflowTypeVersion = _restartWorkflowAction.WorkflowTypeVersion

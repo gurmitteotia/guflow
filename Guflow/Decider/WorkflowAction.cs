@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 
 namespace Guflow.Decider
 {
     public abstract class WorkflowAction
     {
-        private static readonly WorkflowAction _emptyWorkflowAction = new EmptyWorkflowAction();
         internal abstract IEnumerable<WorkflowDecision> GetDecisions();
         internal virtual bool AllowSchedulingOfChildWorkflowItem()
         {
@@ -40,7 +40,12 @@ namespace Guflow.Decider
         {
             return new StartWorkflowAction(workflowItems);
         }
-        internal static WorkflowAction Ignore { get{return _emptyWorkflowAction;} }
+
+        internal static WorkflowAction Ignore(bool keepBranchActive)
+        {
+            return new IgnoreWorkflowAction(keepBranchActive);
+        }
+
         internal static WorkflowAction Cancel(WorkflowItem workflowItem)
         {
             return new GenericWorkflowAction(workflowItem.GetCancelDecision());
@@ -76,13 +81,45 @@ namespace Guflow.Decider
             workflowStartedEvent.TagList.ToList().ForEach(tag=>restartWorkflowAction.AddTag(tag));
             return restartWorkflowAction;
         }
-        private class EmptyWorkflowAction : WorkflowAction
+
+        private sealed class IgnoreWorkflowAction : WorkflowAction
         {
+            private readonly bool _keepBranchActive;
+
+            public IgnoreWorkflowAction(bool keepBranchActive)
+            {
+                _keepBranchActive = keepBranchActive;
+            }
+
             internal override IEnumerable<WorkflowDecision> GetDecisions()
             {
-                return new[] {WorkflowDecision.Empty};
+                return Enumerable.Empty<WorkflowDecision>();
             }
+
+            internal override bool AllowSchedulingOfChildWorkflowItem()
+            {
+                return !_keepBranchActive;
+            }
+
+            private bool Equals(IgnoreWorkflowAction other)
+            {
+                return _keepBranchActive == other._keepBranchActive;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((IgnoreWorkflowAction)obj);
+            }
+            public override int GetHashCode()
+            {
+                return _keepBranchActive.GetHashCode();
+            }
+
         }
+
         private class StartWorkflowAction : WorkflowAction
         {
             private const string _defaultCompleteResult = "Workflow is completed because no schedulable item was found.";

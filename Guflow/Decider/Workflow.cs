@@ -91,7 +91,7 @@ namespace Guflow.Decider
         {
             var workflowEventMethod = _workflowEventMethods.FindFor(EventName.Signal);
             return workflowEventMethod == null
-                ? WorkflowAction.Ignore
+                ? WorkflowAction.Ignore(false)
                 : workflowEventMethod.Invoke(workflowSignaledEvent);
         }
         WorkflowAction IWorkflowActions.OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
@@ -251,9 +251,9 @@ namespace Guflow.Decider
         {
             return WorkflowAction.StartWorkflow(this);
         }
-        protected static WorkflowAction Ignore()
+        protected static WorkflowAction Ignore(bool keepBranchActive)
         {
-            return WorkflowAction.Ignore;
+            return WorkflowAction.Ignore(keepBranchActive);
         }
         protected ScheduleWorkflowItemAction JumpToActivity(string name, string version, string positionalName = "")
         {
@@ -349,7 +349,7 @@ namespace Guflow.Decider
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
         {
             if (proposal && IsActive)
-                return WorkflowAction.Ignore;
+                return WorkflowAction.Ignore(false);
             return DuringCompletion(result);
         }
         WorkflowAction IWorkflowClosingActions.OnFailure(string reason, string details)
