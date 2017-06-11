@@ -26,16 +26,16 @@ namespace Guflow.Decider
         internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
             var childItems = _completedWorkflowItem.GetChildlern();
-            if(!childItems.Any())
-                return new[]{new CompleteWorkflowDecision(DefaultWorkflowCompletedResult,true)};
-           
+            if (!childItems.Any())
+                return new[] { new CompleteWorkflowDecision(DefaultWorkflowCompletedResult, true) };
+
             var schedulableChildItems = childItems.Where(s => s.AreAllParentBranchesInactive(exceptBranchOf: _completedWorkflowItem));
             return schedulableChildItems.SelectMany(f => f.GetContinuedDecisions());
         }
 
-        internal override bool AllowSchedulingOfChildWorkflowItem()
+        internal override bool ReadyToScheduleChildren
         {
-            return true;
+            get { return true; }
         }
     }
 }
