@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Guflow.Properties;
 
 namespace Guflow.Decider
@@ -78,11 +77,6 @@ namespace Guflow.Decider
             return Identity.GetHashCode();
         }
 
-        //public bool SchedulingIsAllowedByAllParents()
-        //{
-        //    return _parentItems.All(p => p.AllowSchedulingOfChildWorkflowItem());
-        //}
-
         public bool AreAllParentBranchesInactive(WorkflowItem exceptBranchOf)
         {
             var parentsItems = _parentItems.Except(new[] { exceptBranchOf });
@@ -91,46 +85,31 @@ namespace Guflow.Decider
                 var parentBranches = WorkflowItemsBranch.BuildParentBranchStartingWith(parentsItem, _workflow).ToArray();
                 if (!parentBranches.All(p => p.IsInactive(parentBranches)))
                     return false;
-
             }
             return true;
         }
 
-        //private IEnumerable<WorkflowItem> AllParentItemsInBranchOf(WorkflowItem workflowItem)
-        //{
-        //    var list = new List<WorkflowItem> {workflowItem};
 
-        //    var parentWorkflowItems = _workflow.GetParentsOf(workflowItem);
-        //    foreach (var parentWorkflowItem in parentWorkflowItems)
-        //    {
-        //        list.AddRange(AllParentItemsInBranchOf(parentWorkflowItem));
-        //    }
-
-        //    return list;
-        //}
-
-        public bool AllowSchedulingOfChildWorkflowItem()
+        public bool IsReadyToScheduleChildren()
         {
             var lastEvent = LastEvent;
-            if (lastEvent != WorkflowItemEvent.NotFound && !lastEvent.IsActive)
-            {
-                var lastEventAction = lastEvent.Interpret(_workflow);
-                return lastEventAction.AllowSchedulingOfChildWorkflowItem();
-            }
-
-            return false;
+            if (lastEvent == WorkflowItemEvent.NotFound || lastEvent.IsActive)
+                return false;
+            var lastEventAction = lastEvent.Interpret(_workflow);
+            return lastEventAction.ReadyToScheduleChildren;
         }
-
-        public bool IsLastEventTriggerSchedulingOfAny(IEnumerable<WorkflowItem> workflowItems)
+        public bool IsKeepingBranchActive(IEnumerable<WorkflowItem> allWorkflowItemsInBranches)
         {
             var lastEvent = LastEvent;
-            if (lastEvent != WorkflowItemEvent.NotFound && !lastEvent.IsActive)
-            {
-                var lastEventDecisions = lastEvent.Interpret(_workflow).GetDecisions();
-                return lastEventDecisions.Any(d => workflowItems.Any(d.IsFor));
-            }
-            return false;
+            if (lastEvent == WorkflowItemEvent.NotFound)
+                return false;
+            if (lastEvent.IsActive)
+                return true;
+            var lastEventAction = lastEvent.Interpret(_workflow);
+            return lastEventAction.CanKeepBranchActive(allWorkflowItemsInBranches);
         }
+
+      
         protected void AddParent(Identity identity)
         {
             var parentItem = _workflow.Find(identity);
@@ -145,8 +124,6 @@ namespace Guflow.Decider
         {
             get { return _workflow.WorkflowEvents; }
         }
-
-
     }
 
     internal class WorkflowItemsBranch
@@ -189,15 +166,16 @@ namespace Guflow.Decider
         {
             var immediateParent = _workflowItems[0];
 
-            if (immediateParent.IsActive)
-                return false;
-            if (immediateParent.AllowSchedulingOfChildWorkflowItem())
+            if (immediateParent.IsReadyToScheduleChildren())
                 return true;
 
             var allItemsInBranches = allBranches.SelectMany(b => b._workflowItems);
-            
-            return _workflowItems.Skip(1).All(w => !w.IsActive && !w.IsLastEventTriggerSchedulingOfAny(allItemsInBranches));
+            var parentsExceptImmediate = _workflowItems.Skip(1).ToArray();
+
+            if (!parentsExceptImmediate.Any())
+                return !immediateParent.IsKeepingBranchActive(allItemsInBranches);
+
+            return parentsExceptImmediate.All(w => !w.IsKeepingBranchActive(allItemsInBranches));
         }
-     
     }
 }

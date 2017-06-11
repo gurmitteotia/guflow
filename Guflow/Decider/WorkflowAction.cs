@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 
 namespace Guflow.Decider
@@ -7,9 +6,15 @@ namespace Guflow.Decider
     public abstract class WorkflowAction
     {
         internal abstract IEnumerable<WorkflowDecision> GetDecisions();
-        internal virtual bool AllowSchedulingOfChildWorkflowItem()
+        internal virtual bool ReadyToScheduleChildren
         {
-            return false;
+            get { return false; }
+        }
+
+        internal virtual bool CanKeepBranchActive(IEnumerable<WorkflowItem> branchWorkflowItems)
+        {
+             var decisions = GetDecisions();
+             return decisions.Any(d => branchWorkflowItems.Any(d.IsFor));
         }
 
         public static WorkflowAction operator +(WorkflowAction left, WorkflowAction right)
@@ -96,9 +101,14 @@ namespace Guflow.Decider
                 return Enumerable.Empty<WorkflowDecision>();
             }
 
-            internal override bool AllowSchedulingOfChildWorkflowItem()
+            internal override bool CanKeepBranchActive(IEnumerable<WorkflowItem> branchWorkflowItems)
             {
-                return !_keepBranchActive;
+                return _keepBranchActive;
+            }
+
+            internal override bool ReadyToScheduleChildren
+            {
+                get { return !_keepBranchActive; }
             }
 
             private bool Equals(IgnoreWorkflowAction other)
@@ -174,10 +184,14 @@ namespace Guflow.Decider
                 _left = left;
                 _right = right;
             }
-
-            internal override bool AllowSchedulingOfChildWorkflowItem()
+            internal override bool ReadyToScheduleChildren
             {
-                return _left.AllowSchedulingOfChildWorkflowItem() || _right.AllowSchedulingOfChildWorkflowItem();
+                get { return  _left.ReadyToScheduleChildren || _right.ReadyToScheduleChildren; }
+            }
+
+            internal override bool CanKeepBranchActive(IEnumerable<WorkflowItem> branchWorkflowItems)
+            {
+                return _left.CanKeepBranchActive(branchWorkflowItems) || _right.CanKeepBranchActive(branchWorkflowItems);
             }
 
             internal override IEnumerable<WorkflowDecision> GetDecisions()
@@ -185,5 +199,6 @@ namespace Guflow.Decider
                 return _left.GetDecisions().Concat(_right.GetDecisions());
             }
         }
+
     }
 }

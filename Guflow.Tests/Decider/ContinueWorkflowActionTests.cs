@@ -26,7 +26,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_the_scheduling_decision_for_all_child_activities()
+        public void Returns_the_scheduling_decision_for_all_child_activities()
         {
             var workflow = new WorkflowWithMultipleChilds();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
@@ -37,7 +37,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_propose_to_complete_complete_decision_when_no_schedulable_child_item_found()
+        public void Returns_propose_to_complete_complete_decision_when_no_schedulable_child_item_found()
         {
             var workflow = new SingleActivityWorkflow();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
@@ -47,7 +47,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions,Is.EqualTo(new []{new CompleteWorkflowDecision("Workflow is completed.",true)}));
         }
         [Test]
-        public void Should_schedule_the_child_when_one_of_its_parents_branch_is_completed_and_other_parent_branch_is_not_active_at_all()
+        public void Schedule_the_child_when_one_of_its_parents_branch_is_completed_and_other_parent_branch_is_not_active_at_all()
         {
             var workflow = new WorkflowWithMultipleParents();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
@@ -58,7 +58,7 @@ namespace Guflow.Tests.Decider
 
         }
         [Test]
-        public void Should_not_schedule_the_child_when_one_of_its_parent_activity_ignores_the_action_by_keeping_the_branch_active()
+        public void Does_not_schedule_the_child_when_one_of_its_parent_activity_ignores_the_action_by_keeping_the_branch_active()
         {
             var workflow = new WorkflowWithAParentIgnoringCompleteEvent(keepBranchActive:true);
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
@@ -70,7 +70,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_not_schedule_the_child_when_one_of_its_parent_activity_is_active()
+        public void Does_not_schedule_the_child_when_one_of_its_parent_activity_is_active()
         {
             var workflow = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
@@ -82,7 +82,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_scheduling_decision_for_child_when_all_of_its_parents_are_completed()
+        public void Return_scheduling_decision_for_child_when_all_of_its_parents_are_completed()
         {
             var workflow = new WorkflowWithMultipleParents();
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
@@ -94,7 +94,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Transcode", "2.0")) }));
         }
         [Test]
-        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_other_one_is_failed_but_configured_to_continue()
+        public void Return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_other_one_is_failed_but_configured_to_continue()
         {
             var workflow = new WorkflowWithAParentContinueOnFailure();
             var allHistoryEvents = CreateParentActivityCompletedAndFailedEventsGraph();
@@ -105,7 +105,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_other_one_is_timedout_but_configured_to_continue()
+        public void Return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_other_one_is_timedout_but_configured_to_continue()
         {
             var workflow = new WorkflowWithAParentContinueOnTimedout();
             var allHistoryEvents = CreateParentActivityCompletedAndTimedoutEventsGraph();
@@ -116,7 +116,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_cancelled_but_configured_to_continue()
+        public void Return_scheduling_decision_for_child_when_one_of_its_parent_is_completed_and_one_is_cancelled_but_configured_to_continue()
         {
             var workflow = new WorkflowWithAParentContinueOnCancelled();
             var allHistoryEvents = CreateParentActivityCompletedAndCancelledEventsGraph();
