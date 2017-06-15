@@ -18,7 +18,7 @@ namespace Guflow.Decider
         }
 
         public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
-            :this(allHistoryEvents,allHistoryEvents.First().EventId, allHistoryEvents.Last().EventId)
+            :this(allHistoryEvents,allHistoryEvents.Last().EventId, allHistoryEvents.First().EventId)
         {
         }
 
@@ -49,7 +49,7 @@ namespace Guflow.Decider
         {
             var interpretedWorkflowActions = new List<WorkflowAction>();
 
-            for (var eventId = _newEventsStartId;eventId>=_newEventsEndId;eventId--)
+            for (var eventId = _newEventsStartId;eventId<=_newEventsEndId;eventId++)
             {
                 var historyEvent = _allHistoryEvents.FirstOrDefault(h => h.EventId == eventId);
                 if (historyEvent == null)

@@ -430,8 +430,12 @@ namespace Guflow.Tests.Decider
       
         private WorkflowHistoryEvents CreateTimerFireAndFailedEventGraph()
         {
-            var combinedEventGraph = HistoryEventFactory.CreateTimerStartFailedEventGraph(Identity.Timer("timer"), "cause")
-                .Concat(HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer"), TimeSpan.FromSeconds(4)));
+            var timerStartedEventFileGraph =
+                HistoryEventFactory.CreateTimerStartFailedEventGraph(Identity.Timer("timer"), "cause");
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer"),
+                TimeSpan.FromSeconds(4));
+
+            var combinedEventGraph = timerFiredEventGraph.Concat(timerStartedEventFileGraph);
             return new WorkflowHistoryEvents(combinedEventGraph);
         }
 
