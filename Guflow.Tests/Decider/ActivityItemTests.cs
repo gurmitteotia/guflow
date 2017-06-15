@@ -240,9 +240,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_is_timer_event_when_timer_events_are_newer_then_activity_event()
         {
+            var activityFailedEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "workerid", "reason", "detail");
             var timerStartedEventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_activityIdenity,TimeSpan.FromSeconds(2));
-            var eventGraph = timerStartedEventGraph.Concat(HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "workerid","reason","detail"));
-            var activityItem = CreateActivityItemWith(eventGraph);
+            
+            var activityItem = CreateActivityItemWith(activityFailedEventGraph.Concat(timerStartedEventGraph));
 
             var latestEvent = activityItem.LastEvent;
 
@@ -252,8 +253,9 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_is_activity_event_when_activity_events_are_newer_then_timer_event()
         {
+            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(_activityIdenity, TimeSpan.FromSeconds(2));
             var activityFailedEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(_activityIdenity, "workerid", "reason", "detail");
-            var eventGraph =activityFailedEventGraph.Concat(HistoryEventFactory.CreateTimerFiredEventGraph(_activityIdenity,TimeSpan.FromSeconds(2)));
+            var eventGraph = timerFiredEventGraph.Concat(activityFailedEventGraph);
             var activityItem = CreateActivityItemWith(eventGraph);
 
 
@@ -505,9 +507,10 @@ namespace Guflow.Tests.Decider
 
             var allEvents = activityItem.AllEvents;
 
-            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[] {new ActivityStartedEvent(startedEventGraph.First(),startedEventGraph) ,
-                                                                       new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph),
-                                                                       new ActivityCompletedEvent(completedEventGraph.First(),completedEventGraph)}));
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[] {new ActivityCompletedEvent(completedEventGraph.First(),completedEventGraph),
+                                                                        new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph),
+                                                                        new ActivityStartedEvent(startedEventGraph.First(),startedEventGraph),
+                                                                       }));
         }
 
         [Test]

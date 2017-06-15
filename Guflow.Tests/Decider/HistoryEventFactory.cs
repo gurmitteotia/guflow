@@ -659,39 +659,39 @@ namespace Guflow.Tests.Decider
 
         private class EventIds
         {
-            private static long _seed = long.MaxValue;
-            private readonly long _completedId;
-            private EventIds(long completedId)
+            private static long _seed = 1;
+            private readonly long _scheduledId;
+            private EventIds(long scheduledId)
             {
-                _completedId = completedId;
+                _scheduledId = scheduledId;
             }
 
             public static EventIds NewEventIds
             {
                 get
                 {
-                    _seed -= 10;
+                    _seed += 10;
                     return new EventIds(_seed);
                 }
             }
 
             public long CompletedId
             {
-                get { return _completedId; }
+                get { return _scheduledId + 3; }
             }
 
             public long CancelRequestedId
             {
-                get { return _completedId - 1; }
+                get { return _scheduledId + 2; }
             }
             public long StartedId
             {
-                get { return _completedId - 2; }
+                get { return _scheduledId + 1; }
             }
 
             public long ScheduledId
             {
-                get { return _completedId - 3; }
+                get { return _scheduledId; }
             }
         }
     }
