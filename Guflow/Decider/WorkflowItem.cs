@@ -162,9 +162,33 @@ namespace Guflow.Decider
             return new WorkflowItemsBranch(_workflow, _workflowItems.Concat(workflowItemsBranch._workflowItems).ToArray());
         }
 
-        public bool IsInactive(IEnumerable<WorkflowItemsBranch> allBranches)
+        public bool IsActive(IEnumerable<WorkflowItemsBranch> allBranches)
         {
-            var immediateParent = _workflowItems[0];
+            var lastWorkflowEvents = _workflowItems.Select(w => w.LastEvent);
+            var sortedLastEvents = lastWorkflowEvents.OrderByDescending(e => e, WorkflowEvent.IdComparer);
+            if (sortedLastEvents.Any(e => e.IsActive))
+                return true;
+            if (sortedLastEvents.All(e => e == WorkflowItemEvent.NotFound))
+                return false;
+            
+            /*var immediateParent = _workflowItems.First();
+            if()
+            foreach (var workflowItemEvent in sortedLastEvents)
+            {
+                if(workflowItemEvent == WorkflowItemEvent.NotFound)
+                    continue;
+                if (workflowItemEvent.IsActive)
+                    return false;
+                var workflowItem = _workflowItems.First(w => workflowItemEvent.IsFor(w));
+                
+                if (workflowItem.IsKeepingBranchActive(null))
+                    return false;
+                
+            }*/
+            
+            return true;
+
+            /*var immediateParent = _workflowItems[0];
 
             if (immediateParent.IsReadyToScheduleChildren())
                 return true;
@@ -175,7 +199,11 @@ namespace Guflow.Decider
             if (!parentsExceptImmediate.Any())
                 return !immediateParent.IsKeepingBranchActive(allItemsInBranches);
 
-            return parentsExceptImmediate.All(w => !w.IsKeepingBranchActive(allItemsInBranches));
+            var branchInactive = parentsExceptImmediate.All(w => !w.IsKeepingBranchActive(allItemsInBranches));
+            if (branchInactive)
+            {
+                
+            }*/
         }
     }
 }
