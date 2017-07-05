@@ -155,7 +155,6 @@ namespace Guflow.Tests.Decider
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId)).Execute();
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
-
         }
 
         [Test]

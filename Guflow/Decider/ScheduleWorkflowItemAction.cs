@@ -6,11 +6,9 @@ namespace Guflow.Decider
     public sealed class ScheduleWorkflowItemAction : WorkflowAction
     {
         private readonly WorkflowItem _workflowItem;
-        private readonly WorkflowAction _workflowAction;
         internal ScheduleWorkflowItemAction(WorkflowItem workflowItem)
         {
             _workflowItem = workflowItem;
-            _workflowAction = new GenericWorkflowAction(_workflowItem.GetScheduleDecision());
         }
 
         public WorkflowAction After(TimeSpan afterTimeout)
@@ -18,9 +16,13 @@ namespace Guflow.Decider
             return new GenericWorkflowAction(_workflowItem.GetRescheduleDecision(afterTimeout));
         }
 
+        public WorkflowAction UpTo(Limit limit)
+        {
+            return new ScheduleWorkflowItemAction(_workflowItem);
+        }
         internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
-            return _workflowAction.GetDecisions();
+            return new[] {_workflowItem.GetScheduleDecision()};
         }
         private bool Equals(ScheduleWorkflowItemAction other)
         {

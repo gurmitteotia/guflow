@@ -11,10 +11,10 @@ namespace Guflow.Decider
             get { return false; }
         }
 
-        internal virtual bool CanKeepBranchActive(IEnumerable<WorkflowItem> branchWorkflowItems)
+        internal virtual bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
         {
              var decisions = GetDecisions();
-             return decisions.Any(d => branchWorkflowItems.Any(d.IsFor));
+             return decisions.Any(d => workflowItems.Any(d.IsFor));
         }
 
         public static WorkflowAction operator +(WorkflowAction left, WorkflowAction right)
@@ -36,6 +36,10 @@ namespace Guflow.Decider
         internal static ScheduleWorkflowItemAction Schedule(WorkflowItem workflowItem)
         {
             return new ScheduleWorkflowItemAction(workflowItem);
+        }
+        internal static JumpWorkflowAction JumpTo(WorkflowItem workflowItem)
+        {
+            return new JumpWorkflowAction(workflowItem);
         }
         internal static WorkflowAction ContinueWorkflow(WorkflowItem workflowItem)
         {
@@ -101,7 +105,7 @@ namespace Guflow.Decider
                 return Enumerable.Empty<WorkflowDecision>();
             }
 
-            internal override bool CanKeepBranchActive(IEnumerable<WorkflowItem> branchWorkflowItems)
+            internal override bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
             {
                 return _keepBranchActive;
             }
@@ -189,9 +193,9 @@ namespace Guflow.Decider
                 get { return  _left.ReadyToScheduleChildren || _right.ReadyToScheduleChildren; }
             }
 
-            internal override bool CanKeepBranchActive(IEnumerable<WorkflowItem> branchWorkflowItems)
+            internal override bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
             {
-                return _left.CanKeepBranchActive(branchWorkflowItems) || _right.CanKeepBranchActive(branchWorkflowItems);
+                return _left.CanScheduleAny(workflowItems) || _right.CanScheduleAny(workflowItems);
             }
 
             internal override IEnumerable<WorkflowDecision> GetDecisions()

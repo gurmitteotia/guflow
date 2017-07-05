@@ -74,6 +74,7 @@
     <Compile Include="Decider\CancelWorkflowActionTests.cs" />
     <Compile Include="Decider\CancelWorkflowDecisionTests.cs" />
     <Compile Include="Decider\DeflowAlgorithmTests.cs" />
+    <Compile Include="Decider\JumpWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowDecisionTests.cs" />
     <Compile Include="DomainTests.cs" />
@@ -104,7 +105,7 @@
     <Compile Include="Decider\RecordMarkerFailedEventTests.cs" />
     <Compile Include="Decider\RecordMarkerWorkflowActionTests.cs" />
     <Compile Include="Decider\ScheduleTimerDecisionTests.cs" />
-    <Compile Include="Decider\ScheduleWorkflowItemActionTest.cs" />
+    <Compile Include="Decider\ScheduleWorkflowItemActionTests.cs" />
     <Compile Include="Decider\ScheduleActivityDecisionTests.cs" />
     <Compile Include="Decider\SignalWorkflowActionTests.cs" />
     <Compile Include="Decider\SignalWorkflowDecisionTests.cs" />

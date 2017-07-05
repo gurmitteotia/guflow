@@ -255,20 +255,20 @@ namespace Guflow.Decider
         {
             return WorkflowAction.Ignore(keepBranchActive);
         }
-        protected ScheduleWorkflowItemAction JumpToActivity(string name, string version, string positionalName = "")
+        protected JumpWorkflowAction JumpToActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name, "name");
             Ensure.NotNullAndEmpty(version, "version");
 
             var activityItem = _allWorkflowItems.ActivityItemFor(Identity.New(name, version, positionalName));
-            return WorkflowAction.Schedule(activityItem);
+            return WorkflowAction.JumpTo(activityItem);
         }
-        protected WorkflowAction JumpToTimer(string name)
+        protected JumpWorkflowAction JumpToTimer(string name)
         {
             Ensure.NotNullAndEmpty(name, "name");
 
             var activityItem = _allWorkflowItems.TimerItemFor(Identity.Timer(name));
-            return WorkflowAction.Schedule(activityItem);
+            return WorkflowAction.JumpTo(activityItem);
         }
 
         protected CancelRequest CancelRequest { get { return new CancelRequest(this);} }
