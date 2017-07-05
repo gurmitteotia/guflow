@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -7,7 +9,7 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
-    public class ScheduleWorkflowItemActionTest
+    public class ScheduleWorkflowItemActionTests
     {
         private readonly Mock<IWorkflow> _workflow = new Mock<IWorkflow>();
         private const string _activityName = "Download";
@@ -54,31 +56,28 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Can_be_returned_as_workflow_action_when_scheduling_the_activity()
+        public void Returns_timer_decision_when_total_number_of_scheduling_is_less_than_allowed_limit()
         {
-            var workflow = new WorkflowToReturnScheduleActivityAction();
-            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var workflow = new WorkflowToScheduleActivityUpToLimit(3);
+            var completed1 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var completed2 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var historyEvents = new WorkflowHistoryEvents(completed2.Concat(completed1), completed2.Last().EventId, completed2.First().EventId);
 
-            var workflowAction = completedActivityEvent.Interpret(workflow);
+            var decisions = historyEvents.InterpretNewEventsFor(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(new ActivityItem(Identity.New(_activityName, _activityVersion, _positionalName), null))));
-        }
+            Assert.That(decisions, Is.EqualTo(new []{ new CompleteWorkflowDecision("Completed")}));
 
-        [Test]
-        public void Can_be_returned_as_workflow_action_when_scheduling_the_timer()
-        {
-            var workflow = new WorkflowToReturnScheduleTimerAction();
-            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
-
-            var workflowAction = completedActivityEvent.Interpret(workflow);
-
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Schedule(TimerItem.New(Identity.Timer("SomeTimer"),null))));
+        
         }
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
+        }
+        private IEnumerable<HistoryEvent> CreateCompletedActivityEventGraph(string activityName, string activityVersion, string positionalName)
+        {
+            return HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
         }
         private class WorkflowToReturnRescheduleAction : Workflow
         {
@@ -87,20 +86,17 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(_activityName, _activityVersion,_positionalName).OnCompletion(Reschedule);
             }
         }
-        private class WorkflowToReturnScheduleActivityAction : Workflow
+
+        private class WorkflowToScheduleActivityUpToLimit : Workflow
         {
-            public WorkflowToReturnScheduleActivityAction()
+            public WorkflowToScheduleActivityUpToLimit(int limit)
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => JumpToActivity(_activityName, _activityVersion, _positionalName));
+                ScheduleActivity(_activityName, _activityVersion, _positionalName)
+                    .OnCompletion(e => Reschedule(e).UpTo(Limit.Count(limit)));
+
+                ScheduleAction(CancelWorkflow("completed")).After(_activityName, _activityVersion, _positionalName);
             }
         }
-        private class WorkflowToReturnScheduleTimerAction : Workflow
-        {
-            public WorkflowToReturnScheduleTimerAction()
-            {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => JumpToTimer("SomeTimer"));
-                ScheduleTimer("SomeTimer");
-            }
-        }
+     
     }
 }

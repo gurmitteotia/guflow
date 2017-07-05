@@ -82,8 +82,8 @@ namespace Guflow.Decider
             var parentsItems = _parentItems.Except(new[] { exceptBranchOf });
             foreach (var parentsItem in parentsItems)
             {
-                var parentBranches = WorkflowItemsBranch.BuildParentBranchStartingWith(parentsItem, _workflow).ToArray();
-                if (!parentBranches.All(p => p.IsInactive(parentBranches)))
+                var parentBranches = WorkflowBranch.BuildParentBranchStartingWith(parentsItem, _workflow).ToArray();
+                if (parentBranches.Any(p => p.IsActive(parentBranches)))
                     return false;
             }
             return true;
@@ -98,7 +98,7 @@ namespace Guflow.Decider
             var lastEventAction = lastEvent.Interpret(_workflow);
             return lastEventAction.ReadyToScheduleChildren;
         }
-        public bool IsKeepingBranchActive(IEnumerable<WorkflowItem> allWorkflowItemsInBranches)
+        public bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
         {
             var lastEvent = LastEvent;
             if (lastEvent == WorkflowItemEvent.NotFound)
@@ -106,10 +106,8 @@ namespace Guflow.Decider
             if (lastEvent.IsActive)
                 return true;
             var lastEventAction = lastEvent.Interpret(_workflow);
-            return lastEventAction.CanKeepBranchActive(allWorkflowItemsInBranches);
+            return lastEventAction.CanScheduleAny(workflowItems);
         }
-
-      
         protected void AddParent(Identity identity)
         {
             var parentItem = _workflow.Find(identity);
@@ -126,22 +124,22 @@ namespace Guflow.Decider
         }
     }
 
-    internal class WorkflowItemsBranch
+    internal class WorkflowBranch
     {
         private readonly IWorkflow _workflow;
         private readonly List<WorkflowItem> _workflowItems = new List<WorkflowItem>();
 
-        private WorkflowItemsBranch(IWorkflow workflow, params WorkflowItem[] workflowItems)
+        private WorkflowBranch(IWorkflow workflow, params WorkflowItem[] workflowItems)
         {
             _workflow = workflow;
             _workflowItems.AddRange(workflowItems);
         }
 
-        public static IEnumerable<WorkflowItemsBranch> BuildParentBranchStartingWith(WorkflowItem startItem, IWorkflow workflow)
+        public static IEnumerable<WorkflowBranch> BuildParentBranchStartingWith(WorkflowItem startItem, IWorkflow workflow)
         {
-            var allBranches = new List<WorkflowItemsBranch>();
+            var allBranches = new List<WorkflowBranch>();
 
-            var parentBranch = new WorkflowItemsBranch(workflow, startItem);
+            var parentBranch = new WorkflowBranch(workflow, startItem);
             if (parentBranch.Parents().Any())
                 foreach (var parent in parentBranch.Parents())
                     allBranches.Add(parentBranch.Add(parent));
@@ -151,18 +149,18 @@ namespace Guflow.Decider
             return allBranches;
         }
 
-        private IEnumerable<WorkflowItemsBranch> Parents()
+        private IEnumerable<WorkflowBranch> Parents()
         {
             return _workflow.GetParentsOf(_workflowItems.Last())
                     .SelectMany(p => BuildParentBranchStartingWith(p, _workflow));
         }
 
-        private WorkflowItemsBranch Add(WorkflowItemsBranch workflowItemsBranch)
+        private WorkflowBranch Add(WorkflowBranch workflowBranch)
         {
-            return new WorkflowItemsBranch(_workflow, _workflowItems.Concat(workflowItemsBranch._workflowItems).ToArray());
+            return new WorkflowBranch(_workflow, _workflowItems.Concat(workflowBranch._workflowItems).ToArray());
         }
 
-        public bool IsActive(IEnumerable<WorkflowItemsBranch> allBranches)
+        public bool IsActive(IEnumerable<WorkflowBranch> allBranches)
         {
             var lastWorkflowEvents = _workflowItems.Select(w => w.LastEvent);
             var sortedLastEvents = lastWorkflowEvents.OrderByDescending(e => e, WorkflowEvent.IdComparer);
@@ -170,40 +168,15 @@ namespace Guflow.Decider
                 return true;
             if (sortedLastEvents.All(e => e == WorkflowItemEvent.NotFound))
                 return false;
-            
-            /*var immediateParent = _workflowItems.First();
-            if()
-            foreach (var workflowItemEvent in sortedLastEvents)
-            {
-                if(workflowItemEvent == WorkflowItemEvent.NotFound)
-                    continue;
-                if (workflowItemEvent.IsActive)
-                    return false;
-                var workflowItem = _workflowItems.First(w => workflowItemEvent.IsFor(w));
-                
-                if (workflowItem.IsKeepingBranchActive(null))
-                    return false;
-                
-            }*/
-            
-            return true;
+            var immediateParent = _workflowItems.First();
+            var latestEvent = sortedLastEvents.First();
+            if (latestEvent.IsFor(immediateParent) && immediateParent.IsReadyToScheduleChildren())
+                return false;
 
-            /*var immediateParent = _workflowItems[0];
-
-            if (immediateParent.IsReadyToScheduleChildren())
-                return true;
-
+            var latestEventItem = _workflowItems.First(i => latestEvent.IsFor(i));
             var allItemsInBranches = allBranches.SelectMany(b => b._workflowItems);
-            var parentsExceptImmediate = _workflowItems.Skip(1).ToArray();
-
-            if (!parentsExceptImmediate.Any())
-                return !immediateParent.IsKeepingBranchActive(allItemsInBranches);
-
-            var branchInactive = parentsExceptImmediate.All(w => !w.IsKeepingBranchActive(allItemsInBranches));
-            if (branchInactive)
-            {
-                
-            }*/
+            
+            return latestEventItem.CanScheduleAny(allItemsInBranches);
         }
     }
 }
