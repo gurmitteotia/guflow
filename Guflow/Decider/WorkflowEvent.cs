@@ -11,7 +11,15 @@ namespace Guflow.Decider
             _eventId = eventId;
         }
 
-        internal abstract WorkflowAction Interpret(IWorkflowActions workflowActions);
+        internal virtual WorkflowAction Interpret(IWorkflowActions workflowActions)
+        {
+            throw new NotSupportedException(string.Format("Can not interpret {0}.", this.GetType().Name));
+        }
+
+        internal virtual WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            throw new NotSupportedException(string.Format("DefaultAction is not supported {0}.", this.GetType().Name));
+        }
         public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();
     
         public int CompareTo(WorkflowEvent other)

@@ -81,7 +81,7 @@ namespace Guflow.Decider
         }
         public IEnumerable<IWorkflowItem> AllItems
         {
-            get { return _workflowItems; }
+            get { return _workflowItems.Where(i=>i.GetType()!=typeof(WorkflowActionItem)); }
         }
 
         public IEnumerable<IActivityItem> AllActivities

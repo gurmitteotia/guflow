@@ -16,5 +16,10 @@ namespace Guflow.Decider
         {
             return workflowActions.OnActivityCancellationFailed(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.FailWorkflow("ACTIVITY_CANCELLATION_FAILED", Cause);
+        }
     }
 }

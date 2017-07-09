@@ -22,6 +22,11 @@ namespace Guflow.Decider
             }
         }
 
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.StartWorkflow();
+        }
+
         public string ContinuedExecutionRunId { get { return _workflowStartedAttributes.ContinuedExecutionRunId; } }
         public TimeSpan ExecutionStartToCloseTimeout { get { return TimeSpan.FromSeconds(Convert.ToInt32(_workflowStartedAttributes.ExecutionStartToCloseTimeout)); } }
         public string Input { get { return _workflowStartedAttributes.Input; } }

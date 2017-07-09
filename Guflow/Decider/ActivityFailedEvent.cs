@@ -14,11 +14,16 @@ namespace Guflow.Decider
         }
 
         public string Reason { get { return _eventAttributes.Reason; } }
-        public string Detail { get { return _eventAttributes.Details; } }
+        public string Details { get { return _eventAttributes.Details; } }
 
         internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
             return workflowActions.OnActivityFailure(this);
+        }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.FailWorkflow(Reason, Details);
         }
     }
 }

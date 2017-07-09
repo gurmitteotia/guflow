@@ -32,10 +32,10 @@ namespace Guflow.Decider
         {
             var timerItem = new TimerItem(identity, workflow);
             timerItem._rescheduleTimer = Reschedule(timerItem, identity, workflow);
-            timerItem.OnStartFailure(e => WorkflowAction.FailWorkflow("TIMER_START_FAILED", e.Cause));
-            timerItem.OnCancelled(e => WorkflowAction.CancelWorkflow("TIMER_CANCELLED"));
-            timerItem.OnFailedCancellation(e => WorkflowAction.FailWorkflow("TIMER_CANCELLATION_FAILED", e.Cause));
-            timerItem.OnFired(e => WorkflowAction.ContinueWorkflow(timerItem));
+            timerItem.OnStartFailure(e => e.DefaultAction(workflow));
+            timerItem.OnCancelled(e => e.DefaultAction(workflow));
+            timerItem.OnFailedCancellation(e => e.DefaultAction(workflow));
+            timerItem.OnFired(e => e.DefaultAction(workflow));
             return timerItem;
         }
 
@@ -44,7 +44,7 @@ namespace Guflow.Decider
             get { return WorkflowEvents.LastTimerEventFor(this); }
         }
 
-        public IEnumerable<WorkflowItemEvent> AllEvents
+        public override IEnumerable<WorkflowItemEvent> AllEvents
         {
             get { return WorkflowEvents.AllTimerEventsFor(this); }
         }

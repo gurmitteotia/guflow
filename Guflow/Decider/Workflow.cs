@@ -21,21 +21,6 @@ namespace Guflow.Decider
         public event EventHandler<WorkflowClosedEventArgs> Closed;
         public event EventHandler<WorkflowRestartedEventArgs> Restarted;
 
-        WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
-        {
-            Raise(workflowStartedEvent);
-
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.WorkflowStarted);
-            return workflowEventMethod == null
-                ? WorkflowAction.StartWorkflow(this)
-                : workflowEventMethod.Invoke(workflowStartedEvent);
-        }
-        private void Raise(WorkflowStartedEvent @event)
-        {
-            var eventHandler = Started;
-            if(eventHandler!=null)
-                eventHandler(this,new WorkflowStartedEventArgs(@event));
-        }
         WorkflowAction IWorkflowActions.OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
         {
             IActivity activity = _allWorkflowItems.ActivityItemFor(activityCompletedEvent);
@@ -87,68 +72,86 @@ namespace Guflow.Decider
             ITimer timer = _allWorkflowItems.TimerFor(timerCancellationFailedEvent);
             return timer.CancellationFailed(timerCancellationFailedEvent);
         }
+        WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
+        {
+            Raise(workflowStartedEvent);
+            return Handle(EventName.WorkflowStarted, workflowStartedEvent);
+        }
+        private void Raise(WorkflowStartedEvent @event)
+        {
+            var eventHandler = Started;
+            if (eventHandler != null)
+                eventHandler(this, new WorkflowStartedEventArgs(@event));
+        }
         WorkflowAction IWorkflowActions.OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.Signal);
-            return workflowEventMethod == null
-                ? WorkflowAction.Ignore(false)
-                : workflowEventMethod.Invoke(workflowSignaledEvent);
+            return Handle(EventName.Signal, workflowSignaledEvent);
         }
         WorkflowAction IWorkflowActions.OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CancelRequest);
-            return workflowEventMethod == null
-                ? WorkflowAction.CancelWorkflow(workflowCancellationRequestedEvent.Cause)
-                : workflowEventMethod.Invoke(workflowCancellationRequestedEvent);
+            return Handle(EventName.CancelRequest, workflowCancellationRequestedEvent);
         }
         WorkflowAction IWorkflowActions.OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.RecordMarkerFailed);
-            return workflowEventMethod == null
-                ? FailWorkflow("FAILED_TO_RECORD_MARKER", recordMarkerFailedEvent.Cause)
-                : workflowEventMethod.Invoke(recordMarkerFailedEvent);
+            return Handle(EventName.RecordMarkerFailed, recordMarkerFailedEvent);
         }
 
         WorkflowAction IWorkflowActions.OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.SignalFailed);
-            return workflowEventMethod == null
-                ? FailWorkflow("FAILED_TO_SIGNAL_WORKFLOW", workflowSignalFailedEvent.Cause)
-                : workflowEventMethod.Invoke(workflowSignalFailedEvent);
+            return Handle(EventName.SignalFailed, workflowSignalFailedEvent);
         }
 
         WorkflowAction IWorkflowActions.OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CompletionFailed);
-            return workflowEventMethod == null
-                ? FailWorkflow("FAILED_TO_COMPLETE_WORKFLOW", workflowCompletionFailedEvent.Cause)
-                : workflowEventMethod.Invoke(workflowCompletionFailedEvent);
+            return Handle(EventName.CompletionFailed, workflowCompletionFailedEvent);
         }
 
         WorkflowAction IWorkflowActions.OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.FailureFailed);
-            return workflowEventMethod == null
-                ? FailWorkflow("FAILED_TO_FAIL_WORKFLOW", workflowFailureFailedEvent.Cause)
-                : workflowEventMethod.Invoke(workflowFailureFailedEvent);
+            return Handle(EventName.FailureFailed, workflowFailureFailedEvent);
         }
 
         WorkflowAction IWorkflowActions.OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CancelRequestFailed);
-            return workflowEventMethod == null
-                ? FailWorkflow("FAILED_TO_SEND_CANCEL_REQUEST", workflowCancelRequestFailedEvent.Cause)
-                : workflowEventMethod.Invoke(workflowCancelRequestFailedEvent);
+            return Handle(EventName.CancelRequestFailed, workflowCancelRequestFailedEvent);
         }
 
         WorkflowAction IWorkflowActions.OnWorkflowCancellationFailed(WorkflowCancellationFailedEvent workflowCancellationFailedEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(EventName.CancellationFailed);
-            return workflowEventMethod == null
-                ? FailWorkflow("FAILED_TO_CANCEL_WORKFLOW", workflowCancellationFailedEvent.Cause)
-                : workflowEventMethod.Invoke(workflowCancellationFailedEvent);
+            return Handle(EventName.CancellationFailed, workflowCancellationFailedEvent);
         }
 
+        private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)
+        {
+            var workflowEventMethod = _workflowEventMethods.FindFor(eventName);
+            return workflowEventMethod == null
+                ? workflowEvent.DefaultAction(this)
+                : workflowEventMethod.Invoke(workflowEvent);
+        }
+        WorkflowAction IWorkflowDefaultActions.Continue(WorkflowItemEvent workflowItemEvent)
+        {
+            return Continue(workflowItemEvent);
+        }
+
+        WorkflowAction IWorkflowDefaultActions.StartWorkflow()
+        {
+            return StartWorkflow();
+        }
+
+        WorkflowAction IWorkflowDefaultActions.FailWorkflow(string reason, string details)
+        {
+            return FailWorkflow(reason, details);
+        }
+
+        WorkflowAction IWorkflowDefaultActions.CancelWorkflow(string details)
+        {
+            return CancelWorkflow(details);
+        }
+
+        WorkflowAction IWorkflowDefaultActions.Ignore()
+        {
+            return Ignore(false);
+        }
         internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {
             var completedHandler = Completed;
@@ -235,7 +238,6 @@ namespace Guflow.Decider
         {
             return WorkflowAction.CancelWorkflow(details);
         }
-
         protected RestartWorkflowAction RestartWorkflow()
         {
             IWorkflow workflow = this;
@@ -383,5 +385,6 @@ namespace Guflow.Decider
         {
             _currentWorkflowEvents = null;
         }
+        
     }
 }
