@@ -1,10 +1,23 @@
-﻿namespace Guflow.Decider
+﻿using System.Linq;
+
+namespace Guflow.Decider
 {
     public class Limit
     {
-        public static Limit Count(int count)
+        private readonly uint _count;
+
+        private Limit(uint count)
         {
-            return new Limit();
+            _count = count;
+        }
+        public static Limit Count(uint count)
+        {
+            return new Limit(count);
+        }
+        internal bool IsExceeded(WorkflowItem workflowItem)
+        {
+            var allEvents = workflowItem.AllEventsOf(workflowItem.LastEvent.GetType());
+            return allEvents.Count() > _count;
         }
     }
 }

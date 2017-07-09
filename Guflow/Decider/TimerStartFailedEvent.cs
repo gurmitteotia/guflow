@@ -17,5 +17,10 @@ namespace Guflow.Decider
         {
             return workflowActions.OnTimerStartFailure(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.FailWorkflow("TIMER_START_FAILED", Cause);
+        }
     }
 }

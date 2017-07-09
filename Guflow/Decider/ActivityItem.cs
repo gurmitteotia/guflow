@@ -21,12 +21,12 @@ namespace Guflow.Decider
         internal ActivityItem(Identity identity, IWorkflow workflow)
             : base(identity, workflow)
         {
-            _onCompletionAction = c => WorkflowAction.ContinueWorkflow(this);
-            _onFailedAction = c => WorkflowAction.FailWorkflow(c.Reason, c.Detail);
-            _onTimedoutAction = t => WorkflowAction.FailWorkflow(t.TimeoutType, t.Details);
-            _onCancelledAction = c => WorkflowAction.CancelWorkflow(c.Details);
-            _onCancellationFailedAction = c => WorkflowAction.FailWorkflow("ACTIVITY_CANCELLATION_FAILED", c.Cause);
-            _onFailedSchedulingAction = c => WorkflowAction.FailWorkflow("ACTIVITY_SCHEDULING_FAILED", c.Cause);
+            _onCompletionAction = c => c.DefaultAction(workflow);
+            _onFailedAction = c => c.DefaultAction(workflow);
+            _onTimedoutAction = t => t.DefaultAction(workflow);
+            _onCancelledAction = c => c.DefaultAction(workflow);
+            _onCancellationFailedAction = c => c.DefaultAction(workflow);
+            _onFailedSchedulingAction = c => c.DefaultAction(workflow);
             _inputFunc = a => WorkflowEvents.WorkflowStartedEvent().Input;
             _taskListFunc = a => null;
             _whenFunc = a => true;
@@ -67,7 +67,7 @@ namespace Guflow.Decider
             get { return WorkflowEvents.LastCancelledEventFor(this); }
         }
 
-        public IEnumerable<WorkflowItemEvent> AllEvents
+        public override IEnumerable<WorkflowItemEvent> AllEvents
         {
             get
             {

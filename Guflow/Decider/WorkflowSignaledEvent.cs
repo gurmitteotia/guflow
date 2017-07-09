@@ -22,7 +22,6 @@ namespace Guflow.Decider
                     : null;
             }
         }
-
         public string ExternalWorkflowId
         {
             get
@@ -36,6 +35,11 @@ namespace Guflow.Decider
         internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
         {
             return workflowActions.OnWorkflowSignaled(this);
+        }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.Ignore();
         }
     }
 }

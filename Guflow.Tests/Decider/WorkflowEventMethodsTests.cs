@@ -510,6 +510,10 @@ namespace Guflow.Tests.Decider
             public string Reason { get; set; }
             public long EventId { get; set; }
             public DateTime EventTime { get; set; }
+            internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class ArgumentInStringFormat : WorkflowEvent
@@ -527,6 +531,10 @@ namespace Guflow.Tests.Decider
             public string EventTime { get; set; }
             public string Duration { get; set; }
             public string Reason { get; set; }
+            internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

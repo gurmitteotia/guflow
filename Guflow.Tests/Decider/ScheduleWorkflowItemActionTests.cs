@@ -89,7 +89,7 @@ namespace Guflow.Tests.Decider
 
         private class WorkflowToScheduleActivityUpToLimit : Workflow
         {
-            public WorkflowToScheduleActivityUpToLimit(int limit)
+            public WorkflowToScheduleActivityUpToLimit(uint limit)
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName)
                     .OnCompletion(e => Reschedule(e).UpTo(Limit.Count(limit)));

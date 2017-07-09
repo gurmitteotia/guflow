@@ -16,11 +16,6 @@ namespace Guflow.Decider
             IsActive = true;
         }
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
-        {
-            throw new NotSupportedException("Can not interpret activity cancel requested event.");
-        }
-
         internal override bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)
         {
             foreach (var itemEvent in workflowItemEvents.OfType<ActivityCancelledEvent>())

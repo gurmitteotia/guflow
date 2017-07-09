@@ -16,6 +16,11 @@ namespace Guflow.Decider
             return workflowActions.OnWorkflowCancelRequestFailed(this);
         }
 
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.FailWorkflow("FAILED_TO_SEND_CANCEL_REQUEST", Cause);
+        }
+
         public string Cause {get { return _eventAttributes.Cause; }}
     }
 }

@@ -24,7 +24,6 @@ namespace Guflow.Decider
         {
             get { return Identity.Name; }
         }
-
         public bool IsActive
         {
             get
@@ -35,7 +34,7 @@ namespace Guflow.Decider
         }
 
         public abstract WorkflowItemEvent LastEvent { get; }
-
+        public abstract IEnumerable<WorkflowItemEvent> AllEvents { get; }
         public bool HasNoParents()
         {
             return _parentItems.Count == 0;
@@ -65,6 +64,7 @@ namespace Guflow.Decider
         {
             return Identity.Equals(identity);
         }
+      
         public override bool Equals(object other)
         {
             var otherItem = other as WorkflowItem;
@@ -88,7 +88,6 @@ namespace Guflow.Decider
             }
             return true;
         }
-
 
         public bool IsReadyToScheduleChildren()
         {
@@ -121,6 +120,11 @@ namespace Guflow.Decider
         protected IWorkflowEvents WorkflowEvents
         {
             get { return _workflow.WorkflowEvents; }
+        }
+
+        public WorkflowAction DefaultActionOnLastEvent()
+        {
+            return LastEvent.DefaultAction(_workflow);
         }
     }
 

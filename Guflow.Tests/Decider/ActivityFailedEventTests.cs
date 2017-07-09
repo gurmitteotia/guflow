@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
         {
             Assert.That(_activityFailedEvent.WorkerIdentity,Is.EqualTo(_identity));
             Assert.That(_activityFailedEvent.Reason,Is.EqualTo(_reason));
-            Assert.That(_activityFailedEvent.Detail,Is.EqualTo(_detail));
+            Assert.That(_activityFailedEvent.Details,Is.EqualTo(_detail));
             Assert.That(_activityFailedEvent.IsActive,Is.False);
         }
 

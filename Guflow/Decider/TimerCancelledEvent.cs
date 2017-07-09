@@ -14,5 +14,10 @@ namespace Guflow.Decider
         {
             return workflowActions.OnTimerCancelled(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.CancelWorkflow("TIMER_CANCELLED");
+        }
     }
 }

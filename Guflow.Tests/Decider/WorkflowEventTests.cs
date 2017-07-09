@@ -72,6 +72,11 @@ namespace Guflow.Tests.Decider
             {
                 throw new System.NotImplementedException();
             }
+
+            internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+            {
+                throw new System.NotImplementedException();
+            }
         }
     }
 }

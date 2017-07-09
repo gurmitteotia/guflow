@@ -18,5 +18,10 @@ namespace Guflow.Decider
         {
             return workflowActions.OnWorkflowSignalFailed(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.FailWorkflow("FAILED_TO_SIGNAL_WORKFLOW", Cause);
+        }
     }
 }

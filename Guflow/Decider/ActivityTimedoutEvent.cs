@@ -20,5 +20,10 @@ namespace Guflow.Decider
         {
             return workflowActions.OnActivityTimeout(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.FailWorkflow(TimeoutType, Details);
+        }
     }
 }

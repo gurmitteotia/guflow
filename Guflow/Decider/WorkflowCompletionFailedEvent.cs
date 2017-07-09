@@ -17,5 +17,10 @@ namespace Guflow.Decider
         {
             return workflowActions.OnWorkflowCompletionFailed(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.FailWorkflow("FAILED_TO_COMPLETE_WORKFLOW", Cause);
+        }
     }
 }

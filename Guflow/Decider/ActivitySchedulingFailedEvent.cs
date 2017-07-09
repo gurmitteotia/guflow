@@ -17,5 +17,10 @@ namespace Guflow.Decider
         {
             return workflowActions.OnActivitySchedulingFailed(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.FailWorkflow("ACTIVITY_SCHEDULING_FAILED", Cause);
+        }
     }
 }

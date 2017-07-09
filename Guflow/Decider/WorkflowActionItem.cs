@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Guflow.Decider
 {
@@ -51,6 +52,11 @@ namespace Guflow.Decider
         {
             AddParent(Identity.New(activityName, activityVersion, positionalName));
             return this;
+        }
+
+        public override IEnumerable<WorkflowItemEvent> AllEvents
+        {
+            get { return Enumerable.Empty<WorkflowItemEvent>(); }
         }
     }
 }

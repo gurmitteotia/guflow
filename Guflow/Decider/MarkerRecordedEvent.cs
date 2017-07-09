@@ -13,10 +13,5 @@ namespace Guflow.Decider
 
         public string MarkerName { get { return _eventAttributes.MarkerName; } }
         public string Details { get { return _eventAttributes.Details; }}
-
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
-        {
-            throw new NotSupportedException(string.Format("Can not interpret {0}.",this.GetType().Name));
-        }
     }
 }
