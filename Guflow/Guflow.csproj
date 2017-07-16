@@ -87,11 +87,14 @@
     <Compile Include="Decider\ChildPolicy.cs" />
     <Compile Include="Decider\IFluentWorkflowActionItem.cs" />
     <Compile Include="Decider\IWorkflowDefaultActions.cs" />
+    <Compile Include="Decider\JumpActions.cs" />
     <Compile Include="Decider\JumpWorkflowAction.cs" />
     <Compile Include="Decider\RestartWorkflowAction.cs" />
     <Compile Include="Decider\RestartWorkflowDecision.cs" />
     <Compile Include="Decider\Times.cs" />
+    <Compile Include="Decider\TriggerWorkflowAction.cs" />
     <Compile Include="Decider\WorkflowActionItem.cs" />
+    <Compile Include="Decider\WorkflowBranch.cs" />
     <Compile Include="Decider\WorkflowClosedEventArgs.cs" />
     <Compile Include="Decider\WorkflowItemExtensions.cs" />
     <Compile Include="Decider\WorkflowItems.cs" />

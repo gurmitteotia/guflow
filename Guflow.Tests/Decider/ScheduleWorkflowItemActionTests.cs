@@ -56,18 +56,62 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Returns_timer_decision_when_total_number_of_scheduling_is_less_than_allowed_limit()
+        public void Reschedule_activity_when_total_number_of_scheduling_is_less_than_allowed_limit()
         {
             var workflow = new WorkflowToScheduleActivityUpToLimit(3);
             var completed1 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
             var completed2 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var completed3 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var historyEvents = new WorkflowHistoryEvents(completed3.Concat(completed2.Concat(completed1)), completed3.Last().EventId, completed3.First().EventId);
+
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(_activityName, _activityVersion , _positionalName))}));
+        }
+
+        [Test]
+        public void Schedule_next_item_when_total_number_of_scheduling_events_exceeds_allowed_limit()
+        {
+            var workflow = new WorkflowToScheduleActivityUpToLimit(3);
+            var completed1 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var completed2 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var completed3 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var completed4 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+
+            var historyEvents = new WorkflowHistoryEvents(completed4.Concat(completed3.Concat(completed2.Concat(completed1))), completed4.Last().EventId, completed4.First().EventId);
+
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("completed") }));
+        }
+
+        [Test]
+        public void Reschedule_timer_when_total_number_of_scheduling_is_less_than_allowed_limit()
+        {
+            var workflow = new WorkflowToRescheduleActivityWithTimerUpToLimit(2);
+            var completed1 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var completed2 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+
             var historyEvents = new WorkflowHistoryEvents(completed2.Concat(completed1), completed2.Last().EventId, completed2.First().EventId);
 
-            var decisions = historyEvents.InterpretNewEventsFor(workflow);
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
 
-            Assert.That(decisions, Is.EqualTo(new []{ new CompleteWorkflowDecision("Completed")}));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.New(_activityName, _activityVersion, _positionalName), TimeSpan.FromSeconds(2), true) }));
+        }
 
-        
+        [Test]
+        public void Schedule_next_item_when_total_number_of_scheduling_events_exceeds_configured_limit()
+        {
+            var workflow = new WorkflowToRescheduleActivityWithTimerUpToLimit(2);
+            var completed1 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var completed2 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+            var completed3 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
+
+            var historyEvents = new WorkflowHistoryEvents(completed3.Concat(completed2.Concat(completed1)), completed3.Last().EventId, completed3.First().EventId);
+
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("completed") }));
         }
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
@@ -94,9 +138,19 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(_activityName, _activityVersion, _positionalName)
                     .OnCompletion(e => Reschedule(e).UpTo(Limit.Count(limit)));
 
-                ScheduleAction(CancelWorkflow("completed")).After(_activityName, _activityVersion, _positionalName);
+                ScheduleAction(CompleteWorkflow("completed")).After(_activityName, _activityVersion, _positionalName);
             }
         }
-     
+
+        private class WorkflowToRescheduleActivityWithTimerUpToLimit : Workflow
+        {
+            public WorkflowToRescheduleActivityWithTimerUpToLimit(uint limit)
+            {
+                ScheduleActivity(_activityName, _activityVersion, _positionalName)
+                    .OnCompletion(e => Reschedule(e).After(TimeSpan.FromSeconds(2)).UpTo(Limit.Count(limit)));
+
+                ScheduleAction(CompleteWorkflow("completed")).After(_activityName, _activityVersion, _positionalName);
+            }
+        }
     }
 }
