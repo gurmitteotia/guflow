@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Guflow.Decider
@@ -100,6 +101,11 @@ namespace Guflow.Decider
         private ActivityItem ActivityOf(Identity identity)
         {
             return _workflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
+        }
+
+        public IEnumerable<WorkflowBranch> ChildBranchesOf(WorkflowItem workflowItem)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

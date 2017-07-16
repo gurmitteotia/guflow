@@ -158,7 +158,7 @@ namespace Guflow.Decider
             if(completedHandler!=null)
                 completedHandler(this, new WorkflowCompletedEventArgs(workflowId, workflowRunId, result));
 
-            RaiseClosed(workflowId, workflowRunId);
+            RaiseWorkflowClosedEvent(workflowId, workflowRunId);
         }
         internal void OnFailed(string workflowId, string workflowRunId, string reason, string details)
         {
@@ -166,7 +166,7 @@ namespace Guflow.Decider
             if (eventHandler != null)
                 eventHandler(this, new WorkflowFailedEventArgs(workflowId, workflowRunId, reason, details));
 
-            RaiseClosed(workflowId, workflowRunId);
+            RaiseWorkflowClosedEvent(workflowId, workflowRunId);
         }
         internal void OnCancelled(string workflowId, string workflowRunId, string details)
         {
@@ -174,7 +174,7 @@ namespace Guflow.Decider
             if (eventHandler != null)
                 eventHandler(this, new WorkflowCancelledEventArgs(workflowId, workflowRunId, details));
 
-            RaiseClosed(workflowId, workflowRunId);
+            RaiseWorkflowClosedEvent(workflowId, workflowRunId);
         }
 
         internal void OnRestarted(string workflowId, string workflowRunId)
@@ -182,10 +182,10 @@ namespace Guflow.Decider
             var eventHandler = Restarted;
             if(eventHandler != null)
                 eventHandler(this, new WorkflowRestartedEventArgs(workflowId, workflowRunId));
-            RaiseClosed(workflowId, workflowRunId);
+            RaiseWorkflowClosedEvent(workflowId, workflowRunId);
         }
 
-        private void RaiseClosed(string workflowId, string workflowRunId)
+        private void RaiseWorkflowClosedEvent(string workflowId, string workflowRunId)
         {
             var closedHandler = Closed;
             if (closedHandler != null)
@@ -273,6 +273,13 @@ namespace Guflow.Decider
             return WorkflowAction.JumpTo(activityItem);
         }
 
+        protected JumpActions Jump(WorkflowItemEvent workflowItemEvent)
+        {
+            Ensure.NotNull(workflowItemEvent, "workflowItemEvent");
+            var workflowItem = _allWorkflowItems.WorkflowItemFor(workflowItemEvent);
+            return new JumpActions(workflowItem, _allWorkflowItems);
+        }
+
         protected CancelRequest CancelRequest { get { return new CancelRequest(this);} }
 
         protected IActivityItem ActivityOf(WorkflowItemEvent activityEvent)
@@ -309,7 +316,7 @@ namespace Guflow.Decider
         {
             get { return ((IWorkflow)this).WorkflowEvents.AllWorkflowCancellationRequestedEvents(); }
         }
-        protected Signal Signal(string signalName, object input)
+        protected static Signal Signal(string signalName, object input)
         {
             Ensure.NotNullAndEmpty(signalName, "signalName");
             return new Signal(signalName, input);

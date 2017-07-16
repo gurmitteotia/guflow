@@ -14,6 +14,7 @@ namespace Guflow.Tests.Decider
         private const string BookFlightActivity = "BookFlightActivity";
         private const string ChooseSeatActivity = "ChooseSeatActivity";
         private const string ChargeCustomerActivity = "ChargeCustomerActivity";
+        private const string SendEmailActivity = "SendEmailActivity";
         private const string Version = "1.0";
 
         [Test]
@@ -171,12 +172,31 @@ namespace Guflow.Tests.Decider
                     .Concat(reebokFlightActicityCompletedGraph)
                     .Concat(chooseSeatActivityCompletedGraph)
                     .Concat(bookFlightActivityCompletedGraph);
+            var workflow = new WorkflowHasImmediateParentWithIgnoreAction(false);
 
-            var decisions =
-                new WorkflowHasImmediateParentWithIgnoreAction(false).NewExecutionFor(new WorkflowHistoryEvents(allEvents,
+            var decisions = workflow.NewExecutionFor(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId)).Execute();
 
             Assert.That(decisions, Is.Empty);
+        }
+
+        [Test]
+        public void Schedule_the_first_children_with_mulitple_parents_when_jumping_out_of_execution_branch()
+        {
+            var bookHotel = CompletedActivityGraph(BookHotelActivity);
+            var addDinner = CompletedActivityGraph(AddDinnerActivity);
+            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+            var workflow = new WorkflowWithJumpAction();
+            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
+            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
+            
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EqualTo(new []
+            {
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)), 
+                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version))
+            }));
         }
 
         private static IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
@@ -230,6 +250,23 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowWithJumpAction : Workflow
+        {
+            public WorkflowWithJumpAction()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).After(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => JumpToActivity(SendEmailActivity, Version));
+                ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);
+
+                ScheduleActivity(SendEmailActivity, Version).After(ChargeCustomerActivity, Version);
             }
         }
     }
