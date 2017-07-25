@@ -16,9 +16,9 @@ namespace Guflow.Decider
 
         public string Details { get { return _eventAttributes.Details; } }
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnActivityTimeout(this);
+            return workflow.OnActivityTimeout(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

@@ -21,6 +21,7 @@ namespace Guflow.Decider
                 var workflowBranchJoint = childBranch.FindFirstJoint();
 
             }
+            return null;
         }
     }
 }

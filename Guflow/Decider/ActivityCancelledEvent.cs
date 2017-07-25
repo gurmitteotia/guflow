@@ -13,9 +13,9 @@ namespace Guflow.Decider
         }
         public string Details{get { return _eventAttributes.Details; }}
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnActivityCancelled(this);
+            return workflow.OnActivityCancelled(this);
         }
 
         internal bool IsCancelledEventFor(long cancelRequestedEventId)

@@ -45,7 +45,7 @@ namespace Guflow.Decider
             return WorkflowItemEvent.NotFound;
         }
 
-        public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflowActions workflowActions)
+        public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow)
         {
             var interpretedWorkflowActions = new List<WorkflowAction>();
 
@@ -56,7 +56,7 @@ namespace Guflow.Decider
                     continue;
                 var workflowEvent = historyEvent.CreateInterpretableEvent(_allHistoryEvents);
                 if(workflowEvent!=null)
-                    interpretedWorkflowActions.Add(workflowEvent.Interpret(workflowActions));
+                    interpretedWorkflowActions.Add(workflowEvent.Interpret(workflow));
             }
 
             return interpretedWorkflowActions.Where(w=>w!=null).SelectMany(a => a.GetDecisions()).Distinct();

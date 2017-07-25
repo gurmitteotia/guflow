@@ -32,9 +32,9 @@ namespace Guflow.Decider
             }
         }
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnWorkflowSignaled(this);
+            return workflow.OnWorkflowSignaled(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

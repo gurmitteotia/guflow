@@ -2,16 +2,12 @@
 {
     public sealed class JumpActions
     {
-        private readonly WorkflowItem _triggeringWorkflowItem;
         private readonly WorkflowItems _workflowItems;
-
-        internal JumpActions(WorkflowItem triggeringWorkflowItem, WorkflowItems workflowItems)
+        private readonly WorkflowItem _triggeringWorkflowItem = null;
+        internal JumpActions(WorkflowItems workflowItems)
         {
-            _triggeringWorkflowItem = triggeringWorkflowItem;
             _workflowItems = workflowItems;
         }
-        
-
         public JumpWorkflowAction ToActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name, "name");

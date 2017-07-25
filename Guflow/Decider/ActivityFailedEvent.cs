@@ -16,9 +16,9 @@ namespace Guflow.Decider
         public string Reason { get { return _eventAttributes.Reason; } }
         public string Details { get { return _eventAttributes.Details; } }
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnActivityFailure(this);
+            return workflow.OnActivityFailure(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

@@ -12,13 +12,13 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class WorkflowHistoryEventsTests
     {
-        private Mock<IWorkflowActions> _workflow;
+        private Mock<IWorkflow> _workflow;
         private WorkflowAction _interpretedWorkflowAction;
         private WorkflowDecision _expectedWorkflowDecision;
         [SetUp]
         public void Setup()
         {
-            _workflow = new Mock<IWorkflowActions>();
+            _workflow = new Mock<IWorkflow>();
             _expectedWorkflowDecision = new Mock<WorkflowDecision>(false,false).Object;
             _interpretedWorkflowAction = new TestWorkflowAction(_expectedWorkflowDecision);
         }

@@ -50,7 +50,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflowEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.StartWorkflow(workflow)));
+            Assert.That(workflowAction,Is.EqualTo(workflow.StartupAction));
         }
 
         [Test]

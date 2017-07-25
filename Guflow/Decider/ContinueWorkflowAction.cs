@@ -25,7 +25,7 @@ namespace Guflow.Decider
         }
         internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
-            var childItems = _completedWorkflowItem.GetChildlern();
+            var childItems = _completedWorkflowItem.Children();
             if (!childItems.Any())
                 return new[] { new CompleteWorkflowDecision(DefaultWorkflowCompletedResult, true) };
 

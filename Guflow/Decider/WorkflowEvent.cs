@@ -11,7 +11,7 @@ namespace Guflow.Decider
             _eventId = eventId;
         }
 
-        internal virtual WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal virtual WorkflowAction Interpret(IWorkflow workflow)
         {
             throw new NotSupportedException(string.Format("Can not interpret {0}.", this.GetType().Name));
         }

@@ -13,9 +13,9 @@ namespace Guflow.Decider
 
         internal string Cause { get { return _startTimerFailedAttributes.Cause; } }
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnTimerStartFailure(this);
+            return workflow.OnTimerStartFailure(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

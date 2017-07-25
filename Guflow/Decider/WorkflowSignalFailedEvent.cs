@@ -14,9 +14,9 @@ namespace Guflow.Decider
         public string WorkflowId { get { return _eventAttributes.WorkflowId; } }
         public string RunId { get { return _eventAttributes.RunId; } }
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnWorkflowSignalFailed(this);
+            return workflow.OnWorkflowSignalFailed(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
