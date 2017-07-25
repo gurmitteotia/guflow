@@ -502,7 +502,7 @@ namespace Guflow.Tests.Decider
             {
             }
 
-            internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+            internal override WorkflowAction Interpret(IWorkflow workflow)
             {
                 throw new NotImplementedException();
             }
@@ -523,7 +523,7 @@ namespace Guflow.Tests.Decider
             {
             }
 
-            internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+            internal override WorkflowAction Interpret(IWorkflow workflow)
             {
                 throw new NotImplementedException();
             }

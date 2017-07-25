@@ -44,9 +44,14 @@ namespace Guflow.Decider
             return _parentItems.Contains(workflowItem);
         }
 
-        public IEnumerable<WorkflowItem> GetChildlern()
+        public IEnumerable<WorkflowItem> Children()
         {
             return _workflow.GetChildernOf(this);
+        }
+
+        public IEnumerable<WorkflowItem> Parents()
+        {
+            return _parentItems;
         }
 
         public abstract WorkflowDecision GetScheduleDecision();
@@ -79,14 +84,18 @@ namespace Guflow.Decider
 
         public bool AreAllParentBranchesInactive(WorkflowItem exceptBranchOf)
         {
-            var parentsItems = _parentItems.Except(new[] { exceptBranchOf });
-            foreach (var parentsItem in parentsItems)
+            var parentBranches = ParentBranches().Where(p=>!p.Has(exceptBranchOf)).ToArray();
+            foreach (var parentBranch in parentBranches)
             {
-                var parentBranches = WorkflowBranch.BuildParentBranchStartingWith(parentsItem, _workflow).ToArray();
-                if (parentBranches.Any(p => p.IsActive(parentBranches)))
+                if (parentBranch.IsActive(parentBranches))
                     return false;
             }
             return true;
+        }
+
+        public IEnumerable<WorkflowBranch> ParentBranches()
+        {
+            return _parentItems.SelectMany(WorkflowBranch.Build);
         }
 
         public bool IsReadyToScheduleChildren()
@@ -109,7 +118,7 @@ namespace Guflow.Decider
         }
         protected void AddParent(Identity identity)
         {
-            var parentItem = _workflow.Find(identity);
+            var parentItem = _workflow.FindWorkflowItemBy(identity);
             if (parentItem == null)
                 throw new ParentItemMissingException(string.Format(Resources.Schedulable_item_missing, identity));
             if (Equals(parentItem))

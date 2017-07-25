@@ -32,9 +32,9 @@ namespace Guflow.Decider
                     : null;
             }
         }
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnWorkflowCancellationRequested(this);
+            return workflow.OnWorkflowCancellationRequested(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

@@ -9,6 +9,7 @@ namespace Guflow.Decider
         private readonly WorkflowItems _allWorkflowItems = new WorkflowItems();
         private IWorkflowEvents _currentWorkflowEvents;
         private readonly WorkflowEventMethods _workflowEventMethods;
+        private WorkflowAction _startupAction;
 
         protected Workflow()
         {
@@ -21,58 +22,58 @@ namespace Guflow.Decider
         public event EventHandler<WorkflowClosedEventArgs> Closed;
         public event EventHandler<WorkflowRestartedEventArgs> Restarted;
 
-        WorkflowAction IWorkflowActions.OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
+        WorkflowAction IWorkflow.OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
         {
             IActivity activity = _allWorkflowItems.ActivityItemFor(activityCompletedEvent);
             return activity.Completed(activityCompletedEvent);
         }
-        WorkflowAction IWorkflowActions.OnActivityFailure(ActivityFailedEvent activityFailedEvent)
+        WorkflowAction IWorkflow.OnActivityFailure(ActivityFailedEvent activityFailedEvent)
         {
             IActivity activity = _allWorkflowItems.ActivityItemFor(activityFailedEvent);
             return activity.Failed(activityFailedEvent);
         }
-        WorkflowAction IWorkflowActions.OnActivityTimeout(ActivityTimedoutEvent activityTimedoutEvent)
+        WorkflowAction IWorkflow.OnActivityTimeout(ActivityTimedoutEvent activityTimedoutEvent)
         {
             IActivity activity = _allWorkflowItems.ActivityItemFor(activityTimedoutEvent);
             return activity.Timedout(activityTimedoutEvent);
         }
-        WorkflowAction IWorkflowActions.OnActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
+        WorkflowAction IWorkflow.OnActivityCancelled(ActivityCancelledEvent activityCancelledEvent)
         {
             IActivity activity = _allWorkflowItems.ActivityItemFor(activityCancelledEvent);
             return activity.Cancelled(activityCancelledEvent);
         }
-        WorkflowAction IWorkflowActions.OnActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
+        WorkflowAction IWorkflow.OnActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent)
         {
             IActivity workflowActivity = _allWorkflowItems.ActivityItemFor(activityCancellationFailedEvent);
             return workflowActivity.CancellationFailed(activityCancellationFailedEvent);
         }
 
-        WorkflowAction IWorkflowActions.OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
+        WorkflowAction IWorkflow.OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent)
         {
             IActivity workflowActivity = _allWorkflowItems.ActivityItemFor(activitySchedulingFailedEvent);
             return workflowActivity.SchedulingFailed(activitySchedulingFailedEvent);
         }
-        WorkflowAction IWorkflowActions.OnTimerFired(TimerFiredEvent timerFiredEvent)
+        WorkflowAction IWorkflow.OnTimerFired(TimerFiredEvent timerFiredEvent)
         {
             ITimer timer = _allWorkflowItems.TimerFor(timerFiredEvent);
             return timer.Fired(timerFiredEvent);
         }
-        WorkflowAction IWorkflowActions.OnTimerStartFailure(TimerStartFailedEvent timerStartFailedEvent)
+        WorkflowAction IWorkflow.OnTimerStartFailure(TimerStartFailedEvent timerStartFailedEvent)
         {
             ITimer timer = _allWorkflowItems.TimerFor(timerStartFailedEvent);
             return timer.StartFailed(timerStartFailedEvent);
         }
-        WorkflowAction IWorkflowActions.OnTimerCancelled(TimerCancelledEvent timerCancelledEvent)
+        WorkflowAction IWorkflow.OnTimerCancelled(TimerCancelledEvent timerCancelledEvent)
         {
             ITimer timer = _allWorkflowItems.TimerFor(timerCancelledEvent);
             return timer.Cancelled(timerCancelledEvent);
         }
-        WorkflowAction IWorkflowActions.OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        WorkflowAction IWorkflow.OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
             ITimer timer = _allWorkflowItems.TimerFor(timerCancellationFailedEvent);
             return timer.CancellationFailed(timerCancellationFailedEvent);
         }
-        WorkflowAction IWorkflowActions.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
+        WorkflowAction IWorkflow.OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent)
         {
             Raise(workflowStartedEvent);
             return Handle(EventName.WorkflowStarted, workflowStartedEvent);
@@ -83,40 +84,40 @@ namespace Guflow.Decider
             if (eventHandler != null)
                 eventHandler(this, new WorkflowStartedEventArgs(@event));
         }
-        WorkflowAction IWorkflowActions.OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent)
+        WorkflowAction IWorkflow.OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent)
         {
             return Handle(EventName.Signal, workflowSignaledEvent);
         }
-        WorkflowAction IWorkflowActions.OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
+        WorkflowAction IWorkflow.OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
         {
             return Handle(EventName.CancelRequest, workflowCancellationRequestedEvent);
         }
-        WorkflowAction IWorkflowActions.OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent)
+        WorkflowAction IWorkflow.OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent)
         {
             return Handle(EventName.RecordMarkerFailed, recordMarkerFailedEvent);
         }
 
-        WorkflowAction IWorkflowActions.OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent)
+        WorkflowAction IWorkflow.OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent)
         {
             return Handle(EventName.SignalFailed, workflowSignalFailedEvent);
         }
 
-        WorkflowAction IWorkflowActions.OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent)
+        WorkflowAction IWorkflow.OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent)
         {
             return Handle(EventName.CompletionFailed, workflowCompletionFailedEvent);
         }
 
-        WorkflowAction IWorkflowActions.OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent)
+        WorkflowAction IWorkflow.OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent)
         {
             return Handle(EventName.FailureFailed, workflowFailureFailedEvent);
         }
 
-        WorkflowAction IWorkflowActions.OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
+        WorkflowAction IWorkflow.OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
         {
             return Handle(EventName.CancelRequestFailed, workflowCancelRequestFailedEvent);
         }
 
-        WorkflowAction IWorkflowActions.OnWorkflowCancellationFailed(WorkflowCancellationFailedEvent workflowCancellationFailedEvent)
+        WorkflowAction IWorkflow.OnWorkflowCancellationFailed(WorkflowCancellationFailedEvent workflowCancellationFailedEvent)
         {
             return Handle(EventName.CancellationFailed, workflowCancellationFailedEvent);
         }
@@ -251,36 +252,25 @@ namespace Guflow.Decider
         }
         protected WorkflowAction StartWorkflow()
         {
-            return WorkflowAction.StartWorkflow(this);
+            return WorkflowAction.StartWorkflow(_allWorkflowItems);
         }
         protected static WorkflowAction Ignore(bool keepBranchActive)
         {
             return WorkflowAction.Ignore(keepBranchActive);
         }
-        protected JumpWorkflowAction JumpToActivity(string name, string version, string positionalName = "")
+    
+        protected JumpActions Jump
         {
-            Ensure.NotNullAndEmpty(name, "name");
-            Ensure.NotNullAndEmpty(version, "version");
-
-            var activityItem = _allWorkflowItems.ActivityItemFor(Identity.New(name, version, positionalName));
-            return WorkflowAction.JumpTo(activityItem);
-        }
-        protected JumpWorkflowAction JumpToTimer(string name)
-        {
-            Ensure.NotNullAndEmpty(name, "name");
-
-            var activityItem = _allWorkflowItems.TimerItemFor(Identity.Timer(name));
-            return WorkflowAction.JumpTo(activityItem);
+            get { return new JumpActions(_allWorkflowItems); }
         }
 
-        protected JumpActions Jump(WorkflowItemEvent workflowItemEvent)
+        protected WorkflowAction DefaultAction(WorkflowEvent workflowEvent)
         {
-            Ensure.NotNull(workflowItemEvent, "workflowItemEvent");
-            var workflowItem = _allWorkflowItems.WorkflowItemFor(workflowItemEvent);
-            return new JumpActions(workflowItem, _allWorkflowItems);
+            Ensure.NotNull(workflowEvent, "workflowEvent");
+            IWorkflowDefaultActions defaultActions = this;
+            return workflowEvent.DefaultAction(defaultActions);
         }
-
-        protected CancelRequest CancelRequest { get { return new CancelRequest(this);} }
+        protected CancelRequest CancelRequest { get { return new CancelRequest(_allWorkflowItems);} }
 
         protected IActivityItem ActivityOf(WorkflowItemEvent activityEvent)
         {
@@ -321,31 +311,41 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(signalName, "signalName");
             return new Signal(signalName, input);
         }
-        IEnumerable<WorkflowItem> IWorkflowItems.GetStartupWorkflowItems()
+        //IEnumerable<WorkflowItem> IWorkflowItems.GetStartupWorkflowItems()
+        //{
+        //    return _allWorkflowItems.StartupItems();
+        //}
+        //IEnumerable<WorkflowItem> IWorkflowItems.GetChildernOf(WorkflowItem item)
+        //{
+        //    return _allWorkflowItems.ChilderenOf(item);
+        //}
+
+        //IEnumerable<WorkflowItem> IWorkflowItems.GetParentsOf(WorkflowItem item)
+        //{
+        //    return _allWorkflowItems.ParentsOf(item);
+        //}
+        //WorkflowItem IWorkflowItems.Find(Identity identity)
+        //{
+        //    return _allWorkflowItems.WorkflowItemFor(identity);
+        //}
+        //ActivityItem IWorkflowItems.FindActivityFor(Identity identity)
+        //{
+        //    return _allWorkflowItems.ActivityItemFor(identity);
+        //}
+        //TimerItem IWorkflowItems.FindTimerFor(Identity identity)
+        //{
+        //    return _allWorkflowItems.TimerItemFor(identity);
+        //}
+        IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
         {
-            return _allWorkflowItems.StartupItems();
-        }
-        IEnumerable<WorkflowItem> IWorkflowItems.GetChildernOf(WorkflowItem item)
-        {
-            return _allWorkflowItems.ChilderenOf(item);
+            return _allWorkflowItems.ChilderenOf(workflowItem);
         }
 
-        IEnumerable<WorkflowItem> IWorkflowItems.GetParentsOf(WorkflowItem item)
-        {
-            return _allWorkflowItems.ParentsOf(item);
-        }
-        WorkflowItem IWorkflowItems.Find(Identity identity)
+        WorkflowItem IWorkflow.FindWorkflowItemBy(Identity identity)
         {
             return _allWorkflowItems.WorkflowItemFor(identity);
         }
-        ActivityItem IWorkflowItems.FindActivityFor(Identity identity)
-        {
-            return _allWorkflowItems.ActivityItemFor(identity);
-        }
-        TimerItem IWorkflowItems.FindTimerFor(Identity identity)
-        {
-            return _allWorkflowItems.TimerItemFor(identity);
-        }
+
         IWorkflowEvents IWorkflow.WorkflowEvents
         {
             get
@@ -355,6 +355,12 @@ namespace Guflow.Decider
                 return _currentWorkflowEvents;
             }
         }
+
+        public WorkflowAction StartupAction
+        {
+            get { return _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems)); }
+        }
+
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
         {
             if (proposal && IsActive)

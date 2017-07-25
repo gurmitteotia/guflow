@@ -261,7 +261,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(BookHotelActivity, Version);
                 ScheduleActivity(AddDinnerActivity, Version).After(BookHotelActivity, Version);
 
-                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => JumpToActivity(SendEmailActivity, Version));
+                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump.ToActivity(SendEmailActivity, Version));
                 ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);

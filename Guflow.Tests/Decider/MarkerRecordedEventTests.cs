@@ -25,7 +25,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_interpreted()
         {
-            Assert.Throws<NotSupportedException>(() => _markerRecordedEvent.Interpret(new Mock<IWorkflowActions>().Object));
+            Assert.Throws<NotSupportedException>(() => _markerRecordedEvent.Interpret(new Mock<IWorkflow>().Object));
         }
     }
 }

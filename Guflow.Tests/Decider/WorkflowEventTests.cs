@@ -68,7 +68,7 @@ namespace Guflow.Tests.Decider
             public TestWorkflowEvent(long eventId) : base(eventId)
             {
             }
-            internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+            internal override WorkflowAction Interpret(IWorkflow workflow)
             {
                 throw new System.NotImplementedException();
             }

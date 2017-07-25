@@ -5,8 +5,8 @@ namespace Guflow.Decider
 {
     public class CancelRequest
     {
-        private readonly IWorkflowItems _workflowItems;
-        internal CancelRequest(IWorkflowItems workflowItems)
+        private readonly WorkflowItems _workflowItems;
+        internal CancelRequest(WorkflowItems workflowItems)
         {
             _workflowItems = workflowItems;
         }
@@ -15,14 +15,14 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(name,"name");
             Ensure.NotNullAndEmpty(version, "version");
 
-            var activityItem = _workflowItems.FindActivityFor(Identity.New(name, version, positionalName));
+            var activityItem = _workflowItems.ActivityItemFor(Identity.New(name, version, positionalName));
             return WorkflowAction.Cancel(activityItem);
         }
         public WorkflowAction ForTimer(string timerName)
         {
             Ensure.NotNullAndEmpty(timerName, "timerName");
 
-            var timerItem = _workflowItems.FindTimerFor(Identity.Timer(timerName));
+            var timerItem = _workflowItems.TimerItemFor(Identity.Timer(timerName));
             return WorkflowAction.Cancel(timerItem);
         }
         public WorkflowAction ForWorkflow(string workflowId, string runId = null)

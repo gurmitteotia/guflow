@@ -76,9 +76,9 @@ namespace Guflow.Decider
             get { return TimeSpan.FromSeconds(Convert.ToInt32(_workflowStartedAttributes.TaskStartToCloseTimeout)); }
         }
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnWorkflowStarted(this);
+            return workflow.OnWorkflowStarted(this);
         }
     }
 }

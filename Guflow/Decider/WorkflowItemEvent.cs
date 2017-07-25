@@ -34,7 +34,7 @@ namespace Guflow.Decider
                 AwsIdentity= AwsIdentity.Raw("");
                 IsActive = false;
             }
-            internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+            internal override WorkflowAction Interpret(IWorkflow workflow)
             {
                 return WorkflowAction.Ignore(true);
             }

@@ -5,20 +5,18 @@ namespace Guflow.Decider
 {
     internal class WorkflowBranch
     {
-        private readonly IWorkflow _workflow;
         private readonly List<WorkflowItem> _workflowItems = new List<WorkflowItem>();
 
-        private WorkflowBranch(IWorkflow workflow, params WorkflowItem[] workflowItems)
+        private WorkflowBranch(params WorkflowItem[] branchItems)
         {
-            _workflow = workflow;
-            _workflowItems.AddRange(workflowItems);
+            _workflowItems.AddRange(branchItems);
         }
 
-        public static IEnumerable<WorkflowBranch> BuildParentBranchStartingWith(WorkflowItem startItem, IWorkflow workflow)
+        public static IEnumerable<WorkflowBranch> Build(WorkflowItem startItem)
         {
             var allBranches = new List<WorkflowBranch>();
 
-            var parentBranch = new WorkflowBranch(workflow, startItem);
+            var parentBranch = new WorkflowBranch(startItem);
             if (parentBranch.Parents().Any())
                 foreach (var parent in parentBranch.Parents())
                     allBranches.Add(parentBranch.Add(parent));
@@ -30,13 +28,13 @@ namespace Guflow.Decider
 
         private IEnumerable<WorkflowBranch> Parents()
         {
-            return _workflow.GetParentsOf(_workflowItems.Last())
-                .SelectMany(p => BuildParentBranchStartingWith(p, _workflow));
+            return _workflowItems.Last().Parents()
+                .SelectMany(Build);
         }
 
         private WorkflowBranch Add(WorkflowBranch workflowBranch)
         {
-            return new WorkflowBranch(_workflow, _workflowItems.Concat(workflowBranch._workflowItems).ToArray());
+            return new WorkflowBranch(_workflowItems.Concat(workflowBranch._workflowItems).ToArray());
         }
 
         public bool IsActive(IEnumerable<WorkflowBranch> allBranches)
@@ -61,6 +59,11 @@ namespace Guflow.Decider
         public BorkflowBranchJoint FindFirstJoint()
         {
             throw new System.NotImplementedException();
+        }
+
+        public bool Has(WorkflowItem workflowItem)
+        {
+            return _workflowItems.Contains(workflowItem);
         }
     }
 

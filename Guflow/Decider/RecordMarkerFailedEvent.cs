@@ -13,9 +13,9 @@ namespace Guflow.Decider
         public string MarkerName { get { return _eventAttributes.MarkerName; } }
         public string Cause { get { return _eventAttributes.Cause; } }
 
-        internal override WorkflowAction Interpret(IWorkflowActions workflowActions)
+        internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflowActions.OnRecordMarkerFailed(this);
+            return workflow.OnRecordMarkerFailed(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

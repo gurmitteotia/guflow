@@ -10,18 +10,10 @@ namespace Guflow.Tests.Decider
     public class StartWorkflowActionTests
     {
         [Test]
-        public void Equality_tests()
-        {
-            var workflowItem = new Mock<IWorkflowItems>();
-            Assert.True(WorkflowAction.StartWorkflow(workflowItem.Object).Equals(WorkflowAction.StartWorkflow(workflowItem.Object)));
-            Assert.False(WorkflowAction.StartWorkflow(workflowItem.Object).Equals(WorkflowAction.StartWorkflow(new Mock<IWorkflowItems>().Object)));
-        }
-
-        [Test]
         public void Return_workflow_completed_decision_when_workflow_does_not_have_any_schedulable_items()
         {
             var emptyWorkflow = new EmptyWorkflow();
-            var startWorkflowAction = WorkflowAction.StartWorkflow(emptyWorkflow);
+            var startWorkflowAction = emptyWorkflow.StartupAction;
 
             var startupDecisions = startWorkflowAction.GetDecisions();
 
@@ -32,7 +24,7 @@ namespace Guflow.Tests.Decider
         public void Return_schedule_decisions_for_startup_items()
         {
             var workflow = new TestWorkflow();
-            var startWorkflowAction = WorkflowAction.StartWorkflow(workflow);
+            var startWorkflowAction = workflow.StartupAction;
 
             var workflowStartedDecisions = startWorkflowAction.GetDecisions();
 
@@ -47,14 +39,14 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = activityCompletedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.StartWorkflow(workflow)));
+            Assert.That(workflowAction,Is.EqualTo(workflow.StartupAction));
         }
 
         [Test]
         public void Can_return_the_decisions_for_startup_schedulable_workflow_action()
         {
             var workflow = new WorkflowToScheduleAction("reason", "detailss");
-            var startWorkflowAction = WorkflowAction.StartWorkflow(workflow);
+            var startWorkflowAction = workflow.StartupAction;
 
             var action = startWorkflowAction.GetDecisions();
 

@@ -45,7 +45,7 @@ namespace Guflow.Decider
         {
             return new ContinueWorkflowAction(workflowItem);
         }
-        internal static WorkflowAction StartWorkflow(IWorkflowItems workflowItems)
+        internal static WorkflowAction StartWorkflow(WorkflowItems workflowItems)
         {
             return new StartWorkflowAction(workflowItems);
         }
@@ -137,9 +137,9 @@ namespace Guflow.Decider
         private class StartWorkflowAction : WorkflowAction
         {
             private const string _defaultCompleteResult = "Workflow is completed because no schedulable item was found.";
-            private readonly IWorkflowItems _workflowItems;
+            private readonly WorkflowItems _workflowItems;
 
-            public StartWorkflowAction(IWorkflowItems workflowItems)
+            public StartWorkflowAction(WorkflowItems workflowItems)
             {
                 _workflowItems = workflowItems;
             }
@@ -156,7 +156,7 @@ namespace Guflow.Decider
             }
             internal override IEnumerable<WorkflowDecision> GetDecisions()
             {
-                var startupWorkflowItems = _workflowItems.GetStartupWorkflowItems();
+                var startupWorkflowItems = _workflowItems.StartupItems();
 
                 if (!startupWorkflowItems.Any())
                     return new[] { new CompleteWorkflowDecision(_defaultCompleteResult) };
