@@ -82,6 +82,11 @@ namespace Guflow.Decider
             return Identity.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return Identity.ToString();
+        }
+
         public bool AreAllParentBranchesInactive(WorkflowItem exceptBranchOf)
         {
             var parentBranches = ParentBranches().Where(p=>!p.Has(exceptBranchOf)).ToArray();
@@ -95,7 +100,12 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowBranch> ParentBranches()
         {
-            return _parentItems.SelectMany(WorkflowBranch.Build);
+            return _parentItems.SelectMany(WorkflowBranch.ParentBranches);
+        }
+
+        public IEnumerable<WorkflowBranch> ChildBranches()
+        {
+            return WorkflowBranch.ChildBranches(this);
         }
 
         public bool IsReadyToScheduleChildren()
@@ -126,9 +136,9 @@ namespace Guflow.Decider
             _parentItems.Add(parentItem);
         }
 
-        protected IWorkflowEvents WorkflowEvents
+        protected IWorkflowHistoryEvents WorkflowHistoryEvents
         {
-            get { return _workflow.WorkflowEvents; }
+            get { return _workflow.WorkflowHistoryEvents; }
         }
 
         public WorkflowAction DefaultActionOnLastEvent()

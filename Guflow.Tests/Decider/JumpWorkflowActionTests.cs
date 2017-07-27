@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -10,9 +12,11 @@ namespace Guflow.Tests.Decider
     public class JumpWorkflowActionTests
     {
         private readonly Mock<IWorkflow> _workflow = new Mock<IWorkflow>();
-        private const string _activityName = "activity";
-        private const string _activityVersion = "2.0";
-        private const string _positionalName = "pname";
+        private const string ActivityName = "activity";
+        private const string ActivityVersion = "2.0";
+        private const string PositionalName = "pname";
+        private const string SiblingActivityName = "BookHotelActivity";
+        private const string Version = "1.0";
         [Test]
         public void Equality_tests()
         {
@@ -46,43 +50,68 @@ namespace Guflow.Tests.Decider
         public void Can_be_returned_as_workflow_action_when_scheduling_the_activity()
         {
             var workflow = new WorkflowToReturnScheduleActivityAction();
-            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var completedActivityEvent = CreateCompletedActivityEvent(ActivityName, ActivityVersion, PositionalName);
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.JumpTo(new ActivityItem(Identity.New(_activityName, _activityVersion, _positionalName), null))));
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.JumpTo(new ActivityItem(Identity.New(ActivityName, ActivityVersion, PositionalName), null))));
         }
 
         [Test]
         public void Can_be_returned_as_workflow_action_when_scheduling_the_timer()
         {
             var workflow = new WorkflowToReturnScheduleTimerAction();
-            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var completedActivityEvent = CreateCompletedActivityEvent(ActivityName, ActivityVersion, PositionalName);
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
 
             Assert.That(workflowAction, Is.EqualTo(WorkflowAction.JumpTo(TimerItem.New(Identity.Timer("SomeTimer"), null))));
         }
 
+        [Test]
+        public void Jumping_out_to_different_parent_branch_is_not_allowed()
+        {
+            var siblingActivity = CompletedActivityGraph(SiblingActivityName);
+            var workflow = new WorkflowToJumpToDifferentBranch();
+            var historyEvents = new WorkflowHistoryHistoryEvents(siblingActivity, siblingActivity.Last().EventId, siblingActivity.First().EventId);
+
+            Assert.Throws<OutOfBranchJumpException>(()=> workflow.NewExecutionFor(historyEvents).Execute());
+        }
+
         private class WorkflowToReturnScheduleActivityAction : Workflow
         {
             public WorkflowToReturnScheduleActivityAction()
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => Jump.ToActivity(_activityName, _activityVersion, _positionalName));
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => Jump(c).ToActivity(ActivityName, ActivityVersion, PositionalName));
             }
         }
         private class WorkflowToReturnScheduleTimerAction : Workflow
         {
             public WorkflowToReturnScheduleTimerAction()
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => Jump.ToTimer("SomeTimer"));
-                ScheduleTimer("SomeTimer");
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => Jump(c).ToTimer("SomeTimer"));
+                ScheduleTimer("SomeTimer").After(ActivityName, ActivityVersion, PositionalName);
             }
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
             var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
+        }
+        private static IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
+        {
+            return HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, Version), "id", "result");
+        }
+        [WorkflowDescription("1.0")]
+        private class WorkflowToJumpToDifferentBranch : Workflow
+        {
+            public WorkflowToJumpToDifferentBranch()
+            {
+                ScheduleActivity(ActivityName, Version);
+
+                ScheduleActivity(SiblingActivityName, Version)
+                    .OnCompletion(e => Jump(e).ToActivity(ActivityName, Version));
+            }
         }
     }
 }

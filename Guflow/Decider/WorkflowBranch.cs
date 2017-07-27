@@ -12,7 +12,7 @@ namespace Guflow.Decider
             _workflowItems.AddRange(branchItems);
         }
 
-        public static IEnumerable<WorkflowBranch> Build(WorkflowItem startItem)
+        public static IEnumerable<WorkflowBranch> ParentBranches(WorkflowItem startItem)
         {
             var allBranches = new List<WorkflowBranch>();
 
@@ -26,10 +26,30 @@ namespace Guflow.Decider
             return allBranches;
         }
 
+        public static IEnumerable<WorkflowBranch> ChildBranches(WorkflowItem startItem)
+        {
+            var allBranches = new List<WorkflowBranch>();
+
+            var childBranch = new WorkflowBranch(startItem);
+            if (childBranch.Childs().Any())
+                foreach (var child in childBranch.Childs())
+                    allBranches.Add(childBranch.Add(child));
+            else
+                allBranches.Add(childBranch);
+
+            return allBranches;
+        }
+
         private IEnumerable<WorkflowBranch> Parents()
         {
             return _workflowItems.Last().Parents()
-                .SelectMany(Build);
+                .SelectMany(ParentBranches);
+        }
+
+        private IEnumerable<WorkflowBranch> Childs()
+        {
+            return _workflowItems.Last().Children()
+                .SelectMany(ChildBranches);
         }
 
         private WorkflowBranch Add(WorkflowBranch workflowBranch)
@@ -56,9 +76,12 @@ namespace Guflow.Decider
             return latestEventItem.CanScheduleAny(allItemsInBranches);
         }
 
-        public BorkflowBranchJoint FindFirstJoint()
+        public WorkflowItem FindFirstJointItemUpTo(WorkflowItem jumpedItem)
         {
-            throw new System.NotImplementedException();
+            if(Has(jumpedItem))
+                return _workflowItems.TakeWhile(i=> !i.Equals(jumpedItem)).FirstOrDefault(i => i.Parents().Count() > 1);
+
+            return null;
         }
 
         public bool Has(WorkflowItem workflowItem)
@@ -67,7 +90,5 @@ namespace Guflow.Decider
         }
     }
 
-    internal class BorkflowBranchJoint
-    {
-    }
+   
 }

@@ -62,7 +62,7 @@ namespace Guflow.Tests.Decider
             var completed1 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
             var completed2 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
             var completed3 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
-            var historyEvents = new WorkflowHistoryEvents(completed3.Concat(completed2.Concat(completed1)), completed3.Last().EventId, completed3.First().EventId);
+            var historyEvents = new WorkflowHistoryHistoryEvents(completed3.Concat(completed2.Concat(completed1)), completed3.Last().EventId, completed3.First().EventId);
 
             var decisions = workflow.NewExecutionFor(historyEvents).Execute();
 
@@ -78,7 +78,7 @@ namespace Guflow.Tests.Decider
             var completed3 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
             var completed4 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
-            var historyEvents = new WorkflowHistoryEvents(completed4.Concat(completed3.Concat(completed2.Concat(completed1))), completed4.Last().EventId, completed4.First().EventId);
+            var historyEvents = new WorkflowHistoryHistoryEvents(completed4.Concat(completed3.Concat(completed2.Concat(completed1))), completed4.Last().EventId, completed4.First().EventId);
 
             var decisions = workflow.NewExecutionFor(historyEvents).Execute();
 
@@ -92,7 +92,7 @@ namespace Guflow.Tests.Decider
             var completed1 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
             var completed2 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
-            var historyEvents = new WorkflowHistoryEvents(completed2.Concat(completed1), completed2.Last().EventId, completed2.First().EventId);
+            var historyEvents = new WorkflowHistoryHistoryEvents(completed2.Concat(completed1), completed2.Last().EventId, completed2.First().EventId);
 
             var decisions = workflow.NewExecutionFor(historyEvents).Execute();
 
@@ -107,7 +107,7 @@ namespace Guflow.Tests.Decider
             var completed2 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
             var completed3 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
-            var historyEvents = new WorkflowHistoryEvents(completed3.Concat(completed2.Concat(completed1)), completed3.Last().EventId, completed3.First().EventId);
+            var historyEvents = new WorkflowHistoryHistoryEvents(completed3.Concat(completed2.Concat(completed1)), completed3.Last().EventId, completed3.First().EventId);
 
             var decisions = workflow.NewExecutionFor(historyEvents).Execute();
 

@@ -2,14 +2,12 @@
 
 namespace Guflow.Decider
 {
-    internal interface IWorkflow : IWorkflowItems, IWorkflowDefaultActions
+    internal interface IWorkflow : IWorkflowDefaultActions
     {
         IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem workflowItem);
         WorkflowItem FindWorkflowItemBy(Identity identity);
 
-        IWorkflowEvents WorkflowEvents { get; }
-
-        WorkflowAction StartupAction { get; }
+        IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
 
         WorkflowAction OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent);
         WorkflowAction OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent);

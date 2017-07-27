@@ -89,10 +89,11 @@
     <Compile Include="Decider\IWorkflowDefaultActions.cs" />
     <Compile Include="Decider\JumpActions.cs" />
     <Compile Include="Decider\JumpWorkflowAction.cs" />
+    <Compile Include="Decider\OutOfBranchJumpException.cs" />
     <Compile Include="Decider\RestartWorkflowAction.cs" />
     <Compile Include="Decider\RestartWorkflowDecision.cs" />
     <Compile Include="Decider\Times.cs" />
-    <Compile Include="Decider\TriggerWorkflowAction.cs" />
+    <Compile Include="Decider\JumpTriggeredWorkflowAction.cs" />
     <Compile Include="Decider\WorkflowActionItem.cs" />
     <Compile Include="Decider\WorkflowBranch.cs" />
     <Compile Include="Decider\WorkflowClosedEventArgs.cs" />
@@ -153,7 +154,6 @@
     <Compile Include="Decider\IWorkflowClosingActions.cs" />
     <Compile Include="Decider\IWorkflowEvents.cs" />
     <Compile Include="Decider\IWorkflowItem.cs" />
-    <Compile Include="Decider\IWorkflowItems.cs" />
     <Compile Include="SerializationExtension.cs" />
     <Compile Include="Decider\MarkerRecordedEvent.cs" />
     <Compile Include="Decider\ParentItemMissingException.cs" />

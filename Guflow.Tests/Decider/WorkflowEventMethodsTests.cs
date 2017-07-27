@@ -52,13 +52,13 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Returns_ignore_workflow_action_when_target_method_returns_void()
+        public void Returns_empty_workflow_action_when_target_method_returns_void()
         {
             var workflowMethod = WorkflowEventMethods.For(new TestClassWithPrivateMethod()).FindFor(_eventName);
 
             var workflowAction =workflowMethod.Invoke(_argument);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Ignore(true)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Empty));
         }
 
         [Test]
@@ -201,13 +201,13 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Return_workflow_ignore_action_when_target_method_returns_null()
+        public void Return_workflow_empty_action_when_target_method_returns_null()
         {
             var workflowMethod = WorkflowEventMethods.For(new MethodReturnsNull()).FindFor(_eventName);
 
             var workflowAction = workflowMethod.Invoke(_argument);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Ignore(true)));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Empty));
         }
 
         [Test]

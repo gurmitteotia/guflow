@@ -147,7 +147,7 @@ namespace Guflow.Tests.Decider
         public void Can_interpret_workflow_signaled_failed_event()
         {
             _workflow.Setup(w => w.OnWorkflowSignalFailed(It.IsAny<WorkflowSignalFailedEvent>())).Returns(_interpretedWorkflowAction);
-            var historyEvents = new WorkflowHistoryEvents(new []{HistoryEventFactory.CreateWorkflowSignalFailedEvent("cause","wid","rid")});
+            var historyEvents = new WorkflowHistoryHistoryEvents(new []{HistoryEventFactory.CreateWorkflowSignalFailedEvent("cause","wid","rid")});
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
@@ -167,7 +167,7 @@ namespace Guflow.Tests.Decider
         public void Can_interpret_workflow_completion_failed_event()
         {
             _workflow.Setup(w => w.OnWorkflowCompletionFailed(It.IsAny<WorkflowCompletionFailedEvent>())).Returns(_interpretedWorkflowAction);
-            var historyEvents = new WorkflowHistoryEvents(new[]{HistoryEventFactory.CreateWorkflowCompletionFailureEvent("cause")});
+            var historyEvents = new WorkflowHistoryHistoryEvents(new[]{HistoryEventFactory.CreateWorkflowCompletionFailureEvent("cause")});
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
@@ -177,7 +177,7 @@ namespace Guflow.Tests.Decider
         public void Can_interpret_workflow_failure_failed_event()
         {
             _workflow.Setup(w => w.OnWorkflowFailureFailed(It.IsAny<WorkflowFailureFailedEvent>())).Returns(_interpretedWorkflowAction);
-            var historyEvents = new WorkflowHistoryEvents(new[] { HistoryEventFactory.CreateWorkflowFailureFailedEvent("cause") });
+            var historyEvents = new WorkflowHistoryHistoryEvents(new[] { HistoryEventFactory.CreateWorkflowFailureFailedEvent("cause") });
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
@@ -188,7 +188,7 @@ namespace Guflow.Tests.Decider
         public void Can_interpret_workflow_cancel_request_failed_event()
         {
             _workflow.Setup(w => w.OnWorkflowCancelRequestFailed(It.IsAny<WorkflowCancelRequestFailedEvent>())).Returns(_interpretedWorkflowAction);
-            var historyEvents = new WorkflowHistoryEvents(new[] { HistoryEventFactory.CreateWorkflowCancelRequestFailedEvent("cause") });
+            var historyEvents = new WorkflowHistoryHistoryEvents(new[] { HistoryEventFactory.CreateWorkflowCancelRequestFailedEvent("cause") });
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
@@ -199,7 +199,7 @@ namespace Guflow.Tests.Decider
         public void Can_interpret_workflow_cancellation_failed_failed_event()
         {
             _workflow.Setup(w => w.OnWorkflowCancellationFailed(It.IsAny<WorkflowCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
-            var historyEvents = new WorkflowHistoryEvents(new[] { HistoryEventFactory.CreateWorkflowCancellationFailedEvent("cause") });
+            var historyEvents = new WorkflowHistoryHistoryEvents(new[] { HistoryEventFactory.CreateWorkflowCancellationFailedEvent("cause") });
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
 
@@ -258,7 +258,7 @@ namespace Guflow.Tests.Decider
         public void Should_be_active_when_activity_is_just_started()
         {
             var activityStartedEventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New("activity", "1.0"), "id");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(activityStartedEventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(activityStartedEventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.IsActive());
         }
@@ -267,7 +267,7 @@ namespace Guflow.Tests.Decider
         public void Should_be_active_when_activity_is_just_scheduled()
         {
             var activityScheduledEventGraph = HistoryEventFactory.CreateActivityScheduledEventGraph(Identity.New("activity", "1.0"));
-            var workflowHistoryEvents = new WorkflowHistoryEvents(activityScheduledEventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(activityScheduledEventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.IsActive());
         }
@@ -276,7 +276,7 @@ namespace Guflow.Tests.Decider
         public void Should_be_active_when_activity_cancellation_is_in_progress()
         {
             var activityCancelRequestedGraph = HistoryEventFactory.CreateActivityCancelRequestedGraph(Identity.New("activity", "1.0"),"id");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(activityCancelRequestedGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(activityCancelRequestedGraph);
 
             Assert.IsTrue(workflowHistoryEvents.IsActive());
         }
@@ -285,7 +285,7 @@ namespace Guflow.Tests.Decider
         public void Should_not_be_active_when_activity_is_completed()
         {
             var activityCompletedEventGraph =HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "res");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(activityCompletedEventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(activityCompletedEventGraph);
 
             Assert.IsFalse(workflowHistoryEvents.IsActive());
         }
@@ -295,7 +295,7 @@ namespace Guflow.Tests.Decider
         {
             var eventGraph = HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New("activity", "1.0"), "id")
                                             .Concat(HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New("activity", "1.0"), "id", "res","detail"));
-            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(eventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.IsActive());
         }
@@ -304,7 +304,7 @@ namespace Guflow.Tests.Decider
         public void Should_be_active_when_timer_is_started()
         {
             var timerStartedEventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(Identity.Timer("id"),TimeSpan.FromSeconds(2));
-            var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(timerStartedEventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.IsActive());
         }
@@ -313,7 +313,7 @@ namespace Guflow.Tests.Decider
         public void Should_not_be_active_when_timer_is_fired()
         {
             var timerStartedEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("id"), TimeSpan.FromSeconds(2));
-            var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(timerStartedEventGraph);
 
             Assert.IsFalse(workflowHistoryEvents.IsActive());
         }
@@ -326,7 +326,7 @@ namespace Guflow.Tests.Decider
                 HistoryEventFactory.CreateMarkerRecordedEvent("name1", "detail1"),
                 HistoryEventFactory.CreateMarkerRecordedEvent("name2", "detail2")
             };
-            var workflowHistoryEvents = new WorkflowHistoryEvents(markerRecordedEventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(markerRecordedEventGraph);
             var markerRecordedEvents = workflowHistoryEvents.AllMarkerRecordedEvents();
 
             Assert.That(markerRecordedEvents,Is.EqualTo(new []{new MarkerRecordedEvent(markerRecordedEventGraph.First()),
@@ -341,7 +341,7 @@ namespace Guflow.Tests.Decider
                 HistoryEventFactory.CreateWorkflowSignaledEvent("name1", "input1"),
                 HistoryEventFactory.CreateWorkflowSignaledEvent("name1", "input1","runid","wid")
             };
-            var workflowHistoryEvents = new WorkflowHistoryEvents(signalEventsGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(signalEventsGraph);
             var allSignalEvents = workflowHistoryEvents.AllSignalEvents();
 
             Assert.That(allSignalEvents,Is.EqualTo(new []{ new WorkflowSignaledEvent(signalEventsGraph.First()),new WorkflowSignaledEvent(signalEventsGraph.Last())}));
@@ -355,80 +355,80 @@ namespace Guflow.Tests.Decider
                 HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause"),
                 HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause2","runid","wid")
             };
-            var workflowHistoryEvents = new WorkflowHistoryEvents(cancellationEventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(cancellationEventGraph);
             var allWorkflowCancellationRequestedEvents = workflowHistoryEvents.AllWorkflowCancellationRequestedEvents();
 
             Assert.That(allWorkflowCancellationRequestedEvents, Is.EqualTo(new[] { new WorkflowCancellationRequestedEvent(cancellationEventGraph.First()), new WorkflowCancellationRequestedEvent(cancellationEventGraph.Last()) }));
         }
 
-        private WorkflowHistoryEvents CreateActivityCompletedEventGraph()
+        private WorkflowHistoryHistoryEvents CreateActivityCompletedEventGraph()
         {
             var activityCompletedEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activity", "1.0"), "id", "result").ToArray();
-            return new WorkflowHistoryEvents(activityCompletedEventGraph);
+            return new WorkflowHistoryHistoryEvents(activityCompletedEventGraph);
         }
-        private WorkflowHistoryEvents CreateActivityFailedEventGraph()
+        private WorkflowHistoryHistoryEvents CreateActivityFailedEventGraph()
         {
             var activityFailedEventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New("activity", "1.0"), "id", "reason","detail");
-            return new WorkflowHistoryEvents(activityFailedEventGraph);
+            return new WorkflowHistoryHistoryEvents(activityFailedEventGraph);
         }
-        private WorkflowHistoryEvents CreateActivityTimedoutEventGraph()
+        private WorkflowHistoryHistoryEvents CreateActivityTimedoutEventGraph()
         {
             var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(Identity.New("activity", "1.0"), "id", "reason", "detail");
-            return new WorkflowHistoryEvents(activityTimedoutEventGraph);
+            return new WorkflowHistoryHistoryEvents(activityTimedoutEventGraph);
         }
-        private WorkflowHistoryEvents CreateActivityCancelledEventGraph()
+        private WorkflowHistoryHistoryEvents CreateActivityCancelledEventGraph()
         {
             var activityCancelledEventGraph = HistoryEventFactory.CreateActivityCancelledEventGraph(Identity.New("activity", "1.0"), "id", "detail");
-            return new WorkflowHistoryEvents(activityCancelledEventGraph);
+            return new WorkflowHistoryHistoryEvents(activityCancelledEventGraph);
         }
-        private WorkflowHistoryEvents CreateActivityCancellationFailedEventGraph()
+        private WorkflowHistoryHistoryEvents CreateActivityCancellationFailedEventGraph()
         {
             var activityCancellationFailedEventGraph = HistoryEventFactory.CreateActivityCancellationFailedEventGraph(Identity.New("activity", "1.0"), "detail");
-            return new WorkflowHistoryEvents(activityCancellationFailedEventGraph);
+            return new WorkflowHistoryHistoryEvents(activityCancellationFailedEventGraph);
         }
-        private WorkflowHistoryEvents CreateWorkflowStartedEventGraph()
+        private WorkflowHistoryHistoryEvents CreateWorkflowStartedEventGraph()
         {
             var workflowStartedEventGraph = HistoryEventFactory.CreateWorkflowStartedEventGraph();
-            return new WorkflowHistoryEvents(workflowStartedEventGraph);
+            return new WorkflowHistoryHistoryEvents(workflowStartedEventGraph);
         }
-        private WorkflowHistoryEvents CreateTimerFiredEventGraph()
+        private WorkflowHistoryHistoryEvents CreateTimerFiredEventGraph()
         {
             var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer"), TimeSpan.FromSeconds(4));
             
-            return new WorkflowHistoryEvents(timerFiredEventGraph);
+            return new WorkflowHistoryHistoryEvents(timerFiredEventGraph);
         }
-        private WorkflowHistoryEvents CreateTimerFailedEventGraph()
+        private WorkflowHistoryHistoryEvents CreateTimerFailedEventGraph()
         {
             var timerFailedEventGraph = HistoryEventFactory.CreateTimerStartFailedEventGraph(Identity.Timer("timer"), "cause");
-            return new WorkflowHistoryEvents(timerFailedEventGraph);
+            return new WorkflowHistoryHistoryEvents(timerFailedEventGraph);
         }
-        private WorkflowHistoryEvents CreateTimerCancelledEventGraph()
+        private WorkflowHistoryHistoryEvents CreateTimerCancelledEventGraph()
         {
             var timerCancelledEventGraph = HistoryEventFactory.CreateTimerCancelledEventGraph(Identity.Timer("timer"),TimeSpan.FromSeconds(4));
-            return new WorkflowHistoryEvents(timerCancelledEventGraph);
+            return new WorkflowHistoryHistoryEvents(timerCancelledEventGraph);
         }
-        private WorkflowHistoryEvents CreateTimerCancellationFailedEventGraph()
+        private WorkflowHistoryHistoryEvents CreateTimerCancellationFailedEventGraph()
         {
             var timerCancellationFailedEventGraph = HistoryEventFactory.CreateTimerCancellationFailedEventGraph(Identity.Timer("timer"), "cause");
-            return new WorkflowHistoryEvents(timerCancellationFailedEventGraph);
+            return new WorkflowHistoryHistoryEvents(timerCancellationFailedEventGraph);
         }
-        private WorkflowHistoryEvents CreateWorkflowSignaledEventGraph()
+        private WorkflowHistoryHistoryEvents CreateWorkflowSignaledEventGraph()
         {
             var workflowSignaledEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name","input");
-            return new WorkflowHistoryEvents(new[]{workflowSignaledEvent});
+            return new WorkflowHistoryHistoryEvents(new[]{workflowSignaledEvent});
         }
-        private WorkflowHistoryEvents CreateWorkflowCancellationRequestedEventGraph()
+        private WorkflowHistoryHistoryEvents CreateWorkflowCancellationRequestedEventGraph()
         {
             var workflowCancellationRequestedEvent = HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause");
-            return new WorkflowHistoryEvents(new[] { workflowCancellationRequestedEvent });
+            return new WorkflowHistoryHistoryEvents(new[] { workflowCancellationRequestedEvent });
         }
-        private WorkflowHistoryEvents CreateNotInterpretingEventGraph()
+        private WorkflowHistoryHistoryEvents CreateNotInterpretingEventGraph()
         {
             var nonInterpretEvent = new HistoryEvent() {EventType = EventType.DecisionTaskCompleted};
-            return new WorkflowHistoryEvents(new []{nonInterpretEvent});
+            return new WorkflowHistoryHistoryEvents(new []{nonInterpretEvent});
         }
       
-        private WorkflowHistoryEvents CreateTimerFireAndFailedEventGraph()
+        private WorkflowHistoryHistoryEvents CreateTimerFireAndFailedEventGraph()
         {
             var timerStartedEventFileGraph =
                 HistoryEventFactory.CreateTimerStartFailedEventGraph(Identity.Timer("timer"), "cause");
@@ -436,7 +436,7 @@ namespace Guflow.Tests.Decider
                 TimeSpan.FromSeconds(4));
 
             var combinedEventGraph = timerFiredEventGraph.Concat(timerStartedEventFileGraph);
-            return new WorkflowHistoryEvents(combinedEventGraph);
+            return new WorkflowHistoryHistoryEvents(combinedEventGraph);
         }
 
         private class TestWorkflowAction : WorkflowAction

@@ -241,6 +241,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can not jump to item {0} from item {1} because former is in different branch than later&apos;s branches..
+        /// </summary>
+        internal static string Invalid_jump {
+            get {
+                return ResourceManager.GetString("Invalid_jump", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Target method {0} has incompatible parameter {1} which can&apos;t be assigned from source object {2}&apos;s property..
         /// </summary>
         internal static string Invalid_parameter {
