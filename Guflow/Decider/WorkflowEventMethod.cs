@@ -20,7 +20,7 @@ namespace Guflow.Decider
             try
             {
                 var returnType = _methodInfo.Invoke(_targetInstance, parameters);
-                return returnType == null ? WorkflowAction.Ignore(true) : (WorkflowAction)returnType;
+                return returnType == null ? WorkflowAction.Empty : (WorkflowAction)returnType;
             }
             catch (TargetInvocationException ex)
             {

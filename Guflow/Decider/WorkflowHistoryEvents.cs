@@ -4,20 +4,20 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
-    internal class WorkflowHistoryEvents : IWorkflowEvents
+    internal class WorkflowHistoryHistoryEvents : IWorkflowHistoryEvents
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly long _newEventsStartId;
         private readonly long _newEventsEndId;
 
-        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long newEventsStartId, long newEventsEndId)
+        public WorkflowHistoryHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long newEventsStartId, long newEventsEndId)
         {
             _allHistoryEvents = allHistoryEvents;
             _newEventsStartId = newEventsStartId;
             _newEventsEndId = newEventsEndId;
         }
 
-        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
+        public WorkflowHistoryHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
             :this(allHistoryEvents,allHistoryEvents.Last().EventId, allHistoryEvents.First().EventId)
         {
         }

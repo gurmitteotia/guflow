@@ -36,7 +36,7 @@ namespace Guflow.Decider
             }
             internal override WorkflowAction Interpret(IWorkflow workflow)
             {
-                return WorkflowAction.Ignore(true);
+                return WorkflowAction.Empty;
             }
         }
     }

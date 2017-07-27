@@ -21,6 +21,7 @@ namespace Guflow.Decider
         {
             return new CompositeWorkflowAction(left,right);
         }
+        internal static readonly WorkflowAction Empty = new EmptyWorkflowAction();
         internal static WorkflowAction FailWorkflow(string reason, string detail)
         {
             return new GenericWorkflowAction(new FailWorkflowDecision(reason,detail));
@@ -75,9 +76,9 @@ namespace Guflow.Decider
         {
             return new GenericWorkflowAction(new CancelRequestWorkflowDecision(workflowId, runId));
         }
-        internal static RestartWorkflowAction RestartWorkflow(IWorkflowEvents workflowEvents)
+        internal static RestartWorkflowAction RestartWorkflow(IWorkflowHistoryEvents workflowHistoryEvents)
         {
-            var workflowStartedEvent = workflowEvents.WorkflowStartedEvent();
+            var workflowStartedEvent = workflowHistoryEvents.WorkflowStartedEvent();
             var restartWorkflowAction = new RestartWorkflowAction()
             {
                 Input = workflowStartedEvent.Input,
@@ -204,5 +205,12 @@ namespace Guflow.Decider
             }
         }
 
+        private sealed class EmptyWorkflowAction : WorkflowAction
+        {
+            internal override IEnumerable<WorkflowDecision> GetDecisions()
+            {
+                return Enumerable.Empty<WorkflowDecision>();
+            }
+        }
     }
 }

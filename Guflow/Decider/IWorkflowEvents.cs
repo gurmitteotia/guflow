@@ -2,7 +2,7 @@
 
 namespace Guflow.Decider
 {
-    internal interface IWorkflowEvents
+    internal interface IWorkflowHistoryEvents
     {
         WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem);
         WorkflowItemEvent LastTimerEventFor(TimerItem timerItem);

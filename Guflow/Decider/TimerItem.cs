@@ -41,12 +41,12 @@ namespace Guflow.Decider
 
         public override WorkflowItemEvent LastEvent
         {
-            get { return WorkflowEvents.LastTimerEventFor(this); }
+            get { return WorkflowHistoryEvents.LastTimerEventFor(this); }
         }
 
         public override IEnumerable<WorkflowItemEvent> AllEvents
         {
-            get { return WorkflowEvents.AllTimerEventsFor(this); }
+            get { return WorkflowHistoryEvents.AllTimerEventsFor(this); }
         }
         public IFluentTimerItem FireAfter(TimeSpan fireAfter)
         {

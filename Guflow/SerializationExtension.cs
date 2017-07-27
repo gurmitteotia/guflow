@@ -41,9 +41,9 @@ namespace Guflow
         {
             if (instance == null)
                 return null;
-            var inputAsString = instance as string;
-            if (inputAsString != null)
-                return inputAsString;
+            if (Primitive(instance))
+                return instance.ToString();
+
             return instance.ToJson();
         }
 

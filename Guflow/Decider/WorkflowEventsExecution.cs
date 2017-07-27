@@ -7,17 +7,17 @@ namespace Guflow.Decider
     internal class WorkflowEventsExecution : IDisposable
     {
         private readonly Workflow _workflow;
-        private readonly IWorkflowEvents _workflowEvents;
+        private readonly IWorkflowHistoryEvents _workflowHistoryEvents;
 
-        public WorkflowEventsExecution(Workflow workflow, IWorkflowEvents workflowEvents)
+        public WorkflowEventsExecution(Workflow workflow, IWorkflowHistoryEvents workflowHistoryEvents)
         {
             _workflow = workflow;
-            _workflowEvents = workflowEvents;
+            _workflowHistoryEvents = workflowHistoryEvents;
         }
 
         public IEnumerable<WorkflowDecision> Execute()
         {
-            var workflowDecisions = _workflowEvents.InterpretNewEventsFor(_workflow);
+            var workflowDecisions = _workflowHistoryEvents.InterpretNewEventsFor(_workflow);
             return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
         }
         private IEnumerable<WorkflowDecision> FilterOutIncompatibleDecisions(IEnumerable<WorkflowDecision> workflowDecisions)

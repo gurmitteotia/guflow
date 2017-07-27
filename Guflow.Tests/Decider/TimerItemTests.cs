@@ -128,9 +128,9 @@ namespace Guflow.Tests.Decider
 
         private TimerItem CreateTimerItemFor(IEnumerable<HistoryEvent> eventGraph)
         {
-            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+            var workflowHistoryEvents = new WorkflowHistoryHistoryEvents(eventGraph);
             var workflow = new Mock<IWorkflow>();
-            workflow.SetupGet(w => w.WorkflowEvents).Returns(workflowHistoryEvents);
+            workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(workflowHistoryEvents);
             return TimerItem.New(_timerIdentity, workflow.Object);
         }
     }

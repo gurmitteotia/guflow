@@ -231,4 +231,7 @@
   <data name="Parameter_can_not_be_deserialized" xml:space="preserve">
     <value>Parameter {0} can not be deserialized from string value {1}.</value>
   </data>
+  <data name="Invalid_jump" xml:space="preserve">
+    <value>Can not jump to item {0} from item {1} because former is in different branch than later's branches.</value>
+  </data>
 </root>
