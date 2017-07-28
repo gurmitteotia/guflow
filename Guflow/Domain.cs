@@ -27,7 +27,8 @@ namespace Guflow
         public Domain(string name, RegionEndpoint regionEndpoint) : this(name, new AmazonSimpleWorkflowClient(regionEndpoint))
         {
         }
-        internal Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient, IErrorHandler errorHandler)
+
+        private Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient, IErrorHandler errorHandler)
         {
             Ensure.NotNullAndEmpty(name, () => new ArgumentException(Resources.Domain_name_required, "name"));
             Ensure.NotNull(simpleWorkflowClient, "simpleWorkflowClient");
