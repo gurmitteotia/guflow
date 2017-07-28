@@ -9,10 +9,6 @@ namespace Guflow.Decider
         IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow);
         WorkflowStartedEvent WorkflowStartedEvent();
         bool IsActive();
-        ActivityCompletedEvent LastCompletedEventFor(ActivityItem activityItem);
-        ActivityFailedEvent LastFailedEventFor(ActivityItem activityItem);
-        ActivityTimedoutEvent LastTimedoutEventFor(ActivityItem activityItem);
-        ActivityCancelledEvent LastCancelledEventFor(ActivityItem activityItem);
         IEnumerable<WorkflowItemEvent> AllActivityEventsFor(ActivityItem activityItem);
         IEnumerable<WorkflowItemEvent> AllTimerEventsFor(TimerItem timerItem);
         IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents();

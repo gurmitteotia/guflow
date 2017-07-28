@@ -47,25 +47,6 @@ namespace Guflow.Decider
                 return latestTimerEvent;
             }
         }
-        public ActivityCompletedEvent LastCompletedEvent
-        {
-            get { return WorkflowHistoryEvents.LastCompletedEventFor(this); }
-        }
-
-        public ActivityFailedEvent LastFailedEvent
-        {
-            get { return WorkflowHistoryEvents.LastFailedEventFor(this); }
-        }
-
-        public ActivityTimedoutEvent LastTimedoutEvent
-        {
-            get { return WorkflowHistoryEvents.LastTimedoutEventFor(this); }
-        }
-
-        public ActivityCancelledEvent LastCancelledEvent
-        {
-            get { return WorkflowHistoryEvents.LastCancelledEventFor(this); }
-        }
 
         public override IEnumerable<WorkflowItemEvent> AllEvents
         {

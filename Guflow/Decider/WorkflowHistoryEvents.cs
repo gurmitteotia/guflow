@@ -84,62 +84,6 @@ namespace Guflow.Decider
             }
             return false;
         }
-
-        public ActivityCompletedEvent LastCompletedEventFor(ActivityItem activityItem)
-        {
-            foreach (var historyEvent in _allHistoryEvents)
-            {
-                if (historyEvent.IsActivityCompletedEvent())
-                {
-                    var activityCompletedEvent = new ActivityCompletedEvent(historyEvent,_allHistoryEvents);
-                    if (activityCompletedEvent.IsFor(activityItem))
-                        return activityCompletedEvent;
-                }
-            }
-            return null;
-        }
-
-        public ActivityFailedEvent LastFailedEventFor(ActivityItem activityItem)
-        {
-            foreach (var historyEvent in _allHistoryEvents)
-            {
-                if (historyEvent.IsActivityFailedEvent())
-                {
-                    var activityFailedEvent = new ActivityFailedEvent(historyEvent, _allHistoryEvents);
-                    if (activityFailedEvent.IsFor(activityItem))
-                        return activityFailedEvent;
-                }
-            }
-            return null;
-        }
-        public ActivityTimedoutEvent LastTimedoutEventFor(ActivityItem activityItem)
-        {
-            foreach (var historyEvent in _allHistoryEvents)
-            {
-                if (historyEvent.IsActivityTimedoutEvent())
-                {
-                    var activityTimedoutEvent = new ActivityTimedoutEvent(historyEvent, _allHistoryEvents);
-                    if (activityTimedoutEvent.IsFor(activityItem))
-                        return activityTimedoutEvent;
-                }
-            }
-            return null;
-        }
-
-        public ActivityCancelledEvent LastCancelledEventFor(ActivityItem activityItem)
-        {
-            foreach (var historyEvent in _allHistoryEvents)
-            {
-                if (historyEvent.IsActivityCancelledEvent())
-                {
-                    var activityCancelledEvent = new ActivityCancelledEvent(historyEvent, _allHistoryEvents);
-                    if (activityCancelledEvent.IsFor(activityItem))
-                        return activityCancelledEvent;
-                }
-            }
-            return null;
-        }
-
         public IEnumerable<WorkflowItemEvent> AllActivityEventsFor(ActivityItem activityItem)
         {
             var allEvents = new List<WorkflowItemEvent>();
@@ -149,9 +93,9 @@ namespace Guflow.Decider
                 if (workflowItemEvent.IsFor(activityItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
                     allEvents.Add(workflowItemEvent);
+                    yield return workflowItemEvent;
                 }
             }
-            return allEvents;
         }
 
         public IEnumerable<WorkflowItemEvent> AllTimerEventsFor(TimerItem timerItem)
@@ -163,9 +107,9 @@ namespace Guflow.Decider
                 if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
                     allEvents.Add(workflowItemEvent);
+                    yield return workflowItemEvent;
                 }
             }
-            return allEvents;
         }
 
         public IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents()
