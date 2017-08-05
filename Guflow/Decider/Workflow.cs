@@ -157,7 +157,7 @@ namespace Guflow.Decider
         internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {
             var completedHandler = Completed;
-            if(completedHandler!=null)
+            if (completedHandler != null)
                 completedHandler(this, new WorkflowCompletedEventArgs(workflowId, workflowRunId, result));
 
             RaiseWorkflowClosedEvent(workflowId, workflowRunId);
@@ -182,7 +182,7 @@ namespace Guflow.Decider
         internal void OnRestarted(string workflowId, string workflowRunId)
         {
             var eventHandler = Restarted;
-            if(eventHandler != null)
+            if (eventHandler != null)
                 eventHandler(this, new WorkflowRestartedEventArgs(workflowId, workflowRunId));
             RaiseWorkflowClosedEvent(workflowId, workflowRunId);
         }
@@ -264,13 +264,13 @@ namespace Guflow.Decider
         {
             return WorkflowAction.Ignore(keepBranchActive);
         }
-    
+
         protected JumpAction Jump(WorkflowItemEvent workflowItemEvent)
         {
             Ensure.NotNull(workflowItemEvent, "workflowItemEvent");
             var workflowItem = _allWorkflowItems.WorkflowItemFor(workflowItemEvent);
 
-            return  JumpAction.JumpFromItem(workflowItem, _allWorkflowItems);
+            return JumpAction.JumpFromItem(workflowItem, _allWorkflowItems);
         }
         protected JumpAction Jump(WorkflowEvent workflowEvent)
         {
@@ -283,7 +283,7 @@ namespace Guflow.Decider
             IWorkflowDefaultActions defaultActions = this;
             return workflowEvent.DefaultAction(defaultActions);
         }
-        protected CancelRequest CancelRequest { get { return new CancelRequest(_allWorkflowItems);} }
+        protected CancelRequest CancelRequest { get { return new CancelRequest(_allWorkflowItems); } }
 
         protected IActivityItem ActivityOf(WorkflowItemEvent activityEvent)
         {
@@ -295,7 +295,7 @@ namespace Guflow.Decider
             Ensure.NotNull(activityEvent, "activityEvent");
             return _allWorkflowItems.TimerItemFor(activityEvent);
         }
-        protected IEnumerable<IWorkflowItem> WorkflowItems { get { return _allWorkflowItems.AllItems ; } }
+        protected IEnumerable<IWorkflowItem> WorkflowItems { get { return _allWorkflowItems.AllItems; } }
         protected IEnumerable<IActivityItem> Activities { get { return _allWorkflowItems.AllActivities; } }
         protected IEnumerable<ITimerItem> Timers { get { return _allWorkflowItems.AllTimers; } }
         protected bool IsActive
@@ -323,6 +323,20 @@ namespace Guflow.Decider
         {
             Ensure.NotNullAndEmpty(signalName, "signalName");
             return new Signal(signalName, input);
+        }
+
+        protected dynamic Input
+        {
+            get
+            {
+                IWorkflow workflow = this;
+                return workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input.FromJson();
+            }
+        }
+        protected TType InputAs<TType>()
+        {
+            IWorkflow workflow = this;
+            return workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input.FromJson<TType>();
         }
         IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
         {

@@ -14,10 +14,7 @@ namespace Guflow.Decider
             if(activityCompletedEvent == null)
                 throw new InvalidOperationException(string.Format(Resources.Activity_result_can_not_accessed,
                                                     typeof(ActivityCompletedEvent), completedEvent!=null? completedEvent.GetType().ToString(): "Unkown"));
-            if (activityCompletedEvent.Result.IsValidJson())
-                return JObject.Parse(activityCompletedEvent.Result);
-            
-            return activityCompletedEvent.Result;
+            return activityCompletedEvent.Result.FromJson();
         }
 
         public static TType Result<TType>(this IActivityItem activityItem)
