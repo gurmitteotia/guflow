@@ -21,6 +21,12 @@ namespace Guflow
             return JsonConvert.DeserializeObject(jsonData, targetType);
         }
 
+        internal static dynamic FromJson(this string jsonData)
+        {
+            if (jsonData.IsValidJson())
+                return JObject.Parse(jsonData);
+            return jsonData;
+        }
         internal static bool IsValidJson(this object value)
         {
             var strValue = value as string;
