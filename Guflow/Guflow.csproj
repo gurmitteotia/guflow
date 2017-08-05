@@ -78,6 +78,8 @@
     <Compile Include="Decider\ActivityEvent.cs" />
     <Compile Include="Decider\ActivityFailedEvent.cs" />
     <Compile Include="Decider\ActivityItem.cs" />
+    <Compile Include="Decider\ActivityItemExtension.cs" />
+    <Compile Include="Decider\ActivityItemsExtension.cs" />
     <Compile Include="Decider\ActivityScheduledEvent.cs" />
     <Compile Include="Decider\ActivitySchedulingFailedEvent.cs" />
     <Compile Include="Decider\ActivityStartedEvent.cs" />
@@ -92,6 +94,7 @@
     <Compile Include="Decider\OutOfBranchJumpException.cs" />
     <Compile Include="Decider\RestartWorkflowAction.cs" />
     <Compile Include="Decider\RestartWorkflowDecision.cs" />
+    <Compile Include="Decider\TimerItemsExtension.cs" />
     <Compile Include="Decider\Times.cs" />
     <Compile Include="Decider\JumpTriggeredWorkflowAction.cs" />
     <Compile Include="Decider\WorkflowActionItem.cs" />

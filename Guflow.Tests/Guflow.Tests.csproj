@@ -61,6 +61,8 @@
     <Compile Include="Decider\ActivityCancelRequestedEventTests.cs" />
     <Compile Include="Decider\ActivityCompletedEventTests.cs" />
     <Compile Include="Decider\ActivityFailedEventTests.cs" />
+    <Compile Include="Decider\ActivityItemExtensionTests.cs" />
+    <Compile Include="Decider\ActivityItemsExtensionTests.cs" />
     <Compile Include="Decider\ActivityItemTests.cs" />
     <Compile Include="Decider\ActivityScheduledEventTests.cs" />
     <Compile Include="Decider\ActivitySchedulingFailedEventTests.cs" />
@@ -77,6 +79,7 @@
     <Compile Include="Decider\JumpWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowDecisionTests.cs" />
+    <Compile Include="Decider\TimerItemsExtensionTests.cs" />
     <Compile Include="Decider\WorkflowItemExtensionsTests.cs" />
     <Compile Include="DomainTests.cs" />
     <Compile Include="ErrorHandlerTests.cs" />

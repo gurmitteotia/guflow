@@ -133,6 +133,24 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can access activity result only when last event is of type {0}. Last event type of activity is {1}.
+        /// </summary>
+        internal static string Activity_result_can_not_accessed {
+            get {
+                return ResourceManager.GetString("Activity_result_can_not_accessed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not deserialize json data {0} in to type {1}.
+        /// </summary>
+        internal static string Can_not_deserialize_json_data_into_type {
+            get {
+                return ResourceManager.GetString("Can_not_deserialize_json_data_into_type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can not determine the task list to poll on for new task when multiple activities are hosted. Please explicitly pass the task list to begin the execution..
         /// </summary>
         internal static string Can_not_determine_the_task_list_to_poll_for_activity_task {

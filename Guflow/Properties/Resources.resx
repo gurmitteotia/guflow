@@ -234,4 +234,10 @@
   <data name="Invalid_jump" xml:space="preserve">
     <value>Can not jump to item {0} from item {1} because former is in different branch than later's branches.</value>
   </data>
+  <data name="Activity_result_can_not_accessed" xml:space="preserve">
+    <value>Can access activity result only when last event is of type {0}. Last event type of activity is {1}</value>
+  </data>
+  <data name="Can_not_deserialize_json_data_into_type" xml:space="preserve">
+    <value>Can not deserialize json data {0} in to type {1}</value>
+  </data>
 </root>
