@@ -15,7 +15,7 @@ namespace Guflow.Tests.Decider
             var activityCompletedEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activityName", "1.0"), "id", "result");
             var activityCompletedEvent = new ActivityCompletedEvent(activityCompletedEvents.First(), activityCompletedEvents);
             var eventGraph = activityCompletedEvents.Concat(new[] {workflowStartedEventGraph});
-            var workflowEvents = new WorkflowHistoryHistoryEvents(eventGraph);
+            var workflowEvents = new WorkflowHistoryEvents(eventGraph);
             var workflow = new WorkflowToRestart();
             workflow.NewExecutionFor(workflowEvents);
 

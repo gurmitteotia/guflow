@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Guflow.Worker;
 
 namespace Guflow.Decider
 {
@@ -54,6 +55,11 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentWorkflowActionItem After<TActivity>(string positionalName = "") where TActivity : Activity
+        {
+            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            return After(description.Name, description.Version, positionalName);
+        }
         public override IEnumerable<WorkflowItemEvent> AllEvents
         {
             get { return Enumerable.Empty<WorkflowItemEvent>(); }

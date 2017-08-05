@@ -1,5 +1,7 @@
 ﻿using System;
 using Guflow.Decider;
+using Guflow.Worker;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -22,6 +24,34 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => _cancelRequest.ForTimer( null));
             Assert.Throws<ArgumentException>(() => _cancelRequest.ForWorkflow(null));
             Assert.Throws<ArgumentNullException>(() => _cancelRequest.For(null));
+        }
+
+        [Test]
+        public void Can_return_cancel_request_for_activity()
+        {
+            var activityItem = CreateActivity("name1", "1.0", "pname");
+            var workflowItems = new WorkflowItems();
+            workflowItems.Add(activityItem);
+            var cancelRequest = new CancelRequest(workflowItems);
+
+            var action = cancelRequest.ForActivity<TestActivity>("pname");
+
+            Assert.That(action, Is.EqualTo(WorkflowAction.Cancel(activityItem)));
+        }
+
+        private static ActivityItem CreateActivity(string name, string version, string positionalName)
+        {
+            var identity = Identity.New(name, version, positionalName);
+            var historyEvent = new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityScheduledEventGraph(identity));
+            var workflow = new Mock<IWorkflow>();
+            workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(historyEvent);
+            return new ActivityItem(identity, workflow.Object);
+        }
+
+        [ActivityDescription("1.0", Name="name1")]
+        private class TestActivity : Activity
+        {
+            
         }
     }
 }

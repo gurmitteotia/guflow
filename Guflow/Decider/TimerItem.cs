@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Guflow.Worker;
 
 namespace Guflow.Decider
 {
@@ -83,6 +84,11 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentTimerItem After<TActivity>(string positionalName = "") where TActivity : Activity
+        {
+            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            return After(description.Name, description.Version, positionalName);
+        }
         public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> onCancelledFunc)
         {
             Ensure.NotNull(onCancelledFunc, "onCancelledFunc");
@@ -145,5 +151,6 @@ namespace Guflow.Decider
         {
             return new CancelTimerDecision(Identity);
         }
+
     }
 }

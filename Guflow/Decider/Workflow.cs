@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Guflow.Properties;
+using Guflow.Worker;
 
 namespace Guflow.Decider
 {
@@ -202,6 +203,11 @@ namespace Guflow.Decider
             if (!_allWorkflowItems.Add(activityItem))
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_activity, name, version, positionalName));
             return activityItem;
+        }
+        protected IFluentActivityItem ScheduleActivity<TActivity>(string postionalName = "") where TActivity : Activity
+        {
+            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            return ScheduleActivity(description.Name, description.Version, postionalName);
         }
         protected IFluentTimerItem ScheduleTimer(string name)
         {
