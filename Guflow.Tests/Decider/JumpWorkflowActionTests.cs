@@ -73,7 +73,7 @@ namespace Guflow.Tests.Decider
         {
             var siblingActivity = CompletedActivityGraph(SiblingActivityName);
             var workflow = new WorkflowToJumpToDifferentBranch();
-            var historyEvents = new WorkflowHistoryHistoryEvents(siblingActivity, siblingActivity.Last().EventId, siblingActivity.First().EventId);
+            var historyEvents = new WorkflowHistoryEvents(siblingActivity, siblingActivity.Last().EventId, siblingActivity.First().EventId);
 
             Assert.Throws<OutOfBranchJumpException>(()=> workflow.NewExecutionFor(historyEvents).Execute());
         }

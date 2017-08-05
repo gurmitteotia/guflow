@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Guflow.Worker;
 
 namespace Guflow.Decider
 {
@@ -17,6 +18,11 @@ namespace Guflow.Decider
 
             var activityItem = _workflowItems.ActivityItemFor(Identity.New(name, version, positionalName));
             return WorkflowAction.Cancel(activityItem);
+        }
+        public WorkflowAction ForActivity<TActivity>(string positionalName = "") where TActivity: Activity
+        {
+            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            return ForActivity(description.Name, description.Version, positionalName);
         }
         public WorkflowAction ForTimer(string timerName)
         {

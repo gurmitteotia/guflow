@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Guflow.Worker;
 
 namespace Guflow.Decider
 {
@@ -83,6 +84,11 @@ namespace Guflow.Decider
 
             AddParent(Identity.Timer(timerName));
             return this;
+        }
+        public IFluentActivityItem After<TActivity>(string positionalName = "") where TActivity : Activity
+        {
+            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            return After(description.Name, description.Version, positionalName);
         }
 
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
@@ -247,5 +253,6 @@ namespace Guflow.Decider
 
             return new CancelActivityDecision(Identity);
         }
+
     }
 }

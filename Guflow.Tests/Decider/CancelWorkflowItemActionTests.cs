@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
         {
             _workflow = new Mock<IWorkflow>();
             _workflow.SetupGet(w => w.WorkflowHistoryEvents)
-                .Returns(new WorkflowHistoryHistoryEvents(new[] { new HistoryEvent() }));
+                .Returns(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace Guflow.Tests.Decider
         public void Cancel_request_for_activity_can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnCancelActivityAction();
-            workflow.NewExecutionFor(new WorkflowHistoryHistoryEvents(new[] { new HistoryEvent() }));
+            workflow.NewExecutionFor(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
             var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
             var workflowAction = completedActivityEvent.Interpret(workflow);
@@ -109,7 +109,7 @@ namespace Guflow.Tests.Decider
         public void Cancel_request_for_multiple_items_can_be_returned_as_workflow_action()
         {
             var workflow = new WorkflowtoReturnCancelActionForMultipleItems();
-            workflow.NewExecutionFor(new WorkflowHistoryHistoryEvents(new[] {new HistoryEvent()}));
+            workflow.NewExecutionFor(new WorkflowHistoryEvents(new[] {new HistoryEvent()}));
             var cancelRequestEvent = new WorkflowCancellationRequestedEvent(HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause"));
 
             var workflowAction = cancelRequestEvent.Interpret(workflow).GetDecisions();
@@ -147,7 +147,7 @@ namespace Guflow.Tests.Decider
         }
         private void SetupWorkflowToReturns(IEnumerable<HistoryEvent> historyEvents)
         {
-            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryHistoryEvents(historyEvents));
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(historyEvents));
         }
         private class WorkflowToReturnCancelledTimerAction : Workflow
         {
