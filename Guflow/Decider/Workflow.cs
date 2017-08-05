@@ -289,9 +289,9 @@ namespace Guflow.Decider
             Ensure.NotNull(activityEvent, "activityEvent");
             return _allWorkflowItems.TimerItemFor(activityEvent);
         }
-        protected IEnumerable<IWorkflowItem> AllWorkflowItems { get { return _allWorkflowItems.AllItems ; } }
-        protected IEnumerable<IActivityItem> AllActivities { get { return _allWorkflowItems.AllActivities; } }
-        protected IEnumerable<ITimerItem> AllTimers { get { return _allWorkflowItems.AllTimers; } }
+        protected IEnumerable<IWorkflowItem> WorkflowItems { get { return _allWorkflowItems.AllItems ; } }
+        protected IEnumerable<IActivityItem> Activities { get { return _allWorkflowItems.AllActivities; } }
+        protected IEnumerable<ITimerItem> Timers { get { return _allWorkflowItems.AllTimers; } }
         protected bool IsActive
         {
             get { return ((IWorkflow)this).WorkflowHistoryEvents.IsActive(); }

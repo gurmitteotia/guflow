@@ -142,7 +142,7 @@ namespace Guflow.Tests.Decider
             [WorkflowEvent(EventName.CancelRequest)]
             private WorkflowAction OnCancelRequest()
             {
-                return CancelRequest.For(AllWorkflowItems);
+                return CancelRequest.For(WorkflowItems);
             }
         }
         private void SetupWorkflowToReturns(IEnumerable<HistoryEvent> historyEvents)

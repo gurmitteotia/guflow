@@ -24,25 +24,14 @@ namespace Guflow.Decider
 
         public WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem)
         {
-            foreach (var historyEvent in _allHistoryEvents)
-            {
-                var workflowItemEvent = historyEvent.CreateActivityEventFor(_allHistoryEvents);
-                if (workflowItemEvent.IsFor(activityItem))
-                    return workflowItemEvent;
-            }
-
-            return WorkflowItemEvent.NotFound;
+            var lastEvent = AllActivityEventsFor(activityItem).FirstOrDefault();
+            return lastEvent ?? WorkflowItemEvent.NotFound;
         }
 
         public WorkflowItemEvent LastTimerEventFor(TimerItem timerItem)
         {
-            foreach (var historyEvent in _allHistoryEvents)
-            {
-                var workflowItemEvent = historyEvent.CreateTimerEventFor(_allHistoryEvents);
-                if (workflowItemEvent.IsFor(timerItem))
-                    return workflowItemEvent;
-            }
-            return WorkflowItemEvent.NotFound;
+            var lastEvent = AllTimerEventsFor(timerItem).FirstOrDefault();
+            return lastEvent?? WorkflowItemEvent.NotFound;
         }
 
         public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow)
