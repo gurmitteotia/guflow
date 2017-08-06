@@ -23,7 +23,8 @@ namespace Guflow.Decider
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
         {
-            return defaultActions.FailWorkflow(TimeoutType, Details);
+            var details = string.IsNullOrEmpty(Details) ? "ActivityTimedout" : Details;
+            return defaultActions.FailWorkflow(TimeoutType, details);
         }
     }
 }

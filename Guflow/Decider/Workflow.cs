@@ -204,10 +204,10 @@ namespace Guflow.Decider
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_activity, name, version, positionalName));
             return activityItem;
         }
-        protected IFluentActivityItem ScheduleActivity<TActivity>(string postionalName = "") where TActivity : Activity
+        protected IFluentActivityItem ScheduleActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
             var description = ActivityDescriptionAttribute.FindOn<TActivity>();
-            return ScheduleActivity(description.Name, description.Version, postionalName);
+            return ScheduleActivity(description.Name, description.Version, positionalName);
         }
         protected IFluentTimerItem ScheduleTimer(string name)
         {
@@ -329,14 +329,20 @@ namespace Guflow.Decider
         {
             get
             {
-                IWorkflow workflow = this;
-                return workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input.FromJson();
+               return StartedEvent.Input.FromJson();
             }
         }
         protected TType InputAs<TType>()
         {
-            IWorkflow workflow = this;
-            return workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input.FromJson<TType>();
+            return StartedEvent.Input.FromJson<TType>();
+        }
+        protected WorkflowStartedEvent StartedEvent
+        {
+            get
+            {
+                IWorkflow workflow = this;
+                return workflow.WorkflowHistoryEvents.WorkflowStartedEvent();
+            }
         }
         IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
         {

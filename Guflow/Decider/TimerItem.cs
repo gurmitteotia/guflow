@@ -68,26 +68,26 @@ namespace Guflow.Decider
             _onFiredAction = onFiredAction;
             return this;
         }
-        public IFluentTimerItem After(string timerName)
+        public IFluentTimerItem AfterTimer(string name)
         {
-            Ensure.NotNullAndEmpty(timerName, "timerName");
-            AddParent(Identity.Timer(timerName));
+            Ensure.NotNullAndEmpty(name, "timerName");
+            AddParent(Identity.Timer(name));
             return this;
         }
 
-        public IFluentTimerItem After(string activityName, string activityVersion, string positionalName = "")
+        public IFluentTimerItem AfterActivity(string name, string version, string positionalName = "")
         {
-            Ensure.NotNullAndEmpty(activityName, "activityName");
-            Ensure.NotNullAndEmpty(activityVersion, "activityVersion");
+            Ensure.NotNullAndEmpty(name, "activityName");
+            Ensure.NotNullAndEmpty(version, "activityVersion");
 
-            AddParent(Identity.New(activityName, activityVersion, positionalName));
+            AddParent(Identity.New(name, version, positionalName));
             return this;
         }
 
-        public IFluentTimerItem After<TActivity>(string positionalName = "") where TActivity : Activity
+        public IFluentTimerItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
             var description = ActivityDescriptionAttribute.FindOn<TActivity>();
-            return After(description.Name, description.Version, positionalName);
+            return AfterActivity(description.Name, description.Version, positionalName);
         }
         public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> onCancelledFunc)
         {

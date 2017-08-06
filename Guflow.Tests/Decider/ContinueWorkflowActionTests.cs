@@ -234,8 +234,8 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity<TestActivity>(_positionalName).OnCompletion(Continue);
 
-                ScheduleActivity("Transcode", "2.0").After<TestActivity>(_positionalName);
-                ScheduleActivity("Sync", "2.1").After<TestActivity>(_positionalName);
+                ScheduleActivity("Transcode", "2.0").AfterActivity<TestActivity>(_positionalName);
+                ScheduleActivity("Sync", "2.1").AfterActivity<TestActivity>(_positionalName);
             }
         }
         private class WorkflowWithMultipleParents : Workflow
@@ -244,7 +244,7 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion);
-                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+                ScheduleActivity("Transcode", "2.0").AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }
 
@@ -254,7 +254,7 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion);
-                ScheduleAction(CompleteWorkflow(workflowActionResult)).After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+                ScheduleAction(CompleteWorkflow(workflowActionResult)).AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }
 
@@ -264,7 +264,7 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnFailure(Continue);
-                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+                ScheduleActivity("Transcode", "2.0").AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }
         private class WorkflowWithAParentContinueOnTimedout : Workflow
@@ -273,7 +273,7 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnTimedout(Continue);
-                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+                ScheduleActivity("Transcode", "2.0").AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }
 
@@ -283,7 +283,7 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnCancelled(Continue);
-                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+                ScheduleActivity("Transcode", "2.0").AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }
 
@@ -293,7 +293,7 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnCompletion(e => Ignore(keepBranchActive));
-                ScheduleActivity("Transcode", "2.0").After(_activityName, _activityVersion, _positionalName).After(_siblingActivityName, _siblingActivityVersion);
+                ScheduleActivity("Transcode", "2.0").AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }
         private class SingleActivityWorkflow : Workflow
@@ -325,7 +325,7 @@ namespace Guflow.Tests.Decider
             public WorkflowWithParentChildTimers(string timerName, string childTimer,TimeSpan childTimeout)
             {
                 ScheduleTimer(timerName);
-                ScheduleTimer(childTimer).After(timerName).FireAfter(childTimeout);
+                ScheduleTimer(childTimer).AfterTimer(timerName).FireAfter(childTimeout);
             }
         }
         private class WorkflowWithChildActivity : Workflow
@@ -333,7 +333,7 @@ namespace Guflow.Tests.Decider
             public WorkflowWithChildActivity(string timerName)
             {
                 ScheduleTimer(timerName);
-                ScheduleActivity(_activityName, _activityVersion).After(timerName);
+                ScheduleActivity(_activityName, _activityVersion).AfterTimer(timerName);
             }
         }
         private class WorkflowWithParentActivityAndChildTimers : Workflow
@@ -341,7 +341,7 @@ namespace Guflow.Tests.Decider
             public WorkflowWithParentActivityAndChildTimers(string timerName)
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
-                ScheduleTimer(timerName).After(_activityName, _activityVersion,_positionalName);
+                ScheduleTimer(timerName).AfterActivity(_activityName, _activityVersion,_positionalName);
             }
         }
 

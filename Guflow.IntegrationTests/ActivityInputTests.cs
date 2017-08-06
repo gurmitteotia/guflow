@@ -58,6 +58,21 @@ namespace Guflow.IntegrationTests
             Assert.That(TestActivityWithInput.Input, Is.EqualTo("activity input"));
         }
 
+        [Test]
+        public async Task Can_schedule_the_activity_with_custom_input_built_from_workflow_input()
+        {
+            var @event = new ManualResetEvent(false);
+            var workflow = new WorkflowToAccessDynamicInput();
+            workflow.Closed += (s, e) => @event.Set();
+            _hostedWorkflows = await HostAsync(workflow);
+            var input = new {Name = "name", Age = 10}.ToJson();
+            
+            await _domain.StartWorkflow<WorkflowToScheduleActivityWithCustomInput>(input, _taskListName);
+            @event.WaitOne();
+
+            Assert.That(TestActivityWithInput.Input, Is.EqualTo(input));
+        }
+
         private async Task<HostedWorkflows> HostAsync(params Workflow[] workflows)
         {
             var hostedWorkflows = await _domain.Host(workflows);
@@ -72,7 +87,7 @@ namespace Guflow.IntegrationTests
             return hostedActivities;
         }
 
-        [WorkflowDescription("1.0", Name  = "TestWorkflow", DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
+        [WorkflowDescription(Names.Workflow.Test.Version, Name  = Names.Workflow.Test.Name, DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
            DefaultTaskPriority = 10, DefaultTaskStartToCloseTimeoutInSeconds = 900, Description = "Empty workflow")]
         private class WorkflowToScheduleActivityWithDefaultInput : Workflow
         {
@@ -82,7 +97,7 @@ namespace Guflow.IntegrationTests
             }
         }
 
-        [WorkflowDescription("1.0", Name = "TestWorkflow", DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
+        [WorkflowDescription(Names.Workflow.Test.Version, Name = Names.Workflow.Test.Name, DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
           DefaultTaskPriority = 10, DefaultTaskStartToCloseTimeoutInSeconds = 900, Description = "Empty workflow")]
         private class WorkflowToScheduleActivityWithCustomInput : Workflow
         {
@@ -92,8 +107,19 @@ namespace Guflow.IntegrationTests
             }
         }
 
+        [WorkflowDescription(Names.Workflow.Test.Version, Name = Names.Workflow.Test.Name, DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
+         DefaultTaskPriority = 10, DefaultTaskStartToCloseTimeoutInSeconds = 900, Description = "Empty workflow")]
+        private class WorkflowToAccessDynamicInput : Workflow
+        {
+            public WorkflowToAccessDynamicInput()
+            {
+                ScheduleActivity<TestActivityWithInput>().OnTaskList((t) => _taskListName)
+                    .WithInput(t => new {Input.Name, Input.Age});
+            }
+        }
 
-        [ActivityDescription("1.0", Name = "TestActivity", DefaultTaskListName = "DefaultTaskList", DefaultTaskPriority = 10,  Description = "some activity",
+
+        [ActivityDescription(Names.Activity.Test.Version, Name = Names.Activity.Test.Name, DefaultTaskListName = "DefaultTaskList", DefaultTaskPriority = 10,  Description = "some activity",
            DefaultHeartbeatTimeoutInSeconds = 10, DefaultScheduleToStartTimeoutInSeconds = 10, DefaultStartToCloseTimeoutInSeconds = 10, DefaultScheduleToCloseTimeoutInSeconds = 20)]
         private class TestActivityWithInput : Activity
         {

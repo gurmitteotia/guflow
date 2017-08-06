@@ -90,7 +90,7 @@ namespace Guflow.Tests.Decider
             public WorkflowToReturnScheduleTimerAction()
             {
                 ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => Jump(c).ToTimer("SomeTimer"));
-                ScheduleTimer("SomeTimer").After(ActivityName, ActivityVersion, PositionalName);
+                ScheduleTimer("SomeTimer").AfterActivity(ActivityName, ActivityVersion, PositionalName);
             }
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
