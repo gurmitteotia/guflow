@@ -289,7 +289,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithActivityToParentItself()
             {
-                ScheduleActivity("Download", "1.0").After("Download", "1.0");
+                ScheduleActivity("Download", "1.0").AfterActivity("Download", "1.0");
             }
         }
         private class WorkflowWithSameTimer : Workflow
@@ -304,14 +304,14 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithNonExistentParentActivityItem()
             {
-                ScheduleActivity("_timerName", "version").After("ParentName", "parentVer");
+                ScheduleActivity("_timerName", "version").AfterActivity("ParentName", "parentVer");
             }
         }
         private class WorkflowWithNonExistentParentTimerItem : Workflow
         {
             public WorkflowWithNonExistentParentTimerItem()
             {
-                ScheduleActivity("_timerName", "version").After("ParentName");
+                ScheduleActivity("_timerName", "version").AfterTimer("ParentName");
             }
         }
         private class TestWorkflow : Workflow

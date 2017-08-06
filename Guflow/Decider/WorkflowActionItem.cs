@@ -43,22 +43,22 @@ namespace Guflow.Decider
             return Identity.New(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
         }
 
-        public IFluentWorkflowActionItem After(string timerName)
+        public IFluentWorkflowActionItem AfterTimer(string name)
         {
-            AddParent(Identity.Timer(timerName));
+            AddParent(Identity.Timer(name));
             return this;
         }
 
-        public IFluentWorkflowActionItem After(string activityName, string activityVersion, string positionalName = "")
+        public IFluentWorkflowActionItem AfterActivity(string name, string version, string positionalName = "")
         {
-            AddParent(Identity.New(activityName, activityVersion, positionalName));
+            AddParent(Identity.New(name, version, positionalName));
             return this;
         }
 
-        public IFluentWorkflowActionItem After<TActivity>(string positionalName = "") where TActivity : Activity
+        public IFluentWorkflowActionItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
             var description = ActivityDescriptionAttribute.FindOn<TActivity>();
-            return After(description.Name, description.Version, positionalName);
+            return AfterActivity(description.Name, description.Version, positionalName);
         }
         public override IEnumerable<WorkflowItemEvent> AllEvents
         {

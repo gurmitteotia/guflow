@@ -121,9 +121,9 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => timerItem.OnStartFailure(null));
             Assert.Throws<ArgumentNullException>(() => timerItem.When(null));
 
-            Assert.Throws<ArgumentException>(() => timerItem.After(null,"1.0"));
-            Assert.Throws<ArgumentException>(() => timerItem.After("1.0", null));
-            Assert.Throws<ArgumentException>(() => timerItem.After(null));
+            Assert.Throws<ArgumentException>(() => timerItem.AfterActivity(null,"1.0"));
+            Assert.Throws<ArgumentException>(() => timerItem.AfterActivity("1.0", null));
+            Assert.Throws<ArgumentException>(() => timerItem.AfterTimer(null));
         }
 
         private TimerItem CreateTimerItemFor(IEnumerable<HistoryEvent> eventGraph)

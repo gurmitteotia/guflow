@@ -168,7 +168,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowWithParentActivity = new WorkflowWithParentActivity("parent1","1.0","pos");
             var childActivity = new ActivityItem(Identity.New("child","1.0"),workflowWithParentActivity);
-            childActivity.After("parent1", "1.0","pos");
+            childActivity.AfterActivity("parent1", "1.0","pos");
 
             var parentActivities = childActivity.ParentActivities;
             
@@ -183,7 +183,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowWithParentActivity = new WorkflowWithParentTimer("parent1");
             var childActivity = new ActivityItem(Identity.New("child", "1.0"), workflowWithParentActivity);
-            childActivity.After("parent1");
+            childActivity.AfterTimer("parent1");
 
             var parentActivities = childActivity.ParentTimers;
 
@@ -552,9 +552,9 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => activityItem.WithPriority(null));
             Assert.Throws<ArgumentNullException>(() => activityItem.WithTimeouts(null));
 
-            Assert.Throws<ArgumentException>(() => activityItem.After(null, "1.0"));
-            Assert.Throws<ArgumentException>(() => activityItem.After("34", null));
-            Assert.Throws<ArgumentException>(() => activityItem.After(null));
+            Assert.Throws<ArgumentException>(() => activityItem.AfterActivity(null, "1.0"));
+            Assert.Throws<ArgumentException>(() => activityItem.AfterActivity("34", null));
+            Assert.Throws<ArgumentException>(() => activityItem.AfterTimer(null));
         }
 
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)

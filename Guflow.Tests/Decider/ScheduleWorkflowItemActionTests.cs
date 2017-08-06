@@ -138,7 +138,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(_activityName, _activityVersion, _positionalName)
                     .OnCompletion(e => Reschedule(e).UpTo(Limit.Count(limit)));
 
-                ScheduleAction(CompleteWorkflow("completed")).After(_activityName, _activityVersion, _positionalName);
+                ScheduleAction(CompleteWorkflow("completed")).AfterActivity(_activityName, _activityVersion, _positionalName);
             }
         }
 
@@ -149,7 +149,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(_activityName, _activityVersion, _positionalName)
                     .OnCompletion(e => Reschedule(e).After(TimeSpan.FromSeconds(2)).UpTo(Limit.Count(limit)));
 
-                ScheduleAction(CompleteWorkflow("completed")).After(_activityName, _activityVersion, _positionalName);
+                ScheduleAction(CompleteWorkflow("completed")).AfterActivity(_activityName, _activityVersion, _positionalName);
             }
         }
     }

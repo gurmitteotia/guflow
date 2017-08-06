@@ -69,26 +69,26 @@ namespace Guflow.Decider
             get { return Identity.PositionalName; }
         }
 
-        public IFluentActivityItem After(string activityName, string activityVersion, string positionalName = "")
+        public IFluentActivityItem AfterActivity(string name, string version, string positionalName = "")
         {
-            Ensure.NotNullAndEmpty(activityName, "activityName");
-            Ensure.NotNullAndEmpty(activityVersion, "activityVersion");
+            Ensure.NotNullAndEmpty(name, "activityName");
+            Ensure.NotNullAndEmpty(version, "activityVersion");
 
-            AddParent(Identity.New(activityName, activityVersion, positionalName));
+            AddParent(Identity.New(name, version, positionalName));
             return this;
         }
 
-        public IFluentActivityItem After(string timerName)
+        public IFluentActivityItem AfterTimer(string name)
         {
-            Ensure.NotNullAndEmpty(timerName, "timerName");
+            Ensure.NotNullAndEmpty(name, "timerName");
 
-            AddParent(Identity.Timer(timerName));
+            AddParent(Identity.Timer(name));
             return this;
         }
-        public IFluentActivityItem After<TActivity>(string positionalName = "") where TActivity : Activity
+        public IFluentActivityItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
             var description = ActivityDescriptionAttribute.FindOn<TActivity>();
-            return After(description.Name, description.Version, positionalName);
+            return AfterActivity(description.Name, description.Version, positionalName);
         }
 
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)

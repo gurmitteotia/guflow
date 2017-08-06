@@ -268,12 +268,12 @@ namespace Guflow.Tests.Decider
             public TestWorkflow()
             {
                 ScheduleActivity(BookHotelActivity, Version);
-                ScheduleActivity(AddDinnerActivity, Version).After(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version);
-                ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
-                ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
             }
         }
 
@@ -283,12 +283,12 @@ namespace Guflow.Tests.Decider
             public WorkflowHasImmediateParentWithIgnoreAction(bool keepBranchActive)
             {
                 ScheduleActivity(BookHotelActivity, Version);
-                ScheduleActivity(AddDinnerActivity, Version).After(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version);
-                ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version).OnCompletion(e => Ignore(keepBranchActive));
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version).OnCompletion(e => Ignore(keepBranchActive));
 
-                ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
             }
         }
 
@@ -298,12 +298,12 @@ namespace Guflow.Tests.Decider
             public WorkflowHasNotImmediateParentWithIgnoreAction(bool keepBranchActive)
             {
                 ScheduleActivity(BookHotelActivity, Version);
-                ScheduleActivity(AddDinnerActivity, Version).After(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Ignore(keepBranchActive));
-                ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
-                ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
             }
         }
 
@@ -313,14 +313,14 @@ namespace Guflow.Tests.Decider
             public WorkflowWithJumpToChildBranch()
             {
                 ScheduleActivity(BookHotelActivity, Version);
-                ScheduleActivity(AddDinnerActivity, Version).After(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump(e).ToActivity(SendEmailActivity, Version));
-                ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
-                ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
 
-                ScheduleActivity(SendEmailActivity, Version).After(ChargeCustomerActivity, Version);
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
             }
         }
 
@@ -330,14 +330,14 @@ namespace Guflow.Tests.Decider
             public WorkflowWithJumpToParentBranch()
             {
                 ScheduleActivity(BookHotelActivity, Version);
-                ScheduleActivity(AddDinnerActivity, Version).After(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump(e).ToActivity(ChooseSeatActivity, Version));
-                ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
-                ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
 
-                ScheduleActivity(SendEmailActivity, Version).After(ChargeCustomerActivity, Version);
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
             }
         }
 
@@ -347,14 +347,14 @@ namespace Guflow.Tests.Decider
             public WorkflowWithJumpToFirstMultiParentChild()
             {
                 ScheduleActivity(BookHotelActivity, Version);
-                ScheduleActivity(AddDinnerActivity, Version).After(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump(e).ToActivity(ChargeCustomerActivity, Version));
-                ScheduleActivity(ChooseSeatActivity, Version).After(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
-                ScheduleActivity(ChargeCustomerActivity, Version).After(AddDinnerActivity, Version).After(ChooseSeatActivity, Version);
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
 
-                ScheduleActivity(SendEmailActivity, Version).After(ChargeCustomerActivity, Version);
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
             }
         }
     }

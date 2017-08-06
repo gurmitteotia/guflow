@@ -20,8 +20,7 @@ namespace Guflow.Tests.Decider
         [SetUp]
         public void Setup()
         {
-            var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _timeoutType, _detail); 
-            _activityTimedoutEvent = new ActivityTimedoutEvent(activityTimedoutEventGraph.First(), activityTimedoutEventGraph);
+            _activityTimedoutEvent = CreateActivityTimedoutEvent(_timeoutType, _detail);
         }
 
         [Test]
@@ -52,6 +51,16 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Populate_workflow_details_with_activity_timedout_when_details_is_empty()
+        {
+            var workflow = new SingleActivityWorkflow();
+            var activityTimedoutEvent = CreateActivityTimedoutEvent(_timeoutType, "");
+            var workflowAction = activityTimedoutEvent.Interpret(workflow);
+
+            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.FailWorkflow(_timeoutType, "ActivityTimedout")));
+        }
+
+        [Test]
         public void Can_return_the_custom_workflow_action()
         {
             var workflowAction = new Mock<WorkflowAction>().Object;
@@ -60,6 +69,12 @@ namespace Guflow.Tests.Decider
             var actualAction = _activityTimedoutEvent.Interpret(workflow);
 
             Assert.That(actualAction,Is.EqualTo(workflowAction));
+        }
+
+        private ActivityTimedoutEvent CreateActivityTimedoutEvent(string timeoutType, string details)
+        {
+            var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, timeoutType, details);
+            return new ActivityTimedoutEvent(activityTimedoutEventGraph.First(), activityTimedoutEventGraph);
         }
 
         private class SingleActivityWorkflow : Workflow
