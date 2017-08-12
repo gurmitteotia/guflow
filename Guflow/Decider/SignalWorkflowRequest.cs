@@ -4,16 +4,16 @@ namespace Guflow.Decider
 {
     public class SignalWorkflowRequest
     {
-        public SignalWorkflowRequest(string workflowId, string signalname)
+        public SignalWorkflowRequest(string workflowId, string signalName)
         {
             Ensure.NotNullAndEmpty(workflowId, "workflowId");
-            Ensure.NotNullAndEmpty(signalname, "signalName");
+            Ensure.NotNullAndEmpty(signalName, "signalName");
 
             WorkflowId = workflowId;
-            Signalname = signalname;
+            SignalName = signalName;
         }
         public string WorkflowId { get; private set; }
-        public string Signalname { get; private set; }
+        public string SignalName { get; private set; }
         public string WorkflowRunId { get; set; }
         public string SignalInput { get; set; }
 
@@ -25,7 +25,7 @@ namespace Guflow.Decider
                 RunId = WorkflowRunId,
                 WorkflowId = WorkflowId,
                 Input = SignalInput,
-                SignalName = Signalname
+                SignalName = SignalName
             };
         }
     }

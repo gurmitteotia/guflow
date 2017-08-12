@@ -340,6 +340,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Null instance of Log is return from factory..
+        /// </summary>
+        internal static string Null_logger_is_returned {
+            get {
+                return ResourceManager.GetString("Null_logger_is_returned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parameter {0} can not be deserialized from string value {1}..
         /// </summary>
         internal static string Parameter_can_not_be_deserialized {

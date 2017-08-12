@@ -240,4 +240,7 @@
   <data name="Can_not_deserialize_json_data_into_type" xml:space="preserve">
     <value>Can not deserialize json data {0} in to type {1}</value>
   </data>
+  <data name="Null_logger_is_returned" xml:space="preserve">
+    <value>Null instance of Log is return from factory.</value>
+  </data>
 </root>

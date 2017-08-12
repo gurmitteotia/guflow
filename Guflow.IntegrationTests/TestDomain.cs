@@ -23,6 +23,7 @@ namespace Guflow.IntegrationTests
             {
                 await _domain.RegisterWorkflowAsync(workflow.GetType());
             }
+            
             return _domain.Host(workflows);
         }
 
@@ -36,12 +37,19 @@ namespace Guflow.IntegrationTests
             return _domain.Host(activityTypes);
         }
 
-        public async Task StartWorkflow<TWorkflow>(string input, string taskListName) where TWorkflow :Workflow
+        public async Task<string> StartWorkflow<TWorkflow>(string input, string taskListName) where TWorkflow :Workflow
         {
-            var startRequest = StartWorkflowRequest.For<TWorkflow>(Guid.NewGuid().ToString());
+            var workflowId = Guid.NewGuid().ToString();
+            var startRequest = StartWorkflowRequest.For<TWorkflow>(workflowId);
             startRequest.TaskListName = taskListName;
             startRequest.Input = input;
             await _domain.StartWorkflowAsync(startRequest);
+            return workflowId;
+        }
+
+        public async Task SendSignal(string workflowId, string name, string input)
+        {
+            await _domain.SignalWorkflowAsync(new SignalWorkflowRequest(workflowId, name){ SignalInput = input });
         }
     }
 }
