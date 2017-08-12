@@ -25,6 +25,42 @@
                 public const string Name = "SendEmailActivity";
                 public const string Version = "1.0";
             }
+
+            public static class BookHotel
+            {
+                public const string Name = "BookHotelActivity";
+                public const string Version = "1.0";
+            }
+
+            public static class AddDinner
+            {
+                public const string Name = "AddDinnerActivity";
+                public const string Version = "1.0";
+            }
+
+            public static class BookFlight
+            {
+                public const string Name = "BookFlightActivity";
+                public const string Version = "1.0";
+            }
+
+            public static class ChooseSeat
+            {
+                public const string Name = "ChooseSeatActivity";
+                public const string Version = "1.0";
+            }
+
+            public static class ChargeCustomer
+            {
+                public const string Name = "ChargeCustomerActivity";
+                public const string Version = "1.0";
+            }
+
+            public static class OrderItem
+            {
+                public const string Name = "OrderItem";
+                public const string Version = "1.0";
+            }
         }
 
         public static class Workflow

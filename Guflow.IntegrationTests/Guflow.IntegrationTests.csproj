@@ -54,6 +54,7 @@
     <Compile Include="DeflowAlgorithmTests.cs" />
     <Compile Include="Names.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SignalWorkflowTests.cs" />
     <Compile Include="TestDomain.cs" />
     <Compile Include="ActivityInputTests.cs" />
   </ItemGroup>

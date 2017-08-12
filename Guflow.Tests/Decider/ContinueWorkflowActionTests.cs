@@ -254,7 +254,7 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
                 ScheduleActivity(_siblingActivityName, _siblingActivityVersion);
-                ScheduleAction(CompleteWorkflow(workflowActionResult)).AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
+                ScheduleAction((i)=>CompleteWorkflow(workflowActionResult)).AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }
 

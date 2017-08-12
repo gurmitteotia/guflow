@@ -220,7 +220,7 @@ namespace Guflow.Decider
             return timerItem;
         }
 
-        protected IFluentWorkflowActionItem ScheduleAction(WorkflowAction workflowAction)
+        protected IFluentWorkflowActionItem ScheduleAction(Func<IWorkflowItem,WorkflowAction> workflowAction)
         {
             var workflowActionItem = new WorkflowActionItem(workflowAction, this);
             _allWorkflowItems.Add(workflowActionItem);

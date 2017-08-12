@@ -162,10 +162,11 @@ namespace Guflow
             await _simpleWorkflowClient.RequestCancelWorkflowExecutionAsync(cancelRequest.SwfFormat(_name));
         }
 
-        public async Task StartWorkflowAsync(StartWorkflowRequest startRequest)
+        public async Task<string> StartWorkflowAsync(StartWorkflowRequest startRequest)
         {
             Ensure.NotNull(startRequest, "startRequest");
-            await _simpleWorkflowClient.StartWorkflowExecutionAsync(startRequest.SwfFormat(_name));
+            var response = await _simpleWorkflowClient.StartWorkflowExecutionAsync(startRequest.SwfFormat(_name));
+            return response.Run.RunId;
         }
         public async Task SignalWorkflowAsync(SignalWorkflowRequest signalRequest)
         {
@@ -210,6 +211,11 @@ namespace Guflow
             listRequest.RegistrationStatus = RegistrationStatus.REGISTERED;
             var response = await _simpleWorkflowClient.ListActivityTypesAsync(listRequest);
             return response.ActivityTypeInfos.TypeInfos;
+        }
+
+        public override string ToString()
+        {
+            return _name;
         }
     }
 }

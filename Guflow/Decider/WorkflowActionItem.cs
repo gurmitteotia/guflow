@@ -7,10 +7,11 @@ namespace Guflow.Decider
 {
     internal class WorkflowActionItem : WorkflowItem, IFluentWorkflowActionItem
     {
-        private readonly WorkflowAction _workflowAction;
-        public WorkflowActionItem(WorkflowAction workflowAction, IWorkflow workflow) : base(RandomIdentity(), workflow)
+        private readonly Func<IWorkflowItem,WorkflowAction> _workflowActionFunc;
+        public WorkflowActionItem(Func<IWorkflowItem, WorkflowAction> workflowActionFunc, IWorkflow workflow)
+            : base(RandomIdentity(), workflow)
         {
-            _workflowAction = workflowAction;
+            _workflowActionFunc = workflowActionFunc;
         }
 
         public override WorkflowItemEvent LastEvent
@@ -35,7 +36,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> GetContinuedDecisions()
         {
-            return _workflowAction.GetDecisions();
+            return _workflowActionFunc(this).GetDecisions();
         }
 
         private static Identity RandomIdentity()

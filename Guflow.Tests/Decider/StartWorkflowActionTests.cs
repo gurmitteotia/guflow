@@ -57,7 +57,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowToScheduleAction(string reason, string details)
             {
-                ScheduleAction(FailWorkflow(reason, details));
+                ScheduleAction((i)=>FailWorkflow(reason, details));
             }
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)

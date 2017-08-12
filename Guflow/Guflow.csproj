@@ -71,6 +71,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleLog.cs" />
     <Compile Include="Decider\ActivityCancellationFailedEvent.cs" />
     <Compile Include="Decider\ActivityCancelledEvent.cs" />
     <Compile Include="Decider\ActivityCancelRequestedEvent.cs" />
@@ -113,7 +114,11 @@
     <Compile Include="Decider\NonWorkflowTypeException.cs" />
     <Compile Include="Decider\SignalWorkflowRequest.cs" />
     <Compile Include="Decider\StartWorkflowRequest.cs" />
+    <Compile Include="ILog.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="LogException.cs" />
     <Compile Include="MethodInfoExtensions.cs" />
+    <Compile Include="NullLog.cs" />
     <Compile Include="RetryableFunc.cs" />
     <Compile Include="TaskQueue.cs" />
     <Compile Include="Decider\WorkflowAlreadyHostedException.cs" />

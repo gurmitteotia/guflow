@@ -1,4 +1,5 @@
 ﻿using System;
+using Guflow.Worker;
 
 namespace Guflow.Decider
 {
@@ -29,6 +30,11 @@ namespace Guflow.Decider
 
             var activityItem = _workflowItems.ActivityItemFor(Identity.New(name, version, positionalName));
             return WorkflowAction.JumpTo(activityItem).SetTriggerAction(_triggeringAction(activityItem));
+        }
+        public JumpWorkflowAction ToActivity<TActivity>(string positionalName = "") where TActivity: Activity
+        {
+            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            return ToActivity(description.Name, description.Version, positionalName);
         }
         public JumpWorkflowAction ToTimer(string name)
         {

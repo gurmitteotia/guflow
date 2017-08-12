@@ -396,7 +396,7 @@ namespace Guflow.Tests
             {
                 Assert.That(request.WorkflowId, Is.EqualTo(s.WorkflowId));
                 Assert.That(request.WorkflowRunId, Is.EqualTo(request.WorkflowRunId));
-                Assert.That(request.Signalname, Is.EqualTo(s.SignalName));
+                Assert.That(request.SignalName, Is.EqualTo(s.SignalName));
                 Assert.That(request.SignalInput, Is.EqualTo(s.Input));
                 Assert.That(_domainName, Is.EqualTo(s.Domain));
                 return true;
