@@ -17,6 +17,7 @@ namespace Guflow.Worker
         private ActivityExecution _activityExecution;
         private volatile bool _stopped;
         private volatile bool _disposed;
+        private ILog _log = Log.GetLogger<HostedActivities>();
         internal HostedActivities(Domain domain, IEnumerable<Type> activitiesTypes)
             : this(domain, activitiesTypes, t=>(Activity)Activator.CreateInstance(t))
         {
@@ -111,11 +112,19 @@ namespace Guflow.Worker
             var activityExecution = Execution;
             activityExecution.Set(hostedActivities: this);
             var domain = _domain.OnPollingError(_pollingErrorHandler);
-            while (!_stopped)
+            try
             {
-                var workerTask = await taskQueue.PollForWorkerTaskAsync(domain, _cancellationTokenSource.Token);
-                workerTask.SetErrorHandler(_genericErrorHandler);
-                await activityExecution.ExecuteAsync(workerTask);
+                while (!_stopped)
+                {
+                    var workerTask = await taskQueue.PollForWorkerTaskAsync(domain, _cancellationTokenSource.Token);
+                    workerTask.SetErrorHandler(_genericErrorHandler);
+                    await activityExecution.ExecuteAsync(workerTask);
+                }
+            }
+            catch (Exception exception)
+            {
+                _log.Fatal("Hosted activities is faulted.", exception);
+                Environment.FailFast("Hosted activities is faulted. Bringing down the system", exception);
             }
         }
         internal Activity FindBy(string activityName, string activityVersion)

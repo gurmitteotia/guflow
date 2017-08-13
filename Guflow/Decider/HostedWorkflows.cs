@@ -18,7 +18,7 @@ namespace Guflow.Decider
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private bool _disposed = false;
-        private ILog _log = Log.GetLogger<HostedWorkflows>();
+        private readonly ILog _log = Log.GetLogger<HostedWorkflows>();
         public HostedWorkflows(Domain domain, IEnumerable<Workflow> workflows)
         {
             Ensure.NotNull(domain, "domain");
@@ -26,7 +26,7 @@ namespace Guflow.Decider
 
             workflows = workflows.Where(w => w != null).ToArray();
             if(!workflows.Any())
-                throw new ArgumentException(Resources.No_workflow_to_host, "workflows");
+                throw new ArgumentException(Resources.No_workflow_to_host, nameof(workflows));
 
             _domain = domain;
             _hostedWorkflows = new Workflows(workflows);
