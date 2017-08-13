@@ -13,13 +13,12 @@ namespace Guflow
         private readonly string _taskListName;
         private readonly string _pollingIdentity;
         private ReadHistoryEvents _readHistoryEvents;
-        //private ErrorHandler _errorHandler = ErrorHandler.NotHandled;
         public static readonly ReadHistoryEvents ReadAllEvents = (d,q) => ReadAllEventsAsync(d,q);
-        public static readonly ReadHistoryEvents ReadFirstPage = (d,q) => ReadFirstPageAsync(d, q); 
-
+        public static readonly ReadHistoryEvents ReadFirstPage = (d,q) => ReadFirstPageAsync(d, q);
+        private ILog _log = Log.GetLogger<TaskQueue>();
         public TaskQueue(string taskListName, string pollingIdentity = null)
         {
-            Ensure.NotNullAndEmpty(taskListName,()=>new ArgumentException(Resources.TaskListName_required, "taskListName"));
+            Ensure.NotNullAndEmpty(taskListName,()=>new ArgumentException(Resources.TaskListName_required, nameof(taskListName)));
             _taskListName = taskListName;
             _pollingIdentity = pollingIdentity??Environment.MachineName;
             ReadStrategy = ReadAllEvents;
@@ -37,9 +36,12 @@ namespace Guflow
 
         internal async Task<WorkflowTask> PollForWorkflowTaskAsync(Domain domain)
         {
+            _log.Debug($"Polling for new decisions on {this} under {domain}");
             var decisionTask = await domain.PollForDecisionTaskAsync(this);
             if (NewTasksAreReturned(decisionTask))
                 return WorkflowTask.CreateFor(decisionTask, domain);
+
+            _log.Debug($"No new decisions are returned on {this} under {domain}");
             return WorkflowTask.Empty;
         }
 
@@ -98,6 +100,11 @@ namespace Guflow
                 Domain = forDomain,
                 TaskList = new TaskList() {Name = _taskListName}
             };
+        }
+
+        public override string ToString()
+        {
+            return $"TaskQueue {_taskListName} Identity {_pollingIdentity}";
         }
 
         public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue);

@@ -272,10 +272,9 @@ namespace Guflow.Decider
 
             return JumpAction.JumpFromItem(workflowItem, _allWorkflowItems);
         }
-        protected JumpAction Jump(WorkflowEvent workflowEvent)
+        protected JumpAction Jump()
         {
-            Ensure.NotNull(workflowEvent, "workflowEvent");
-            return JumpAction.JumpFromNonItem(_allWorkflowItems);
+                return JumpAction.JumpFromNonItem(_allWorkflowItems);
         }
         protected WorkflowAction DefaultAction(WorkflowEvent workflowEvent)
         {

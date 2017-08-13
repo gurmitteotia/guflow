@@ -18,6 +18,7 @@ namespace Guflow.Decider
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private bool _disposed = false;
+        private ILog _log = Log.GetLogger<HostedWorkflows>();
         public HostedWorkflows(Domain domain, IEnumerable<Workflow> workflows)
         {
             Ensure.NotNull(domain, "domain");
@@ -137,10 +138,18 @@ namespace Guflow.Decider
         }
         private async void ExecuteHostedWorkfowsAsync(TaskQueue taskQueue, Domain domain)
         {
-            while (!_cancelled)
+            try
             {
-                var workflowTask = await PollForTaskAsync(taskQueue, domain);
-                await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
+                while (!_cancelled)
+                {
+                    var workflowTask = await PollForTaskAsync(taskQueue, domain);
+                    await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
+                }
+            }
+            catch (Exception exception)
+            {
+                _log.Fatal("Hosted workflows is faulted.", exception);
+                Environment.FailFast("Hosted workflow is faulted. Bringing down the system.", exception);
             }
         }
         private async Task<WorkflowTask> PollForTaskAsync(TaskQueue taskQueue, Domain domain)
