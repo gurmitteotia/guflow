@@ -215,7 +215,7 @@ namespace Guflow
 
         public override string ToString()
         {
-            return _name;
+            return $"Domain {_name}";
         }
     }
 }

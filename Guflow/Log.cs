@@ -6,7 +6,10 @@ namespace Guflow
     public class Log
     {
         private static readonly ILog NullLog = new NullLog();
-        private static Func<Type, ILog> _logFactory = (t)=>NullLog;
+        public static Func<Type, ILog> NullLogger = t => NullLog;
+        public static Func<Type, ILog> ConsoleLogger = t => new ConsoleLog(t.Name);
+        private static Func<Type, ILog> _logFactory = NullLogger;
+      
         public static ILog GetLogger<T>()
         {
             var log = _logFactory(typeof(T));
@@ -16,7 +19,7 @@ namespace Guflow
             return log;
         }
 
-        public static void RegisterFactory(Func<Type, ILog> logFactoryFunc)
+        public static void Register(Func<Type, ILog> logFactoryFunc)
         {
             Ensure.NotNull(logFactoryFunc, "logFactoryFunc");
             _logFactory = logFactoryFunc;

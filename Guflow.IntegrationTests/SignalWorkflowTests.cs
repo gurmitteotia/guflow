@@ -18,6 +18,7 @@ namespace Guflow.IntegrationTests
         [SetUp]
         public async Task Setup()
         {
+            Log.Register(Log.ConsoleLogger);
             _domain = new TestDomain();
             _taskListName = Guid.NewGuid().ToString();
             _hostedActivities = await HostAsync(typeof(OrderItemActivity), typeof(ChargeCustomerActivity));
@@ -88,7 +89,7 @@ namespace Guflow.IntegrationTests
             public WorkflowAction InventoryUpdated(WorkflowSignaledEvent @event)
             {
                 if (!Activities.First<OrderItemActivity>().IsActive)
-                    return Jump((WorkflowEvent)null).ToActivity<OrderItemActivity>();
+                    return Jump().ToActivity<OrderItemActivity>();
 
                 return Ignore(false);
             }
