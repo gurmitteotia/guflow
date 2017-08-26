@@ -59,15 +59,9 @@ namespace Guflow.Decider
             }
         }
 
-        public string Version
-        {
-            get { return Identity.Version; }
-        }
+        public string Version => Identity.Version;
 
-        public string PositionalName
-        {
-            get { return Identity.PositionalName; }
-        }
+        public string PositionalName => Identity.PositionalName;
 
         public IFluentActivityItem AfterActivity(string name, string version, string positionalName = "")
         {
@@ -165,10 +159,8 @@ namespace Guflow.Decider
             return this;
         }
 
-        public IFluentTimerItem RescheduleTimer
-        {
-            get { return _rescheduleTimer; }
-        }
+        public IFluentTimerItem RescheduleTimer => _rescheduleTimer;
+
         WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
             ITimer timer = _rescheduleTimer;

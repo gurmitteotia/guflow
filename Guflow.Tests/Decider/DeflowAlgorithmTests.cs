@@ -181,7 +181,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test] // joint workflow item = item with multiple parents
-        public void Jumping_down_in_branch_after_the_joint_item_triggers_scheduling_of_joint_item()
+        public void Jumping_down_in_branch_after_the_joint_item_triggers_scheduling_of_joint_item_when_its_all_parent_branches_are_inactive()
         {
             var bookHotel = CompletedActivityGraph(BookHotelActivity);
             var addDinner = CompletedActivityGraph(AddDinnerActivity);
@@ -195,6 +195,24 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EquivalentTo(new []
             {
                 new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)), 
+                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version))
+            }));
+        }
+
+        [Test] 
+        public void Does_not_trigger_scheduling_of_joint_item_when_jumping_without_trigger()
+        {
+            var bookHotel = CompletedActivityGraph(BookHotelActivity);
+            var addDinner = CompletedActivityGraph(AddDinnerActivity);
+            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+            var workflow = new WorkflowWithAJumpToChildBranchWithoutTrigger();
+            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
+            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
+
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
                 new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version))
             }));
         }
@@ -315,7 +333,24 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(BookHotelActivity, Version);
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
-                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump(e).ToActivity(SendEmailActivity, Version));
+                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump.ToActivity(SendEmailActivity, Version));
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowWithAJumpToChildBranchWithoutTrigger : Workflow
+        {
+            public WorkflowWithAJumpToChildBranchWithoutTrigger()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump.ToActivity(SendEmailActivity, Version).WithoutTrigger());
                 ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
@@ -332,7 +367,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(BookHotelActivity, Version);
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
-                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump(e).ToActivity(ChooseSeatActivity, Version));
+                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump.ToActivity(ChooseSeatActivity, Version));
                 ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
@@ -349,7 +384,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(BookHotelActivity, Version);
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
-                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump(e).ToActivity(ChargeCustomerActivity, Version));
+                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Jump.ToActivity(ChargeCustomerActivity, Version));
                 ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);

@@ -3,24 +3,25 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
-    public sealed class JumpAction
+    public sealed class JumpActions
     {
         private readonly WorkflowItems _workflowItems;
         private readonly Func<WorkflowItem, WorkflowAction> _triggeringAction;
-        private JumpAction(WorkflowItems workflowItems, Func<WorkflowItem, WorkflowAction> triggeringAction)
+
+        private JumpActions(WorkflowItems workflowItems, Func<WorkflowItem, WorkflowAction> triggeringAction)
         {
             _workflowItems = workflowItems;
             _triggeringAction = triggeringAction;
         }
 
-        internal static JumpAction JumpFromItem(WorkflowItem jumpFromItem, WorkflowItems workflowItems)
+        internal static JumpActions FromWorkflowItem(WorkflowItems workflowItems, WorkflowItem workflowItem)
         {
-            return new JumpAction(workflowItems, (to)=>new JumpTriggeredWorkflowAction(jumpFromItem, to));
+            return new JumpActions(workflowItems, jumpItem=>new TriggerActions(workflowItem).FirstJoint(jumpItem));
         }
 
-        internal static JumpAction JumpFromNonItem(WorkflowItems workflowItems)
+        internal static JumpActions FromWorkflowEvent(WorkflowItems workflowItems)
         {
-            return new JumpAction(workflowItems, (to) => WorkflowAction.Empty);
+            return new JumpActions(workflowItems, jumpItem => WorkflowAction.Empty);
         }
 
         public JumpWorkflowAction ToActivity(string name, string version, string positionalName = "")
@@ -29,7 +30,7 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(version, "version");
 
             var activityItem = _workflowItems.ActivityItemFor(Identity.New(name, version, positionalName));
-            return WorkflowAction.JumpTo(activityItem).SetTriggerAction(_triggeringAction(activityItem));
+            return WorkflowAction.JumpTo(activityItem).WithTriggerAction(_triggeringAction(activityItem));
         }
         public JumpWorkflowAction ToActivity<TActivity>(string positionalName = "") where TActivity: Activity
         {
@@ -40,7 +41,7 @@ namespace Guflow.Decider
         {
             Ensure.NotNullAndEmpty(name, "name");
             var timerItem = _workflowItems.TimerItemFor(Identity.Timer(name));
-            return WorkflowAction.JumpTo(timerItem).SetTriggerAction(_triggeringAction(timerItem));
+            return WorkflowAction.JumpTo(timerItem).WithTriggerAction(_triggeringAction(timerItem));
         }
     }
 }

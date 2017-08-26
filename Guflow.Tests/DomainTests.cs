@@ -194,6 +194,11 @@ namespace Guflow.Tests
         [Test]
         public async Task Send_workflow_start_request_to_amazon_swf()
         {
+            var response = new StartWorkflowExecutionResponse() {Run = new Run()};
+            _amazonWorkflowClient.Setup(c => c.StartWorkflowExecutionAsync(
+                It.IsAny<StartWorkflowExecutionRequest>(),
+                It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(response));
             var startRequest = new StartWorkflowRequest("workflowName", "version", "workflowId")
             {
                 ChildPolicy = ChildPolicy.Abandon,
