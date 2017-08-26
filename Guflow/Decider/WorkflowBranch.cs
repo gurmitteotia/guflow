@@ -72,16 +72,22 @@ namespace Guflow.Decider
 
             var latestEventItem = _workflowItems.First(i => latestEvent.IsFor(i));
             var allItemsInBranches = allBranches.SelectMany(b => b._workflowItems);
-            
+
             return latestEventItem.CanScheduleAny(allItemsInBranches);
         }
 
-        public WorkflowItem FindFirstJointItemUpTo(WorkflowItem jumpedItem)
+        public WorkflowItem FindFirstJointItem(WorkflowItem beforeItem)
         {
-            if(Has(jumpedItem))
-                return _workflowItems.TakeWhile(i=> !i.Equals(jumpedItem)).FirstOrDefault(i => i.Parents().Count() > 1);
+            if (Has(beforeItem))
+                return _workflowItems.TakeWhile(i => !i.Equals(beforeItem))
+                        .FirstOrDefault(i => i.Parents().Count() > 1);
 
             return null;
+        }
+
+        public WorkflowItem FindFirstJointItem()
+        {
+            return _workflowItems.FirstOrDefault(i => i.Parents().Count() > 1);
         }
 
         public bool Has(WorkflowItem workflowItem)
@@ -90,5 +96,5 @@ namespace Guflow.Decider
         }
     }
 
-   
+
 }

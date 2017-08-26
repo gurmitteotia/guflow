@@ -11,7 +11,7 @@ namespace Guflow.Decider
         private IWorkflowHistoryEvents _currentWorkflowHistoryEvents;
         private readonly WorkflowEventMethods _workflowEventMethods;
         private WorkflowAction _startupAction;
-
+        private WorkflowEvent _currentExecutingEvent;
         protected Workflow()
         {
             _workflowEventMethods = WorkflowEventMethods.For(this);
@@ -258,17 +258,16 @@ namespace Guflow.Decider
             return WorkflowAction.Ignore(keepBranchActive);
         }
 
-        protected JumpAction Jump(WorkflowItemEvent workflowItemEvent)
+        protected JumpActions Jump
         {
-            Ensure.NotNull(workflowItemEvent, "workflowItemEvent");
-            var workflowItem = _allWorkflowItems.WorkflowItemFor(workflowItemEvent);
+            get
+            {
+                return CurrentExecutingItem != null
+                    ? JumpActions.FromWorkflowItem(_allWorkflowItems, CurrentExecutingItem)
+                    : JumpActions.FromWorkflowEvent(_allWorkflowItems);
+            }
+        }
 
-            return JumpAction.JumpFromItem(workflowItem, _allWorkflowItems);
-        }
-        protected JumpAction Jump()
-        {
-                return JumpAction.JumpFromNonItem(_allWorkflowItems);
-        }
         protected WorkflowAction DefaultAction(WorkflowEvent workflowEvent)
         {
             Ensure.NotNull(workflowEvent, "workflowEvent");
@@ -318,13 +317,8 @@ namespace Guflow.Decider
             return new Signal(signalName, input);
         }
 
-        protected dynamic Input
-        {
-            get
-            {
-               return StartedEvent.Input.FromJson();
-            }
-        }
+        protected dynamic Input => StartedEvent.Input.FromJson();
+
         protected TType InputAs<TType>()
         {
             return StartedEvent.Input.FromJson<TType>();
@@ -347,6 +341,21 @@ namespace Guflow.Decider
             return _allWorkflowItems.WorkflowItemFor(identity);
         }
 
+        void IWorkflow.SetCurrentExecutingEvent(WorkflowEvent workflowEvent)
+        {
+            _currentExecutingEvent = workflowEvent;
+        }
+        private WorkflowItem CurrentExecutingItem
+        {
+            get
+            {
+                var workflowItemEvent = _currentExecutingEvent as WorkflowItemEvent;
+                if (workflowItemEvent != null)
+                    return _allWorkflowItems.WorkflowItemFor(workflowItemEvent);
+
+                return null;
+            }
+        }
         IWorkflowHistoryEvents IWorkflow.WorkflowHistoryEvents
         {
             get

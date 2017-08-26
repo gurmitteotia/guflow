@@ -82,14 +82,14 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowToReturnScheduleActivityAction()
             {
-                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => Jump(c).ToActivity(ActivityName, ActivityVersion, PositionalName));
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => Jump.ToActivity(ActivityName, ActivityVersion, PositionalName));
             }
         }
         private class WorkflowToReturnScheduleTimerAction : Workflow
         {
             public WorkflowToReturnScheduleTimerAction()
             {
-                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => Jump(c).ToTimer("SomeTimer"));
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => Jump.ToTimer("SomeTimer"));
                 ScheduleTimer("SomeTimer").AfterActivity(ActivityName, ActivityVersion, PositionalName);
             }
         }
@@ -110,7 +110,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(ActivityName, Version);
 
                 ScheduleActivity(SiblingActivityName, Version)
-                    .OnCompletion(e => Jump(e).ToActivity(ActivityName, Version));
+                    .OnCompletion(e => Jump.ToActivity(ActivityName, Version));
             }
         }
     }

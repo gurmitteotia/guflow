@@ -6,20 +6,23 @@ namespace Guflow.Decider
     public abstract class WorkflowAction
     {
         internal abstract IEnumerable<WorkflowDecision> GetDecisions();
-        internal virtual bool ReadyToScheduleChildren
-        {
-            get { return false; }
-        }
+        internal virtual bool ReadyToScheduleChildren => false;
 
         internal virtual bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
         {
              var decisions = GetDecisions();
              return decisions.Any(d => workflowItems.Any(d.IsFor));
         }
-
+        
         public static WorkflowAction operator +(WorkflowAction left, WorkflowAction right)
         {
+            Ensure.NotNull(left,nameof(left));
+            Ensure.NotNull(right, nameof(right));
             return new CompositeWorkflowAction(left,right);
+        }
+        public WorkflowAction And(WorkflowAction other)
+        {
+            return this + other;
         }
         internal static readonly WorkflowAction Empty = new EmptyWorkflowAction();
         internal static WorkflowAction FailWorkflow(string reason, string detail)
@@ -55,7 +58,6 @@ namespace Guflow.Decider
         {
             return new IgnoreWorkflowAction(keepBranchActive);
         }
-
         internal static WorkflowAction Cancel(WorkflowItem workflowItem)
         {
             return new GenericWorkflowAction(workflowItem.GetCancelDecision());
@@ -91,120 +93,6 @@ namespace Guflow.Decider
             workflowStartedEvent.TagList.ToList().ForEach(tag=>restartWorkflowAction.AddTag(tag));
             return restartWorkflowAction;
         }
-
-        private sealed class IgnoreWorkflowAction : WorkflowAction
-        {
-            private readonly bool _keepBranchActive;
-
-            public IgnoreWorkflowAction(bool keepBranchActive)
-            {
-                _keepBranchActive = keepBranchActive;
-            }
-
-            internal override IEnumerable<WorkflowDecision> GetDecisions()
-            {
-                return Enumerable.Empty<WorkflowDecision>();
-            }
-
-            internal override bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
-            {
-                return _keepBranchActive;
-            }
-
-            internal override bool ReadyToScheduleChildren
-            {
-                get { return !_keepBranchActive; }
-            }
-
-            private bool Equals(IgnoreWorkflowAction other)
-            {
-                return _keepBranchActive == other._keepBranchActive;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((IgnoreWorkflowAction)obj);
-            }
-            public override int GetHashCode()
-            {
-                return _keepBranchActive.GetHashCode();
-            }
-
-        }
-
-        private class StartWorkflowAction : WorkflowAction
-        {
-            private const string _defaultCompleteResult = "Workflow is completed because no schedulable item was found.";
-            private readonly WorkflowItems _workflowItems;
-
-            public StartWorkflowAction(WorkflowItems workflowItems)
-            {
-                _workflowItems = workflowItems;
-            }
-            public override bool Equals(object other)
-            {
-                var otherAction = other as StartWorkflowAction;
-                if (otherAction == null)
-                    return false;
-                return _workflowItems.Equals(otherAction._workflowItems);
-            }
-            public override int GetHashCode()
-            {
-                return _workflowItems.GetHashCode();
-            }
-            internal override IEnumerable<WorkflowDecision> GetDecisions()
-            {
-                var startupWorkflowItems = _workflowItems.StartupItems();
-
-                if (!startupWorkflowItems.Any())
-                    return new[] { new CompleteWorkflowDecision(_defaultCompleteResult) };
-
-                return startupWorkflowItems.SelectMany(s => s.GetContinuedDecisions());
-            }
-        }
-
-        private class CancelItemsWorkflowAction : WorkflowAction
-        {
-            private readonly IEnumerable<WorkflowItem> _workflowItems;
-
-            public CancelItemsWorkflowAction(IEnumerable<WorkflowItem> workflowItems)
-            {
-                _workflowItems = workflowItems;
-            }
-
-            internal override IEnumerable<WorkflowDecision> GetDecisions()
-            {
-                return _workflowItems.Select(w => w.GetCancelDecision());
-            }
-        }
-        private class CompositeWorkflowAction : WorkflowAction
-        {
-            private readonly WorkflowAction _left;
-            private readonly WorkflowAction _right;
-            public CompositeWorkflowAction(WorkflowAction left, WorkflowAction right)
-            {
-                _left = left;
-                _right = right;
-            }
-            internal override bool ReadyToScheduleChildren
-            {
-                get { return  _left.ReadyToScheduleChildren || _right.ReadyToScheduleChildren; }
-            }
-
-            internal override bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
-            {
-                return _left.CanScheduleAny(workflowItems) || _right.CanScheduleAny(workflowItems);
-            }
-
-            internal override IEnumerable<WorkflowDecision> GetDecisions()
-            {
-                return _left.GetDecisions().Concat(_right.GetDecisions());
-            }
-        }
-
         private sealed class EmptyWorkflowAction : WorkflowAction
         {
             internal override IEnumerable<WorkflowDecision> GetDecisions()

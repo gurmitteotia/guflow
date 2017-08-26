@@ -6,22 +6,26 @@ namespace Guflow.Decider
 {
     public sealed class JumpWorkflowAction : WorkflowAction
     {
-        private  WorkflowAction _triggeredAction;
+        private WorkflowAction _triggeredAction = Empty;
         private readonly ScheduleWorkflowItemAction _scheduleAction;
-
         internal JumpWorkflowAction(WorkflowItem jumpToItem)
         {
             _scheduleAction = new ScheduleWorkflowItemAction(jumpToItem);
-            _triggeredAction = Empty;
-        }
-        internal JumpWorkflowAction SetTriggerAction(WorkflowAction workflowAction)
-        {
-            _triggeredAction = workflowAction;
-            return this;
         }
         internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
             return _scheduleAction.GetDecisions().Concat(_triggeredAction.GetDecisions());
+        }
+
+        internal JumpWorkflowAction WithTriggerAction(WorkflowAction triggerAction)
+        {
+            _triggeredAction = triggerAction;
+            return this;
+        }
+        public WorkflowAction WithoutTrigger()
+        {
+            _triggeredAction = Empty;
+            return this;
         }
 
         public WorkflowAction After(TimeSpan interval)
@@ -45,6 +49,5 @@ namespace Guflow.Decider
         {
             return _scheduleAction.GetHashCode();
         }
-
     }
-}
+  }

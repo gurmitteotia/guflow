@@ -13,12 +13,12 @@ namespace Guflow.Decider
 
         internal virtual WorkflowAction Interpret(IWorkflow workflow)
         {
-            throw new NotSupportedException(string.Format("Can not interpret {0}.", this.GetType().Name));
+            throw new NotSupportedException($"Can not interpret {this.GetType().Name}.");
         }
 
         internal virtual WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
         {
-            throw new NotSupportedException(string.Format("DefaultAction is not supported {0}.", this.GetType().Name));
+            throw new NotSupportedException($"DefaultAction is not supported {this.GetType().Name}.");
         }
         public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();
     
