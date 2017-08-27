@@ -4,17 +4,18 @@ namespace Guflow.Decider
 {
     public interface IFluentActivityItem: IFluentWorkflowItem<IFluentActivityItem>
     {
-        IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc);
-        IFluentActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> onFailureFunc);
-        IFluentActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> onTimedoutFunc);
-        IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationFunc);
-        IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> onFailedSchedulingAction);
-        IFluentActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc);
-        IFluentActivityItem WithInput(Func<IActivityItem, object> inputFunc);
-        IFluentActivityItem OnTaskList(Func<IActivityItem, string> taskListFunc);
-        IFluentActivityItem When(Func<IActivityItem, bool> whenFunc);
-        IFluentActivityItem WithPriority(Func<IActivityItem, int?> priorityFunc);
-        IFluentActivityItem WithTimeouts(Func<IActivityItem, ScheduleActivityTimeouts> timeoutsFunc);
+        IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> action);
+        IFluentActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> action);
+        IFluentActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> action);
+        IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> action);
+        IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> action);
+        IFluentActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> action);
+        IFluentActivityItem WithInput(Func<IActivityItem, object> data);
+        IFluentActivityItem OnTaskList(Func<IActivityItem, string> name);
+        IFluentActivityItem When(Func<IActivityItem, bool> @true);
+        IFluentActivityItem When(Func<IActivityItem, bool> @true, Func<IActivityItem, WorkflowAction> falseAction);
+        IFluentActivityItem WithPriority(Func<IActivityItem, int?> number);
+        IFluentActivityItem WithTimeouts(Func<IActivityItem, ScheduleActivityTimeouts> timeouts);
         IFluentTimerItem RescheduleTimer { get; }
     }
 }
