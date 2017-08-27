@@ -34,14 +34,14 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Return_empty_when_when_condiation_is_evaluated_to_false()
+        public void Return_empty_when_when_condition_is_evaluated_to_false()
         {
-            var timerItem = TimerItem.New(_timerIdentity, null);
+            var timerItem = TimerItem.New(_timerIdentity, Mock.Of<IWorkflow>());
             timerItem.When(t => false);
 
-            var decision = timerItem.GetScheduleDecisions();
+            var decisions = timerItem.GetScheduleDecisions();
 
-            Assert.That(decision,Is.EqualTo(new []{WorkflowDecision.Empty}));
+            Assert.That(decisions,Is.Empty);
         }
 
         [Test]

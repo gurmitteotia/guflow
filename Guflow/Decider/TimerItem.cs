@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Guflow.Worker;
 
 namespace Guflow.Decider
@@ -8,16 +7,18 @@ namespace Guflow.Decider
     internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer
     {
         private TimeSpan _fireAfter= new TimeSpan();
-        private Func<TimerFiredEvent, WorkflowAction> _onFiredAction;
-        private Func<TimerCancellationFailedEvent, WorkflowAction> _onCanellationFailedAction;
-        private Func<TimerStartFailedEvent, WorkflowAction> _onStartFailureAction;
-        private Func<TimerCancelledEvent, WorkflowAction> _onTimerCancelledAction; 
-        private Func<TimerItem, bool> _whenFunc;
+        private Func<TimerFiredEvent, WorkflowAction> _firedAction;
+        private Func<TimerCancellationFailedEvent, WorkflowAction> _cancellationFailedAction;
+        private Func<TimerStartFailedEvent, WorkflowAction> _startFailureAction;
+        private Func<TimerCancelledEvent, WorkflowAction> _timerCancelledAction; 
+        private Func<TimerItem, bool> _canSchedule;
+        private Func<ITimerItem, WorkflowAction> _falseAction;
         private TimerItem _rescheduleTimer;
         private TimerItem(Identity identity, IWorkflow workflow)
                      : base(identity, workflow)
         {
-            _whenFunc = t => true;
+            _canSchedule = t => true;
+            _falseAction = t=>new TriggerActions(this).FirstJoint();
         }
 
         public static TimerItem Reschedule(WorkflowItem ownerItem, Identity identity, IWorkflow workflow)
@@ -41,32 +42,35 @@ namespace Guflow.Decider
             return timerItem;
         }
 
-        public override WorkflowItemEvent LastEvent
-        {
-            get { return WorkflowHistoryEvents.LastTimerEventFor(this); }
-        }
+        public override WorkflowItemEvent LastEvent => WorkflowHistoryEvents.LastTimerEventFor(this);
 
-        public override IEnumerable<WorkflowItemEvent> AllEvents
+        public override IEnumerable<WorkflowItemEvent> AllEvents => WorkflowHistoryEvents.AllTimerEventsFor(this);
+
+        public IFluentTimerItem FireAfter(TimeSpan time)
         {
-            get { return WorkflowHistoryEvents.AllTimerEventsFor(this); }
-        }
-        public IFluentTimerItem FireAfter(TimeSpan fireAfter)
-        {
-            _fireAfter = fireAfter;
+            _fireAfter = time;
             return this;
         }
-        public IFluentTimerItem When(Func<ITimerItem, bool> whenFunc)
+        public IFluentTimerItem When(Func<ITimerItem, bool> @true)
         {
-            Ensure.NotNull(whenFunc,"whenFunc");
+            Ensure.NotNull(@true,"@true");
 
-            _whenFunc = whenFunc;
+            _canSchedule = @true;
             return this;
         }
-        public IFluentTimerItem OnFired(Func<TimerFiredEvent, WorkflowAction> onFiredAction)
-        {
-            Ensure.NotNull(onFiredAction, "onFiredAction");
 
-            _onFiredAction = onFiredAction;
+        public IFluentTimerItem When(Func<ITimerItem, bool> @true, Func<ITimerItem, WorkflowAction> falseAction)
+        {
+            Ensure.NotNull(falseAction,nameof(falseAction));
+            _falseAction = falseAction;
+            return When(@true);
+        }
+
+        public IFluentTimerItem OnFired(Func<TimerFiredEvent, WorkflowAction> action)
+        {
+            Ensure.NotNull(action, "action");
+
+            _firedAction = action;
             return this;
         }
         public IFluentTimerItem AfterTimer(string name)
@@ -90,54 +94,54 @@ namespace Guflow.Decider
             var description = ActivityDescriptionAttribute.FindOn<TActivity>();
             return AfterActivity(description.Name, description.Version, positionalName);
         }
-        public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> onCancelledFunc)
+        public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(onCancelledFunc, "onCancelledFunc");
+            Ensure.NotNull(action, "action");
 
-            _onTimerCancelledAction = onCancelledFunc;
+            _timerCancelledAction = action;
             return this;
         }
-        public IFluentTimerItem OnFailedCancellation(Func<TimerCancellationFailedEvent, WorkflowAction> onCancellationFailedFunc)
+        public IFluentTimerItem OnFailedCancellation(Func<TimerCancellationFailedEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(onCancellationFailedFunc, "onCancellationFailedFunc");
+            Ensure.NotNull(action, "action");
 
-            _onCanellationFailedAction = onCancellationFailedFunc;
+            _cancellationFailedAction = action;
             return this;
         }
 
-        public IFluentTimerItem OnStartFailure(Func<TimerStartFailedEvent, WorkflowAction> onStartFailureAction)
+        public IFluentTimerItem OnStartFailure(Func<TimerStartFailedEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(onStartFailureAction, "onStartFailureAction");
-            _onStartFailureAction = onStartFailureAction;
+            Ensure.NotNull(action, "action");
+            _startFailureAction = action;
             return this;
         }
         WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
             if (timerFiredEvent.IsARescheduledTimer)
-                return _rescheduleTimer._onFiredAction(timerFiredEvent);
+                return _rescheduleTimer._firedAction(timerFiredEvent);
 
-            return _onFiredAction(timerFiredEvent);
+            return _firedAction(timerFiredEvent);
         }
 
         WorkflowAction ITimer.Cancelled(TimerCancelledEvent timerCancelledEvent)
         {
-            return _onTimerCancelledAction(timerCancelledEvent);
+            return _timerCancelledAction(timerCancelledEvent);
         }
 
         WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
         {
-            return _onStartFailureAction(timerStartFailedEvent);
+            return _startFailureAction(timerStartFailedEvent);
         }
 
         WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
-            return _onCanellationFailedAction(timerCancellationFailedEvent);
+            return _cancellationFailedAction(timerCancellationFailedEvent);
         }
 
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
-            if (!_whenFunc(this))
-                return new []{WorkflowDecision.Empty};
+            if (!_canSchedule(this))
+                return new TriggerActions(this).FirstJoint().GetDecisions();
 
             return new []{new ScheduleTimerDecision(Identity, _fireAfter, this == _rescheduleTimer)};
         }
