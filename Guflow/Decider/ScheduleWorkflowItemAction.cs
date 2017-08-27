@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Guflow.Decider
 {
@@ -10,11 +11,11 @@ namespace Guflow.Decider
         internal ScheduleWorkflowItemAction(WorkflowItem workflowItem)
         {
             _workflowItem = workflowItem;
-            _scheduleWorkflowAction = new GenericWorkflowAction(workflowItem.GetScheduleDecisions());
+            _scheduleWorkflowAction = Custom(workflowItem.GetScheduleDecisions().ToArray());
         }
         public ScheduleWorkflowItemAction After(TimeSpan afterTimeout)
         {
-           _scheduleWorkflowAction = new GenericWorkflowAction(new []{_workflowItem.GetRescheduleDecision(afterTimeout)});
+           _scheduleWorkflowAction = Custom(_workflowItem.GetRescheduleDecision(afterTimeout));
             return this;
         }
         public WorkflowAction UpTo(Limit limit)
