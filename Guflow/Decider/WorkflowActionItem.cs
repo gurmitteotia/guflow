@@ -18,7 +18,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
-            return new []{WorkflowDecision.Empty};
+            return _workflowActionFunc(this).GetDecisions();
         }
 
         public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan afterTimeout)
@@ -30,12 +30,6 @@ namespace Guflow.Decider
         {
             return WorkflowDecision.Empty;
         }
-
-        public override IEnumerable<WorkflowDecision> GetContinuedDecisions()
-        {
-            return _workflowActionFunc(this).GetDecisions();
-        }
-
         private static Identity RandomIdentity()
         {
             return Identity.New(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
