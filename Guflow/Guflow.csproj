@@ -86,7 +86,6 @@
     <Compile Include="Decider\ActivityStartedEvent.cs" />
     <Compile Include="Decider\ActivityTimedoutEvent.cs" />
     <Compile Include="Decider\AmbiguousWorkflowMethodException.cs" />
-    <Compile Include="Decider\CancelItemsWorkflowAction.cs" />
     <Compile Include="Decider\CancelWorkflowRequest.cs" />
     <Compile Include="Decider\ChildPolicy.cs" />
     <Compile Include="Decider\CompositeWorkflowAction.cs" />
@@ -152,7 +151,6 @@
     <Compile Include="Decider\DuplicateItemException.cs" />
     <Compile Include="Ensure.cs" />
     <Compile Include="Decider\FailWorkflowDecision.cs" />
-    <Compile Include="Decider\GenericWorkflowAction.cs" />
     <Compile Include="Decider\HistoryEventsExtension.cs" />
     <Compile Include="Decider\IActivityItem.cs" />
     <Compile Include="Decider\Identity.cs" />

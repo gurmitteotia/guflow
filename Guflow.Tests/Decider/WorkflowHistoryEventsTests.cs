@@ -20,7 +20,7 @@ namespace Guflow.Tests.Decider
         {
             _workflow = new Mock<IWorkflow>();
             _expectedWorkflowDecision = new Mock<WorkflowDecision>(false,false).Object;
-            _interpretedWorkflowAction = new TestWorkflowAction(_expectedWorkflowDecision);
+            _interpretedWorkflowAction = WorkflowAction.Custom(_expectedWorkflowDecision);
         }
         
         [Test]
@@ -220,7 +220,7 @@ namespace Guflow.Tests.Decider
         public void Should_accumulate_the_interpreted_actions()
         {
             var timerFailedDecision = new Mock<WorkflowDecision>(false,false);
-            var timerFailedAction = new TestWorkflowAction(timerFailedDecision.Object);
+            var timerFailedAction = WorkflowAction.Custom(timerFailedDecision.Object);
             _workflow.Setup(w => w.OnTimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
             _workflow.Setup(w => w.OnTimerStartFailure(It.IsAny<TimerStartFailedEvent>())).Returns(timerFailedAction);
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
@@ -437,21 +437,6 @@ namespace Guflow.Tests.Decider
 
             var combinedEventGraph = timerFiredEventGraph.Concat(timerStartedEventFileGraph);
             return new WorkflowHistoryEvents(combinedEventGraph);
-        }
-
-        private class TestWorkflowAction : WorkflowAction
-        {
-            private readonly WorkflowDecision _workflowDecision;
-
-            public TestWorkflowAction(WorkflowDecision workflowDecision)
-            {
-                _workflowDecision = workflowDecision;
-            }
-
-            internal override IEnumerable<WorkflowDecision> GetDecisions()
-            {
-                return new[] {_workflowDecision};
-            }
         }
     }
 }

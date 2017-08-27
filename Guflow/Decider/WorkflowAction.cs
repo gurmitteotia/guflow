@@ -3,9 +3,26 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
-    public abstract class WorkflowAction
+    public class WorkflowAction
     {
-        internal abstract IEnumerable<WorkflowDecision> GetDecisions();
+        private readonly IEnumerable<WorkflowDecision> _workflowDecisions;
+
+        private WorkflowAction(IEnumerable<WorkflowDecision> workflowDecisions)
+        {
+            _workflowDecisions = workflowDecisions;
+        }
+
+        private WorkflowAction(WorkflowDecision workflowDecision)
+            :this(new []{workflowDecision})
+        {
+        }
+        protected WorkflowAction():this(Enumerable.Empty<WorkflowDecision>())
+        {
+        }
+        internal virtual IEnumerable<WorkflowDecision> GetDecisions()
+        {
+            return _workflowDecisions;
+        }
         internal virtual bool ReadyToScheduleChildren => false;
 
         internal virtual bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
@@ -24,18 +41,23 @@ namespace Guflow.Decider
         {
             return this + other;
         }
-        internal static readonly WorkflowAction Empty = new EmptyWorkflowAction();
+        internal static readonly WorkflowAction Empty = new WorkflowAction(Enumerable.Empty<WorkflowDecision>());
+
+        internal static WorkflowAction Custom(params WorkflowDecision[] workflowDecisions)
+        {
+            return new WorkflowAction(workflowDecisions);
+        }
         internal static WorkflowAction FailWorkflow(string reason, string detail)
         {
-            return new GenericWorkflowAction(new FailWorkflowDecision(reason,detail));
+            return new WorkflowAction(new FailWorkflowDecision(reason,detail));
         }
         internal static WorkflowAction CompleteWorkflow(string result)
         {
-            return new GenericWorkflowAction(new CompleteWorkflowDecision(result));
+            return new WorkflowAction(new CompleteWorkflowDecision(result));
         }
         internal static WorkflowAction CancelWorkflow(string detail)
         {
-            return new GenericWorkflowAction(new CancelWorkflowDecision(detail));
+            return new WorkflowAction(new CancelWorkflowDecision(detail));
         }
         internal static ScheduleWorkflowItemAction Schedule(WorkflowItem workflowItem)
         {
@@ -60,23 +82,23 @@ namespace Guflow.Decider
         }
         internal static WorkflowAction Cancel(WorkflowItem workflowItem)
         {
-            return new GenericWorkflowAction(workflowItem.GetCancelDecision());
+            return new WorkflowAction(workflowItem.GetCancelDecision());
         }
         internal static WorkflowAction Cancel(IEnumerable<WorkflowItem> workflowItems)
         {
-            return new CancelItemsWorkflowAction(workflowItems);
+            return new WorkflowAction(workflowItems.Select(w=>w.GetCancelDecision()));
         }
         internal static WorkflowAction Signal(string signalName, string input,string workflowId, string runId)
         {
-            return new GenericWorkflowAction(new SignalWorkflowDecision(signalName,input,workflowId,runId));
+            return new WorkflowAction(new SignalWorkflowDecision(signalName,input,workflowId,runId));
         }
         internal static WorkflowAction RecordMarker(string markerName, string details)
         {
-            return new GenericWorkflowAction(new RecordMarkerWorkflowDecision(markerName,details));
+            return new WorkflowAction(new RecordMarkerWorkflowDecision(markerName,details));
         }
         internal static WorkflowAction CancelWorkflowRequest(string workflowId, string runId)
         {
-            return new GenericWorkflowAction(new CancelRequestWorkflowDecision(workflowId, runId));
+            return new WorkflowAction(new CancelRequestWorkflowDecision(workflowId, runId));
         }
         internal static RestartWorkflowAction RestartWorkflow(IWorkflowHistoryEvents workflowHistoryEvents)
         {
@@ -92,13 +114,6 @@ namespace Guflow.Decider
             };
             workflowStartedEvent.TagList.ToList().ForEach(tag=>restartWorkflowAction.AddTag(tag));
             return restartWorkflowAction;
-        }
-        private sealed class EmptyWorkflowAction : WorkflowAction
-        {
-            internal override IEnumerable<WorkflowDecision> GetDecisions()
-            {
-                return Enumerable.Empty<WorkflowDecision>();
-            }
         }
     }
 }
