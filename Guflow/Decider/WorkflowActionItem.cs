@@ -21,9 +21,9 @@ namespace Guflow.Decider
             return new []{WorkflowDecision.Empty};
         }
 
-        public override WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
+        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan afterTimeout)
         {
-            return WorkflowDecision.Empty;
+            return GetScheduleDecisions();
         }
 
         public override WorkflowDecision GetCancelDecision()

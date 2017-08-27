@@ -15,7 +15,7 @@ namespace Guflow.Decider
         }
         public ScheduleWorkflowItemAction After(TimeSpan afterTimeout)
         {
-           _scheduleWorkflowAction = Custom(_workflowItem.GetRescheduleDecision(afterTimeout));
+           _scheduleWorkflowAction = Custom(_workflowItem.GetRescheduleDecisions(afterTimeout).ToArray());
             return this;
         }
         public WorkflowAction UpTo(Limit limit)
