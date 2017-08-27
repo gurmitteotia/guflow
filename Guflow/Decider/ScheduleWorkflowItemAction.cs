@@ -10,11 +10,11 @@ namespace Guflow.Decider
         internal ScheduleWorkflowItemAction(WorkflowItem workflowItem)
         {
             _workflowItem = workflowItem;
-            _scheduleWorkflowAction = new GenericWorkflowAction(workflowItem.GetScheduleDecision());
+            _scheduleWorkflowAction = new GenericWorkflowAction(workflowItem.GetScheduleDecisions());
         }
         public ScheduleWorkflowItemAction After(TimeSpan afterTimeout)
         {
-           _scheduleWorkflowAction = new GenericWorkflowAction(_workflowItem.GetRescheduleDecision(afterTimeout));
+           _scheduleWorkflowAction = new GenericWorkflowAction(new []{_workflowItem.GetRescheduleDecision(afterTimeout)});
             return this;
         }
         public WorkflowAction UpTo(Limit limit)

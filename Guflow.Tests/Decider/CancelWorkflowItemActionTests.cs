@@ -27,15 +27,6 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Equality_tests()
-        {
-            var workflowItem1 = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
-            var workflowItem2 = TimerItem.New(Identity.Timer("TimerName2"), _workflow.Object);
-            Assert.That(WorkflowAction.Cancel(workflowItem1).Equals(WorkflowAction.Cancel(workflowItem1)));
-            Assert.False(WorkflowAction.Cancel(workflowItem1).Equals(WorkflowAction.Cancel(workflowItem2)));
-        }
-
-        [Test]
         public void Returns_cancel_timer_decision_for_timer_item_when_it_is_active()
         {
             SetupWorkflowToReturns(HistoryEventFactory.CreateTimerStartedEventGraph(Identity.Timer("TimerName"), TimeSpan.FromSeconds(2)));
@@ -89,9 +80,9 @@ namespace Guflow.Tests.Decider
             workflow.NewExecutionFor(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
             var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
-            var workflowAction = completedActivityEvent.Interpret(workflow);
+            var decisions = completedActivityEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Cancel(new ActivityItem(Identity.New("ActivityToCancel", "1.2"), workflow))));
+            Assert.That(decisions, Is.EqualTo(new []{new CancelActivityDecision(Identity.New("ActivityToCancel", "1.2"))}));
         }
 
         [Test]
@@ -100,9 +91,9 @@ namespace Guflow.Tests.Decider
             var workflow = new WorkflowToReturnCancelledTimerAction();
             var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
-            var workflowAction = completedActivityEvent.Interpret(workflow);
+            var decisions = completedActivityEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Cancel(TimerItem.New(Identity.Timer("SomeTimer"), null))));
+            Assert.That(decisions, Is.EqualTo(new []{new CancelTimerDecision(Identity.Timer("SomeTimer"))}));
         }
 
         [Test]

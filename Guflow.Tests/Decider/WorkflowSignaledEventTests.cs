@@ -57,9 +57,9 @@ namespace Guflow.Tests.Decider
         {
             var workflowSignaledEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input","runid","wid"));
 
-            var workflowAction = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput"));
+            var decisions = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput")).GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Signal("newSignal","newInput",workflowSignaledEvent.ExternalWorkflowId,workflowSignaledEvent.ExternalWorkflowRunid)));
+            Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision("newSignal","newInput",workflowSignaledEvent.ExternalWorkflowId,workflowSignaledEvent.ExternalWorkflowRunid)}));
         }
 
         private class WorkflowWithCustomActionOnSignal : Workflow

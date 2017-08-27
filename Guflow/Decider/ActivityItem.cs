@@ -217,23 +217,23 @@ namespace Guflow.Decider
             return inputObject.ToAwsString();
         }
 
-        public override WorkflowDecision GetScheduleDecision()
+        public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
             if (!_whenFunc(this))
-                return WorkflowDecision.Empty;
+                return new []{WorkflowDecision.Empty};
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.UseInputFunc(GetActivityInput);
             scheduleActivityDecision.TaskList = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);
             scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
-            return scheduleActivityDecision;
+            return new []{scheduleActivityDecision};
         }
 
         public override WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
         {
             _rescheduleTimer.FireAfter(afterTimeout);
-            return _rescheduleTimer.GetScheduleDecision();
+            return _rescheduleTimer.GetScheduleDecisions().Single();
         }
 
         public override WorkflowDecision GetCancelDecision()

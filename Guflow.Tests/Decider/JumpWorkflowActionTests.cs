@@ -32,7 +32,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.GetDecisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { workflowItem.GetScheduleDecision() }));
+            Assert.That(decisions, Is.EquivalentTo(workflowItem.GetScheduleDecisions()));
         }
 
         [Test]

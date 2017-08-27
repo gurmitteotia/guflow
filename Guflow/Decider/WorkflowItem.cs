@@ -54,12 +54,12 @@ namespace Guflow.Decider
             return _parentItems;
         }
 
-        public abstract WorkflowDecision GetScheduleDecision();
+        public abstract IEnumerable<WorkflowDecision> GetScheduleDecisions();
         public abstract WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout);
         public abstract WorkflowDecision GetCancelDecision();
         public virtual IEnumerable<WorkflowDecision> GetContinuedDecisions()
         {
-            return new[] { GetScheduleDecision() };
+            return GetScheduleDecisions();
         }
         public bool Has(AwsIdentity identity)
         {

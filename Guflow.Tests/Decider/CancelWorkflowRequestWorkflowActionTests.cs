@@ -9,15 +9,6 @@ namespace Guflow.Tests.Decider
     public class CancelWorkflowRequestWorkflowActionTests
     {
         [Test]
-        public void Equality_tests()
-        {
-            Assert.That(WorkflowAction.CancelWorkflowRequest("wid","rid").Equals(WorkflowAction.CancelWorkflowRequest("wid","rid")));
-
-            Assert.False(WorkflowAction.CancelWorkflowRequest("wid", "rid").Equals(WorkflowAction.CancelWorkflowRequest("wid", "rid1")));
-            Assert.False(WorkflowAction.CancelWorkflowRequest("wid", "rid").Equals(WorkflowAction.CancelWorkflowRequest("wid1", "rid")));
-        }
-
-        [Test]
         public void Returns_cancel_request_workflow_decision()
         {
             var workflowDecisions = WorkflowAction.CancelWorkflowRequest("wid", "rid").GetDecisions();
@@ -32,9 +23,9 @@ namespace Guflow.Tests.Decider
             var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
             var timerEvent = new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
 
-            var workflowAction = timerEvent.Interpret(workflow);
+            var decisions = timerEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelWorkflowRequest("id", "runid")));
+            Assert.That(decisions, Is.EqualTo(new []{new CancelRequestWorkflowDecision("id", "runid")}));
         }
 
         private class WorkflowToReturnCancelRequest : Workflow

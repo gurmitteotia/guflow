@@ -34,9 +34,9 @@ namespace Guflow.Tests.Decider
             workflowItems.Add(activityItem);
             var cancelRequest = new CancelRequest(workflowItems);
 
-            var action = cancelRequest.ForActivity<TestActivity>("pname");
+            var decisions = cancelRequest.ForActivity<TestActivity>("pname").GetDecisions();
 
-            Assert.That(action, Is.EqualTo(WorkflowAction.Cancel(activityItem)));
+            Assert.That(decisions, Is.EqualTo(new []{new CancelActivityDecision(Identity.New("name1", "1.0", "pname"))}));
         }
 
         private static ActivityItem CreateActivity(string name, string version, string positionalName)

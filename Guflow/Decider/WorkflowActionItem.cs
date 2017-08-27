@@ -14,14 +14,11 @@ namespace Guflow.Decider
             _workflowActionFunc = workflowActionFunc;
         }
 
-        public override WorkflowItemEvent LastEvent
-        {
-            get { return WorkflowItemEvent.NotFound; }
-        }
+        public override WorkflowItemEvent LastEvent => WorkflowItemEvent.NotFound;
 
-        public override WorkflowDecision GetScheduleDecision()
+        public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
-            return WorkflowDecision.Empty;
+            return new []{WorkflowDecision.Empty};
         }
 
         public override WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)

@@ -19,9 +19,9 @@ namespace Guflow.Tests.Decider
         {
             var signalAction = new Signal("name", "input");
 
-            var workflowAction = signalAction.ForWorkflow("id", "runid");
+            var decisions = signalAction.ForWorkflow("id", "runid").GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Signal("name", "input", "id", "runid")));
+            Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision("name", "input", "id", "runid")}));
         }
 
         [Test]
@@ -30,9 +30,9 @@ namespace Guflow.Tests.Decider
             var receivedSignalEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("someName","input1","rid","wid"));
             var signalAction = new Signal("name", "input");
 
-            var workflowAction = signalAction.ReplyTo(receivedSignalEvent);
+            var decisions = signalAction.ReplyTo(receivedSignalEvent).GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.Signal("name", "input", "wid", "rid")));
+            Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision("name", "input", "wid", "rid")}));
         }
     }
 }

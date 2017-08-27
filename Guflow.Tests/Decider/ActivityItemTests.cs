@@ -26,7 +26,7 @@ namespace Guflow.Tests.Decider
             _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(HistoryEventFactory.CreateWorkflowStartedEventGraph(workflowInput)));
             var activityItem = new ActivityItem(_activityIdenity,_workflow.Object);
 
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.Input, Is.EqualTo(workflowInput));
         }
@@ -38,7 +38,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, null);
             activityItem.WithInput(a => activityInput);
 
-            var decision = (ScheduleActivityDecision) activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.Input,Is.EqualTo(activityInput));
         }
@@ -49,7 +49,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, null);
             activityItem.WithInput(a => activityInput);
 
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.Input, Is.EqualTo(activityInput.ToString()));
         }
@@ -60,7 +60,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, null);
             activityItem.WithInput(a => new{InputFile ="SomeFile", Rate =50});
 
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.Input, Is.EqualTo(new { InputFile = "SomeFile", Rate = 50 }.ToJson()));
         }
@@ -71,7 +71,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, null);
             activityItem.WithInput(a => null);
 
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.Input, Is.Null);
         }
@@ -81,7 +81,7 @@ namespace Guflow.Tests.Decider
         {
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
 
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.TaskList, Is.Null);
         }
@@ -93,7 +93,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
             activityItem.OnTaskList(a => taskList);
 
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.TaskList, Is.EqualTo(taskList));
         }
@@ -104,9 +104,9 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
             activityItem.When(a => false);
 
-            var decision = activityItem.GetScheduleDecision();
+            var decision = activityItem.GetScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(WorkflowDecision.Empty));
+            Assert.That(decision, Is.EqualTo(new []{WorkflowDecision.Empty}));
         }
 
         [Test]
@@ -114,7 +114,7 @@ namespace Guflow.Tests.Decider
         {
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
 
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.TaskPriority.HasValue, Is.False);
         }
@@ -124,7 +124,7 @@ namespace Guflow.Tests.Decider
         {
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
             activityItem.WithPriority(a => 10);
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.TaskPriority.Value, Is.EqualTo(10));
         }
@@ -134,7 +134,7 @@ namespace Guflow.Tests.Decider
         {
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
 
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.Timeouts.HeartbeatTimeout, Is.Null);
             Assert.That(decision.Timeouts.ScheduleToCloseTimeout,Is.Null);
@@ -155,7 +155,7 @@ namespace Guflow.Tests.Decider
                         ScheduleToStartTimeout = TimeSpan.FromSeconds(4),
                         StartToCloseTimeout = TimeSpan.FromSeconds(5)
                     });
-            var decision = (ScheduleActivityDecision)activityItem.GetScheduleDecision();
+            var decision = ScheduleDecision(activityItem);
 
             Assert.That(decision.Timeouts.HeartbeatTimeout, Is.EqualTo(TimeSpan.FromSeconds(2)));
             Assert.That(decision.Timeouts.ScheduleToCloseTimeout, Is.EqualTo(TimeSpan.FromSeconds(3)));
@@ -557,6 +557,10 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => activityItem.AfterTimer(null));
         }
 
+        private ScheduleActivityDecision ScheduleDecision(ActivityItem activityItem)
+        {
+            return (ScheduleActivityDecision) activityItem.GetScheduleDecisions().Single();
+        }
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
