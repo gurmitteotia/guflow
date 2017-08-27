@@ -16,6 +16,7 @@ namespace Guflow.Decider
         private Func<IActivityItem, object> _inputFunc;
         private Func<IActivityItem, string> _taskListFunc;
         private Func<IActivityItem, bool> _whenFunc;
+        private Func<IActivityItem, WorkflowAction> _onFalseAction;
         private Func<IActivityItem, int?> _priorityFunc;
         private Func<IActivityItem, ScheduleActivityTimeouts> _timeoutsFunc;
         private readonly TimerItem _rescheduleTimer;
@@ -31,6 +32,7 @@ namespace Guflow.Decider
             _inputFunc = a => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _taskListFunc = a => null;
             _whenFunc = a => true;
+            _onFalseAction = a=>new TriggerActions(this).FirstJoint();
             _priorityFunc = a => null;
             _timeoutsFunc = a => new ScheduleActivityTimeouts();
             _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
@@ -85,77 +87,84 @@ namespace Guflow.Decider
             return AfterActivity(description.Name, description.Version, positionalName);
         }
 
-        public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> onCompletionFunc)
+        public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(onCompletionFunc, "onCompletionFunc");
-            _onCompletionAction = onCompletionFunc;
+            Ensure.NotNull(action, "action");
+            _onCompletionAction = action;
             return this;
         }
-        public IFluentActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> onFailureFunc)
+        public IFluentActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(onFailureFunc, "onFailureFunc");
-            _onFailedAction = onFailureFunc;
+            Ensure.NotNull(action, "action");
+            _onFailedAction = action;
             return this;
         }
-        public IFluentActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> onTimedoutFunc)
+        public IFluentActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(onTimedoutFunc, "onTimedoutFunc");
-            _onTimedoutAction = onTimedoutFunc;
-            return this;
-        }
-
-        public IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> onFailedSchedulingAction)
-        {
-            Ensure.NotNull(onFailedSchedulingAction, "onFailedSchedulingAction");
-            _onFailedSchedulingAction = onFailedSchedulingAction;
+            Ensure.NotNull(action, "action");
+            _onTimedoutAction = action;
             return this;
         }
 
-        public IFluentActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> onCancelledFunc)
+        public IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(onCancelledFunc, "onCancelledFunc");
-            _onCancelledAction = onCancelledFunc;
+            Ensure.NotNull(action, "action");
+            _onFailedSchedulingAction = action;
             return this;
         }
 
-        public IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> onFailedCancellationFunc)
+        public IFluentActivityItem OnCancelled(Func<ActivityCancelledEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(onFailedCancellationFunc, "onFailedCancellationFunc");
-
-            _onCancellationFailedAction = onFailedCancellationFunc;
-            return this;
-        }
-        public IFluentActivityItem WithInput(Func<IActivityItem, object> inputFunc)
-        {
-            Ensure.NotNull(inputFunc, "inputFunc");
-            _inputFunc = inputFunc;
-            return this;
-        }
-        public IFluentActivityItem OnTaskList(Func<IActivityItem, string> taskListFunc)
-        {
-            Ensure.NotNull(taskListFunc, "taskListFunc");
-            _taskListFunc = taskListFunc;
-            return this;
-        }
-        public IFluentActivityItem When(Func<IActivityItem, bool> whenFunc)
-        {
-            Ensure.NotNull(whenFunc, "whenFunc");
-
-            _whenFunc = whenFunc;
-            return this;
-        }
-        public IFluentActivityItem WithPriority(Func<IActivityItem, int?> priorityFunc)
-        {
-            Ensure.NotNull(priorityFunc, "priorityFunc");
-
-            _priorityFunc = priorityFunc;
+            Ensure.NotNull(action, "action");
+            _onCancelledAction = action;
             return this;
         }
 
-        public IFluentActivityItem WithTimeouts(Func<IActivityItem, ScheduleActivityTimeouts> timeoutsFunc)
+        public IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> action)
         {
-            Ensure.NotNull(timeoutsFunc, "timeoutsFunc");
-            _timeoutsFunc = timeoutsFunc;
+            Ensure.NotNull(action, "action");
+
+            _onCancellationFailedAction = action;
+            return this;
+        }
+        public IFluentActivityItem WithInput(Func<IActivityItem, object> data)
+        {
+            Ensure.NotNull(data, "data");
+            _inputFunc = data;
+            return this;
+        }
+        public IFluentActivityItem OnTaskList(Func<IActivityItem, string> name)
+        {
+            Ensure.NotNull(name, "name");
+            _taskListFunc = name;
+            return this;
+        }
+        public IFluentActivityItem When(Func<IActivityItem, bool> @true)
+        {
+            Ensure.NotNull(@true, "@true");
+            _whenFunc = @true;
+            return this;
+        }
+
+        public IFluentActivityItem When(Func<IActivityItem, bool> @true, Func<IActivityItem,WorkflowAction> falseAction)
+        {
+            Ensure.NotNull(falseAction,nameof(falseAction));
+            _onFalseAction = falseAction;
+            return When(@true);
+        }
+
+        public IFluentActivityItem WithPriority(Func<IActivityItem, int?> number)
+        {
+            Ensure.NotNull(number, "number");
+
+            _priorityFunc = number;
+            return this;
+        }
+
+        public IFluentActivityItem WithTimeouts(Func<IActivityItem, ScheduleActivityTimeouts> timeouts)
+        {
+            Ensure.NotNull(timeouts, "timeouts");
+            _timeoutsFunc = timeouts;
             return this;
         }
 
@@ -220,7 +229,7 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
             if (!_whenFunc(this))
-                return new []{WorkflowDecision.Empty};
+                return new TriggerActions(this).FirstJoint().GetDecisions();
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.UseInputFunc(GetActivityInput);

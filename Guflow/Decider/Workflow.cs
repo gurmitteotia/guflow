@@ -258,16 +258,16 @@ namespace Guflow.Decider
             return WorkflowAction.Ignore(keepBranchActive);
         }
 
-        protected JumpActions Jump
-        {
-            get
-            {
-                return CurrentExecutingItem != null
-                    ? JumpActions.FromWorkflowItem(_allWorkflowItems, CurrentExecutingItem)
-                    : JumpActions.FromWorkflowEvent(_allWorkflowItems);
-            }
-        }
+        protected JumpActions Jump => CurrentExecutingItem != null
+            ? JumpActions.FromWorkflowItem(_allWorkflowItems, CurrentExecutingItem)
+            : JumpActions.FromWorkflowEvent(_allWorkflowItems);
 
+        protected TriggerActions Trigger(IWorkflowItem workflowItem)
+        {
+            var item = workflowItem as WorkflowItem;
+            Ensure.NotNull(item, nameof(workflowItem));
+            return new TriggerActions(item);
+        }
         protected WorkflowAction DefaultAction(WorkflowEvent workflowEvent)
         {
             Ensure.NotNull(workflowEvent, "workflowEvent");
