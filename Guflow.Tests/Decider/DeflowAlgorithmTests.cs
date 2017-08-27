@@ -15,6 +15,7 @@ namespace Guflow.Tests.Decider
         private const string ChooseSeatActivity = "ChooseSeatActivity";
         private const string ChargeCustomerActivity = "ChargeCustomerActivity";
         private const string SendEmailActivity = "SendEmailActivity";
+        private const string TimerName = "DelayTimer";
         private const string Version = "1.0";
 
         [Test]
@@ -272,7 +273,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false()
+        public void By_default_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false_for_activity()
         {
 
             var bookHotel = CompletedActivityGraph(BookHotelActivity);
@@ -300,6 +301,46 @@ namespace Guflow.Tests.Decider
             var bookFlight = CompletedActivityGraph(BookFlightActivity);
 
             var workflow = new WorkflowManuallyTriggerJointOnFalseSchedulableCondition();
+            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
+            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
+
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
+            }));
+        }
+
+        [Test]
+        public void By_default_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false_for_timer()
+        {
+
+            var bookHotel = CompletedActivityGraph(BookHotelActivity);
+            var addDinner = CompletedActivityGraph(AddDinnerActivity);
+            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+
+            var workflow = new WorkflowWithFalseSchedulableConditionForTimer();
+            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
+            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
+
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
+            }));
+        }
+
+        [Test]
+        public void Manually_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false_for_timer()
+        {
+
+            var bookHotel = CompletedActivityGraph(BookHotelActivity);
+            var addDinner = CompletedActivityGraph(AddDinnerActivity);
+            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+
+            var workflow = new WorkflowWithFalseSchedulableConditionForTimer();
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
@@ -461,6 +502,40 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(ChooseSeatActivity, Version).When(a=>false, a=>Trigger(a).FirstJoint()).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowWithFalseSchedulableConditionForTimer : Workflow
+        {
+            public WorkflowWithFalseSchedulableConditionForTimer()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleTimer(TimerName).When(a => false).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterTimer(TimerName);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowManuallyTriggerJointOnFalseSchedulableConditionForTimer : Workflow
+        {
+            public WorkflowManuallyTriggerJointOnFalseSchedulableConditionForTimer()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleTimer(TimerName).When(a => false, a=>Trigger(a).FirstJoint()).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterTimer(TimerName);
 
                 ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
             }

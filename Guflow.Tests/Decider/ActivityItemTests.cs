@@ -104,9 +104,9 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
             activityItem.When(a => false);
 
-            var decision = activityItem.GetScheduleDecisions();
+            var decisions = activityItem.GetScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(new []{WorkflowDecision.Empty}));
+            Assert.That(decisions, Is.Empty);
         }
 
         [Test]

@@ -290,10 +290,8 @@ namespace Guflow.Decider
         protected IEnumerable<IActivityItem> Activities => _allWorkflowItems.AllActivities;
         protected IEnumerable<ITimerItem> Timers => _allWorkflowItems.AllTimers;
 
-        protected bool IsActive
-        {
-            get { return ((IWorkflow)this).WorkflowHistoryEvents.IsActive(); }
-        }
+        protected bool IsActive => ((IWorkflow)this).WorkflowHistoryEvents.IsActive();
+
         protected WorkflowAction RecordMarker(string markerName, object details)
         {
             Ensure.NotNullAndEmpty(markerName, "markerName");
@@ -365,10 +363,8 @@ namespace Guflow.Decider
                 return _currentWorkflowHistoryEvents;
             }
         }
-        internal WorkflowAction StartupAction
-        {
-            get { return _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems)); }
-        }
+        internal WorkflowAction StartupAction => _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems));
+
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
         {
             if (proposal && IsActive)
