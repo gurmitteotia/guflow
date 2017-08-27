@@ -230,10 +230,10 @@ namespace Guflow.Decider
             return new []{scheduleActivityDecision};
         }
 
-        public override WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
+        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan afterTimeout)
         {
             _rescheduleTimer.FireAfter(afterTimeout);
-            return _rescheduleTimer.GetScheduleDecisions().Single();
+            return _rescheduleTimer.GetScheduleDecisions();
         }
 
         public override WorkflowDecision GetCancelDecision()

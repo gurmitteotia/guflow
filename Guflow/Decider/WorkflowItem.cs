@@ -16,14 +16,12 @@ namespace Guflow.Decider
             _workflow = workflow;
         }
 
-        public IEnumerable<IActivityItem> ParentActivities { get { return _parentItems.OfType<IActivityItem>(); } }
+        public IEnumerable<IActivityItem> ParentActivities => _parentItems.OfType<IActivityItem>();
 
-        public IEnumerable<ITimerItem> ParentTimers { get { return _parentItems.OfType<ITimerItem>(); } }
+        public IEnumerable<ITimerItem> ParentTimers => _parentItems.OfType<ITimerItem>();
 
-        public string Name
-        {
-            get { return Identity.Name; }
-        }
+        public string Name => Identity.Name;
+
         public bool IsActive
         {
             get
@@ -55,7 +53,7 @@ namespace Guflow.Decider
         }
 
         public abstract IEnumerable<WorkflowDecision> GetScheduleDecisions();
-        public abstract WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout);
+        public abstract IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan afterTimeout);
         public abstract WorkflowDecision GetCancelDecision();
         public virtual IEnumerable<WorkflowDecision> GetContinuedDecisions()
         {
