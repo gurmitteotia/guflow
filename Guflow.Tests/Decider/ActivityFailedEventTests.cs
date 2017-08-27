@@ -41,13 +41,13 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_return_fail_workflow_action()
+        public void By_default_return_fail_workflow_decision()
         {
             var workflow = new SingleActivityWorkflow();
 
-            var workflowAction = _activityFailedEvent.Interpret(workflow);
+            var decisions = _activityFailedEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.FailWorkflow(_reason,_detail)));
+            Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision(_reason,_detail)}));
         }
         [Test]
         public void Can_return_the_custom_workflow_action()

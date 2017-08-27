@@ -8,19 +8,6 @@ namespace Guflow.Tests.Decider
     public class CompleteWorkflowActionTests
     {
         [Test]
-        public void Equality_tests()
-        {
-            Assert.That(WorkflowAction.CompleteWorkflow("result").Equals(WorkflowAction.CompleteWorkflow("result")));
-            Assert.That(WorkflowAction.CompleteWorkflow("").Equals(WorkflowAction.CompleteWorkflow("")));
-            Assert.That(WorkflowAction.CompleteWorkflow(null).Equals(WorkflowAction.CompleteWorkflow(null)));
-
-
-            Assert.False(WorkflowAction.CompleteWorkflow("result").Equals(WorkflowAction.CompleteWorkflow("result1")));
-            Assert.False(WorkflowAction.CompleteWorkflow("result").Equals(WorkflowAction.CompleteWorkflow("")));
-            Assert.False(WorkflowAction.CompleteWorkflow("result").Equals(WorkflowAction.CompleteWorkflow(null)));
-        }
-
-        [Test]
         public void Should_return_complete_workflow_decision()
         {
             var workflowAction = WorkflowAction.CompleteWorkflow("result");
@@ -37,9 +24,9 @@ namespace Guflow.Tests.Decider
             var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(WorkflowReturningCompleteWorkflowAction.ActivityName, WorkflowReturningCompleteWorkflowAction.ActivityVersion, WorkflowReturningCompleteWorkflowAction.PositionalName), "id", "res");
             var completedActivityEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
 
-            var workflowAction = completedActivityEvent.Interpret(workflow);
+            var decisions = completedActivityEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CompleteWorkflow("result")));
+            Assert.That(decisions, Is.EqualTo(new []{new CompleteWorkflowDecision("result")}));
         }
 
         private class WorkflowReturningCompleteWorkflowAction : Workflow

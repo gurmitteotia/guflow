@@ -35,9 +35,9 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_return_cancel_workflow_action()
         {
-            var workflowAction = _cancellationRequestedEvent.Interpret(new EmptyWorkflow());
+            var decisions = _cancellationRequestedEvent.Interpret(new EmptyWorkflow()).GetDecisions();
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.CancelWorkflow("cause")));
+            Assert.That(decisions,Is.EqualTo(new []{new CancelWorkflowDecision("cause")}));
         }
         [Test]
         public void Can_return_custom_workflow_action()

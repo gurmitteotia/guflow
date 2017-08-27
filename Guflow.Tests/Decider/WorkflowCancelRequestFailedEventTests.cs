@@ -22,11 +22,11 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_returns_fail_workflow_action_when_interpreted()
+        public void By_default_returns_fail_workflow_decision_when_interpreted()
         {
-            var workflowAction = _cancelRequestFailedEvent.Interpret(new EmptyWorkflow());
+            var decisions = _cancelRequestFailedEvent.Interpret(new EmptyWorkflow()).GetDecisions();
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.FailWorkflow("FAILED_TO_SEND_CANCEL_REQUEST","cause")));
+            Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision("FAILED_TO_SEND_CANCEL_REQUEST","cause")}));
         }
 
         [Test]

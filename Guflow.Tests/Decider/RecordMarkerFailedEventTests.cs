@@ -23,8 +23,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_return_fail_workflow_action()
         {
-            var workflowAction = _recordMarkerFailedEvent.Interpret(new EmptyWorkflow());
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.FailWorkflow("FAILED_TO_RECORD_MARKER","cause")));
+            var decisions = _recordMarkerFailedEvent.Interpret(new EmptyWorkflow()).GetDecisions();
+            Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision("FAILED_TO_RECORD_MARKER","cause")}));
         }
         [Test]
         public void Can_return_custom_workflow_action()

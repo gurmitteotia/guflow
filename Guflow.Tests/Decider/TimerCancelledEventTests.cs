@@ -33,13 +33,13 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_return_cancel_workflow_action()
+        public void By_default_return_cancel_workflow_decision()
         {
             var workflow = new WorkflowWithTimer();
 
-            var workflowAction = _timerCancelledEvent.Interpret(workflow);
+            var decisions = _timerCancelledEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.CancelWorkflow("TIMER_CANCELLED")));
+            Assert.That(decisions,Is.EqualTo(new []{new CancelWorkflowDecision("TIMER_CANCELLED")}));
         }
 
         [Test]
@@ -62,14 +62,14 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_return_cancel_workflow_action_for_rescheduled_timer()
+        public void By_default_return_cancel_workflow_decision_for_rescheduled_timer()
         {
             var workflow = new SingleActivityWorkflow();
             var timerCancelledEvent = CreateRescheduledTimerCancelledEvent(Identity.New(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion),_fireAfter);
 
-            var workflowAction = timerCancelledEvent.Interpret(workflow);
+            var decisions = timerCancelledEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelWorkflow("RESCHEDULE_TIMER_CANCELLED")));
+            Assert.That(decisions, Is.EqualTo(new []{new CancelWorkflowDecision("RESCHEDULE_TIMER_CANCELLED")}));
         }
 
         [Test]

@@ -23,11 +23,11 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_Returns_fail_workflow_action_when_interpreted()
+        public void By_default_returns_fail_workflow_decision_when_interpreted()
         {
-            var workflowAction = _workflowSignaledEvent.Interpret(new EmptyWorkflow());
+            var decisions = _workflowSignaledEvent.Interpret(new EmptyWorkflow()).GetDecisions();
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.FailWorkflow("FAILED_TO_SIGNAL_WORKFLOW","cause")));
+            Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision("FAILED_TO_SIGNAL_WORKFLOW","cause")}));
         }
 
         [Test]

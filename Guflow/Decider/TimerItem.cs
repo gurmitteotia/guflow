@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Guflow.Worker;
 
 namespace Guflow.Decider
@@ -133,18 +134,18 @@ namespace Guflow.Decider
             return _onCanellationFailedAction(timerCancellationFailedEvent);
         }
 
-        public override WorkflowDecision GetScheduleDecision()
+        public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
             if (!_whenFunc(this))
-                return WorkflowDecision.Empty;
+                return new []{WorkflowDecision.Empty};
 
-            return new ScheduleTimerDecision(Identity, _fireAfter, this == _rescheduleTimer);
+            return new []{new ScheduleTimerDecision(Identity, _fireAfter, this == _rescheduleTimer)};
         }
 
         public override WorkflowDecision GetRescheduleDecision(TimeSpan afterTimeout)
         {
             _rescheduleTimer.FireAfter(afterTimeout);
-            return _rescheduleTimer.GetScheduleDecision();
+            return _rescheduleTimer.GetScheduleDecisions().Single();
         }
 
         public override WorkflowDecision GetCancelDecision()

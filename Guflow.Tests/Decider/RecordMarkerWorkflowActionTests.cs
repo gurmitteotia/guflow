@@ -9,15 +9,6 @@ namespace Guflow.Tests.Decider
     public class RecordMarkerWorkflowActionTests
     {
         [Test]
-        public void Equality_tests()
-        {
-            Assert.That(WorkflowAction.RecordMarker("name","detail").Equals(WorkflowAction.RecordMarker("name","detail")));
-
-            Assert.False(WorkflowAction.RecordMarker("name", "detail").Equals(WorkflowAction.RecordMarker("name", "detail1")));
-            Assert.False(WorkflowAction.RecordMarker("name", "detail").Equals(WorkflowAction.RecordMarker("name1", "detail")));
-        }
-
-        [Test]
         public void Returns_record_marker_workflow_decision()
         {
             var recordMarkerDecision = WorkflowAction.RecordMarker("name", "detail");
@@ -33,9 +24,9 @@ namespace Guflow.Tests.Decider
             var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
             var timerFiredEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
 
-            var workflowAction = timerFiredEvent.Interpret(new WorkflowToReturnRecordMarker("markerName", "details"));
+            var decisions = timerFiredEvent.Interpret(new WorkflowToReturnRecordMarker("markerName", "details")).GetDecisions();
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.RecordMarker("markerName","details")));
+            Assert.That(decisions,Is.EqualTo(new []{new RecordMarkerWorkflowDecision("markerName","details")}));
         }
 
         private class WorkflowToReturnRecordMarker : Workflow

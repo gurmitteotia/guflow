@@ -25,9 +25,9 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_returns_fail_workflow_action_when_interpreted()
         {
-            var workflowAction = _failedEvent.Interpret(new EmptyWorkflow());
+            var decisions = _failedEvent.Interpret(new EmptyWorkflow()).GetDecisions();
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.FailWorkflow("FAILED_TO_FAIL_WORKFLOW",_failedEvent.Cause)));
+            Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision("FAILED_TO_FAIL_WORKFLOW",_failedEvent.Cause)}));
         }
 
         [Test]

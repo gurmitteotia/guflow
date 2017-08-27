@@ -32,13 +32,13 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_return_cancel_workflow_action()
+        public void By_default_return_cancel_workflow_decision()
         {
             var workflow = new SingleActivityWorkflow();
 
-            var workflowAction = _activityCancelledEvent.Interpret(workflow);
+            var decisions = _activityCancelledEvent.Interpret(workflow).GetDecisions();
 
-            Assert.That(workflowAction, Is.EqualTo(WorkflowAction.CancelWorkflow(_detail)) );
+            Assert.That(decisions, Is.EqualTo(new []{new CancelWorkflowDecision(_detail)}) );
         }
 
         [Test]

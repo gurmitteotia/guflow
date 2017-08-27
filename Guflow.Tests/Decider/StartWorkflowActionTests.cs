@@ -43,7 +43,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Can_return_the_decisions_for_startup_schedulable_workflow_action()
+        public void Returns_the_decisions_for_startup_schedulable_workflow_action()
         {
             var workflow = new WorkflowToScheduleAction("reason", "detailss");
             var startWorkflowAction = workflow.StartupAction;
