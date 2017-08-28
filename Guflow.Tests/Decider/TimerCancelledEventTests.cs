@@ -13,9 +13,11 @@ namespace Guflow.Tests.Decider
         private TimerCancelledEvent _timerCancelledEvent;
         private const string _timerName ="timer name";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(2);
+        private HistoryEventsBuilder _builder;
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder(); 
             _timerCancelledEvent = CreateTimerCancelledEvent(Identity.Timer(_timerName),_fireAfter);
         }
 
@@ -86,12 +88,12 @@ namespace Guflow.Tests.Decider
 
         private TimerCancelledEvent CreateTimerCancelledEvent(Identity identity, TimeSpan fireAfter)
         {
-            var timerCancelledEventGraph = HistoryEventFactory.CreateTimerCancelledEventGraph(identity, fireAfter);
+            var timerCancelledEventGraph = _builder.TimerCancelledGraph(identity, fireAfter);
             return new TimerCancelledEvent(timerCancelledEventGraph.First(),timerCancelledEventGraph);
         }
         private TimerCancelledEvent CreateRescheduledTimerCancelledEvent(Identity identity, TimeSpan fireAfter)
         {
-            var timerCancelledEventGraph = HistoryEventFactory.CreateTimerCancelledEventGraph(identity, fireAfter,true);
+            var timerCancelledEventGraph = _builder.TimerCancelledGraph(identity, fireAfter,true);
             return new TimerCancelledEvent(timerCancelledEventGraph.First(), timerCancelledEventGraph);
         }
 

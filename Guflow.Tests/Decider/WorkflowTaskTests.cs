@@ -16,10 +16,12 @@ namespace Guflow.Tests.Decider
     {
         private Mock<IAmazonSimpleWorkflow> _amazonWorkflowClient;
         private Domain _domain;
-       
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
             _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
             _domain = new Domain("name", _amazonWorkflowClient.Object);
         }
@@ -258,9 +260,9 @@ namespace Guflow.Tests.Decider
                                                                                 It.IsAny<CancellationToken>()), times);
         }
 
-        private static DecisionTask DecisionTasksWithSignalEvents(string token)
+        private DecisionTask DecisionTasksWithSignalEvents(string token)
         {
-            var historyEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input");
+            var historyEvent = _builder.WorkflowSignaledEvent("name", "input");
             return new DecisionTask
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
@@ -272,10 +274,10 @@ namespace Guflow.Tests.Decider
             }; 
         }
 
-        private static DecisionTask DecisionTasksWithSignalEvents(string workflowId, string runId)
+        private DecisionTask DecisionTasksWithSignalEvents(string workflowId, string runId)
         {
-            var workflowStartedEvent = HistoryEventFactory.CreateWorkflowStartedEvent("input");
-            var historyEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input");
+            var workflowStartedEvent = _builder.WorkflowStartedEvent("input");
+            var historyEvent = _builder.WorkflowSignaledEvent("name", "input");
             return new DecisionTask
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },

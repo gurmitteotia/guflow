@@ -40,9 +40,7 @@ namespace Guflow.Decider
             
             for (var eventId = _newEventsStartId;eventId<=_newEventsEndId;eventId++)
             {
-                var historyEvent = _allHistoryEvents.FirstOrDefault(h => h.EventId == eventId);
-                if (historyEvent == null)
-                    continue;
+                var historyEvent = _allHistoryEvents.First(h => h.EventId == eventId);
                 var workflowEvent = historyEvent.CreateInterpretableEvent(_allHistoryEvents);
                 if (workflowEvent == null)
                     continue;

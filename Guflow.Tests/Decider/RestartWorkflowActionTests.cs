@@ -7,12 +7,19 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class RestartWorkflowActionTests
     {
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
         [Test]
         public void Can_be_returned_as_custom_action()
         {
-            var workflowStartedEventGraph = HistoryEventFactory.CreateWorkflowStartedEvent("input");
+            var workflowStartedEventGraph = _builder.WorkflowStartedEvent("input");
             var workflowStartedEvent = new WorkflowStartedEvent(workflowStartedEventGraph);
-            var activityCompletedEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("activityName", "1.0"), "id", "result");
+            var activityCompletedEvents = _builder.ActivityCompletedGraph(Identity.New("activityName", "1.0"), "id", "result");
             var activityCompletedEvent = new ActivityCompletedEvent(activityCompletedEvents.First(), activityCompletedEvents);
             var eventGraph = activityCompletedEvents.Concat(new[] {workflowStartedEventGraph});
             var workflowEvents = new WorkflowHistoryEvents(eventGraph);

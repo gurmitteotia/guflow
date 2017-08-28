@@ -14,10 +14,13 @@ namespace Guflow.Tests.Decider
         private const string _positionalName = "First";
         private ActivityScheduledEvent _activityScheduledEvent;
 
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
-            var scheduledActivityEventGraph = HistoryEventFactory.CreateActivityScheduledEventGraph(Identity.New(_activityName, _activityVersion, _positionalName));
+            _builder = new HistoryEventsBuilder();
+            var scheduledActivityEventGraph = _builder.ActivityScheduledGraph(Identity.New(_activityName, _activityVersion, _positionalName));
             _activityScheduledEvent = new ActivityScheduledEvent(scheduledActivityEventGraph.First(),scheduledActivityEventGraph);
         }
 

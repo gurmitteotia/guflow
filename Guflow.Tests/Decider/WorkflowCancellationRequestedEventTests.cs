@@ -9,11 +9,14 @@ namespace Guflow.Tests.Decider
     public class WorkflowCancellationRequestedEventTests
     {
         private WorkflowCancellationRequestedEvent _cancellationRequestedEvent;
-       
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
-            var cancellationRequestedEvent = HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause","runid","id");
+            _builder = new HistoryEventsBuilder();
+
+            var cancellationRequestedEvent = _builder.WorkflowCancellationRequestedEvent("cause","runid","id");
             _cancellationRequestedEvent = new WorkflowCancellationRequestedEvent(cancellationRequestedEvent);
         }
 
@@ -27,7 +30,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_populates_external_workflow_properties_when_not_generated_by_external_workflow()
         {
-            var cancellationRequestedEvent = new WorkflowCancellationRequestedEvent(HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause"));
+            var cancellationRequestedEvent = new WorkflowCancellationRequestedEvent(_builder.WorkflowCancellationRequestedEvent("cause"));
             Assert.That(cancellationRequestedEvent.Cause, Is.EqualTo("cause"));
             Assert.That(cancellationRequestedEvent.ExternalWorkflowRunid, Is.Null);
             Assert.That(cancellationRequestedEvent.ExternalWorkflowId, Is.Null);

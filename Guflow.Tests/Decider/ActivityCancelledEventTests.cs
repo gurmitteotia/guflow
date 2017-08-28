@@ -16,10 +16,13 @@ namespace Guflow.Tests.Decider
         private const string _identity = "machine name";
         private const string _detail = "detail";
 
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
-            var cancelledActivityEventGraph = HistoryEventFactory.CreateActivityCancelledEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _detail);
+            _builder = new HistoryEventsBuilder();
+            var cancelledActivityEventGraph = _builder.ActivityCancelledGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _detail);
             _activityCancelledEvent = new ActivityCancelledEvent(cancelledActivityEventGraph.First(), cancelledActivityEventGraph);
         }
 

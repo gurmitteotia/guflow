@@ -10,10 +10,12 @@ namespace Guflow.Tests.Decider
     public class ActivityItemExtensionTests
     {
         private Mock<IActivityItem> _activityItem;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
             _activityItem = new Mock<IActivityItem>();
         }
 
@@ -104,7 +106,7 @@ namespace Guflow.Tests.Decider
 
         private ActivityCompletedEvent CreateCompltedEvent(string result)
         {
-            var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("a1", "v1"), "id",
+            var eventGraph = _builder.ActivityCompletedGraph(Identity.New("a1", "v1"), "id",
                 result, "input");
             return new ActivityCompletedEvent(eventGraph.First(), eventGraph);
         }

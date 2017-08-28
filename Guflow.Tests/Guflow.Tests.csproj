@@ -76,6 +76,7 @@
     <Compile Include="Decider\CancelWorkflowActionTests.cs" />
     <Compile Include="Decider\CancelWorkflowDecisionTests.cs" />
     <Compile Include="Decider\DeflowAlgorithmTests.cs" />
+    <Compile Include="Decider\HistoryEventsBuilder.cs" />
     <Compile Include="Decider\JumpWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowDecisionTests.cs" />

@@ -8,6 +8,13 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class RecordMarkerWorkflowActionTests
     {
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
         [Test]
         public void Returns_record_marker_workflow_decision()
         {
@@ -21,7 +28,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_returned_as_custom_action_workflow()
         {
-            var timerFiredEventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
+            var timerFiredEventGraph = _builder.TimerFiredGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
             var timerFiredEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
 
             var decisions = timerFiredEvent.Interpret(new WorkflowToReturnRecordMarker("markerName", "details")).GetDecisions();

@@ -1,12 +1,19 @@
-﻿using System.Linq;
-using Guflow.Decider;
+﻿using Guflow.Decider;
 using NUnit.Framework;
+using System.Linq;
 
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
     public class IgnoreWorkflowActionTests
     {
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
         [Test]
         public void Equality_tests()
         {
@@ -35,7 +42,7 @@ namespace Guflow.Tests.Decider
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, string.Empty), "id", "res");
+            var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, string.Empty), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class WorkflowReturningStartWorkflowAction : Workflow

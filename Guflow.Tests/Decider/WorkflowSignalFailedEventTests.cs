@@ -9,10 +9,13 @@ namespace Guflow.Tests.Decider
     public class WorkflowSignalFailedEventTests
     {
         private WorkflowSignalFailedEvent _workflowSignaledEvent;
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
-            _workflowSignaledEvent = new WorkflowSignalFailedEvent(HistoryEventFactory.CreateWorkflowSignalFailedEvent("cause","wid","rid"));
+            _builder = new HistoryEventsBuilder();
+            _workflowSignaledEvent = new WorkflowSignalFailedEvent(_builder.WorkflowSignalFailedEvent("cause","wid","rid"));
         }
         [Test]
         public void Populate_properties_from_event()

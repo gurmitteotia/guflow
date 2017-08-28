@@ -9,6 +9,13 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class StartWorkflowActionTests
     {
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
         [Test]
         public void Return_workflow_completed_decision_when_workflow_does_not_have_any_schedulable_items()
         {
@@ -62,7 +69,7 @@ namespace Guflow.Tests.Decider
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion), "id", "res");
+            var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class TestWorkflow : Workflow

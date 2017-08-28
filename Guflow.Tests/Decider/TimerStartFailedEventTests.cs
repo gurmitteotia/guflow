@@ -13,9 +13,13 @@ namespace Guflow.Tests.Decider
         private const string _timerName = "timername";
         private const string _activityName = "activity";
         private const string _activityVersion = "1.0";
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
+
             _timerStartFailedEvent = CreateTimerStartFailedEvent(Identity.Timer(_timerName), _timerFailureCause);
         }
 
@@ -72,7 +76,7 @@ namespace Guflow.Tests.Decider
 
         private TimerStartFailedEvent CreateTimerStartFailedEvent(Identity timerIdentity, string cause)
         {
-            var timerFailedEventGraph = HistoryEventFactory.CreateTimerStartFailedEventGraph(timerIdentity, cause);
+            var timerFailedEventGraph = _builder.TimerStartFailedGraph(timerIdentity, cause);
             return new TimerStartFailedEvent(timerFailedEventGraph.First());
         }
 

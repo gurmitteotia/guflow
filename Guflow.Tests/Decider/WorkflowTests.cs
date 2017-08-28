@@ -11,10 +11,12 @@ namespace Guflow.Tests.Decider
     public class WorkflowTests
     {
         private Mock<IWorkflowHistoryEvents> _workflowEvents;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
             _workflowEvents = new Mock<IWorkflowHistoryEvents>();
             _workflowEvents.Setup(w => w.InterpretNewEventsFor(It.IsAny<Workflow>())).Returns(new WorkflowDecision[] { });
         }
@@ -41,7 +43,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Activityof_test()
         {
-            var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("Activity1", "1.0"), "id", "result");
+            var eventGraph = _builder.ActivityCompletedGraph(Identity.New("Activity1", "1.0"), "id", "result");
             var activityCompletedEvent = new ActivityCompletedEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -53,7 +55,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Timerof_test()
         {
-            var eventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("Timer1"), TimeSpan.FromSeconds(2));
+            var eventGraph = _builder.TimerFiredGraph(Identity.Timer("Timer1"), TimeSpan.FromSeconds(2));
             var activityCompletedEvent = new TimerFiredEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
