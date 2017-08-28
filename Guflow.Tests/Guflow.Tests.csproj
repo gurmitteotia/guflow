@@ -99,7 +99,6 @@
     <Compile Include="Decider\ContinueWorkflowActionTests.cs" />
     <Compile Include="Decider\FailWorkflowActionTests.cs" />
     <Compile Include="Decider\FailWorkflowDecisionTests.cs" />
-    <Compile Include="Decider\HistoryEventFactory.cs" />
     <Compile Include="Decider\IdentityTests.cs" />
     <Compile Include="Decider\IgnoreWorkflowActionTests.cs" />
     <Compile Include="Decider\MarkerRecordedEventTests.cs" />

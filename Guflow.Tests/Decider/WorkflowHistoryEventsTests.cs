@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
@@ -263,7 +262,7 @@ namespace Guflow.Tests.Decider
             var activityStartedEventGraph = _builder.ActivityStartedGraph(Identity.New("activity", "1.0"), "id");
             var workflowHistoryEvents = new WorkflowHistoryEvents(activityStartedEventGraph);
 
-            Assert.IsTrue(workflowHistoryEvents.IsActive());
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
         }
 
         [Test]
@@ -272,7 +271,7 @@ namespace Guflow.Tests.Decider
             var activityScheduledEventGraph = _builder.ActivityScheduledGraph(Identity.New("activity", "1.0"));
             var workflowHistoryEvents = new WorkflowHistoryEvents(activityScheduledEventGraph);
 
-            Assert.IsTrue(workflowHistoryEvents.IsActive());
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
         }
 
         [Test]
@@ -281,7 +280,7 @@ namespace Guflow.Tests.Decider
             var activityCancelRequestedGraph = _builder.ActivityCancelRequestedGraph(Identity.New("activity", "1.0"),"id");
             var workflowHistoryEvents = new WorkflowHistoryEvents(activityCancelRequestedGraph);
 
-            Assert.IsTrue(workflowHistoryEvents.IsActive());
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
         }
 
         [Test]
@@ -290,7 +289,7 @@ namespace Guflow.Tests.Decider
             var activityCompletedEventGraph =_builder.ActivityCompletedGraph(Identity.New("activity", "1.0"), "id", "res");
             var workflowHistoryEvents = new WorkflowHistoryEvents(activityCompletedEventGraph);
 
-            Assert.IsFalse(workflowHistoryEvents.IsActive());
+            Assert.IsFalse(workflowHistoryEvents.HasActiveEvent());
         }
 
         [Test]
@@ -300,7 +299,7 @@ namespace Guflow.Tests.Decider
                                             .Concat(_builder.ActivityFailedGraph(Identity.New("activity", "1.0"), "id", "res","detail"));
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
 
-            Assert.IsTrue(workflowHistoryEvents.IsActive());
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
         }
 
         [Test]
@@ -309,7 +308,7 @@ namespace Guflow.Tests.Decider
             var timerStartedEventGraph = _builder.TimerStartedGraph(Identity.Timer("id"),TimeSpan.FromSeconds(2));
             var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph);
 
-            Assert.IsTrue(workflowHistoryEvents.IsActive());
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
         }
 
         [Test]
@@ -318,7 +317,7 @@ namespace Guflow.Tests.Decider
             var timerStartedEventGraph = _builder.TimerFiredGraph(Identity.Timer("id"), TimeSpan.FromSeconds(2));
             var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph);
 
-            Assert.IsFalse(workflowHistoryEvents.IsActive());
+            Assert.IsFalse(workflowHistoryEvents.HasActiveEvent());
         }
 
         [Test]
