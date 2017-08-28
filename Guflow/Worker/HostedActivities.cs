@@ -123,6 +123,11 @@ namespace Guflow.Worker
             }
             catch (Exception exception)
             {
+                if (_stopped && exception is OperationCanceledException)
+                {
+                    _log.Info("Hosted activities are shutting down");
+                    return;
+                }
                 _log.Fatal("Hosted activities is faulted.", exception);
                 Environment.FailFast("Hosted activities is faulted. Bringing down the system", exception);
             }

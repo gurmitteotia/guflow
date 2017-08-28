@@ -22,6 +22,7 @@ namespace Guflow.IntegrationTests
             _domain = new TestDomain();
             _taskListName = Guid.NewGuid().ToString();
             _hostedActivities = await HostAsync(typeof(FailingActivity));
+            FailingActivity.ExecutionTimes = 0;
         }
 
         [TearDown]
@@ -38,7 +39,7 @@ namespace Guflow.IntegrationTests
             var workflow = new WorkflowWithNoRetry();
             string reason = null;
             string details = null;
-            workflow.Failed += (s, e) => { @event.Set(); reason= e.Reason; details = e.Details;  };
+            workflow.Failed += (s, e) => { reason = e.Reason; details = e.Details; @event.Set(); };
             _hostedWorkflows = await HostAsync(workflow);
 
             await _domain.StartWorkflow<WorkflowWithNoRetry>("input", _taskListName);
@@ -120,7 +121,7 @@ namespace Guflow.IntegrationTests
             public WorkflowToRetryActivityAfterTimeout(uint retryAttempts)
             {
                 ScheduleActivity<FailingActivity>().OnTaskList((t) => _taskListName)
-                                                    .OnFailure(e => Reschedule(e).After(TimeSpan.FromSeconds(1)).UpTo(Limit.Count(retryAttempts)));
+                                                   .OnFailure(e => Reschedule(e).After(TimeSpan.FromSeconds(1)).UpTo(Limit.Count(retryAttempts)));
             }
         }
 

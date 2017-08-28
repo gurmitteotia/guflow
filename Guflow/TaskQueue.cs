@@ -60,7 +60,7 @@ namespace Guflow
         }
         private static bool NewTasksAreReturned(ActivityTask activityTask)
         {
-            return !string.IsNullOrEmpty(activityTask.TaskToken);
+            return !string.IsNullOrEmpty(activityTask?.TaskToken);
         }
 
         private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskQueue taskQueue, string nextPageToken=null)

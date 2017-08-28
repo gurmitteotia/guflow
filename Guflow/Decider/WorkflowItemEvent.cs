@@ -16,6 +16,7 @@ namespace Guflow.Decider
         }
 
         public bool IsActive { get; protected set; }
+
         public static readonly WorkflowItemEvent NotFound = new NotFoundWorkflowItemEvent(0);
 
         internal virtual bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)

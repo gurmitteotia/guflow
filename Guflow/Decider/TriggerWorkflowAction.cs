@@ -13,7 +13,6 @@ namespace Guflow.Decider
         {
             _triggeringItem = triggeringItem;
         }
-
         public void SetJumpedItem(WorkflowItem jumpedItem)
         {
             ValidateJump(jumpedItem);

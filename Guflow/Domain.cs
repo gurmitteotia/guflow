@@ -120,7 +120,7 @@ namespace Guflow
             var activityTaskPollingRequest = taskQueue.CreateActivityTaskPollingRequest(_name);
             Console.WriteLine("Polling for activity task on queue {0} and on domain {1}", activityTaskPollingRequest.TaskList.Name, activityTaskPollingRequest.Domain);
             var response = await _simpleWorkflowClient.PollForActivityTaskAsync(activityTaskPollingRequest, cancellationToken);
-            return response.ActivityTask;
+            return response?.ActivityTask;
         }
 
         internal async Task<DecisionTask> PollForDecisionTaskAsync(TaskQueue taskQueue)

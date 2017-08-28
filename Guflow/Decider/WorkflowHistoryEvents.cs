@@ -9,6 +9,8 @@ namespace Guflow.Decider
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
         private readonly long _newEventsStartId;
         private readonly long _newEventsEndId;
+        private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedActivityEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
+        private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedTimerEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
 
         public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long newEventsStartId, long newEventsEndId)
         {
@@ -24,14 +26,24 @@ namespace Guflow.Decider
 
         public WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem)
         {
-            var lastEvent = AllActivityEventsFor(activityItem).FirstOrDefault();
-            return lastEvent ?? WorkflowItemEvent.NotFound;
+            WorkflowItemEvent result = null;
+            if (_cachedActivityEvents.TryGetValue(activityItem, out result)) return result;
+
+            result = AllActivityEventsFor(activityItem).FirstOrDefault();
+            result = result ?? WorkflowItemEvent.NotFound;
+            _cachedActivityEvents.Add(activityItem, result);
+            return result;
         }
 
         public WorkflowItemEvent LastTimerEventFor(TimerItem timerItem)
         {
-            var lastEvent = AllTimerEventsFor(timerItem).FirstOrDefault();
-            return lastEvent?? WorkflowItemEvent.NotFound;
+            WorkflowItemEvent result = null;
+            if (_cachedTimerEvents.TryGetValue(timerItem, out result)) return result;
+
+            result = AllTimerEventsFor(timerItem).FirstOrDefault();
+            result = result ?? WorkflowItemEvent.NotFound;
+            _cachedTimerEvents.Add(timerItem, result);
+            return result;
         }
 
         public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow)
