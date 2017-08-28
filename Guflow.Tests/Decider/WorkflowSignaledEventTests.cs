@@ -10,10 +10,13 @@ namespace Guflow.Tests.Decider
     {
         private WorkflowSignaledEvent _workflowSignaledEvent;
 
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
-            var signaledEvent = HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input", "externalWorkflowRunid", "externalWorkflowRunid");
+            _builder = new HistoryEventsBuilder();
+            var signaledEvent = _builder.WorkflowSignaledEvent("name", "input", "externalWorkflowRunid", "externalWorkflowRunid");
             _workflowSignaledEvent = new WorkflowSignaledEvent(signaledEvent);
         }
         [Test]
@@ -27,7 +30,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_populate_external_workflow_properties_when_not_signed_by_external_workflow()
         {
-            var workflowSignaledEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input"));
             Assert.That(workflowSignaledEvent.SignalName, Is.EqualTo("name"));
             Assert.That(workflowSignaledEvent.Input, Is.EqualTo("input"));
             Assert.That(workflowSignaledEvent.ExternalWorkflowRunid, Is.Null);
@@ -36,7 +39,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_returns_workflow_ignore_action()
         {
-            var workflowSignaledEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input"));
 
             var workflowAction = workflowSignaledEvent.Interpret(new EmptyWorkflow());
 
@@ -46,7 +49,7 @@ namespace Guflow.Tests.Decider
         public void Can_return_custom_workflow_action()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input"));
 
             var workflowAction = workflowSignaledEvent.Interpret(new WorkflowWithCustomActionOnSignal(expectedAction));
 
@@ -55,7 +58,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Workflow_can_reply_to_signal_event()
         {
-            var workflowSignaledEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("name", "input","runid","wid"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input","runid","wid"));
 
             var decisions = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput")).GetDecisions();
 

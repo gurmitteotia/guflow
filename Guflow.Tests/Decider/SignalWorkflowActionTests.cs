@@ -8,12 +8,18 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class SignalWorkflowActionTests
     {
+        private HistoryEventsBuilder _builder;
 
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
         [Test]
         public void Can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnSignal("name","input","id","runid");
-            var timerFiredEventGraph= HistoryEventFactory.CreateTimerFiredEventGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
+            var timerFiredEventGraph= _builder.TimerFiredGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
             var timerEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
 
             var decisions = timerEvent.Interpret(workflow).GetDecisions();

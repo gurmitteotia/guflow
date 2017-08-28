@@ -7,39 +7,39 @@ using ChildPolicy = Guflow.Decider.ChildPolicy;
 
 namespace Guflow.Tests.Decider
 {
-    internal class HistoryEventFactory
+    internal class HistoryEventsBuilder
     {
-        public static IEnumerable<HistoryEvent> CreateActivityCompletedEventGraph(Identity activityIdentity, string workerIdentity, string result, string input="")
+        private long _currentEventId = 0;
+        public IEnumerable<HistoryEvent> ActivityCompletedGraph(Identity activityIdentity, string workerIdentity, string result, string input = "")
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.CompletedIds(ref _currentEventId);
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskCompleted,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Completion),
                 ActivityTaskCompletedEventAttributes = new ActivityTaskCompletedEventAttributes()
                 {
                     Result = result,
-                    StartedEventId = eventIds.StartedId,
-                    ScheduledEventId = eventIds.ScheduledId
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
                 }
             });
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
                     Identity = workerIdentity,
-                    ScheduledEventId = eventIds.ScheduledId
-
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
                 }
             });
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskScheduled,
-                EventId = eventIds.ScheduledId,
+                EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
@@ -51,38 +51,38 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityFailedEventGraph(Identity activityIdentity, string identity, string reason, string detail)
+        public IEnumerable<HistoryEvent> ActivityFailedGraph(Identity activityIdentity, string identity, string reason, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.CompletedIds(ref _currentEventId);
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskFailed,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Completion),
                 ActivityTaskFailedEventAttributes = new ActivityTaskFailedEventAttributes()
                 {
                     Details = detail,
                     Reason = reason,
-                    ScheduledEventId = eventIds.ScheduledId,
-                    StartedEventId = eventIds.StartedId
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started)
                 }
             });
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
                     Identity = identity,
-                    ScheduledEventId = eventIds.ScheduledId
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
 
                 }
             });
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskScheduled,
-                EventId = eventIds.ScheduledId,
+                EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
@@ -93,38 +93,38 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityTimedoutEventGraph(Identity activityIdentity, string identity, string timeoutType, string detail)
+        public IEnumerable<HistoryEvent> ActivityTimedoutGraph(Identity activityIdentity, string identity, string timeoutType, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.CompletedIds(ref _currentEventId);
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskTimedOut,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Completion),
                 ActivityTaskTimedOutEventAttributes = new ActivityTaskTimedOutEventAttributes()
                 {
                     Details = detail,
                     TimeoutType = new ActivityTaskTimeoutType(timeoutType),
-                    ScheduledEventId = eventIds.ScheduledId,
-                    StartedEventId = eventIds.StartedId
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started)
                 }
             });
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
                     Identity = identity,
-                    ScheduledEventId = eventIds.ScheduledId
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
 
                 }
             });
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskScheduled,
-                EventId = eventIds.ScheduledId,
+                EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
@@ -135,48 +135,48 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityCancelledEventGraph(Identity activityIdentity, string identity, string detail)
+        public IEnumerable<HistoryEvent> ActivityCancelledGraph(Identity activityIdentity, string identity, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.CancelledIds(ref _currentEventId);
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskCanceled,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Cancelled),
                 ActivityTaskCanceledEventAttributes = new ActivityTaskCanceledEventAttributes()
                 {
                     Details = detail,
-                    LatestCancelRequestedEventId = eventIds.CancelRequestedId,
-                    ScheduledEventId = eventIds.ScheduledId,
-                    StartedEventId = eventIds.StartedId
+                    LatestCancelRequestedEventId = eventIds.EventId(EventIds.CancelRequested),
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started)
                 }
             });
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskCancelRequested,
-                EventId = eventIds.CancelRequestedId,
+                EventId = eventIds.EventId(EventIds.CancelRequested),
                 ActivityTaskCancelRequestedEventAttributes = new ActivityTaskCancelRequestedEventAttributes()
                 {
-                    ActivityId = activityIdentity.Id
+                    ActivityId = activityIdentity.Id,
                 }
             });
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
                     Identity = identity,
-                    ScheduledEventId = eventIds.ScheduledId
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
 
                 }
             });
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskScheduled,
-                EventId = eventIds.ScheduledId,
+                EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
@@ -187,18 +187,18 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateTimerFiredEventGraph(Identity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer=false)
+        public IEnumerable<HistoryEvent> TimerFiredGraph(Identity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.TimerFiredIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.TimerFired,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.TimerFired),
                 TimerFiredEventAttributes = new TimerFiredEventAttributes()
                 {
-                    StartedEventId = eventIds.StartedId,
+                    StartedEventId = eventIds.EventId(EventIds.Started),
                     TimerId = timerId.Id
                 },
             });
@@ -206,30 +206,29 @@ namespace Guflow.Tests.Decider
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.TimerStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 TimerStartedEventAttributes = new TimerStartedEventAttributes()
                 {
                     TimerId = timerId.Id,
                     StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
-                    Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = isARescheduleTimer}).ToJson()
+                    Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = isARescheduleTimer }).ToJson()
                 }
             });
-
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateTimerCancelledEventGraph(Identity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
+        public IEnumerable<HistoryEvent> TimerCancelledGraph(Identity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.TimerCancelledIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.TimerCanceled,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Cancelled),
                 TimerCanceledEventAttributes = new TimerCanceledEventAttributes()
                 {
-                    StartedEventId = eventIds.StartedId,
+                    StartedEventId = eventIds.EventId(EventIds.Started),
                     TimerId = timerId.Id,
                 },
             });
@@ -237,7 +236,7 @@ namespace Guflow.Tests.Decider
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.TimerStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 TimerStartedEventAttributes = new TimerStartedEventAttributes()
                 {
                     TimerId = timerId.Id,
@@ -249,15 +248,15 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateTimerStartFailedEventGraph(Identity timerId, string cause)
+        public IEnumerable<HistoryEvent> TimerStartFailedGraph(Identity timerId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.TimerStartFailedIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.StartTimerFailed,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Failed),
                 StartTimerFailedEventAttributes = new StartTimerFailedEventAttributes()
                 {
                     TimerId = timerId.Id,
@@ -268,16 +267,16 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateWorkflowStartedEventGraph(string input ="workflowinput")
+        public IEnumerable<HistoryEvent> WorkflowStartedGraph(string input = "workflowinput")
         {
-            return new[] {CreateWorkflowStartedEvent(input)};
+            return new[] { WorkflowStartedEvent(input) };
         }
 
-        public static HistoryEvent CreateWorkflowStartedEvent(string input="some input")
+        public HistoryEvent WorkflowStartedEvent(string input = "some input")
         {
             return new HistoryEvent()
             {
-                EventType =  EventType.WorkflowExecutionStarted,
+                EventType = EventType.WorkflowExecutionStarted,
                 WorkflowExecutionStartedEventAttributes = new WorkflowExecutionStartedEventAttributes()
                 {
                     ChildPolicy = ChildPolicy.Terminate,
@@ -294,15 +293,16 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public static IEnumerable<HistoryEvent> CreateActivityCancellationFailedEventGraph(Identity activityId, string cause)
+        public IEnumerable<HistoryEvent> ActivityCancellationFailedGraph(Identity activityId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.CompletedIds(ref _currentEventId);
+
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.RequestCancelActivityTaskFailed,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Completion),
                 RequestCancelActivityTaskFailedEventAttributes = new RequestCancelActivityTaskFailedEventAttributes()
                 {
                     ActivityId = activityId.Id,
@@ -313,37 +313,36 @@ namespace Guflow.Tests.Decider
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
-                   Identity = "someid",
-                   ScheduledEventId = eventIds.ScheduledId
+                    Identity = "someid",
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
                 }
             });
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskScheduled,
-                EventId = eventIds.ScheduledId,
+                EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
-                    ActivityType = new ActivityType() {  Name = activityId.Name, Version = activityId.Version},
+                    ActivityType = new ActivityType() { Name = activityId.Name, Version = activityId.Version },
                     ActivityId = activityId.Id,
                     Control = (new ActivityScheduleData() { PN = activityId.PositionalName }).ToJson(),
                 }
             });
-
             return historyEvents;
         }
-        public static IEnumerable<HistoryEvent> CreateTimerCancellationFailedEventGraph(Identity timerId, string cause)
+        public IEnumerable<HistoryEvent> TimerCancellationFailedGraph(Identity timerId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.CancellationFailedIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.CancelTimerFailed,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Failed),
                 CancelTimerFailedEventAttributes = new CancelTimerFailedEventAttributes()
                 {
                     TimerId = timerId.Id,
@@ -354,7 +353,7 @@ namespace Guflow.Tests.Decider
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.TimerStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 TimerStartedEventAttributes = new TimerStartedEventAttributes()
                 {
                     TimerId = timerId.Id,
@@ -362,19 +361,18 @@ namespace Guflow.Tests.Decider
                     Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = false }).ToJson()
                 }
             });
-
-            return historyEvents;
+           return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateTimerStartedEventGraph(Identity identity, TimeSpan fireAfter, bool isARescheduleTimer =false)
+        public IEnumerable<HistoryEvent> TimerStartedGraph(Identity identity, TimeSpan fireAfter, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.TimerStartedIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.TimerStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 TimerStartedEventAttributes = new TimerStartedEventAttributes()
                 {
                     TimerId = identity.Id,
@@ -386,19 +384,19 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivitySchedulingFailedEventGraph(Identity activityIdentity, string cause)
+        public IEnumerable<HistoryEvent> ActivitySchedulingFailedGraph(Identity activityIdentity, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.SchedulingFailedIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ScheduleActivityTaskFailed,
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Failed),
                 ScheduleActivityTaskFailedEventAttributes = new ScheduleActivityTaskFailedEventAttributes()
                 {
                     ActivityId = activityIdentity.Id,
-                    ActivityType = new ActivityType() {  Name = activityIdentity.Name, Version = activityIdentity.Version},
+                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
                     Cause = cause
                 }
             });
@@ -406,14 +404,15 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityScheduledEventGraph(Identity activityIdentity)
+        public IEnumerable<HistoryEvent> ActivityScheduledGraph(Identity activityIdentity)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.ScheduledIds(ref _currentEventId);
+
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskScheduled,
-                EventId = eventIds.ScheduledId,
+                EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
@@ -425,25 +424,26 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityStartedEventGraph(Identity activityIdentity, string identity)
+        public IEnumerable<HistoryEvent> ActivityStartedGraph(Identity activityIdentity, string identity)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.ActivityStartedIds(ref _currentEventId);
+
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
                     Identity = identity,
-                    ScheduledEventId = eventIds.ScheduledId
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
 
                 }
             });
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskScheduled,
-                EventId = eventIds.ScheduledId,
+                EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
@@ -454,36 +454,36 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public static IEnumerable<HistoryEvent> CreateActivityCancelRequestedGraph(Identity activityIdentity, string identity)
+        public IEnumerable<HistoryEvent> ActivityCancelRequestedGraph(Identity activityIdentity, string identity)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.ActivityCancelRequestedIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskCancelRequested,
-                EventId = eventIds.CancelRequestedId,
+                EventId = eventIds.EventId(EventIds.CancelRequested),
                 ActivityTaskCancelRequestedEventAttributes = new ActivityTaskCancelRequestedEventAttributes()
                 {
-                        ActivityId = activityIdentity.Id,
+                    ActivityId = activityIdentity.Id,
                 }
             });
 
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskStarted,
-                EventId = eventIds.StartedId,
+                EventId = eventIds.EventId(EventIds.Started),
                 ActivityTaskStartedEventAttributes = new ActivityTaskStartedEventAttributes()
                 {
                     Identity = identity,
-                    ScheduledEventId = eventIds.ScheduledId
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
 
                 }
             });
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskScheduled,
-                EventId = eventIds.ScheduledId,
+                EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
@@ -495,28 +495,28 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public static HistoryEvent CreateWorkflowSignaledEvent(string signalName, string input, string externalWorkflowRunId, string externalWorkflowId)
+        public HistoryEvent WorkflowSignaledEvent(string signalName, string input, string externalWorkflowRunId, string externalWorkflowId)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
 
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.WorkflowExecutionSignaled,
                 WorkflowExecutionSignaledEventAttributes = new WorkflowExecutionSignaledEventAttributes()
                 {
                     SignalName = signalName,
                     Input = input,
-                    ExternalWorkflowExecution = new WorkflowExecution() { RunId  = externalWorkflowRunId, WorkflowId = externalWorkflowId}
+                    ExternalWorkflowExecution = new WorkflowExecution() { RunId = externalWorkflowRunId, WorkflowId = externalWorkflowId }
                 }
             };
         }
-        public static HistoryEvent CreateWorkflowSignaledEvent(string signalName, string input)
+        public HistoryEvent WorkflowSignaledEvent(string signalName, string input)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.WorkflowExecutionSignaled,
                 WorkflowExecutionSignaledEventAttributes = new WorkflowExecutionSignaledEventAttributes()
                 {
@@ -525,13 +525,13 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public static HistoryEvent CreateWorkflowCancellationRequestedEvent(string cause, string externalWorkflowRunid,string externalWorkflowId)
+        public HistoryEvent WorkflowCancellationRequestedEvent(string cause, string externalWorkflowRunid, string externalWorkflowId)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
-                EventType    = EventType.WorkflowExecutionCancelRequested,
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.WorkflowExecutionCancelRequested,
                 WorkflowExecutionCancelRequestedEventAttributes = new WorkflowExecutionCancelRequestedEventAttributes()
                 {
                     Cause = cause,
@@ -543,12 +543,12 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public static HistoryEvent CreateWorkflowCancellationRequestedEvent(string cause)
+        public HistoryEvent WorkflowCancellationRequestedEvent(string cause)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.WorkflowExecutionCancelRequested,
                 WorkflowExecutionCancelRequestedEventAttributes = new WorkflowExecutionCancelRequestedEventAttributes()
                 {
@@ -557,12 +557,12 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public static HistoryEvent CreateMarkerRecordedEvent(string markerName, string detail1)
+        public HistoryEvent MarkerRecordedEvent(string markerName, string detail1)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.MarkerRecorded,
                 MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
                 {
@@ -572,12 +572,12 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public static HistoryEvent CreateRecordMarkerFailedEvent(string markerName,string cause)
+        public HistoryEvent RecordMarkerFailedEvent(string markerName, string cause)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.RecordMarkerFailed,
                 RecordMarkerFailedEventAttributes = new RecordMarkerFailedEventAttributes()
                 {
@@ -587,12 +587,12 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public static HistoryEvent CreateWorkflowSignalFailedEvent(string cause, string workflowId, string runId)
+        public HistoryEvent WorkflowSignalFailedEvent(string cause, string workflowId, string runId)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.SignalExternalWorkflowExecutionFailed,
                 SignalExternalWorkflowExecutionFailedEventAttributes = new SignalExternalWorkflowExecutionFailedEventAttributes()
                 {
@@ -603,12 +603,12 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public static HistoryEvent CreateWorkflowCompletionFailureEvent(string cause)
+        public HistoryEvent WorkflowCompletionFailureEvent(string cause)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.CompleteWorkflowExecutionFailed,
                 CompleteWorkflowExecutionFailedEventAttributes = new CompleteWorkflowExecutionFailedEventAttributes()
                 {
@@ -617,12 +617,12 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public static HistoryEvent CreateWorkflowFailureFailedEvent(string cause)
+        public HistoryEvent WorkflowFailureFailedEvent(string cause)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.FailWorkflowExecutionFailed,
                 FailWorkflowExecutionFailedEventAttributes = new FailWorkflowExecutionFailedEventAttributes()
                 {
@@ -630,12 +630,12 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public static HistoryEvent CreateWorkflowCancelRequestFailedEvent(string cause)
+        public HistoryEvent WorkflowCancelRequestFailedEvent(string cause)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.RequestCancelExternalWorkflowExecutionFailed,
                 RequestCancelExternalWorkflowExecutionFailedEventAttributes = new RequestCancelExternalWorkflowExecutionFailedEventAttributes()
                 {
@@ -643,12 +643,12 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public static HistoryEvent CreateWorkflowCancellationFailedEvent(string cause)
+        public HistoryEvent WorkflowCancellationFailedEvent(string cause)
         {
-            var eventIds = EventIds.NewEventIds;
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
-                EventId = eventIds.CompletedId,
+                EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.CancelWorkflowExecutionFailed,
                 CancelWorkflowExecutionFailedEventAttributes = new CancelWorkflowExecutionFailedEventAttributes()
                 {
@@ -656,42 +656,179 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
+        public IEnumerable<HistoryEvent> Concat(params IEnumerable<HistoryEvent> []graphs)
+        {
+            var result = new List<HistoryEvent>();
+            foreach (var graph in graphs)
+            {
+                result.AddRange(graph);
+            }
+            result.Reverse();
+            return result;
+        }
 
         private class EventIds
         {
-            private static long _seed = 1;
-            private readonly long _scheduledId;
-            private EventIds(long scheduledId)
+            public const string Completion = "Completion";
+            public const string Started = "Started";
+            public const string Scheduled = "Scheduled";
+            public const string CancelRequested = "CancelRequested";
+            public const string Cancelled = "Cancelled";
+            public const string TimerFired = "TimerFired";
+            public const string Failed = "Failed";
+            public const string Generic = "Generic";
+
+            private readonly Dictionary<string,long> _ids;
+
+            private EventIds(Dictionary<string, long> ids)
             {
-                _scheduledId = scheduledId;
+                _ids = ids;
             }
 
-            public static EventIds NewEventIds
+            public long EventId(string eventType)
             {
-                get
+                return _ids[eventType];
+            }
+            public static EventIds CompletedIds(ref long eventId)
+            {
+                const long totalEvents = 3;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
                 {
-                    _seed += 10;
-                    return new EventIds(_seed);
-                }
+                    {Completion, eventId},
+                    {Started, eventId - 1},
+                    {Scheduled, eventId - 2}
+                };
+                return new EventIds(ids);
+            }
+            public static EventIds CancelledIds(ref long eventId)
+            {
+                const long totalEvents = 4;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Cancelled, eventId},
+                    {CancelRequested, eventId-1},
+                    {Started, eventId - 2},
+                    {Scheduled, eventId - 3}
+                };
+                return new EventIds(ids);
+            }
+            public static EventIds TimerFiredIds(ref long eventId)
+            {
+                const long totalEvents = 2;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {TimerFired, eventId},
+                    {Started, eventId - 1},
+                };
+                return new EventIds(ids);
             }
 
-            public long CompletedId
+            public static EventIds TimerCancelledIds(ref long eventId)
             {
-                get { return _scheduledId + 3; }
+                const long totalEvents = 2;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Cancelled, eventId},
+                    {Started, eventId - 1},
+                };
+                return new EventIds(ids);
             }
 
-            public long CancelRequestedId
+            public static EventIds TimerStartFailedIds(ref long eventId)
             {
-                get { return _scheduledId + 2; }
-            }
-            public long StartedId
-            {
-                get { return _scheduledId + 1; }
+                const long totalEvents = 1;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Failed, eventId},
+                };
+                return new EventIds(ids);
             }
 
-            public long ScheduledId
+            public static EventIds CancellationFailedIds(ref long eventId)
             {
-                get { return _scheduledId; }
+                const long totalEvents = 2;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Failed, eventId},
+                    {Started, eventId-1},
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds TimerStartedIds(ref long eventId)
+            {
+                const long totalEvents = 1;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Started, eventId},
+                };
+                return new EventIds(ids);
+            }
+            public static EventIds SchedulingFailedIds(ref long eventId)
+            {
+                const long totalEvents = 1;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Failed, eventId},
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds ScheduledIds(ref long eventId)
+            {
+
+                const long totalEvents = 1;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Scheduled, eventId},
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds ActivityStartedIds(ref long eventId)
+            {
+
+                const long totalEvents = 2;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Started, eventId},
+                    {Scheduled, eventId-1},
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds ActivityCancelRequestedIds(ref long eventId)
+            {
+                const long totalEvents = 3;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {CancelRequested, eventId},
+                    {Started, eventId - 1},
+                    {Scheduled, eventId - 2}
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds GenericEventIds(ref long eventId)
+            {
+                const long totalEvents = 1;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Generic, eventId},
+                };
+                return new EventIds(ids);
             }
         }
     }

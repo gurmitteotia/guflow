@@ -10,10 +10,12 @@ namespace Guflow.Tests.Decider
     public class CancelRequestTests
     {
         private CancelRequest _cancelRequest;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
             _cancelRequest = new CancelRequest(null);
         }
         [Test]
@@ -39,10 +41,10 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new []{new CancelActivityDecision(Identity.New("name1", "1.0", "pname"))}));
         }
 
-        private static ActivityItem CreateActivity(string name, string version, string positionalName)
+        private ActivityItem CreateActivity(string name, string version, string positionalName)
         {
             var identity = Identity.New(name, version, positionalName);
-            var historyEvent = new WorkflowHistoryEvents(HistoryEventFactory.CreateActivityScheduledEventGraph(identity));
+            var historyEvent = new WorkflowHistoryEvents(_builder.ActivityScheduledGraph(identity));
             var workflow = new Mock<IWorkflow>();
             workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(historyEvent);
             return new ActivityItem(identity, workflow.Object);

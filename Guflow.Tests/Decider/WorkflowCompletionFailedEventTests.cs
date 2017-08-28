@@ -10,10 +10,14 @@ namespace Guflow.Tests.Decider
     {
         private WorkflowCompletionFailedEvent _failedEvent;
 
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
-            _failedEvent = new WorkflowCompletionFailedEvent(HistoryEventFactory.CreateWorkflowCompletionFailureEvent("cause"));
+            _builder = new HistoryEventsBuilder();
+
+            _failedEvent = new WorkflowCompletionFailedEvent(_builder.WorkflowCompletionFailureEvent("cause"));
         }
 
         [Test]

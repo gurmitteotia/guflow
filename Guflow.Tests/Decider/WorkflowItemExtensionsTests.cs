@@ -11,10 +11,12 @@ namespace Guflow.Tests.Decider
     public class WorkflowItemExtensionsTests
     {
         private Mock<IWorkflowItem> _workflowItem;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
             _workflowItem = new Mock<IWorkflowItem>();
         }
 
@@ -89,16 +91,16 @@ namespace Guflow.Tests.Decider
             Assert.That(_workflowItem.Object.ParentTimer(), Is.EqualTo(parentTimers[0]));
         }
 
-        private static ActivityCompletedEvent CreateCompletedEvent()
+        private ActivityCompletedEvent CreateCompletedEvent()
         {
-            var eventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New("name", "1.0"), "id",
+            var eventGraph = _builder.ActivityCompletedGraph(Identity.New("name", "1.0"), "id",
                 "result");
             return new ActivityCompletedEvent(eventGraph.First(), eventGraph);
         }
 
-        private static ActivityFailedEvent CreateFailedEvent()
+        private ActivityFailedEvent CreateFailedEvent()
         {
-            var eventGraph = HistoryEventFactory.CreateActivityFailedEventGraph(Identity.New("name", "1.0"), "id","reason", "detail");
+            var eventGraph = _builder.ActivityFailedGraph(Identity.New("name", "1.0"), "id","reason", "detail");
             return new ActivityFailedEvent(eventGraph.First(), eventGraph);
         }
 

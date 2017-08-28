@@ -14,9 +14,11 @@ namespace Guflow.Tests.Decider
         private const string _cause = "cause";
         private const string _activityName = "activity";
         private const string _activityVersion = "1.0";
+        private HistoryEventsBuilder _builder;
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
             _timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.Timer(_timerName), _cause);
         }
 
@@ -72,7 +74,7 @@ namespace Guflow.Tests.Decider
 
         private TimerCancellationFailedEvent CreateTimerCancellationFailedEvent(Identity identity, string cause)
         {
-            var timerCancellationFailedEventGraph = HistoryEventFactory.CreateTimerCancellationFailedEventGraph(identity, _cause);
+            var timerCancellationFailedEventGraph = _builder.TimerCancellationFailedGraph(identity, _cause);
             return new TimerCancellationFailedEvent(timerCancellationFailedEventGraph.First());
         }
         private class TestWorkflow : Workflow

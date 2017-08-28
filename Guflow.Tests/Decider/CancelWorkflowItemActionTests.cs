@@ -17,10 +17,12 @@ namespace Guflow.Tests.Decider
         private const string _timerName = "timer2";
 
         private Mock<IWorkflow> _workflow;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
             _workflow = new Mock<IWorkflow>();
             _workflow.SetupGet(w => w.WorkflowHistoryEvents)
                 .Returns(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
@@ -29,7 +31,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_timer_decision_for_timer_item_when_it_is_active()
         {
-            SetupWorkflowToReturns(HistoryEventFactory.CreateTimerStartedEventGraph(Identity.Timer("TimerName"), TimeSpan.FromSeconds(2)));
+            SetupWorkflowToReturns(_builder.TimerStartedGraph(Identity.Timer("TimerName"), TimeSpan.FromSeconds(2)));
             var timerItem = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(timerItem);
 
@@ -41,7 +43,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_activity_decision_for_activity_item_when_reschedule_timer_is_not_active()
         {
-            SetupWorkflowToReturns(HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New("activityName1", "ver"), "id"));
+            SetupWorkflowToReturns(_builder.ActivityStartedGraph(Identity.New("activityName1", "ver"), "id"));
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
@@ -64,7 +66,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_timer_decision_for_activity_item_when_reschedule_timer_is_active()
         {
-            SetupWorkflowToReturns(HistoryEventFactory.CreateTimerStartedEventGraph(Identity.New("activityName1", "ver"), TimeSpan.FromSeconds(2), true));
+            SetupWorkflowToReturns(_builder.TimerStartedGraph(Identity.New("activityName1", "ver"), TimeSpan.FromSeconds(2), true));
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
@@ -101,7 +103,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new WorkflowtoReturnCancelActionForMultipleItems();
             workflow.NewExecutionFor(new WorkflowHistoryEvents(new[] {new HistoryEvent()}));
-            var cancelRequestEvent = new WorkflowCancellationRequestedEvent(HistoryEventFactory.CreateWorkflowCancellationRequestedEvent("cause"));
+            var cancelRequestEvent = new WorkflowCancellationRequestedEvent(_builder.WorkflowCancellationRequestedEvent("cause"));
 
             var workflowAction = cancelRequestEvent.Interpret(workflow).GetDecisions();
 
@@ -110,7 +112,7 @@ namespace Guflow.Tests.Decider
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
+            var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class WorkflowToReturnCancelActivityAction : Workflow

@@ -14,10 +14,13 @@ namespace Guflow.Tests.Decider
         private const string _workerId = "id";
         private ActivityCancelRequestedEvent _activityCancelRequestedEvent;
 
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
-            var activityCancelRequestedGraph = HistoryEventFactory.CreateActivityCancelRequestedGraph(Identity.New(_activityName, _activityVersion, _positionalName),_workerId);
+            _builder = new HistoryEventsBuilder();
+            var activityCancelRequestedGraph = _builder.ActivityCancelRequestedGraph(Identity.New(_activityName, _activityVersion, _positionalName),_workerId);
             _activityCancelRequestedEvent = new ActivityCancelRequestedEvent(activityCancelRequestedGraph.First());
         }
 

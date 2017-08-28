@@ -17,9 +17,12 @@ namespace Guflow.Tests.Decider
         private const string _timeoutType = "reason";
         private const string _detail = "detail";
 
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
             _activityTimedoutEvent = CreateActivityTimedoutEvent(_timeoutType, _detail);
         }
 
@@ -73,7 +76,7 @@ namespace Guflow.Tests.Decider
 
         private ActivityTimedoutEvent CreateActivityTimedoutEvent(string timeoutType, string details)
         {
-            var activityTimedoutEventGraph = HistoryEventFactory.CreateActivityTimedoutEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, timeoutType, details);
+            var activityTimedoutEventGraph = _builder.ActivityTimedoutGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, timeoutType, details);
             return new ActivityTimedoutEvent(activityTimedoutEventGraph.First(), activityTimedoutEventGraph);
         }
 

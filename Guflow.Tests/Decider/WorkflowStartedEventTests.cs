@@ -8,10 +8,18 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class WorkflowStartedEventTests
     {
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
+
         [Test]
         public void Populate_properties_from_event_attributes()
         {
-            var workflowStartedEvent = HistoryEventFactory.CreateWorkflowStartedEvent();
+            var workflowStartedEvent = _builder.WorkflowStartedEvent();
             var startAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
 
             var workflowEvent = new WorkflowStartedEvent(workflowStartedEvent);
@@ -35,7 +43,7 @@ namespace Guflow.Tests.Decider
         {
             var customStartupAction = new Mock<WorkflowAction>().Object;
             var workflow = new WorkflowWithCustomStartupAction(customStartupAction);
-            var workflowEvent = new WorkflowStartedEvent(HistoryEventFactory.CreateWorkflowStartedEvent());
+            var workflowEvent = new WorkflowStartedEvent(_builder.WorkflowStartedEvent());
 
             var actualStartupAction = workflowEvent.Interpret(workflow);
 
@@ -46,7 +54,7 @@ namespace Guflow.Tests.Decider
         public void Return_start_workflow_action()
         {
             var workflow = new EmptyWorkflow();
-            var workflowEvent = new WorkflowStartedEvent(HistoryEventFactory.CreateWorkflowStartedEvent());
+            var workflowEvent = new WorkflowStartedEvent(_builder.WorkflowStartedEvent());
 
             var workflowAction = workflowEvent.Interpret(workflow);
 
@@ -59,7 +67,7 @@ namespace Guflow.Tests.Decider
             var workflow = new EmptyWorkflow();
             WorkflowStartedEventArgs eventArgs = null;
             workflow.Started += (s, e) => { eventArgs = e; };
-            var workflowEvent = new WorkflowStartedEvent(HistoryEventFactory.CreateWorkflowStartedEvent());
+            var workflowEvent = new WorkflowStartedEvent(_builder.WorkflowStartedEvent());
 
             workflowEvent.Interpret(workflow);
 

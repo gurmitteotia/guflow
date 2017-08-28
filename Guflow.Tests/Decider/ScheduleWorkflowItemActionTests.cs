@@ -15,7 +15,13 @@ namespace Guflow.Tests.Decider
         private const string _activityName = "Download";
         private const string _activityVersion = "1.0";
         private const string _positionalName = "First";
+        private HistoryEventsBuilder _builder;
 
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
         [Test]
         public void Equality_tests()
         {
@@ -116,12 +122,12 @@ namespace Guflow.Tests.Decider
 
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
+            var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private IEnumerable<HistoryEvent> CreateCompletedActivityEventGraph(string activityName, string activityVersion, string positionalName)
         {
-            return HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
+            return _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
         }
         private class WorkflowToReturnRescheduleAction : Workflow
         {

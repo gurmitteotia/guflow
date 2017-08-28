@@ -18,10 +18,13 @@ namespace Guflow.Tests.Decider
         private const string _input = "input";
         private ActivityCompletedEvent _activityCompletedEvent;
 
+        private HistoryEventsBuilder _builder;
+
         [SetUp]
         public void Setup()
         {
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result,_input);
+            _builder = new HistoryEventsBuilder();
+            var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result,_input);
             _activityCompletedEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
         }
 
@@ -45,7 +48,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_populate_worker_id_when_activity_started_event_not_found_in_event_graph()
         {
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
+            var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
             
             var activityCompletedEvent= new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h=>h.EventType!=EventType.ActivityTaskStarted));
 
@@ -54,7 +57,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_activity_scheduled_event_not_found_in_event_graph()
         {
-            var completedActivityEventGraph = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
+            var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
 
             Assert.Throws<IncompleteEventGraphException>(() => new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h => h.EventType != EventType.ActivityTaskScheduled)));
         }

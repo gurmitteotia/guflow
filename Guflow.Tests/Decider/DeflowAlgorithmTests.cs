@@ -17,6 +17,13 @@ namespace Guflow.Tests.Decider
         private const string SendEmailActivity = "SendEmailActivity";
         private const string TimerName = "DelayTimer";
         private const string Version = "1.0";
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
 
         [Test]
         public void Does_not_schedule_a_child_item_when_one_of_the_activity_in_its_parent_branch_is_active()
@@ -352,13 +359,13 @@ namespace Guflow.Tests.Decider
             }));
         }
 
-        private static IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
+        private IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
         {
-            return HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, Version), "id", "result");
+            return _builder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result");
         }
-        private static IEnumerable<HistoryEvent> StartedActivityGraph(string activityName)
+        private IEnumerable<HistoryEvent> StartedActivityGraph(string activityName)
         {
-            return HistoryEventFactory.CreateActivityStartedEventGraph(Identity.New(activityName, Version), "id");
+            return _builder.ActivityStartedGraph(Identity.New(activityName, Version), "id");
         }
 
         [WorkflowDescription("1.0")]

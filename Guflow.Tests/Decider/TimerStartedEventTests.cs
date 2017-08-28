@@ -11,10 +11,13 @@ namespace Guflow.Tests.Decider
     {
         private const string _timerName = "timer";
         private TimerStartedEvent _timerStartedEvent;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
+            _builder = new HistoryEventsBuilder();
+
             _timerStartedEvent = CreateTimerStartedEvent(Identity.Timer(_timerName), TimeSpan.FromSeconds(2));
         }
 
@@ -32,7 +35,7 @@ namespace Guflow.Tests.Decider
 
         private TimerStartedEvent CreateTimerStartedEvent(Identity identity, TimeSpan fireAfter)
         {
-            var timerFiredEventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(identity, fireAfter);
+            var timerFiredEventGraph = _builder.TimerStartedGraph(identity, fireAfter);
             return new TimerStartedEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
         }
     }

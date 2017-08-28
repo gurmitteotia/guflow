@@ -17,6 +17,13 @@ namespace Guflow.Tests.Decider
         private const string PositionalName = "pname";
         private const string SiblingActivityName = "BookHotelActivity";
         private const string Version = "1.0";
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
         [Test]
         public void Equality_tests()
         {
@@ -95,12 +102,12 @@ namespace Guflow.Tests.Decider
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
-            var allHistoryEvents = HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
+            var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
-        private static IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
+        private IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
         {
-            return HistoryEventFactory.CreateActivityCompletedEventGraph(Identity.New(activityName, Version), "id", "result");
+            return _builder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result");
         }
         [WorkflowDescription("1.0")]
         private class WorkflowToJumpToDifferentBranch : Workflow

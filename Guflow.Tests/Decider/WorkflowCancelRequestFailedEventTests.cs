@@ -8,11 +8,14 @@ namespace Guflow.Tests.Decider
     public class WorkflowCancelRequestFailedEventTests
     {
         private WorkflowCancelRequestFailedEvent _cancelRequestFailedEvent;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _cancelRequestFailedEvent = new WorkflowCancelRequestFailedEvent(HistoryEventFactory.CreateWorkflowCancelRequestFailedEvent("cause"));
+            _builder = new HistoryEventsBuilder();
+
+            _cancelRequestFailedEvent = new WorkflowCancelRequestFailedEvent(_builder.WorkflowCancelRequestFailedEvent("cause"));
         }
 
         [Test]

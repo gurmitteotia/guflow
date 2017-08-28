@@ -12,6 +12,13 @@ namespace Guflow.Tests.Decider
     public class TimerItemTests
     {
         private readonly Identity _timerIdentity = Identity.Timer("timerName");
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
 
         [Test]
         public void By_default_schedule_timer_to_fire_immediately()
@@ -47,7 +54,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_be_timer_started_event()
         {
-            var eventGraph = HistoryEventFactory.CreateTimerStartedEventGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var eventGraph = _builder.TimerStartedGraph(_timerIdentity, TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent;
@@ -58,7 +65,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_be_timer_fired_event()
         {
-            var eventGraph =HistoryEventFactory.CreateTimerFiredEventGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var eventGraph =_builder.TimerFiredGraph(_timerIdentity, TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent;
@@ -69,7 +76,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_be_timer_start_failed_event()
         {
-            var eventGraph =HistoryEventFactory.CreateTimerStartFailedEventGraph(_timerIdentity, "cause");
+            var eventGraph =_builder.TimerStartFailedGraph(_timerIdentity, "cause");
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent;
@@ -80,7 +87,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_be_timer_cancelled_event()
         {
-            var eventGraph = HistoryEventFactory.CreateTimerCancelledEventGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var eventGraph = _builder.TimerCancelledGraph(_timerIdentity, TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent;
@@ -91,7 +98,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_be_timer_cancellation_failed_event()
         {
-            var eventGraph=HistoryEventFactory.CreateTimerCancellationFailedEventGraph(_timerIdentity, "cause");
+            var eventGraph=_builder.TimerCancellationFailedGraph(_timerIdentity, "cause");
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent;
@@ -102,7 +109,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_fired_events()
         {
-            var eventGraph = HistoryEventFactory.CreateTimerFiredEventGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var eventGraph = _builder.TimerFiredGraph(_timerIdentity, TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.AllEvents;

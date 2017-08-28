@@ -7,6 +7,13 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class SignalTests
     {
+        private HistoryEventsBuilder _builder;
+
+        [SetUp]
+        public void Setup()
+        {
+            _builder = new HistoryEventsBuilder();
+        }
         [Test]
         public void Invalid_arguments_test()
         {
@@ -27,7 +34,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Replying_to_a_signal_returns_signal_workflow_workflow()
         {
-            var receivedSignalEvent = new WorkflowSignaledEvent(HistoryEventFactory.CreateWorkflowSignaledEvent("someName","input1","rid","wid"));
+            var receivedSignalEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("someName","input1","rid","wid"));
             var signalAction = new Signal("name", "input");
 
             var decisions = signalAction.ReplyTo(receivedSignalEvent).GetDecisions();
