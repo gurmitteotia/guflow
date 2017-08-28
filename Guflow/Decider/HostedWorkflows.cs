@@ -148,6 +148,11 @@ namespace Guflow.Decider
             }
             catch (Exception exception)
             {
+                if (_cancelled && exception is OperationCanceledException)
+                {
+                    _log.Info("Hosted workflows are shutting down");
+                    return;
+                }
                 _log.Fatal("Hosted workflows is faulted.", exception);
                 Environment.FailFast("Hosted workflow is faulted. Bringing down the system.", exception);
             }

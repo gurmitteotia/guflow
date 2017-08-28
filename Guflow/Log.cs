@@ -6,8 +6,8 @@ namespace Guflow
     public class Log
     {
         private static readonly ILog NullLog = new NullLog();
-        public static Func<Type, ILog> NullLogger = t => NullLog;
-        public static Func<Type, ILog> ConsoleLogger = t => new ConsoleLog(t.Name);
+        public static readonly Func<Type, ILog> NullLogger = t => NullLog;
+        public static readonly Func<Type, ILog> ConsoleLogger = t => new ConsoleLog(t.Name);
         private static Func<Type, ILog> _logFactory = NullLogger;
       
         public static ILog GetLogger<T>()

@@ -59,6 +59,15 @@ namespace Guflow.Tests
 
             Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
         }
+        [Test]
+        public async Task Returns_empty_worker_task_when_null_response_is_returned_from_amazon_swf()
+        {
+            AmazonSwfReturns((ActivityTask)null);
+
+            var workerTask = await _taskQueue.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
+
+            Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
+        }
 
         [Test]
         public async Task Returns_non_empty_worker_task_when_new_task_is_returned_from_amazon_swf()

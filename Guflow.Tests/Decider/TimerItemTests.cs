@@ -63,6 +63,17 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Last_event_is_cached()
+        {
+            var eventGraph = _builder.TimerStartedGraph(_timerIdentity, TimeSpan.FromSeconds(2));
+            var timerItem = CreateTimerItemFor(eventGraph);
+
+            var latestEvent = timerItem.LastEvent;
+
+            Assert.True(ReferenceEquals(latestEvent, timerItem.LastEvent));
+        }
+
+        [Test]
         public void Last_event_can_be_timer_fired_event()
         {
             var eventGraph =_builder.TimerFiredGraph(_timerIdentity, TimeSpan.FromSeconds(2));
