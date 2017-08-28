@@ -305,7 +305,7 @@ namespace Guflow.Tests.Decider
             }
             public void AccessHistoryEvents()
             {
-                var active = IsActive;
+                var active = HasActiveEvent;
             }
         }
 

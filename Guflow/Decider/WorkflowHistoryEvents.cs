@@ -61,7 +61,7 @@ namespace Guflow.Decider
             throw new IncompleteEventGraphException("Can not find workflow started event.");
         }
 
-        public bool IsActive()
+        public bool HasActiveEvent()
         {
             var allEvents = new List<WorkflowItemEvent>();
             foreach (var historyEvent in _allHistoryEvents)

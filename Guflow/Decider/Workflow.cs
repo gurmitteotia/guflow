@@ -290,7 +290,7 @@ namespace Guflow.Decider
         protected IEnumerable<IActivityItem> Activities => _allWorkflowItems.AllActivities;
         protected IEnumerable<ITimerItem> Timers => _allWorkflowItems.AllTimers;
 
-        protected bool IsActive => ((IWorkflow)this).WorkflowHistoryEvents.IsActive();
+        protected bool HasActiveEvent => ((IWorkflow)this).WorkflowHistoryEvents.HasActiveEvent();
 
         protected WorkflowAction RecordMarker(string markerName, object details)
         {
@@ -367,7 +367,7 @@ namespace Guflow.Decider
 
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
         {
-            if (proposal && IsActive)
+            if (proposal && HasActiveEvent)
                 return WorkflowAction.Empty;
             return DuringCompletion(result);
         }

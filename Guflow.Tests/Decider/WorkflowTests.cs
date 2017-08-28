@@ -241,7 +241,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new StubWorkflow();
             _workflowEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete", true) });
-            _workflowEvents.Setup(h => h.IsActive()).Returns(true);
+            _workflowEvents.Setup(h => h.HasActiveEvent()).Returns(true);
 
             var workflowDecisions = workflow.NewExecutionFor(_workflowEvents.Object).Execute();
 
@@ -253,7 +253,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new StubWorkflow();
             _workflowEvents.Setup(w => w.InterpretNewEventsFor(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete"), WorkflowDecision.Empty });
-            _workflowEvents.Setup(h => h.IsActive()).Returns(true);
+            _workflowEvents.Setup(h => h.HasActiveEvent()).Returns(true);
 
             var workflowDecisions = workflow.NewExecutionFor(_workflowEvents.Object).Execute();
 
