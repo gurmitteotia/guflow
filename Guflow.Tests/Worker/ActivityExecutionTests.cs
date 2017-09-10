@@ -23,7 +23,8 @@ namespace Guflow.Tests.Worker
         public void Setup()
         {
             _amazonSimpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
-            _hostedActivities = new HostedActivities(new Domain("name", _amazonSimpleWorkflow.Object), new[] { typeof(TestActivity) }, t=> new TestActivity(_activityResult));
+            var domain = new Domain("name", _amazonSimpleWorkflow.Object);
+            _hostedActivities = new HostedActivities(domain, new[] { typeof(TestActivity) }, t=> new TestActivity(_activityResult));
             TestActivity.Reset();
         }
         [Test]
@@ -95,6 +96,12 @@ namespace Guflow.Tests.Worker
             _amazonSimpleWorkflow.Verify(w=>w.RespondActivityTaskCompletedAsync(It.Is<RespondActivityTaskCompletedRequest>(r=>request(r)), It.IsAny<CancellationToken>()), Times.Once);
         }
 
+        [Test]
+        public void Fault_the_activity_host_when_execution_excepiton_is_unhandled()
+        {
+            
+        } 
+
         private static WorkerTask NewWorkerTask()
         {
             return WorkerTask.CreateFor(new ActivityTask()
@@ -106,6 +113,15 @@ namespace Guflow.Tests.Worker
             });
         }
 
+        [ActivityDescription("1.0")]
+        private class ErrorThrowingActivity : Activity
+        {
+            [Execute]
+            public void Execute()
+            {
+                throw new Exception("message");
+            }
+        }
         [ActivityDescription("1.0")]
         private class TestActivity : Activity
         {

@@ -213,7 +213,7 @@
   <data name="Invalid_heartbeat_interval" xml:space="preserve">
     <value>Invalid heartbeat interval. Interval must be greater than zero.</value>
   </data>
-  <data name="Concurrent_execution_limit_should_be_than_zero" xml:space="preserve">
+  <data name="Concurrent_execution_limit_should_be_more_than_zero" xml:space="preserve">
     <value>Concurrent execution limit should be more than zero.</value>
   </data>
   <data name="Unhandled_activity_exception" xml:space="preserve">
@@ -242,5 +242,14 @@
   </data>
   <data name="Null_logger_is_returned" xml:space="preserve">
     <value>Null instance of Log is return from factory.</value>
+  </data>
+  <data name="Host_already_excuting" xml:space="preserve">
+    <value>Host is already executing</value>
+  </data>
+  <data name="Host_is_faulted" xml:space="preserve">
+    <value>Host is in faulted state. Please create a new host to start execution.</value>
+  </data>
+  <data name="Host_is_stopped" xml:space="preserve">
+    <value>Host is stopped. Please create a new host to start execution. </value>
   </data>
 </root>

@@ -72,7 +72,7 @@ namespace Guflow.Worker
         {
             return new ActivityFailResponse(_currentTaskToken, reason, details);
         }
-        protected ActivityResponse Defer { get { return ActivityResponse.Defer;} }
+        protected ActivityResponse Defer => ActivityResponse.Defer;
 
         private void ConfigureHeartbeat()
         {

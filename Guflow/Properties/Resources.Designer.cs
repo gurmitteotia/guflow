@@ -171,9 +171,9 @@ namespace Guflow.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Concurrent execution limit should be more than zero..
         /// </summary>
-        internal static string Concurrent_execution_limit_should_be_than_zero {
+        internal static string Concurrent_execution_limit_should_be_more_than_zero {
             get {
-                return ResourceManager.GetString("Concurrent_execution_limit_should_be_than_zero", resourceCulture);
+                return ResourceManager.GetString("Concurrent_execution_limit_should_be_more_than_zero", resourceCulture);
             }
         }
         
@@ -246,6 +246,33 @@ namespace Guflow.Properties {
         internal static string Empty_version {
             get {
                 return ResourceManager.GetString("Empty_version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host is already executing.
+        /// </summary>
+        internal static string Host_already_excuting {
+            get {
+                return ResourceManager.GetString("Host_already_excuting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host is in faulted state. Please create a new host to start execution..
+        /// </summary>
+        internal static string Host_is_faulted {
+            get {
+                return ResourceManager.GetString("Host_is_faulted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host is stopped. Please create a new host to start execution. .
+        /// </summary>
+        internal static string Host_is_stopped {
+            get {
+                return ResourceManager.GetString("Host_is_stopped", resourceCulture);
             }
         }
         

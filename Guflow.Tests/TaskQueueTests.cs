@@ -119,8 +119,9 @@ namespace Guflow.Tests
 
         private void AmazonSwfReturns(DecisionTask decisionTask)
         {
-            _amazonWorkflowClient.Setup(c => c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = decisionTask }));
+            _amazonWorkflowClient.SetupSequence(c => c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = decisionTask }))
+                .Returns(Task.FromResult(new PollForDecisionTaskResponse()));
         }
         private void AmazonSwfReturns(ActivityTask activityTask)
         {

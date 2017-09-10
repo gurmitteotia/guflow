@@ -11,7 +11,7 @@ namespace Guflow.Worker
         private readonly Func<WorkerTask, Task> _executeFunc;
         private HostedActivities _hostedActivities;
         private readonly AsyncAutoResetEvent _completedEvent = new AsyncAutoResetEvent();
-        private int _totalRunningTasks =0 ;
+        private int _totalRunningTasks = 0;
         private ActivityExecution(uint maximumLimit)
         {
             if (maximumLimit > 1)
@@ -22,11 +22,11 @@ namespace Guflow.Worker
             _maximumLimit = maximumLimit;
         }
 
-        public static readonly ActivityExecution Sequencial  = new ActivityExecution(1);
+        public static readonly ActivityExecution Sequencial = new ActivityExecution(1);
 
         public static ActivityExecution Concurrent(uint maximumLimit)
         {
-            Ensure.That(maximumLimit != 0, ()=> new ArgumentException(Resources.Concurrent_execution_limit_should_be_than_zero, "maximumLimit"));
+            Ensure.That(maximumLimit != 0, () => new ArgumentException(Resources.Concurrent_execution_limit_should_be_more_than_zero, "maximumLimit"));
             return new ActivityExecution(maximumLimit);
         }
 
@@ -43,30 +43,29 @@ namespace Guflow.Worker
         private async Task ExecuteConcurrentlyAsync(WorkerTask workerTask)
         {
             var totalRunningTasks = Interlocked.Increment(ref _totalRunningTasks);
-            var activityExecution = Task.Run(async () =>
+            var task = Task.Run(async () =>
             {
-                try
-                {
-                    await ExecuteInSequenceSync(workerTask);
-                    var remainRunningTasks = Interlocked.Decrement(ref _totalRunningTasks);
-                    if (remainRunningTasks < _maximumLimit)
-                        _completedEvent.Set();
 
-                }
-                catch (Exception exception)
-                {
-                    Environment.FailFast(Resources.Unhandled_activity_exception, exception);
-                }
+                await ExecuteInSequenceSync(workerTask);
+                var remainRunningTasks = Interlocked.Decrement(ref _totalRunningTasks);
+                if (remainRunningTasks < _maximumLimit)
+                    _completedEvent.Set();
             });
-
             if (totalRunningTasks >= _maximumLimit)
                 await _completedEvent.WaitAsync();
         }
 
         private async Task ExecuteInSequenceSync(WorkerTask workerTask)
         {
-            var response = await workerTask.ExecuteFor(_hostedActivities);
-            await _hostedActivities.SendAsync(response);
+            try
+            {
+                var response = await workerTask.ExecuteFor(_hostedActivities);
+                await _hostedActivities.SendAsync(response);
+            }
+            catch (Exception exception)
+            {
+               _hostedActivities.Fault(exception);
+            }
         }
     }
 }
