@@ -12,13 +12,13 @@ namespace Guflow.Decider
     {
         private readonly Domain _domain;
         private readonly Workflows _hostedWorkflows;
-        private volatile bool _cancelled = false;
         private ErrorHandler _responseErrorHandler = ErrorHandler.NotHandled;
         private ErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private bool _disposed = false;
         private readonly ILog _log = Log.GetLogger<HostedWorkflows>();
+        private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
         public HostedWorkflows(Domain domain, IEnumerable<Workflow> workflows)
         {
             Ensure.NotNull(domain, "domain");
@@ -27,7 +27,7 @@ namespace Guflow.Decider
             workflows = workflows.Where(w => w != null).ToArray();
             if(!workflows.Any())
                 throw new ArgumentException(Resources.No_workflow_to_host, nameof(workflows));
-
+            Status = HostStatus.Initialized;
             _domain = domain;
             _hostedWorkflows = new Workflows(workflows);
         }
@@ -36,6 +36,8 @@ namespace Guflow.Decider
         {
             return _hostedWorkflows.FindBy(name, version);
         }
+        public HostStatus Status { get; private set; }
+        public event EventHandler<HostFaultEventArgs> OnFault; 
         public void StartExecution()
         {
             if (_hostedWorkflows.Count != 1)
@@ -52,9 +54,7 @@ namespace Guflow.Decider
         public void StartExecution(TaskQueue taskQueue)
         {
             if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
-            if(_cancelled)
-                throw new InvalidOperationException(Resources.Workflow_execution_already_stopped);
+                throw new ObjectDisposedException(Resources.Workflow_execution_already_stopped);
 
             Ensure.NotNull(taskQueue, "taskQueue");
             var domain = _domain.OnPollingError(_pollingErrorHandler);
@@ -63,12 +63,11 @@ namespace Guflow.Decider
 
         public void StopExecution()
         {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
-            if (!_cancelled)
+            if (!_disposed)
             {
-                _cancelled = true;
+                _disposed = true;
                 _cancellationTokenSource.Cancel();
+                _stoppedEvent.Wait(TimeSpan.FromSeconds(5));
             }
         }
 
@@ -138,27 +137,35 @@ namespace Guflow.Decider
         }
         private async void ExecuteHostedWorkfowsAsync(TaskQueue taskQueue, Domain domain)
         {
+            Status = HostStatus.Executing;
             try
             {
-                while (!_cancelled)
+                while (!_disposed)
                 {
                     var workflowTask = await PollForTaskAsync(taskQueue, domain);
                     await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
                 }
+                Status = HostStatus.Stopped;
+            }
+            catch (OperationCanceledException)
+            {
+                _log.Info("Host is shutting down");
+                Status = HostStatus.Stopped;
             }
             catch (Exception exception)
             {
-                if (_cancelled && exception is OperationCanceledException)
-                {
-                    _log.Info("Hosted workflows are shutting down");
-                    return;
-                }
+                Status = HostStatus.Faulted;
                 _log.Fatal("Hosted workflows is faulted.", exception);
-                Environment.FailFast("Hosted workflow is faulted. Bringing down the system.", exception);
+                OnFault?.Invoke(this, new HostFaultEventArgs(exception));
+            }
+            finally
+            {
+                _stoppedEvent.Set();
             }
         }
         private async Task<WorkflowTask> PollForTaskAsync(TaskQueue taskQueue, Domain domain)
         {
+            _log.Debug($"Polling for workflow task on queue {taskQueue} and domain {domain}");
             var workflowTask = await taskQueue.PollForWorkflowTaskAsync(domain);
             workflowTask.OnExecutionError(_genericErrorHandler);
             return workflowTask;
@@ -182,10 +189,7 @@ namespace Guflow.Decider
                 return hostedWorkflow;
             }
 
-            public int Count
-            {
-                get { return _workflows.Count; }
-            }
+            public int Count => _workflows.Count;
 
             public Workflow Single()
             {

@@ -15,9 +15,10 @@ namespace Guflow.Worker
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private ErrorHandler _responseErrorHandler = ErrorHandler.NotHandled;
         private ActivityExecution _activityExecution;
-        private volatile bool _stopped;
         private volatile bool _disposed;
-        private ILog _log = Log.GetLogger<HostedActivities>();
+        private readonly HostState _state = new HostState();
+        private readonly ILog _log = Log.GetLogger<HostedActivities>();
+        private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
         internal HostedActivities(Domain domain, IEnumerable<Type> activitiesTypes)
             : this(domain, activitiesTypes, t=>(Activity)Activator.CreateInstance(t))
         {
@@ -27,15 +28,16 @@ namespace Guflow.Worker
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(activitiesTypes, "activitiesTypes");
             Ensure.NotNull(instanceCreator, "instanceCreator");
-
             _domain = domain;
             _activities = new Activities(activitiesTypes, instanceCreator);
             _activityExecution = ActivityExecution.Concurrent((uint)Environment.ProcessorCount);
         }
 
+        public HostStatus Status => _state.Status;
+        public event EventHandler<HostFaultEventArgs> OnFault; 
         public ActivityExecution Execution
         {
-            get { return _activityExecution; }
+            get => _activityExecution;
             set
             {
                 Ensure.NotNull(value, "Execution");
@@ -59,20 +61,31 @@ namespace Guflow.Worker
         {
             Ensure.NotNull(taskQueue, "taskQueue");
             if(_disposed)
-                throw new ObjectDisposedException(GetType().Name);
-            if(_stopped)
-                throw new InvalidOperationException(Resources.Activity_execution_already_stopped);
-
+                throw new ObjectDisposedException(Resources.Activity_execution_already_stopped);
             ExecuteHostedActivitiesAsync(taskQueue);
         }
         public void StopExecution()
         {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().Name);
-            if (!_stopped)
+            if (_state.CanBeStopped())
             {
-                _stopped = true;
+                _state.Stop();
                 _cancellationTokenSource.Cancel();
+                _stoppedEvent.Wait(TimeSpan.FromSeconds(5));
+                _cancellationTokenSource.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                StopExecution();
+                _disposed = true;
             }
         }
         public void OnPollingError(IErrorHandler errorHandler)
@@ -109,27 +122,34 @@ namespace Guflow.Worker
         }
         private async void ExecuteHostedActivitiesAsync(TaskQueue taskQueue)
         {
+            _state.Start();
             var activityExecution = Execution;
             activityExecution.Set(hostedActivities: this);
             var domain = _domain.OnPollingError(_pollingErrorHandler);
             try
             {
-                while (!_stopped)
+                while (!_disposed)
                 {
                     var workerTask = await taskQueue.PollForWorkerTaskAsync(domain, _cancellationTokenSource.Token);
                     workerTask.SetErrorHandler(_genericErrorHandler);
                     await activityExecution.ExecuteAsync(workerTask);
                 }
+                _state.Stop();
+            }
+            catch (OperationCanceledException e)
+            {
+                _log.Info("Shutting down the host");
+                _state.Stop();
             }
             catch (Exception exception)
             {
-                if (_stopped && exception is OperationCanceledException)
-                {
-                    _log.Info("Hosted activities are shutting down");
-                    return;
-                }
+                _state.Fault();
                 _log.Fatal("Hosted activities is faulted.", exception);
-                Environment.FailFast("Hosted activities is faulted. Bringing down the system", exception);
+                OnFault?.Invoke(this, new HostFaultEventArgs(exception));
+            }
+            finally
+            {
+                _stoppedEvent.Set();
             }
         }
         internal Activity FindBy(string activityName, string activityVersion)
@@ -142,16 +162,12 @@ namespace Guflow.Worker
             var retryableFunc = new RetryableFunc(_responseErrorHandler);
             await retryableFunc.ExecuteAsync(()=>response.SendAsync(_domain.Client, _cancellationTokenSource.Token));
         }
-
-        public void Dispose()
+        internal void Fault(Exception exception)
         {
-            if (_disposed)
-            {
-                StopExecution();
-                _cancellationTokenSource.Dispose();
-                _disposed = true;
-            }
+            StopExecution();
+            var faultHandler = OnFault;
+            faultHandler?.Invoke(this, new HostFaultEventArgs(exception));
+            _state.Fault();
         }
-        
     }
 }

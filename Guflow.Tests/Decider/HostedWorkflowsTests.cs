@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -24,9 +26,9 @@ namespace Guflow.Tests.Decider
         {
             var hostedWorkflow1 = new TestWorkflow1();
             var hostedWorkflow2 = new TestWorkflow2();
-            var hostedWorkflows = new HostedWorkflows(_domain, new Workflow[]{hostedWorkflow1,hostedWorkflow2});
+            var hostedWorkflows = new HostedWorkflows(_domain, new Workflow[] { hostedWorkflow1, hostedWorkflow2 });
 
-            Assert.That(hostedWorkflows.FindBy("TestWorkflow1","2.0"),Is.EqualTo(hostedWorkflow1));
+            Assert.That(hostedWorkflows.FindBy("TestWorkflow1", "2.0"), Is.EqualTo(hostedWorkflow1));
             Assert.That(hostedWorkflows.FindBy("TestWorkflow2", "1.0"), Is.EqualTo(hostedWorkflow2));
         }
 
@@ -34,9 +36,9 @@ namespace Guflow.Tests.Decider
         public void Throws_exception_when_hosted_workflow_is_not_found()
         {
             var hostedWorkflow = new TestWorkflow1();
-            var hostedWorkflows = new HostedWorkflows(_domain, new [] { hostedWorkflow });
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { hostedWorkflow });
 
-            Assert.Throws<WorkflowNotHostedException>(()=>hostedWorkflows.FindBy("TestWorkflow2", "2.0"));
+            Assert.Throws<WorkflowNotHostedException>(() => hostedWorkflows.FindBy("TestWorkflow2", "2.0"));
         }
 
         [Test]
@@ -44,13 +46,13 @@ namespace Guflow.Tests.Decider
         {
             var hostedWorkflow1 = new TestWorkflow1();
             var hostedWorkflow2 = new TestWorkflow1();
-            Assert.Throws<WorkflowAlreadyHostedException>(()=> new HostedWorkflows(_domain, new Workflow[] { hostedWorkflow1, hostedWorkflow2 }));
+            Assert.Throws<WorkflowAlreadyHostedException>(() => new HostedWorkflows(_domain, new Workflow[] { hostedWorkflow1, hostedWorkflow2 }));
         }
 
         [Test]
         public void Throws_exception_multiple_hosted_workflows_execution_start_without_providing_the_task_queue()
         {
-            var hostedWorkflows = _domain.Host(new Workflow[] {new TestWorkflow1(), new TestWorkflow2()});
+            var hostedWorkflows = _domain.Host(new Workflow[] { new TestWorkflow1(), new TestWorkflow2() });
 
             Assert.Throws<InvalidOperationException>(() => hostedWorkflows.StartExecution());
         }
@@ -74,23 +76,75 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Invalid_constructor_argument_tests()
         {
-            Assert.Throws<ArgumentNullException>(() => new HostedWorkflows(null, new[] {new TestWorkflow1()}));
+            Assert.Throws<ArgumentNullException>(() => new HostedWorkflows(null, new[] { new TestWorkflow1() }));
             Assert.Throws<ArgumentNullException>(() => new HostedWorkflows(_domain, null));
             Assert.Throws<ArgumentException>(() => new HostedWorkflows(_domain, Enumerable.Empty<Workflow>()));
-            Assert.Throws<ArgumentException>(() => new HostedWorkflows(_domain, new []{(Workflow)null}));
+            Assert.Throws<ArgumentException>(() => new HostedWorkflows(_domain, new[] { (Workflow)null }));
         }
 
         [Test]
         public void Invalid_error_handler_argument_tests()
         {
-            var hostedWorkflows = new HostedWorkflows(_domain, new []{new TestWorkflow1()});
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow1() });
 
-            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError((HandleError) null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError((HandleError)null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError((IErrorHandler)null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError((HandleError)null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError((IErrorHandler)null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnPollingError((HandleError)null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnPollingError((IErrorHandler)null));
+        }
+
+        [Test]
+        public void Status_is_set_to_initialized_for_new_workflow_host()
+        {
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow1() });
+            Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Initialized));
+
+        }
+
+        [Test]
+        public void Status_is_set_to_executing_when_workflow_host_is_executing()
+        {
+            using (var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow1() }))
+            {
+                hostedWorkflows.StartExecution(new TaskQueue("name"));
+                Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Executing));
+            }
+        }
+
+        [Test]
+        public void Status_is_set_to_stopped_when_workflow_host_is_stopped_execution()
+        {
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow1() });
+            hostedWorkflows.StartExecution(new TaskQueue("name"));
+            hostedWorkflows.StopExecution();
+            Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Stopped));
+        }
+
+        [Test]
+        public void Status_is_set_to_faulted_when_workflow_host_can_not_handle_exception()
+        {
+            _simpleWorkflow.Setup(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(),
+                It.IsAny<CancellationToken>())).Throws<Exception>();
+
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow1() });
+            hostedWorkflows.StartExecution(new TaskQueue("name"));
+            hostedWorkflows.StopExecution();
+            Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Faulted));
+        }
+        [Test]
+        public void Raise_faulted_event_on_unhandled_exception()
+        {
+            var expectedException = new Exception();
+            _simpleWorkflow.Setup(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(),
+                It.IsAny<CancellationToken>())).Throws(expectedException);
+            Exception actualException = null;
+            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow1() });
+            hostedWorkflows.OnFault += (s, e) => actualException = e.Exception;
+            hostedWorkflows.StartExecution(new TaskQueue("name"));
+            hostedWorkflows.StopExecution();
+            Assert.That(actualException, Is.EqualTo(expectedException));
         }
 
         [WorkflowDescription("2.0")]

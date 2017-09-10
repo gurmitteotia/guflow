@@ -267,7 +267,7 @@ namespace Guflow.Tests.Decider
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
                 Events = new List<HistoryEvent>(){ historyEvent},
-                PreviousStartedEventId = historyEvent.EventId,
+                PreviousStartedEventId = 0,
                 StartedEventId = historyEvent.EventId,
                 TaskToken = token,
                 WorkflowExecution = new WorkflowExecution() { RunId = "rid", WorkflowId = "wid"}
@@ -282,7 +282,7 @@ namespace Guflow.Tests.Decider
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
                 Events = new List<HistoryEvent>() { historyEvent, workflowStartedEvent },
-                PreviousStartedEventId = historyEvent.EventId,
+                PreviousStartedEventId = 0,
                 StartedEventId = historyEvent.EventId,
                 TaskToken = "token",
                 WorkflowExecution = new WorkflowExecution() {  WorkflowId = workflowId, RunId = runId}

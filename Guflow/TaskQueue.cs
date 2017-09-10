@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow.Model;
@@ -26,7 +27,7 @@ namespace Guflow
 
         public ReadHistoryEvents ReadStrategy
         {
-            get { return _readHistoryEvents; }
+            get => _readHistoryEvents;
             set
             {
                 Ensure.NotNull(value,()=>new ArgumentNullException(Resources.Read_strategy_required, "ReadStrategy"));
@@ -38,7 +39,7 @@ namespace Guflow
         {
             _log.Debug($"Polling for new decisions on {this} under {domain}");
             var decisionTask = await domain.PollForDecisionTaskAsync(this);
-            if (NewTasksAreReturned(decisionTask))
+            if (AreNewDecisionsAreReturned(decisionTask))
                 return WorkflowTask.CreateFor(decisionTask, domain);
 
             _log.Debug($"No new decisions are returned on {this} under {domain}");
@@ -54,10 +55,6 @@ namespace Guflow
             return WorkerTask.Empty;
         }
        
-        private static bool NewTasksAreReturned(DecisionTask decisionTask)
-        {
-            return !string.IsNullOrEmpty(decisionTask.TaskToken);
-        }
         private static bool NewTasksAreReturned(ActivityTask activityTask)
         {
             return !string.IsNullOrEmpty(activityTask?.TaskToken);
@@ -66,12 +63,21 @@ namespace Guflow
         private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskQueue taskQueue, string nextPageToken=null)
         {
             var decisionTask = await domain.PollForDecisionTaskAsync(taskQueue, nextPageToken);
-            if (!string.IsNullOrEmpty(decisionTask.NextPageToken))
+            if (HasMoreEventsToRead(decisionTask))
             {
                 var nextDecisionTasks = await ReadAllEventsAsync(domain, taskQueue ,decisionTask.NextPageToken);
                 decisionTask.Events.AddRange(nextDecisionTasks.Events);
             }
             return decisionTask;
+        }
+        private static bool AreNewDecisionsAreReturned(DecisionTask decision)
+        {
+            return !string.IsNullOrEmpty(decision?.TaskToken);
+        }
+
+        private static bool HasMoreEventsToRead(DecisionTask decisionTask)
+        {
+            return !string.IsNullOrEmpty(decisionTask?.NextPageToken);
         }
 
         private static async Task<DecisionTask> ReadFirstPageAsync(Domain domain, TaskQueue taskQueue, string nextPageToken= null)

@@ -27,7 +27,6 @@ namespace Guflow
         public Domain(string name, RegionEndpoint regionEndpoint) : this(name, new AmazonSimpleWorkflowClient(regionEndpoint))
         {
         }
-
         private Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient, IErrorHandler errorHandler)
         {
             Ensure.NotNullAndEmpty(name, () => new ArgumentException(Resources.Domain_name_required, "name"));
@@ -36,11 +35,7 @@ namespace Guflow
             _simpleWorkflowClient = simpleWorkflowClient;
             _errorHandler = errorHandler;
         }
-
-        internal IAmazonSimpleWorkflow Client
-        {
-            get { return _simpleWorkflowClient; }
-        }
+        internal IAmazonSimpleWorkflow Client => _simpleWorkflowClient;
 
         public async Task RegisterWorkflowAsync<TWorkflow>() where TWorkflow : Workflow
         {
@@ -141,7 +136,7 @@ namespace Guflow
         {
             var request = taskQueue.CreateDecisionTaskPollingRequest(_name, nextPageToken);
             var response = await _simpleWorkflowClient.PollForDecisionTaskAsync(request);
-            return response.DecisionTask;
+            return response?.DecisionTask;
         } 
 
         public HostedWorkflows Host(IEnumerable<Workflow> workflows)
@@ -184,14 +179,12 @@ namespace Guflow
             };
             await _simpleWorkflowClient.RegisterDomainAsync(request);
         }
-
         private async Task<DomainInfo> ListDomainFromAmazonBy(string domainName, RegistrationStatus registrationStatus)
         {
             var request = new ListDomainsRequest() {RegistrationStatus = registrationStatus};
             var response = await _simpleWorkflowClient.ListDomainsAsync(request);
             return response.DomainInfos.Infos.FirstOrDefault(d => d.Name.Equals(domainName));
         }
-
         private async Task<IEnumerable<WorkflowTypeInfo>> ListWorkflowsFromAmazonBy(string workflowName)
         {
             var listRequest = new ListWorkflowTypesRequest();

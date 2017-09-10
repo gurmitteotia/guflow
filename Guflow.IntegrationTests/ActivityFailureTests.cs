@@ -19,6 +19,7 @@ namespace Guflow.IntegrationTests
         [SetUp]
         public async Task Setup()
         {
+            Log.Register(Log.ConsoleLogger);
             _domain = new TestDomain();
             _taskListName = Guid.NewGuid().ToString();
             _hostedActivities = await HostAsync(typeof(FailingActivity));

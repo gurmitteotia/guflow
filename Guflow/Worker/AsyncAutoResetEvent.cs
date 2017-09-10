@@ -38,8 +38,7 @@ namespace Guflow.Worker
                 else if (!_signaled)
                     _signaled = true;
             }
-            if (toRelease != null)
-                toRelease.SetResult(true);
+            toRelease?.SetResult(true);
         }
     }
 }

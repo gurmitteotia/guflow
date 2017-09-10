@@ -135,6 +135,7 @@
     <Compile Include="Worker\ActivityCompleteResponseTests.cs" />
     <Compile Include="Worker\ActivityDescriptionTests.cs" />
     <Compile Include="Worker\ActivityExecutionMethodTests.cs" />
+    <Compile Include="Worker\ActivityExecutionUnhandledExceptionTests.cs" />
     <Compile Include="Worker\ActivityFailResponseTests.cs" />
     <Compile Include="Worker\ActivityHeartbeatTests.cs" />
     <Compile Include="Worker\ActivityTests.cs" />
