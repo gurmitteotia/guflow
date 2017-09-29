@@ -124,15 +124,12 @@ namespace Guflow.Tests.Worker
             public async Task<ActivityResponse> Execute()
             {
                 _concurrentTaskRecords.Add(Interlocked.Increment(ref _noOfConcurrentTasks));
-                await Task.Delay(_random.Next(20,70));
+                await Task.Delay(_random.Next(100,1000));
                 Interlocked.Decrement(ref _noOfConcurrentTasks);
                 return Complete(_result);
             }
 
-            public static int MaxConcurrentExecution
-            {
-                get { return _concurrentTaskRecords.Max(); }
-            }
+            public static int MaxConcurrentExecution => _concurrentTaskRecords.Max();
 
             public static void Reset()
             {

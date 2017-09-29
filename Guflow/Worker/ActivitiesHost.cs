@@ -11,7 +11,7 @@ namespace Guflow.Worker
         private readonly Domain _domain;
         private readonly Activities _activities;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private ErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
+        private ErrorHandler _genericErrorHandler = ErrorHandler.Continue;
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private ErrorHandler _responseErrorHandler = ErrorHandler.NotHandled;
         private ActivityExecution _activityExecution;

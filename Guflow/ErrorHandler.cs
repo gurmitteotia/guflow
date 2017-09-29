@@ -8,6 +8,7 @@ namespace Guflow
         private readonly IErrorHandler _defaultErrorHandler;
        
         public static readonly ErrorHandler NotHandled= new ErrorHandler((e)=>ErrorAction.Unhandled);
+        public static readonly ErrorHandler Continue= new ErrorHandler((e)=>ErrorAction.Continue);
 
         public static ErrorHandler Default(HandleError errorHandler)
         {
