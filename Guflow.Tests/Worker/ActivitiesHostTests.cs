@@ -151,12 +151,9 @@ namespace Guflow.Tests.Worker
         {
             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
 
-            Assert.Throws<ArgumentNullException>(()=> hostedActivities.OnError((IErrorHandler)null));
-            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnError((HandleError)null));
-            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError((IErrorHandler)null));
-            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError((HandleError)null));
-            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnResponseError((IErrorHandler)null));
-            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnResponseError((HandleError)null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnError(null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError(null));
+            Assert.Throws<ArgumentNullException>(() => hostedActivities.OnResponseError(null));
 
             Assert.Throws<ArgumentNullException>(() => hostedActivities.Execution = null);
         }

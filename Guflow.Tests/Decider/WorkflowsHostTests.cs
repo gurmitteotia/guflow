@@ -87,12 +87,9 @@ namespace Guflow.Tests.Decider
         {
             var hostedWorkflows = new WorkflowsHost(_domain, new[] { new TestWorkflow1() });
 
-            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError((HandleError)null));
-            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError((IErrorHandler)null));
-            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError((HandleError)null));
-            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError((IErrorHandler)null));
-            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnPollingError((HandleError)null));
-            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnPollingError((IErrorHandler)null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError(null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError(null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnPollingError(null));
         }
 
         [Test]

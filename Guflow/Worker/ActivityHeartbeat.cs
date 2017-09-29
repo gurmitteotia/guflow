@@ -38,11 +38,6 @@ namespace Guflow.Worker
             Ensure.NotNull(getDetailsFunc, "getDetailsFunc");
             _activityDetailsFunc = getDetailsFunc;
         }
-        public void OnError(IErrorHandler errorHandler)
-        {
-            Ensure.NotNull(errorHandler, "errorHandler");
-            OnError(errorHandler.OnError);
-        }
         public void OnError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
