@@ -13,7 +13,7 @@ namespace Guflow.Decider
         private readonly Domain _domain;
         private readonly Workflows _hostedWorkflows;
         private ErrorHandler _responseErrorHandler = ErrorHandler.NotHandled;
-        private ErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
+        private ErrorHandler _genericErrorHandler = ErrorHandler.Continue;
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private bool _disposed = false;
