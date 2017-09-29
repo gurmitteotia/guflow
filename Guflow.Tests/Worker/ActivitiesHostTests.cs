@@ -12,7 +12,7 @@ using NUnit.Framework;
 namespace Guflow.Tests.Worker
 {
     [TestFixture]
-    public class HostedActivitiesTests
+    public class ActivitiesHostTests
     {
         private Domain _domain;
         private Mock<IAmazonSimpleWorkflow> _simpleWorkflow;

@@ -9,7 +9,7 @@ namespace Guflow.IntegrationTests
     [TestFixture]
     public class EmptyWorkflowTests
     {
-        private HostedWorkflows _hostedWorkflows;
+        private WorkflowsHost _workflowsHost;
         private Workflow _emptyWorkflow;
         private TestDomain _domain;
         private string _taskListName;
@@ -19,15 +19,15 @@ namespace Guflow.IntegrationTests
         {
             _domain = new TestDomain();
             _emptyWorkflow = new EmptyWorkflow();
-            _hostedWorkflows = await _domain.Host(_emptyWorkflow);
+            _workflowsHost = await _domain.Host(_emptyWorkflow);
             _taskListName = Guid.NewGuid().ToString();
-            _hostedWorkflows.StartExecution(new TaskQueue(_taskListName));
+            _workflowsHost.StartExecution(new TaskQueue(_taskListName));
         }
 
         [TearDown]
         public void TearDown()
         {
-            _hostedWorkflows.StopExecution();
+            _workflowsHost.StopExecution();
         }
 
         [Test]

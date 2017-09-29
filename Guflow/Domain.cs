@@ -139,17 +139,17 @@ namespace Guflow
             return response?.DecisionTask;
         } 
 
-        public HostedWorkflows Host(IEnumerable<Workflow> workflows)
+        public WorkflowsHost Host(IEnumerable<Workflow> workflows)
         {
-            return new HostedWorkflows(this,workflows);
+            return new WorkflowsHost(this,workflows);
         }
-        public HostedActivities Host(IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
+        public ActivitiesHost Host(IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
         {
-            return new HostedActivities(this, activitiesTypes, instanceCreator);
+            return new ActivitiesHost(this, activitiesTypes, instanceCreator);
         }
-        public HostedActivities Host(IEnumerable<Type> activitiesTypes)
+        public ActivitiesHost Host(IEnumerable<Type> activitiesTypes)
         {
-            return new HostedActivities(this, activitiesTypes);
+            return new ActivitiesHost(this, activitiesTypes);
         }
         public async Task CancelWorkflowAsync(CancelWorkflowRequest cancelRequest)
         {

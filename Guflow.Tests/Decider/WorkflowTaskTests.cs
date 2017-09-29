@@ -29,7 +29,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public async Task On_execution_send_decisions_to_amazon_swf()
         {
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new WorkflowCompleteOnSignal("result") });
+            var hostedWorkflows = new WorkflowsHost(_domain, new[] { new WorkflowCompleteOnSignal("result") });
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
 
              await workflowTasks.ExecuteForAsync(hostedWorkflows);
@@ -41,7 +41,7 @@ namespace Guflow.Tests.Decider
         public async Task Throws_exception_when_workflow_history_events_are_queried_after_execution()
         {
             var hostedWorkflow = new WorkflowCompleteOnSignal();
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] { hostedWorkflow });
+            var hostedWorkflows = new WorkflowsHost(_domain, new[] { hostedWorkflow });
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
             await workflowTasks.ExecuteForAsync(hostedWorkflows);
 
@@ -53,7 +53,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowTasks = WorkflowTask.Empty;
 
-            await workflowTasks.ExecuteForAsync(new HostedWorkflows(_domain, new[] {new WorkflowCompleteOnSignal("result")}));
+            await workflowTasks.ExecuteForAsync(new WorkflowsHost(_domain, new[] {new WorkflowCompleteOnSignal("result")}));
 
             _amazonWorkflowClient.Verify(w => w.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),
                                                                                It.IsAny<CancellationToken>()), Times.Never);
@@ -191,7 +191,7 @@ namespace Guflow.Tests.Decider
             _amazonWorkflowClient.SetupSequence(c => c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
                                 .Throws(new UnknownResourceException("msg"))
                                 .Returns(Task.FromResult(new RespondDecisionTaskCompletedResponse()));
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] {new WorkflowCompleteOnSignal()});
+            var hostedWorkflows = new WorkflowsHost(_domain, new[] {new WorkflowCompleteOnSignal()});
             hostedWorkflows.OnResponseError(ErrorHandler.Default(e => ErrorAction.Retry));
             
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
@@ -207,7 +207,7 @@ namespace Guflow.Tests.Decider
             _amazonWorkflowClient.SetupSequence(c => c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
                                 .Throws(new UnknownResourceException("msg"))
                                 .Returns(Task.FromResult(new RespondDecisionTaskCompletedResponse()));
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new WorkflowCompleteOnSignal() });
+            var hostedWorkflows = new WorkflowsHost(_domain, new[] { new WorkflowCompleteOnSignal() });
             hostedWorkflows.OnResponseError(ErrorHandler.Default(e => ErrorAction.Continue));
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
 
@@ -221,7 +221,7 @@ namespace Guflow.Tests.Decider
         public void By_default_execution_exceptions_are_unhandled()
         {
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new ApplicationException("")) });
+            var hostedWorkflows = new WorkflowsHost(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new ApplicationException("")) });
             
             Assert.ThrowsAsync<ApplicationException>(async ()=>await workflowTasks.ExecuteForAsync(hostedWorkflows));
         }
@@ -230,7 +230,7 @@ namespace Guflow.Tests.Decider
         public async Task Execution_exception_can_handled_to_retry()
         {
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new ApplicationException("")) });
+            var hostedWorkflows = new WorkflowsHost(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new ApplicationException("")) });
             workflowTasks.OnExecutionError(ErrorHandler.Default(e=>ErrorAction.Retry));
 
             await workflowTasks.ExecuteForAsync(hostedWorkflows);
@@ -240,7 +240,7 @@ namespace Guflow.Tests.Decider
 
         private async Task ExecuteWorkflowOnSignalEvent(Workflow workflow, string workflowId, string runId)
         {
-            var hostedWorkflows = new HostedWorkflows(_domain, new[] {workflow});
+            var hostedWorkflows = new WorkflowsHost(_domain, new[] {workflow});
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents(workflowId, runId), _domain);
             await workflowTasks.ExecuteForAsync(hostedWorkflows);
         }

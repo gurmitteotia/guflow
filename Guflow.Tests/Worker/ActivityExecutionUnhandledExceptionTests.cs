@@ -12,7 +12,7 @@ namespace Guflow.Tests.Worker
     [TestFixture]
     public class ActivityExecutionUnhandledExceptionTests
     {
-        private HostedActivities _hostedActivities;
+        private ActivitiesHost _activitiesHost;
         private Mock<IAmazonSimpleWorkflow> _amazonSimpleWorkflow;
 
         [SetUp]
@@ -20,18 +20,18 @@ namespace Guflow.Tests.Worker
         {
             _amazonSimpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
             var domain = new Domain("name", _amazonSimpleWorkflow.Object);
-            _hostedActivities = new HostedActivities(domain, new[] { typeof(ErrorThrowingActivity) });
+            _activitiesHost = new ActivitiesHost(domain, new[] { typeof(ErrorThrowingActivity) });
         }
        
         [Test]
         public async Task Fault_the_activity_host_when_execution_excepiton_is_unhandled()
         {
             var activityExecution = ActivityExecution.Sequencial;
-            activityExecution.Set(_hostedActivities);
+            activityExecution.Set(_activitiesHost);
 
             await activityExecution.ExecuteAsync(NewWorkerTask());
 
-            Assert.That(_hostedActivities.Status , Is.EqualTo(HostStatus.Faulted));
+            Assert.That(_activitiesHost.Status , Is.EqualTo(HostStatus.Faulted));
         }
 
         private static WorkerTask NewWorkerTask()

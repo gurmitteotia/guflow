@@ -11,21 +11,21 @@ namespace Guflow.Tests.Worker
     [TestFixture]
     public class WorkerTaskTests
     {
-        private HostedActivities _hostedActivities;
+        private ActivitiesHost _activitiesHost;
         private Domain _domain;
 
         [SetUp]
         public void Setup()
         {
             _domain = new Domain("name", new Mock<IAmazonSimpleWorkflow>().Object);
-            _hostedActivities = new HostedActivities(_domain, new Type[] { typeof(TestActivity) });
+            _activitiesHost = new ActivitiesHost(_domain, new Type[] { typeof(TestActivity) });
         }
         [Test]
         public async Task On_execution_Empty_worker_task_return_deferred_activity_response()
         {
             var workerTask = WorkerTask.Empty;
 
-            var response = await workerTask.ExecuteFor(_hostedActivities);
+            var response = await workerTask.ExecuteFor(_activitiesHost);
 
             Assert.That(response, Is.EqualTo(ActivityResponse.Defer));
         }
@@ -40,7 +40,7 @@ namespace Guflow.Tests.Worker
                                                     TaskToken = "token"
                                                 });
 
-            var response = await workerTask.ExecuteFor(_hostedActivities);
+            var response = await workerTask.ExecuteFor(_activitiesHost);
 
             Assert.That(response, Is.EqualTo(new ActivityCompleteResponse("token" ,"result")));
         }
@@ -59,7 +59,7 @@ namespace Guflow.Tests.Worker
             };
             var workerTask = WorkerTask.CreateFor(activityTask);
 
-            await workerTask.ExecuteFor(_hostedActivities);
+            await workerTask.ExecuteFor(_activitiesHost);
 
            Assert.That(TestActivity.ActivityArgs.Input, Is.EqualTo(activityTask.Input));
            Assert.That(TestActivity.ActivityArgs.ActivityId, Is.EqualTo(activityTask.ActivityId));
@@ -78,7 +78,7 @@ namespace Guflow.Tests.Worker
                 WorkflowExecution = new WorkflowExecution() { RunId = "runid", WorkflowId = "wid" },
                 TaskToken = "token"
             });
-            var hostedActivities = new HostedActivities(_domain, new [] { typeof(ActivityThrowsException) });
+            var hostedActivities = new ActivitiesHost(_domain, new [] { typeof(ActivityThrowsException) });
             workerTask.SetErrorHandler(ErrorHandler.Default(e => ErrorAction.Retry));
             
             var response = await workerTask.ExecuteFor(hostedActivities);
@@ -96,7 +96,7 @@ namespace Guflow.Tests.Worker
                 WorkflowExecution = new WorkflowExecution() { RunId = "runid", WorkflowId = "wid" },
                 TaskToken = "token"
             });
-            var hostedActivities = new HostedActivities(_domain, new[] { typeof(ActivityThrowsException) });
+            var hostedActivities = new ActivitiesHost(_domain, new[] { typeof(ActivityThrowsException) });
 
             Assert.ThrowsAsync<InvalidOperationException>(async ()=>await workerTask.ExecuteFor(hostedActivities));
         }

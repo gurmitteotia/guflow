@@ -14,7 +14,7 @@ namespace Guflow.Tests.Worker
     [TestFixture]
     public class ActivityExecutionTests
     {
-        private HostedActivities _hostedActivities;
+        private ActivitiesHost _activitiesHost;
         private Mock<IAmazonSimpleWorkflow> _amazonSimpleWorkflow;
         private const string ActivityResult = "result";
         private const string TaskToken = "token";
@@ -24,14 +24,14 @@ namespace Guflow.Tests.Worker
         {
             _amazonSimpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
             var domain = new Domain("name", _amazonSimpleWorkflow.Object);
-            _hostedActivities = new HostedActivities(domain, new[] { typeof(TestActivity) }, t=> new TestActivity(ActivityResult));
+            _activitiesHost = new ActivitiesHost(domain, new[] { typeof(TestActivity) }, t=> new TestActivity(ActivityResult));
             TestActivity.Reset();
         }
         [Test]
         public async Task Can_limit_the_activity_execution()
         {
             var concurrentExecution = ActivityExecution.Concurrent(2);
-            concurrentExecution.Set(_hostedActivities);
+            concurrentExecution.Set(_activitiesHost);
 
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
@@ -47,7 +47,7 @@ namespace Guflow.Tests.Worker
         public async Task Can_execute_tasks_in_sequence()
         {
             var concurrentExecution = ActivityExecution.Sequencial;
-            concurrentExecution.Set(_hostedActivities);
+            concurrentExecution.Set(_activitiesHost);
 
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
@@ -62,7 +62,7 @@ namespace Guflow.Tests.Worker
         public async Task Execute_activity_in_sequence_when_concurrent_limit_is_one()
         {
             var concurrentExecution = ActivityExecution.Concurrent(1);
-            concurrentExecution.Set(_hostedActivities);
+            concurrentExecution.Set(_activitiesHost);
 
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
@@ -83,7 +83,7 @@ namespace Guflow.Tests.Worker
         public async Task Send_activity_response_to_amazon_client()
         {
             var concurrentExecution = ActivityExecution.Sequencial;
-            concurrentExecution.Set(_hostedActivities);
+            concurrentExecution.Set(_activitiesHost);
 
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
 
