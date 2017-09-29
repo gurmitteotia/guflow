@@ -1,6 +1,6 @@
 namespace Guflow
 {
-    public interface IHostedItems
+    public interface IHost
     {
         void StartExecution();
         void StartExecution(TaskQueue taskQueue);

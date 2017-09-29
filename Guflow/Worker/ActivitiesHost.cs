@@ -6,7 +6,7 @@ using Guflow.Properties;
 
 namespace Guflow.Worker
 {
-    public class HostedActivities : IDisposable, IHostedItems
+    public class ActivitiesHost : IDisposable, IHost
     {
         private readonly Domain _domain;
         private readonly Activities _activities;
@@ -17,13 +17,13 @@ namespace Guflow.Worker
         private ActivityExecution _activityExecution;
         private volatile bool _disposed;
         private readonly HostState _state = new HostState();
-        private readonly ILog _log = Log.GetLogger<HostedActivities>();
+        private readonly ILog _log = Log.GetLogger<ActivitiesHost>();
         private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
-        internal HostedActivities(Domain domain, IEnumerable<Type> activitiesTypes)
+        internal ActivitiesHost(Domain domain, IEnumerable<Type> activitiesTypes)
             : this(domain, activitiesTypes, t => (Activity)Activator.CreateInstance(t))
         {
         }
-        internal HostedActivities(Domain domain, IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
+        internal ActivitiesHost(Domain domain, IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
         {
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(activitiesTypes, "activitiesTypes");
@@ -121,7 +121,7 @@ namespace Guflow.Worker
         {
             _state.Start();
             var activityExecution = Execution;
-            activityExecution.Set(hostedActivities: this);
+            activityExecution.Set(activitiesHost: this);
             var domain = _domain.OnPollingError(_pollingErrorHandler);
             try
             {

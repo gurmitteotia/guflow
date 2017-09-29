@@ -16,7 +16,7 @@ namespace Guflow.IntegrationTests
             _domain = new Domain(DomainName, RegionEndpoint.EUWest1);
         }
 
-        public async Task<HostedWorkflows> Host(params Workflow[] workflows)
+        public async Task<WorkflowsHost> Host(params Workflow[] workflows)
         {
             await _domain.RegisterAsync(2);
             foreach (var workflow in workflows)
@@ -27,7 +27,7 @@ namespace Guflow.IntegrationTests
             return _domain.Host(workflows);
         }
 
-        public async Task<HostedActivities> Host(Type[] activityTypes)
+        public async Task<ActivitiesHost> Host(Type[] activityTypes)
         {
             await _domain.RegisterAsync(2);
             foreach (var activityType in activityTypes)

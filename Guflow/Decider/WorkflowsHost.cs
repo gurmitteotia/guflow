@@ -8,7 +8,7 @@ using Guflow.Properties;
 
 namespace Guflow.Decider
 {
-    public sealed class HostedWorkflows : IDisposable, IHostedItems
+    public sealed class WorkflowsHost : IDisposable, IHost
     {
         private readonly Domain _domain;
         private readonly Workflows _hostedWorkflows;
@@ -17,9 +17,9 @@ namespace Guflow.Decider
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private bool _disposed = false;
-        private readonly ILog _log = Log.GetLogger<HostedWorkflows>();
+        private readonly ILog _log = Log.GetLogger<WorkflowsHost>();
         private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
-        public HostedWorkflows(Domain domain, IEnumerable<Workflow> workflows)
+        public WorkflowsHost(Domain domain, IEnumerable<Workflow> workflows)
         {
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(workflows, "workflows");

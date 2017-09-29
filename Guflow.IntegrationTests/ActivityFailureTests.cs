@@ -11,8 +11,8 @@ namespace Guflow.IntegrationTests
     [TestFixture]
     public class ActivityFailureTests
     {
-        private HostedWorkflows _hostedWorkflows;
-        private HostedActivities _hostedActivities;
+        private WorkflowsHost _workflowsHost;
+        private ActivitiesHost _activitiesHost;
         private TestDomain _domain;
         private static string _taskListName;
 
@@ -22,15 +22,15 @@ namespace Guflow.IntegrationTests
             Log.Register(Log.ConsoleLogger);
             _domain = new TestDomain();
             _taskListName = Guid.NewGuid().ToString();
-            _hostedActivities = await HostAsync(typeof(FailingActivity));
+            _activitiesHost = await HostAsync(typeof(FailingActivity));
             FailingActivity.ExecutionTimes = 0;
         }
 
         [TearDown]
         public void TearDown()
         {
-            _hostedWorkflows.StopExecution();
-            _hostedActivities.StopExecution();
+            _workflowsHost.StopExecution();
+            _activitiesHost.StopExecution();
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace Guflow.IntegrationTests
             string reason = null;
             string details = null;
             workflow.Failed += (s, e) => { reason = e.Reason; details = e.Details; @event.Set(); };
-            _hostedWorkflows = await HostAsync(workflow);
+            _workflowsHost = await HostAsync(workflow);
 
             await _domain.StartWorkflow<WorkflowWithNoRetry>("input", _taskListName);
             @event.WaitOne();
@@ -57,7 +57,7 @@ namespace Guflow.IntegrationTests
             uint retryAttempts = 2;
             var workflow = new WorkflowToRetryActivityImmediately(retryAttempts);
             workflow.Failed += (s, e) =>  @event.Set();
-            _hostedWorkflows = await HostAsync(workflow);
+            _workflowsHost = await HostAsync(workflow);
 
             await _domain.StartWorkflow<WorkflowToRetryActivityImmediately>("input", _taskListName);
             @event.WaitOne();
@@ -72,7 +72,7 @@ namespace Guflow.IntegrationTests
             uint retryAttempts = 2;
             var workflow = new WorkflowToRetryActivityAfterTimeout(retryAttempts);
             workflow.Failed += (s, e) => @event.Set();
-            _hostedWorkflows = await HostAsync(workflow);
+            _workflowsHost = await HostAsync(workflow);
 
             await _domain.StartWorkflow<WorkflowToRetryActivityImmediately>("input", _taskListName);
             @event.WaitOne();
@@ -80,14 +80,14 @@ namespace Guflow.IntegrationTests
             Assert.That(FailingActivity.ExecutionTimes, Is.EqualTo(retryAttempts + 1));
         }
 
-        private async Task<HostedWorkflows> HostAsync(params Workflow[] workflows)
+        private async Task<WorkflowsHost> HostAsync(params Workflow[] workflows)
         {
             var hostedWorkflows = await _domain.Host(workflows);
             hostedWorkflows.StartExecution(new TaskQueue(_taskListName));
             return hostedWorkflows;
         }
 
-        private async Task<HostedActivities> HostAsync(params Type[] activityTypes)
+        private async Task<ActivitiesHost> HostAsync(params Type[] activityTypes)
         {
             var hostedActivities = await _domain.Host(activityTypes);
             hostedActivities.StartExecution(new TaskQueue(_taskListName));
