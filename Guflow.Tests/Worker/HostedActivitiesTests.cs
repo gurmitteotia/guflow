@@ -159,23 +159,23 @@ namespace Guflow.Tests.Worker
             Assert.Throws<ArgumentNullException>(() => hostedActivities.Execution = null);
         }
 
-        //[Test]
-        //public void Status_is_set_to_initialized_for_new_workflow_host()
-        //{
-        //    var hostedActivities = _domain.Host(new[] { typeof(TestActivity1)});
-        //    Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Initialized));
+        [Test]
+        public void Status_is_set_to_initialized_for_new_workflow_host()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Initialized));
 
-        //}
+        }
 
-        //[Test]
-        //public void Status_is_set_to_executing_when_workflow_host_is_executing()
-        //{
-        //    using (var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) }))
-        //    {
-        //        hostedActivities.StartExecution(new TaskQueue("name"));
-        //        Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Executing));
-        //    }
-        //}
+        [Test]
+        public void Status_is_set_to_executing_when_workflow_host_is_executing()
+        {
+            using (var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) }))
+            {
+                hostedActivities.StartExecution(new TaskQueue("name"));
+                Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Executing));
+            }
+        }
 
         //[Test]
         //public void Status_is_set_to_stopped_when_workflow_host_is_stopped_execution()

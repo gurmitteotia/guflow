@@ -96,12 +96,7 @@ namespace Guflow.Tests.Worker
             _amazonSimpleWorkflow.Verify(w=>w.RespondActivityTaskCompletedAsync(It.Is<RespondActivityTaskCompletedRequest>(r=>request(r)), It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        [Test]
-        public void Fault_the_activity_host_when_execution_excepiton_is_unhandled()
-        {
-            
-        } 
-
+      
         private static WorkerTask NewWorkerTask()
         {
             return WorkerTask.CreateFor(new ActivityTask()
@@ -111,16 +106,6 @@ namespace Guflow.Tests.Worker
                 WorkflowExecution = new WorkflowExecution(){ RunId = "rid", WorkflowId = "wid"},
                 Input = "input"
             });
-        }
-
-        [ActivityDescription("1.0")]
-        private class ErrorThrowingActivity : Activity
-        {
-            [Execute]
-            public void Execute()
-            {
-                throw new Exception("message");
-            }
         }
         [ActivityDescription("1.0")]
         private class TestActivity : Activity

@@ -10,7 +10,7 @@ namespace Guflow.Worker
     {
         private readonly Domain _domain;
         private readonly Activities _activities;
-        private readonly CancellationTokenSource _cancellationTokenSource  = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private ErrorHandler _genericErrorHandler = ErrorHandler.NotHandled;
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private ErrorHandler _responseErrorHandler = ErrorHandler.NotHandled;
@@ -20,7 +20,7 @@ namespace Guflow.Worker
         private readonly ILog _log = Log.GetLogger<HostedActivities>();
         private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
         internal HostedActivities(Domain domain, IEnumerable<Type> activitiesTypes)
-            : this(domain, activitiesTypes, t=>(Activity)Activator.CreateInstance(t))
+            : this(domain, activitiesTypes, t => (Activity)Activator.CreateInstance(t))
         {
         }
         internal HostedActivities(Domain domain, IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
@@ -34,7 +34,7 @@ namespace Guflow.Worker
         }
 
         public HostStatus Status => _state.Status;
-        public event EventHandler<HostFaultEventArgs> OnFault; 
+        public event EventHandler<HostFaultEventArgs> OnFault;
         public ActivityExecution Execution
         {
             get => _activityExecution;
@@ -51,7 +51,7 @@ namespace Guflow.Worker
 
             var singleActivityType = _activities.Single();
             var activityDescription = ActivityDescriptionAttribute.FindOn(singleActivityType);
-            if(string.IsNullOrEmpty(activityDescription.DefaultTaskListName))
+            if (string.IsNullOrEmpty(activityDescription.DefaultTaskListName))
                 throw new InvalidOperationException(Resources.Default_task_list_is_missing);
 
             StartExecution(new TaskQueue(activityDescription.DefaultTaskListName));
@@ -60,15 +60,16 @@ namespace Guflow.Worker
         public void StartExecution(TaskQueue taskQueue)
         {
             Ensure.NotNull(taskQueue, "taskQueue");
-            if(_disposed)
+            if (_disposed)
                 throw new ObjectDisposedException(Resources.Activity_execution_already_stopped);
             ExecuteHostedActivitiesAsync(taskQueue);
         }
         public void StopExecution()
         {
-            if (_state.CanBeStopped())
+            if (!_disposed)
             {
                 _state.Stop();
+                _disposed = true;
                 _cancellationTokenSource.Cancel();
                 _stoppedEvent.Wait(TimeSpan.FromSeconds(5));
                 _cancellationTokenSource.Dispose();
@@ -82,11 +83,7 @@ namespace Guflow.Worker
 
         private void Dispose(bool disposing)
         {
-            if (!_disposed)
-            {
-                StopExecution();
-                _disposed = true;
-            }
+            StopExecution();
         }
         public void OnPollingError(IErrorHandler errorHandler)
         {
@@ -143,9 +140,7 @@ namespace Guflow.Worker
             }
             catch (Exception exception)
             {
-                _state.Fault();
-                _log.Fatal("Hosted activities is faulted.", exception);
-                OnFault?.Invoke(this, new HostFaultEventArgs(exception));
+                Fault(exception);
             }
             finally
             {
@@ -160,10 +155,11 @@ namespace Guflow.Worker
         internal async Task SendAsync(ActivityResponse response)
         {
             var retryableFunc = new RetryableFunc(_responseErrorHandler);
-            await retryableFunc.ExecuteAsync(()=>response.SendAsync(_domain.Client, _cancellationTokenSource.Token));
+            await retryableFunc.ExecuteAsync(() => response.SendAsync(_domain.Client, _cancellationTokenSource.Token));
         }
         internal void Fault(Exception exception)
         {
+            _log.Fatal("Hosted activities is faulted.", exception);
             StopExecution();
             var faultHandler = OnFault;
             faultHandler?.Invoke(this, new HostFaultEventArgs(exception));
