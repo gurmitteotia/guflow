@@ -85,12 +85,7 @@ namespace Guflow.Worker
         {
             StopExecution();
         }
-        public void OnPollingError(IErrorHandler errorHandler)
-        {
-            Ensure.NotNull(errorHandler, "errorHandler");
-            OnPollingError(errorHandler.OnError);
-        }
-        public void OnPollingError(HandleError handleError)
+       public void OnPollingError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
             _pollingErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
@@ -99,16 +94,6 @@ namespace Guflow.Worker
         {
             Ensure.NotNull(handleError, "handleError");
             _responseErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
-        }
-        public void OnResponseError(IErrorHandler errorHandler)
-        {
-            Ensure.NotNull(errorHandler, "errorHandler");
-            OnResponseError(errorHandler.OnError);
-        }
-        public void OnError(IErrorHandler errorHandler)
-        {
-            Ensure.NotNull(errorHandler, "errorHandler");
-            OnError(errorHandler.OnError);
         }
         public void OnError(HandleError handleError)
         {

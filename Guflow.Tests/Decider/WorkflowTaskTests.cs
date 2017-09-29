@@ -192,7 +192,7 @@ namespace Guflow.Tests.Decider
                                 .Throws(new UnknownResourceException("msg"))
                                 .Returns(Task.FromResult(new RespondDecisionTaskCompletedResponse()));
             var hostedWorkflows = new WorkflowsHost(_domain, new[] {new WorkflowCompleteOnSignal()});
-            hostedWorkflows.OnResponseError(ErrorHandler.Default(e => ErrorAction.Retry));
+            hostedWorkflows.OnResponseError(e => ErrorAction.Retry);
             
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
 
@@ -208,7 +208,7 @@ namespace Guflow.Tests.Decider
                                 .Throws(new UnknownResourceException("msg"))
                                 .Returns(Task.FromResult(new RespondDecisionTaskCompletedResponse()));
             var hostedWorkflows = new WorkflowsHost(_domain, new[] { new WorkflowCompleteOnSignal() });
-            hostedWorkflows.OnResponseError(ErrorHandler.Default(e => ErrorAction.Continue));
+            hostedWorkflows.OnResponseError(e => ErrorAction.Continue);
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
 
             await workflowTasks.ExecuteForAsync(hostedWorkflows);

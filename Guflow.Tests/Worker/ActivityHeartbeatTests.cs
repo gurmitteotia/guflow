@@ -96,7 +96,7 @@ namespace Guflow.Tests.Worker
             RecordHeartbeatThrows(new AmazonServiceException("network error"));
             int retryAttempts = 0;
             HandleError errorHandler = e => { retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
-            _activityHearbeat.OnError(ErrorHandler.Default(errorHandler));
+            _activityHearbeat.OnError(errorHandler);
            
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Thread.Sleep(HeartbeatIntervel * 50);
@@ -127,7 +127,7 @@ namespace Guflow.Tests.Worker
             int retryAttempts = 0;
             HandleError errorHandler = e => { retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
             _activityHearbeat.SetFallbackErrorHandler(ErrorHandler.Default(errorHandler));
-            _activityHearbeat.OnError(ErrorHandler.NotHandled);
+            _activityHearbeat.OnError(e=>ErrorAction.Unhandled);
 
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Thread.Sleep(HeartbeatIntervel * 50);
@@ -142,7 +142,7 @@ namespace Guflow.Tests.Worker
             RecordHeartbeatThrows(new AmazonServiceException("network error"));
             int retryAttempts = 0;
             HandleError errorHandler = e => {retryAttempts = e.RetryAttempts; return ErrorAction.Continue;};
-            _activityHearbeat.OnError(ErrorHandler.Default(errorHandler));
+            _activityHearbeat.OnError(errorHandler);
             
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Thread.Sleep(HeartbeatIntervel * 50);
@@ -154,8 +154,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Invalid_argument_tests()
         {
-            Assert.Throws<ArgumentNullException>(()=>_activityHearbeat.OnError((HandleError) null));
-            Assert.Throws<ArgumentNullException>(() => _activityHearbeat.OnError((IErrorHandler)null));
+            Assert.Throws<ArgumentNullException>(()=>_activityHearbeat.OnError(null));
             Assert.Throws<ArgumentNullException>(() => _activityHearbeat.ProvideDetails(null));
             Assert.Throws<ArgumentException>(() => _activityHearbeat.SetInterval(TimeSpan.MinValue));
             Assert.Throws<ArgumentException>(() => _activityHearbeat.SetInterval(TimeSpan.Zero));

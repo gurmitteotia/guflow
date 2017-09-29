@@ -81,21 +81,10 @@ namespace Guflow.Decider
             Ensure.NotNull(handleError, "handleError");
             _pollingErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
         }
-        public void OnPollingError(IErrorHandler errorHandler)
-        {
-            Ensure.NotNull(errorHandler, "errorHandler");
-            OnPollingError(errorHandler.OnError);
-        }
-
         public void OnResponseError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
             _responseErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
-        }
-        public void OnResponseError(IErrorHandler errorHandler)
-        {
-            Ensure.NotNull(errorHandler, "errorHandler");
-            OnResponseError(errorHandler.OnError);
         }
         public void OnError(HandleError handleError)
         {
@@ -104,18 +93,11 @@ namespace Guflow.Decider
             _responseErrorHandler = _responseErrorHandler.WithFallback(_genericErrorHandler);
             _pollingErrorHandler = _pollingErrorHandler.WithFallback(_genericErrorHandler);
         }
-        public void OnError(IErrorHandler errorHandler)
-        {
-            Ensure.NotNull(errorHandler, "errorHandler");
-            OnError(errorHandler.OnError);
-        }
-
         internal async Task SendDecisionsAsync(string taskToken, IEnumerable<WorkflowDecision> decisions)
         {
             var retryAbleFunc = new RetryableFunc(_responseErrorHandler);
             await retryAbleFunc.ExecuteAsync(() => SendDecisionsToAmazonSwfAsync(taskToken, decisions));
         }
-
         private async Task SendDecisionsToAmazonSwfAsync(string taskToken, IEnumerable<WorkflowDecision> decisions)
         {
             var decisionsResponse = ResponseFrom(taskToken, decisions);

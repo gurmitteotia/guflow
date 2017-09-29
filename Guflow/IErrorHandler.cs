@@ -1,6 +1,6 @@
 ﻿namespace Guflow
 {
-    public interface IErrorHandler
+    internal interface IErrorHandler
     {
         ErrorAction OnError(Error error);
     }
