@@ -29,7 +29,7 @@ namespace Guflow
         }
         private Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient, IErrorHandler errorHandler)
         {
-            Ensure.NotNullAndEmpty(name, () => new ArgumentException(Resources.Domain_name_required, "name"));
+            Ensure.NotNullAndEmpty(name, () => new ArgumentException(Resources.Domain_name_required, nameof(name)));
             Ensure.NotNull(simpleWorkflowClient, "simpleWorkflowClient");
             _name = name;
             _simpleWorkflowClient = simpleWorkflowClient;

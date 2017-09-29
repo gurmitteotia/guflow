@@ -25,7 +25,7 @@ namespace Guflow.Decider
             Ensure.NotNull(workflows, "workflows");
 
             workflows = workflows.Where(w => w != null).ToArray();
-            if(!workflows.Any())
+            if (!workflows.Any())
                 throw new ArgumentException(Resources.No_workflow_to_host, nameof(workflows));
             Status = HostStatus.Initialized;
             _domain = domain;
@@ -37,7 +37,7 @@ namespace Guflow.Decider
             return _hostedWorkflows.FindBy(name, version);
         }
         public HostStatus Status { get; private set; }
-        public event EventHandler<HostFaultEventArgs> OnFault; 
+        public event EventHandler<HostFaultEventArgs> OnFault;
         public void StartExecution()
         {
             if (_hostedWorkflows.Count != 1)
@@ -46,9 +46,9 @@ namespace Guflow.Decider
             }
             var singleHostedWorkflow = _hostedWorkflows.Single();
             var defaultTaskListName = WorkflowDescriptionAttribute.FindOn(singleHostedWorkflow.GetType()).DefaultTaskListName;
-            if(string.IsNullOrEmpty(defaultTaskListName))
+            if (string.IsNullOrEmpty(defaultTaskListName))
                 throw new InvalidOperationException(Resources.Default_task_list_is_missing);
-            
+
             StartExecution(new TaskQueue(defaultTaskListName));
         }
         public void StartExecution(TaskQueue taskQueue)
@@ -73,12 +73,7 @@ namespace Guflow.Decider
 
         public void Dispose()
         {
-            if (!_disposed)
-            {
-                StopExecution();
-                _cancellationTokenSource.Dispose();
-                _disposed = true;
-            }
+            StopExecution();
         }
 
         public void OnPollingError(HandleError handleError)

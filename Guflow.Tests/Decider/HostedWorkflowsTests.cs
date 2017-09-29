@@ -100,7 +100,6 @@ namespace Guflow.Tests.Decider
         {
             var hostedWorkflows = new HostedWorkflows(_domain, new[] { new TestWorkflow1() });
             Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Initialized));
-
         }
 
         [Test]
