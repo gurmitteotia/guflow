@@ -150,7 +150,7 @@ namespace Guflow.Worker
         }
         private static bool IsCancellationRequested(RecordActivityTaskHeartbeatResponse response)
         {
-            return response.ActivityTaskStatus.CancelRequested;
+            return (response?.ActivityTaskStatus?.CancelRequested).HasValue;
         }
 
         private static RecordActivityTaskHeartbeatRequest HeartbeatRequest(string details, string token)

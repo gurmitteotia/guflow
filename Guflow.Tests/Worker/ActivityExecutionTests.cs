@@ -16,15 +16,15 @@ namespace Guflow.Tests.Worker
     {
         private HostedActivities _hostedActivities;
         private Mock<IAmazonSimpleWorkflow> _amazonSimpleWorkflow;
-        private const string _activityResult = "result";
-        private const string _taskToken = "token";
+        private const string ActivityResult = "result";
+        private const string TaskToken = "token";
        
         [SetUp]
         public void Setup()
         {
             _amazonSimpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
             var domain = new Domain("name", _amazonSimpleWorkflow.Object);
-            _hostedActivities = new HostedActivities(domain, new[] { typeof(TestActivity) }, t=> new TestActivity(_activityResult));
+            _hostedActivities = new HostedActivities(domain, new[] { typeof(TestActivity) }, t=> new TestActivity(ActivityResult));
             TestActivity.Reset();
         }
         [Test]
@@ -89,8 +89,8 @@ namespace Guflow.Tests.Worker
 
             Func<RespondActivityTaskCompletedRequest, bool> request = r =>
             {
-                Assert.That(r.Result, Is.EqualTo(_activityResult));
-                Assert.That(r.TaskToken, Is.EqualTo(_taskToken));
+                Assert.That(r.Result, Is.EqualTo(ActivityResult));
+                Assert.That(r.TaskToken, Is.EqualTo(TaskToken));
                 return true;
             };
             _amazonSimpleWorkflow.Verify(w=>w.RespondActivityTaskCompletedAsync(It.Is<RespondActivityTaskCompletedRequest>(r=>request(r)), It.IsAny<CancellationToken>()), Times.Once);
