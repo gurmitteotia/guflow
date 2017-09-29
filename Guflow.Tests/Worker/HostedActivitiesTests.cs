@@ -11,6 +11,7 @@ using NUnit.Framework;
 
 namespace Guflow.Tests.Worker
 {
+    [TestFixture]
     public class HostedActivitiesTests
     {
         private Domain _domain;
@@ -19,6 +20,7 @@ namespace Guflow.Tests.Worker
         public void Setup()
         {
             _simpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
+            SetupAmazonSwfToReturnEmptyActivityTask();
             _domain = new Domain("name", _simpleWorkflow.Object);
         }
         [Test]
@@ -172,46 +174,60 @@ namespace Guflow.Tests.Worker
         {
             using (var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) }))
             {
+                hostedActivities.Execution = ActivityExecution.Sequencial;
                 hostedActivities.StartExecution(new TaskQueue("name"));
                 Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Executing));
             }
         }
 
-        //[Test]
-        //public void Status_is_set_to_stopped_when_workflow_host_is_stopped_execution()
-        //{
-        //    var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
-        //    hostedActivities.StartExecution(new TaskQueue("name"));
-        //    hostedActivities.StopExecution();
-        //    Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Stopped));
-        //}
+        [Test]
+        public void Status_is_set_to_stopped_when_workflow_host_is_stopped_execution()
+        {
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            hostedActivities.Execution = ActivityExecution.Sequencial;
+            hostedActivities.StartExecution(new TaskQueue("name"));
+            hostedActivities.StopExecution();
+            Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Stopped));
+        }
 
-        //[Test]
-        //public void Status_is_set_to_faulted_when_workflow_host_can_not_handle_exception()
-        //{
-        //    _simpleWorkflow.Setup(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(),
-        //        It.IsAny<CancellationToken>())).Throws<Exception>();
+        [Test]
+        public void Status_is_set_to_faulted_when_workflow_host_can_not_handle_exception()
+        {
+            SetupAmazonSwfToThrowsException();
 
-        //    var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
-        //    hostedActivities.StartExecution(new TaskQueue("name"));
-        //    hostedActivities.StopExecution();
-        //    Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Faulted));
-        //}
+             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            hostedActivities.StartExecution(new TaskQueue("name"));
+            hostedActivities.StopExecution();
+            Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Faulted));
+        }
 
-        //[Test]
-        //public void Raise_faulted_event_on_unhandled_exception()
-        //{
-        //    var expectedException = new Exception();
-        //    _simpleWorkflow.Setup(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(),
-        //        It.IsAny<CancellationToken>())).Throws(expectedException);
-        //    Exception actualException = null;
-        //    var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
-        //    hostedActivities.OnFault += (s, e) => actualException = e.Exception;
-        //    hostedActivities.StartExecution(new TaskQueue("name"));
-        //    hostedActivities.StopExecution();
-        //    Assert.That(actualException, Is.EqualTo(expectedException));
-        //}
+        [Test]
+        public void Raise_faulted_event_on_unhandled_exception()
+        {
+            SetupAmazonSwfToThrowsException();
+              Exception actualException = null;
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            hostedActivities.OnFault += (s, e) => actualException = e.Exception;
+            hostedActivities.StartExecution(new TaskQueue("name"));
+            hostedActivities.StopExecution();
+            Assert.That(actualException, Is.Not.Null);
+        }
+        private void SetupAmazonSwfToReturnEmptyActivityTask()
+        {
+            _simpleWorkflow.Setup(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(async()=> { await Task.Delay(100); return new PollForActivityTaskResponse(); } );
+        }
 
+        private void SetupAmazonSwfToThrowsException()
+        {
+            _simpleWorkflow.Setup(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(),
+                    It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new Exception()).Callback<PollForActivityTaskRequest, CancellationToken>(async (t, c) =>
+                {
+                    await Task.Delay(100, c);
+                });
+        }
         [ActivityDescription("1.0")]
         private class TestActivity1 : Activity
         {

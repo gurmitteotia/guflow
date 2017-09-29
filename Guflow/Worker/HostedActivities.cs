@@ -127,13 +127,13 @@ namespace Guflow.Worker
             {
                 while (!_disposed)
                 {
-                    var workerTask = await taskQueue.PollForWorkerTaskAsync(domain, _cancellationTokenSource.Token);
+                    var workerTask = await taskQueue.PollForWorkerTaskAsync(domain, _cancellationTokenSource.Token).ConfigureAwait(false);
                     workerTask.SetErrorHandler(_genericErrorHandler);
                     await activityExecution.ExecuteAsync(workerTask);
                 }
                 _state.Stop();
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 _log.Info("Shutting down the host");
                 _state.Stop();
