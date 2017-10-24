@@ -125,7 +125,6 @@
     <Compile Include="Decider\StartWorkflowRequest.cs" />
     <Compile Include="ILog.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="LogException.cs" />
     <Compile Include="MethodInfoExtensions.cs" />
     <Compile Include="NullLog.cs" />
     <Compile Include="RetryableFunc.cs" />

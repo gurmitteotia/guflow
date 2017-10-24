@@ -5,6 +5,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// Represents activity cancelled response.
+    /// </summary>
     public class ActivityCancelResponse : ActivityResponse
     {
         private readonly string _taskToken;

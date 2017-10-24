@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow.Model;
@@ -9,12 +8,21 @@ using Guflow.Worker;
 
 namespace Guflow
 {
+    /// <summary>
+    /// Represents the task list to poll for new decisions/activity task on Amazon SWF.
+    /// </summary>
     public sealed class TaskQueue
     {
         private readonly string _taskListName;
         private readonly string _pollingIdentity;
         private ReadHistoryEvents _readHistoryEvents;
+        /// <summary>
+        /// Strategy to read all history events of workflow.
+        /// </summary>
         public static readonly ReadHistoryEvents ReadAllEvents = (d,q) => ReadAllEventsAsync(d,q);
+        /// <summary>
+        /// Strategy to read only first page of workflow history event. Use it carefully.
+        /// </summary>
         public static readonly ReadHistoryEvents ReadFirstPage = (d,q) => ReadFirstPageAsync(d, q);
         private ILog _log = Log.GetLogger<TaskQueue>();
         public TaskQueue(string taskListName, string pollingIdentity = null)
@@ -25,6 +33,10 @@ namespace Guflow
             ReadStrategy = ReadAllEvents;
         }
 
+        /// <summary>
+        /// Gets or sets the strategy to read workflow history events. By default it reads all history events of workflow when responding to new 
+        /// decision tasks.
+        /// </summary>
         public ReadHistoryEvents ReadStrategy
         {
             get => _readHistoryEvents;

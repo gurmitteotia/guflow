@@ -2,6 +2,9 @@
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represent the event of a scheduleable item like- activity, timer etc.
+    /// </summary>
     public abstract class WorkflowItemEvent : WorkflowEvent
     {
         protected AwsIdentity AwsIdentity;
@@ -15,6 +18,9 @@ namespace Guflow.Decider
         {
         }
 
+        /// <summary>
+        /// Indicate if this is an active event.
+        /// </summary>
         public bool IsActive { get; protected set; }
 
         public static readonly WorkflowItemEvent NotFound = new NotFoundWorkflowItemEvent(0);

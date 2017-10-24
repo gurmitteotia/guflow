@@ -5,6 +5,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// Represent a failed activity response.
+    /// </summary>
     public sealed class ActivityFailResponse : ActivityResponse
     {
         private readonly string _reason;

@@ -7,6 +7,9 @@ using Amazon.SimpleWorkflow;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// Represent an activity.
+    /// </summary>
     public abstract class Activity
     {
         private readonly ActivityExecutionMethod _executionMethod;
@@ -58,20 +61,38 @@ namespace Guflow.Worker
                 Hearbeat.StopHeartbeat();
             }
         }
-
+        /// <summary>
+        /// Successfully complete the activity with given result.
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
         protected ActivityResponse Complete(string result)
         {
             return new ActivityCompleteResponse(_currentTaskToken, result);
         }
-
+        /// <summary>
+        /// Cancel the activity with given details.
+        /// </summary>
+        /// <param name="details"></param>
+        /// <returns></returns>
         protected ActivityResponse Cancel(string details)
         {
             return new ActivityCancelResponse(_currentTaskToken, details);
         }
+        /// <summary>
+        /// Fails the activity with given reason and details.
+        /// </summary>
+        /// <param name="reason"></param>
+        /// <param name="details"></param>
+        /// <returns></returns>
         protected ActivityResponse Fail(string reason,string details)
         {
             return new ActivityFailResponse(_currentTaskToken, reason, details);
         }
+        /// <summary>
+        /// Do not send any response to Amazon SWF.It is useful when you do not have response to return Amazon SWF and possibly a human intervention is need to send the response
+        /// back to Amazon SWF. Later on you can send the reponse by using ActivityResponse classes.
+        /// </summary>
         protected ActivityResponse Defer => ActivityResponse.Defer;
 
         private void ConfigureHeartbeat()

@@ -7,6 +7,9 @@ using Guflow.Properties;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// Represents activity hearbeat.
+    /// </summary>
     public class ActivityHeartbeat
     {
         private Func<string> _activityDetailsFunc;
@@ -24,7 +27,10 @@ namespace Guflow.Worker
         }
         public event EventHandler CancellationRequested;
         public event EventHandler ActivityTerminated;
-
+        /// <summary>
+        /// Configure the heartbeat interval. It override the heartbeat interval given in ActivityDescriptionAttribute.
+        /// </summary>
+        /// <param name="interval"></param>
         public void SetInterval(TimeSpan interval)
         {
             if(interval <= TimeSpan.Zero)
@@ -32,12 +38,19 @@ namespace Guflow.Worker
             _interval = interval;
             _enabled = true;
         }
-
-        public void ProvideDetails(Func<string> getDetailsFunc)
+        /// <summary>
+        /// Provides a function to send details to Amazon SWF on each heartbeat pulse.
+        /// </summary>
+        /// <param name="detailsFunc"></param>
+        public void ProvideDetails(Func<string> detailsFunc)
         {
-            Ensure.NotNull(getDetailsFunc, "getDetailsFunc");
-            _activityDetailsFunc = getDetailsFunc;
+            Ensure.NotNull(detailsFunc, "getDetailsFunc");
+            _activityDetailsFunc = detailsFunc;
         }
+        /// <summary>
+        /// Register an error handler for any heartbeat specific error. If you do do not handle it here then it ActivitiesHost generic error handler is used.
+        /// </summary>
+        /// <param name="handleError"></param>
         public void OnError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");

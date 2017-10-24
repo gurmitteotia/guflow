@@ -1,8 +1,10 @@
 ﻿using System;
-using Guflow.Properties;
 
 namespace Guflow
 {
+    /// <summary>
+    /// Allows you to configure logging.
+    /// </summary>
     public class Log
     {
         private static readonly ILog NullLog = new NullLog();
@@ -13,12 +15,14 @@ namespace Guflow
         public static ILog GetLogger<T>()
         {
             var log = _logFactory(typeof(T));
-            if(log==null)
-                throw new LogException(Resources.Null_logger_is_returned);
+            log = log ?? NullLog;
 
             return log;
         }
-
+        /// <summary>
+        /// Register your custom logger to be used by 
+        /// </summary>
+        /// <param name="logFactoryFunc"></param>
         public static void Register(Func<Type, ILog> logFactoryFunc)
         {
             Ensure.NotNull(logFactoryFunc, "logFactoryFunc");

@@ -6,6 +6,9 @@ using Guflow.Properties;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// A host to execute the activities.
+    /// </summary>
     public class ActivitiesHost : IDisposable, IHost
     {
         private readonly Domain _domain;
@@ -32,9 +35,17 @@ namespace Guflow.Worker
             _activities = new Activities(activitiesTypes, instanceCreator);
             _activityExecution = ActivityExecution.Concurrent((uint)Environment.ProcessorCount);
         }
-
+        /// <summary>
+        /// Return the execution state.
+        /// </summary>
         public HostStatus Status => _state.Status;
+        /// <summary>
+        /// Raised when an exception escaped all handlers. In faulted state it no more polls for new work.
+        /// </summary>
         public event EventHandler<HostFaultEventArgs> OnFault;
+        /// <summary>
+        /// Gets or sets execution strategy to control the parallel execution of activities. 
+        /// </summary>
         public ActivityExecution Execution
         {
             get => _activityExecution;
@@ -44,6 +55,9 @@ namespace Guflow.Worker
                 _activityExecution = value;
             }
         }
+        /// <summary>
+        /// Start execution of hosted activities. It will start polling for new activity task on default task list. This method is only useful when one activity is hosted.
+        /// </summary>
         public void StartExecution()
         {
             if (_activities.Count != 1)
@@ -57,6 +71,10 @@ namespace Guflow.Worker
             StartExecution(new TaskQueue(activityDescription.DefaultTaskListName));
         }
 
+        /// <summary>
+        /// Started execution of hosted activities on given task list. 
+        /// </summary>
+        /// <param name="taskQueue"></param>
         public void StartExecution(TaskQueue taskQueue)
         {
             Ensure.NotNull(taskQueue, "taskQueue");
@@ -64,6 +82,9 @@ namespace Guflow.Worker
                 throw new ObjectDisposedException(Resources.Activity_execution_already_stopped);
             ExecuteHostedActivitiesAsync(taskQueue);
         }
+        /// <summary>
+        /// Shut down host.
+        /// </summary>
         public void StopExecution()
         {
             if (!_disposed)
@@ -85,16 +106,28 @@ namespace Guflow.Worker
         {
             StopExecution();
         }
-       public void OnPollingError(HandleError handleError)
+        /// <summary>
+        /// Handle polling error on host. Any unhandled polling error is handled by generic <see cref="OnError"/> handler.
+        /// </summary>
+        /// <param name="handleError"></param>
+        public void OnPollingError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
             _pollingErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
         }
+        /// <summary>
+        /// Handle response on host. Any unhandled repsonse error is handled by generic <see cref="OnError"/> handler.
+        /// </summary>
+        /// <param name="handleError"></param>
         public void OnResponseError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
             _responseErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
         }
+        /// <summary>
+        /// Top level generic error handler. Any exception unhandled at this stage will cause the host to be faulted.
+        /// </summary>
+        /// <param name="handleError"></param>
         public void OnError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
