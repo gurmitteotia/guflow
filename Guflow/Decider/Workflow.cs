@@ -184,6 +184,13 @@ namespace Guflow.Decider
             closedHandler?.Invoke(this, new WorkflowClosedEventArgs(workflowId, workflowRunId));
         }
 
+        /// <summary>
+        /// Schedule the activity given by name and version. Activity should be already registered with Amazon SWF.
+        /// </summary>
+        /// <param name="name">Name of the activity.</param>
+        /// <param name="version">Version of the activity.</param>
+        /// <param name="positionalName">A user defined name to differentiate same activity at multiple positions in workflow.</param>
+        /// <returns></returns>
         protected IFluentActivityItem ScheduleActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name, "name");
@@ -194,11 +201,22 @@ namespace Guflow.Decider
                 throw new DuplicateItemException(string.Format(Resources.Duplicate_activity, name, version, positionalName));
             return activityItem;
         }
+        /// <summary>
+        /// Schedule the activity. It reads the activity name and version from <seealso cref="ActivityDescriptionAttribute"/> of TActivity.
+        /// </summary>
+        /// <typeparam name="TActivity"></typeparam>
+        /// <param name="positionalName">A user defined name to differentiate same activity at multiple positions in workflow</param>
+        /// <returns></returns>
         protected IFluentActivityItem ScheduleActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
             var description = ActivityDescriptionAttribute.FindOn<TActivity>();
             return ScheduleActivity(description.Name, description.Version, positionalName);
         }
+        /// <summary>
+        /// Schedule the timer.
+        /// </summary>
+        /// <param name="name">Any user defined name to assign to this timer.</param>
+        /// <returns></returns>
         protected IFluentTimerItem ScheduleTimer(string name)
         {
             Ensure.NotNullAndEmpty(name, "name");
@@ -209,6 +227,11 @@ namespace Guflow.Decider
 
             return timerItem;
         }
+        /// <summary>
+        /// Schedule a workflow action directly.
+        /// </summary>
+        /// <param name="workflowAction"></param>
+        /// <returns></returns>
         protected IFluentWorkflowActionItem ScheduleAction(Func<IWorkflowItem,WorkflowAction> workflowAction)
         {
             var workflowActionItem = new WorkflowActionItem(workflowAction, this);
@@ -216,7 +239,7 @@ namespace Guflow.Decider
             return workflowActionItem;
         }
         /// <summary>
-        /// Continue the scheduling the of child items.
+        /// Continue the scheduling the of child items. All child items will be scheduled as per Deflow algorithm.
         /// </summary>
         /// <param name="workflowItemEvent"></param>
         /// <returns></returns>
