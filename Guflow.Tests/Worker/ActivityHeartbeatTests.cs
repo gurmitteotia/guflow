@@ -23,7 +23,7 @@ namespace Guflow.Tests.Worker
             _activityHearbeat = new ActivityHeartbeat();
             _activityHearbeat.ProvideDetails(()=>"details");
             _simpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
-            _activityHearbeat.SetInterval(TimeSpan.FromMilliseconds(HeartbeatIntervel));
+            _activityHearbeat.Enable(TimeSpan.FromMilliseconds(HeartbeatIntervel));
         }
 
         [TearDown]
@@ -156,8 +156,8 @@ namespace Guflow.Tests.Worker
         {
             Assert.Throws<ArgumentNullException>(()=>_activityHearbeat.OnError(null));
             Assert.Throws<ArgumentNullException>(() => _activityHearbeat.ProvideDetails(null));
-            Assert.Throws<ArgumentException>(() => _activityHearbeat.SetInterval(TimeSpan.MinValue));
-            Assert.Throws<ArgumentException>(() => _activityHearbeat.SetInterval(TimeSpan.Zero));
+            Assert.Throws<ArgumentException>(() => _activityHearbeat.Enable(TimeSpan.MinValue));
+            Assert.Throws<ArgumentException>(() => _activityHearbeat.Enable(TimeSpan.Zero));
         }
 
         private void AsserThatHearbeatIsRecordedMultipleTimes()

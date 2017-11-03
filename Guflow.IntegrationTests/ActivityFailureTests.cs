@@ -128,6 +128,7 @@ namespace Guflow.IntegrationTests
 
         [ActivityDescription(Names.Activity.Test.Version, Name = Names.Activity.Test.Name, DefaultTaskListName = "DefaultTaskList", DefaultTaskPriority = 10, Description = "some activity",
            DefaultHeartbeatTimeoutInSeconds = 10, DefaultScheduleToStartTimeoutInSeconds = 10, DefaultStartToCloseTimeoutInSeconds = 10, DefaultScheduleToCloseTimeoutInSeconds = 20)]
+        [EnableHeartbeat(IntervalInMilliSeconds = 5000)]
         private class FailingActivity : Activity
         {
             public static int ExecutionTimes = 0;

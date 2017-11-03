@@ -19,7 +19,7 @@ namespace Guflow.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -246,6 +246,15 @@ namespace Guflow.Properties {
         internal static string Empty_version {
             get {
                 return ResourceManager.GetString("Empty_version", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Heartbeat on activity {0} is enabled but heartbeat interval is not configured..
+        /// </summary>
+        internal static string Heartbeat_is_enabled_but_interval_is_missing {
+            get {
+                return ResourceManager.GetString("Heartbeat_is_enabled_but_interval_is_missing", resourceCulture);
             }
         }
         

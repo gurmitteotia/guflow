@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
+using Guflow.Properties;
 
 namespace Guflow.Worker
 {
@@ -44,7 +45,19 @@ namespace Guflow.Worker
                 Hearbeat.SetFallbackErrorHandler(_errorHandler);
                 Hearbeat.StartHeartbeatIfEnabled(_amazonSimpleWorkflow, activityArgs.TaskToken);
                 var retryableFunc = new RetryableFunc(_errorHandler);
-                return await retryableFunc.ExecuteAsync(()=>_executionMethod.ExecuteAsync(this, activityArgs, _cancellationTokenSource.Token), Defer);
+                return await retryableFunc.ExecuteAsync(()=>ExecuteActivityMethod(activityArgs), Defer);
+            }
+            finally
+            {
+                Hearbeat.StopHeartbeat();
+            }
+        }
+
+        private async Task<ActivityResponse> ExecuteActivityMethod(ActivityArgs activityArgs)
+        {
+            try
+            {
+                return await _executionMethod.ExecuteAsync(this, activityArgs, _cancellationTokenSource.Token);
             }
             catch (OperationCanceledException exception)
             {
@@ -56,11 +69,8 @@ namespace Guflow.Worker
                     return Fail(exception.GetType().Name, exception.Message);
                 throw;
             }
-            finally
-            {
-                Hearbeat.StopHeartbeat();
-            }
         }
+        
         /// <summary>
         /// Successfully complete the activity with given result.
         /// </summary>
@@ -97,12 +107,29 @@ namespace Guflow.Worker
 
         private void ConfigureHeartbeat()
         {
-            var enableHearbeatAttribute = GetType().GetCustomAttribute<EnableHeartbeatAttribute>();
-            if (enableHearbeatAttribute != null)
-            {
-                Hearbeat.SetInterval(TimeSpan.FromMilliseconds(enableHearbeatAttribute.HeartbeatIntervalInMilliSeconds));
-            }
+            var heartbeatAttribute = GetType().GetCustomAttribute<EnableHeartbeatAttribute>();
+            if(heartbeatAttribute ==null)
+                return;
+          
+            Hearbeat.Enable(TimeSpan.FromMilliseconds(HeartbeatInterval(heartbeatAttribute)));
             Hearbeat.CancellationRequested += (s, e) => _cancellationTokenSource.Cancel();
+        }
+
+        private ulong HeartbeatInterval(EnableHeartbeatAttribute attribute)
+        {
+            ulong intervalMillisec = 0;
+            if (attribute.IntervalInMilliSeconds > 0)
+                intervalMillisec = attribute.IntervalInMilliSeconds;
+
+            if (intervalMillisec == 0)
+            {
+                var description = ActivityDescriptionAttribute.FindOn(GetType());
+                intervalMillisec = description.DefaultHeartbeatTimeoutInSeconds * 1000;
+            }
+            if (intervalMillisec == 0)
+                throw new ActivityConfigurationException(
+                    string.Format(Resources.Heartbeat_is_enabled_but_interval_is_missing, GetType().Name));
+            return intervalMillisec;
         }
     }
 }

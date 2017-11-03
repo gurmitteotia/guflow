@@ -28,10 +28,10 @@ namespace Guflow.Worker
         public event EventHandler CancellationRequested;
         public event EventHandler ActivityTerminated;
         /// <summary>
-        /// Configure the heartbeat interval. It override the heartbeat interval given in ActivityDescriptionAttribute.
+        /// Enabled the activity heartbeat with given interval.. It override the heartbeat interval given in ActivityDescriptionAttribute.
         /// </summary>
         /// <param name="interval"></param>
-        public void SetInterval(TimeSpan interval)
+        public void Enable(TimeSpan interval)
         {
             if(interval <= TimeSpan.Zero)
                 throw new ArgumentException(Resources.Invalid_heartbeat_interval, "interval");
@@ -169,7 +169,5 @@ namespace Guflow.Worker
                 Details = details
             };
         }
-
-       
     }
 }
