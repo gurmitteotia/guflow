@@ -12,26 +12,12 @@ namespace Guflow.Decider
             _eventAttributes = cancellationRequestedEvent.WorkflowExecutionCancelRequestedEventAttributes;
         }
 
-        public string Cause { get { return _eventAttributes.Cause; } }
+        public string Cause => _eventAttributes.Cause;
 
-        public string ExternalWorkflowRunid
-        {
-            get
-            {
-                return _eventAttributes.ExternalWorkflowExecution != null
-                    ? _eventAttributes.ExternalWorkflowExecution.RunId
-                    : null;
-            }
-        }
-        public string ExternalWorkflowId
-        {
-            get
-            {
-                return _eventAttributes.ExternalWorkflowExecution != null
-                    ? _eventAttributes.ExternalWorkflowExecution.WorkflowId
-                    : null;
-            }
-        }
+        public string ExternalWorkflowRunid => _eventAttributes.ExternalWorkflowExecution?.RunId;
+
+        public string ExternalWorkflowId => _eventAttributes.ExternalWorkflowExecution?.WorkflowId;
+
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
             return workflow.OnWorkflowCancellationRequested(this);

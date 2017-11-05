@@ -13,11 +13,11 @@ namespace Guflow.Worker
             TaskToken = taskToken;
         }
 
-        public string ActivityId { get; private set; }
-        public string Input { get; private set; }
-        public string WorkflowId { get; private set; }
-        public string WorkflowRunId { get; private set; }
-        public string TaskToken { get; private set; }
+        public string ActivityId { get; }
+        public string Input { get; }
+        public string WorkflowId { get; }
+        public string WorkflowRunId { get; }
+        public string TaskToken { get; }
         public long StartedEventId { get; internal set; }
     }
 }

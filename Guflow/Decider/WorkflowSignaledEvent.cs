@@ -10,8 +10,8 @@ namespace Guflow.Decider
             _eventAttributes = signaledEvent.WorkflowExecutionSignaledEventAttributes;
         }
 
-        public string SignalName { get { return _eventAttributes.SignalName; } }
-        public string Input { get { return _eventAttributes.Input; }}
+        public string SignalName => _eventAttributes.SignalName;
+        public string Input => _eventAttributes.Input;
 
         public string ExternalWorkflowRunid
         {
