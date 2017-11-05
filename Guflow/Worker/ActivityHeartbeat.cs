@@ -28,7 +28,7 @@ namespace Guflow.Worker
         public event EventHandler CancellationRequested;
         public event EventHandler ActivityTerminated;
         /// <summary>
-        /// Enabled the activity heartbeat with given interval.. It override the heartbeat interval given in ActivityDescriptionAttribute.
+        /// Enable the activity heartbeat with given interval.. It override the heartbeat interval given in ActivityDescriptionAttribute.
         /// </summary>
         /// <param name="interval"></param>
         public void Enable(TimeSpan interval)
@@ -39,16 +39,17 @@ namespace Guflow.Worker
             _enabled = true;
         }
         /// <summary>
-        /// Provides a function to send details to Amazon SWF on each heartbeat pulse.
+        /// Provide a func callback to provide the details for heartbeat pulse. Details from func callback will be send
+        /// to Amazon SWF when reporting the heartbeat.
         /// </summary>
-        /// <param name="detailsFunc"></param>
-        public void ProvideDetails(Func<string> detailsFunc)
+        /// <param name="details"></param>
+        public void ProvideDetails(Func<string> details)
         {
-            Ensure.NotNull(detailsFunc, "getDetailsFunc");
-            _activityDetailsFunc = detailsFunc;
+            Ensure.NotNull(details, "getDetailsFunc");
+            _activityDetailsFunc = details;
         }
         /// <summary>
-        /// Register an error handler for any heartbeat specific error. If you do do not handle it here then it ActivitiesHost generic error handler is used.
+        /// Register an error handler for any heartbeat specific error. If you do do not handle it here then ActivitiesHost generic error handler is used.
         /// </summary>
         /// <param name="handleError"></param>
         public void OnError(HandleError handleError)
