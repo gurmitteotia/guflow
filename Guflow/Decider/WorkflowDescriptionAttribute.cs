@@ -60,7 +60,6 @@ namespace Guflow.Decider
         public static WorkflowDescriptionAttribute FindOn(Type workflowType)
         {
             Ensure.NotNull(workflowType, "workflowType");
-
             if(!typeof(Workflow).IsAssignableFrom(workflowType))
                 throw new NonWorkflowTypeException(string.Format(Resources.Non_Workflow_type,workflowType.Name,typeof(Workflow).Name));
 

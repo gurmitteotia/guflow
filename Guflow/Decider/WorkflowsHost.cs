@@ -8,6 +8,9 @@ using Guflow.Properties;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Host the execution of workflows.
+    /// </summary>
     public sealed class WorkflowsHost : IDisposable, IHost
     {
         private readonly Domain _domain;
@@ -36,8 +39,18 @@ namespace Guflow.Decider
         {
             return _hostedWorkflows.FindBy(name, version);
         }
+        /// <summary>
+        /// Status of workflow host.
+        /// </summary>
         public HostStatus Status { get; private set; }
+        /// <summary>
+        /// Fired when host goes in to faulted state because of unhandled exception.
+        /// </summary>
         public event EventHandler<HostFaultEventArgs> OnFault;
+
+        /// <summary>
+        /// Start execution of hosted workflow on default task list. It will throw the exception when more than one workflows are hosted.
+        /// </summary>
         public void StartExecution()
         {
             if (_hostedWorkflows.Count != 1)
@@ -51,6 +64,10 @@ namespace Guflow.Decider
 
             StartExecution(new TaskQueue(defaultTaskListName));
         }
+        /// <summary>
+        /// Start execution of hosted workflows on given TaskQueue.
+        /// </summary>
+        /// <param name="taskQueue"></param>
         public void StartExecution(TaskQueue taskQueue)
         {
             if (_disposed)
@@ -60,7 +77,9 @@ namespace Guflow.Decider
             var domain = _domain.OnPollingError(_pollingErrorHandler);
             ExecuteHostedWorkfowsAsync(taskQueue, domain);
         }
-
+        /// <summary>
+        /// Stop the execution of hosted workflows.
+        /// </summary>
         public void StopExecution()
         {
             if (!_disposed)
@@ -75,17 +94,29 @@ namespace Guflow.Decider
         {
             StopExecution();
         }
-
+        /// <summary>
+        /// Register the error handler for polling error.
+        /// </summary>
+        /// <param name="handleError"></param>
         public void OnPollingError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
             _pollingErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
         }
+        /// <summary>
+        /// Register the error handler for response errror.
+        /// </summary>
+        /// <param name="handleError"></param>
         public void OnResponseError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");
             _responseErrorHandler = ErrorHandler.Default(handleError).WithFallback(_genericErrorHandler);
         }
+
+        /// <summary>
+        /// Generic error handler. If exeception remains unhandled at this stage then host goes into faulted state.
+        /// </summary>
+        /// <param name="handleError"></param>
         public void OnError(HandleError handleError)
         {
             Ensure.NotNull(handleError, "handleError");

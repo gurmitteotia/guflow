@@ -7,6 +7,9 @@ using Guflow.Properties;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// Describe the activities. Its properties are used when registering the activity with Amazon SWF.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed class ActivityDescriptionAttribute : Attribute
     {

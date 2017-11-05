@@ -1,13 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow", "Guflow\Guflow.csproj", "{107F1FED-A272-4046-9DA0-360A657853AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow.Tests", "Guflow.Tests\Guflow.Tests.csproj", "{5D1215A6-932B-4335-A7AE-1885F91B7E68}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow.IntegrationTests", "Guflow.IntegrationTests\Guflow.IntegrationTests.csproj", "{FFF19166-CA47-4B4E-8531-3DF994E76AF9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Builds", "Builds", "{19B4998B-9FF8-45D8-BCC2-57602069AA29}"
+	ProjectSection(SolutionItems) = preProject
+		Builds\Guflow.nuspec = Builds\Guflow.nuspec
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90525C23-4849-4A9C-B0B2-8871A3596140}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +40,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ED633C45-7FFA-4AE2-A50C-51F598262101}
 	EndGlobalSection
 EndGlobal

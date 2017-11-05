@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace Guflow
+﻿namespace Guflow
 {
     internal class ErrorHandler : IErrorHandler
     {

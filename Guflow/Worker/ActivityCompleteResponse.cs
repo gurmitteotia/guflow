@@ -5,9 +5,11 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// Represents activity completed response.
+    /// </summary>
     public sealed class ActivityCompleteResponse : ActivityResponse
     {
-       
         private readonly string _result;
         private readonly string _taskToken;
         public ActivityCompleteResponse(string taskToken, string result)

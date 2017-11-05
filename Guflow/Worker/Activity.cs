@@ -4,9 +4,13 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
+using Guflow.Properties;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// Represent an activity.
+    /// </summary>
     public abstract class Activity
     {
         private readonly ActivityExecutionMethod _executionMethod;
@@ -41,7 +45,19 @@ namespace Guflow.Worker
                 Hearbeat.SetFallbackErrorHandler(_errorHandler);
                 Hearbeat.StartHeartbeatIfEnabled(_amazonSimpleWorkflow, activityArgs.TaskToken);
                 var retryableFunc = new RetryableFunc(_errorHandler);
-                return await retryableFunc.ExecuteAsync(()=>_executionMethod.ExecuteAsync(this, activityArgs, _cancellationTokenSource.Token), Defer);
+                return await retryableFunc.ExecuteAsync(()=>ExecuteActivityMethod(activityArgs), Defer);
+            }
+            finally
+            {
+                Hearbeat.StopHeartbeat();
+            }
+        }
+
+        private async Task<ActivityResponse> ExecuteActivityMethod(ActivityArgs activityArgs)
+        {
+            try
+            {
+                return await _executionMethod.ExecuteAsync(this, activityArgs, _cancellationTokenSource.Token);
             }
             catch (OperationCanceledException exception)
             {
@@ -53,35 +69,67 @@ namespace Guflow.Worker
                     return Fail(exception.GetType().Name, exception.Message);
                 throw;
             }
-            finally
-            {
-                Hearbeat.StopHeartbeat();
-            }
         }
-
+        
+        /// <summary>
+        /// Successfully complete the activity with given result.
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
         protected ActivityResponse Complete(string result)
         {
             return new ActivityCompleteResponse(_currentTaskToken, result);
         }
-
+        /// <summary>
+        /// Cancel the activity with given details.
+        /// </summary>
+        /// <param name="details"></param>
+        /// <returns></returns>
         protected ActivityResponse Cancel(string details)
         {
             return new ActivityCancelResponse(_currentTaskToken, details);
         }
+        /// <summary>
+        /// Fails the activity with given reason and details.
+        /// </summary>
+        /// <param name="reason"></param>
+        /// <param name="details"></param>
+        /// <returns></returns>
         protected ActivityResponse Fail(string reason,string details)
         {
             return new ActivityFailResponse(_currentTaskToken, reason, details);
         }
+        /// <summary>
+        /// Do not send any response to Amazon SWF.It is useful when you do not have response to return Amazon SWF and possibly a human intervention is need to send the response
+        /// back to Amazon SWF. Later on you can send the reponse by using ActivityResponse classes.
+        /// </summary>
         protected ActivityResponse Defer => ActivityResponse.Defer;
 
         private void ConfigureHeartbeat()
         {
-            var enableHearbeatAttribute = GetType().GetCustomAttribute<EnableHeartbeatAttribute>();
-            if (enableHearbeatAttribute != null)
-            {
-                Hearbeat.SetInterval(TimeSpan.FromMilliseconds(enableHearbeatAttribute.HeartbeatIntervalInMilliSeconds));
-            }
+            var heartbeatAttribute = GetType().GetCustomAttribute<EnableHeartbeatAttribute>();
+            if(heartbeatAttribute ==null)
+                return;
+          
+            Hearbeat.Enable(TimeSpan.FromMilliseconds(HeartbeatInterval(heartbeatAttribute)));
             Hearbeat.CancellationRequested += (s, e) => _cancellationTokenSource.Cancel();
+        }
+
+        private ulong HeartbeatInterval(EnableHeartbeatAttribute attribute)
+        {
+            ulong intervalMillisec = 0;
+            if (attribute.IntervalInMilliSeconds > 0)
+                intervalMillisec = attribute.IntervalInMilliSeconds;
+
+            if (intervalMillisec == 0)
+            {
+                var description = ActivityDescriptionAttribute.FindOn(GetType());
+                intervalMillisec = description.DefaultHeartbeatTimeoutInSeconds * 1000;
+            }
+            if (intervalMillisec == 0)
+                throw new ActivityConfigurationException(
+                    string.Format(Resources.Heartbeat_is_enabled_but_interval_is_missing, GetType().Name));
+            return intervalMillisec;
         }
     }
 }

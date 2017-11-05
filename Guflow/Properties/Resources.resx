@@ -252,4 +252,7 @@
   <data name="Host_is_stopped" xml:space="preserve">
     <value>Host is stopped. Please create a new host to start execution. </value>
   </data>
+  <data name="Heartbeat_is_enabled_but_interval_is_missing" xml:space="preserve">
+    <value>Heartbeat on activity {0} is enabled but heartbeat interval is not configured.</value>
+  </data>
 </root>

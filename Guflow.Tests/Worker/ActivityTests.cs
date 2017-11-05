@@ -136,6 +136,17 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
+        public async Task Activity_convert_the_exception_to_fail_reponse_without_using_error_handler()
+        {
+            var activity = new ActivityThrowingException(new IndexOutOfRangeException("blah"));
+            activity.SetErrorHandler(ErrorHandler.Continue);
+
+            var actualResponse = await activity.ExecuteAsync(_activityArgs);
+
+            Assert.That(actualResponse, Is.EqualTo(new ActivityFailResponse(_taskToken, "IndexOutOfRangeException", "blah")));
+        }
+
+        [Test]
         public async Task Activity_args_can_be_deserialized_into_method_parameters()
         {
             var activityArgs = new ActivityArgs(new Input {Id = 10, Details = "det"}.ToJson(), "id", "wid", "rid", "token");
@@ -158,6 +169,11 @@ namespace Guflow.Tests.Worker
             AssertThatHearbeatIsSendToAmazonSwf("details");
         }
 
+        [Test]
+        public void Activity_execution_throws_exception_when_heartbeat_is_enabled_but_interval_is_not_configured()
+        {
+            Assert.Throws<ActivityConfigurationException>(()=> new ActivityWithHearbeatIntervalMissing());
+        }
 
         [Test]
         public async Task Does_not_send_hearbeat_to_amazon_swf_when_not_enabled()
@@ -405,7 +421,7 @@ namespace Guflow.Tests.Worker
             public string TaskToken { get; private set; }
         }
 
-        [EnableHeartbeat(10)]
+        [EnableHeartbeat(IntervalInMilliSeconds = 10)]
         private class ActivityWithHeartbeatEnabledByAttribute : Activity
         {
             private readonly TimeSpan _activityExecutionTime;
@@ -419,6 +435,20 @@ namespace Guflow.Tests.Worker
             public void TranscodeMe()
             {
                 Thread.Sleep(_activityExecutionTime);
+            }
+        }
+
+        [EnableHeartbeat]
+        [ActivityDescription("1.0")]
+        private class ActivityWithHearbeatIntervalMissing : Activity
+        {
+            public ActivityWithHearbeatIntervalMissing()
+            {
+            }
+            [Execute]
+            public void TranscodeMe()
+            {
+
             }
         }
 
@@ -445,7 +475,7 @@ namespace Guflow.Tests.Worker
             public ActivityWithHeartbeatEnabledProgrammatically(string details, TimeSpan activityExecutionTime)
             {
                 _activityExecutionTime = activityExecutionTime;
-                Hearbeat.SetInterval(TimeSpan.FromMilliseconds(10));
+                Hearbeat.Enable(TimeSpan.FromMilliseconds(10));
                 Hearbeat.ProvideDetails(() => details);
             }
             [Execute]
@@ -513,10 +543,6 @@ namespace Guflow.Tests.Worker
 
         private class ActivityReturningDeferResponse : Activity
         {
-            public ActivityReturningDeferResponse()
-            {
-            }
-
             [Execute]
             public ActivityResponse Execute()
             {
@@ -524,7 +550,7 @@ namespace Guflow.Tests.Worker
             }
         }
 
-        [EnableHeartbeat(10)]
+        [EnableHeartbeat(IntervalInMilliSeconds = 10)]
         private class ActivityWithCancellationToken : Activity
         {
             private CancellationToken _cancellationToken;

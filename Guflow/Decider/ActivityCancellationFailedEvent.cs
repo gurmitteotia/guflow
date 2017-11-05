@@ -10,7 +10,7 @@ namespace Guflow.Decider
             _eventAttributes = activityCancellationFailedEvent.RequestCancelActivityTaskFailedEventAttributes;
             AwsIdentity = AwsIdentity.Raw(_eventAttributes.ActivityId);
         }
-        public string Cause { get { return _eventAttributes.Cause.Value; } }
+        public string Cause => _eventAttributes.Cause.Value;
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {

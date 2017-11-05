@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represent a event in workflow history.
+    /// </summary>
     public abstract class WorkflowEvent : IComparable<WorkflowEvent>
     {
         private readonly long _eventId;
