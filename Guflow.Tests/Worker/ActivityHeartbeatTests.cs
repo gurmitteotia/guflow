@@ -82,7 +82,7 @@ namespace Guflow.Tests.Worker
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Assert.IsTrue(_heartbeatReportedToSwf.WaitOne(_waitTimeForEvent));
 
-            Assert.That(terminatedEvent.WaitOne(HeartbeatIntervel * 50), "Activity terminated event is not raised");
+            Assert.That(terminatedEvent.WaitOne(_waitTimeForEvent), "Activity terminated event is not raised");
         }
 
         [Test]
