@@ -62,7 +62,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Raise_cancellation_requested_when_activity_is_requested_to_cancel()
         {
-            AmazonSwfReturnActivityCancellationRequested(CallbackForTimes(3));
+            SetupAmazonSwfToReturnActivityCancellationRequested(CallbackForTimes(3));
             var cancellelationRequestedEvent = new ManualResetEvent(false);
             _activityHearbeat.CancellationRequested += (s, e) => cancellelationRequestedEvent.Set();
             
@@ -80,9 +80,8 @@ namespace Guflow.Tests.Worker
             _activityHearbeat.ActivityTerminated += (s, e) => terminatedEvent.Set();
 
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
-            Assert.IsTrue(_heartbeatReportedToSwf.WaitOne(_waitTimeForEvent));
 
-            Assert.That(terminatedEvent.WaitOne(_waitTimeForEvent), "Activity terminated event is not raised");
+            Assert.That(terminatedEvent.WaitOne(_waitTimeForEvent *2), "Activity terminated event is not raised");
         }
 
         [Test]
@@ -114,13 +113,12 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Error_raised_in_reporting_the_heartbeat_can_be_retried_using_fallback_error_handler()
         {
-            RecordHeartbeatThrows(new AmazonServiceException("network error"), CallbackForTimes(3));
+            RecordHeartbeatThrows(new AmazonServiceException("network error"), CallbackForTimes(4));
             int retryAttempts = 0;
             HandleError errorHandler = e => { retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
             _activityHearbeat.SetFallbackErrorHandler(ErrorHandler.Default(errorHandler));
 
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
-            Assert.IsTrue(_heartbeatReportedToSwf.WaitOne(_waitTimeForEvent));
             Assert.IsTrue(_heartbeatReportedToSwf.WaitOne(_waitTimeForEvent));
 
 
@@ -131,14 +129,13 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Error_raised_in_reporting_the_heartbeat_can_be_retried_using_fallback_error_handler_even_if_was_set_before_user_handler()
         {
-            RecordHeartbeatThrows(new AmazonServiceException("network error"), CallbackForTimes(3));
+            RecordHeartbeatThrows(new AmazonServiceException("network error"), CallbackForTimes(4));
             int retryAttempts = 0;
             HandleError errorHandler = e => { retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
             _activityHearbeat.SetFallbackErrorHandler(ErrorHandler.Default(errorHandler));
             _activityHearbeat.OnError(e=>ErrorAction.Unhandled);
 
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
-            Assert.IsTrue(_heartbeatReportedToSwf.WaitOne(_waitTimeForEvent));
             Assert.IsTrue(_heartbeatReportedToSwf.WaitOne(_waitTimeForEvent));
 
 
@@ -156,8 +153,6 @@ namespace Guflow.Tests.Worker
             
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");
             Assert.IsTrue(_heartbeatReportedToSwf.WaitOne(_waitTimeForEvent));
-            Assert.IsTrue(_heartbeatReportedToSwf.WaitOne(_waitTimeForEvent));
-
 
             Assert.That(retryAttempts, Is.EqualTo(0));
             AsserThatHearbeatIsRecordedMultipleTimes();
@@ -201,13 +196,12 @@ namespace Guflow.Tests.Worker
         private void RecordHeartbeatThrows(Exception exception, Action callback)
         {
             _simpleWorkflow.Setup(
-                w => w.RecordActivityTaskHeartbeatAsync(It.IsAny<RecordActivityTaskHeartbeatRequest>(),
-                    It.IsAny<CancellationToken>()))
-                    .Callback(callback)
-                    .Throws(exception);
+                    w => w.RecordActivityTaskHeartbeatAsync(It.IsAny<RecordActivityTaskHeartbeatRequest>(),
+                        It.IsAny<CancellationToken>()))
+                .ThrowsAsync(exception).Callback(callback);
 
         }
-        private void AmazonSwfReturnActivityCancellationRequested(Action callback)
+        private void SetupAmazonSwfToReturnActivityCancellationRequested(Action callback)
         {
             var response = new RecordActivityTaskHeartbeatResponse()
             {
@@ -216,7 +210,7 @@ namespace Guflow.Tests.Worker
 
             _simpleWorkflow.Setup(
                     w => w.RecordActivityTaskHeartbeatAsync(It.IsAny<RecordActivityTaskHeartbeatRequest>(),
-                        It.IsAny<CancellationToken>())).Returns(Task.FromResult(response))
+                        It.IsAny<CancellationToken>())).ReturnsAsync(response)
                 .Callback(callback);
         }
 
@@ -236,7 +230,7 @@ namespace Guflow.Tests.Worker
             _simpleWorkflow
                 .Setup(w => w.RecordActivityTaskHeartbeatAsync(It.Is<RecordActivityTaskHeartbeatRequest>(r => req(r)),
                     It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(response)).Callback(callback);
+                .ReturnsAsync(response).Callback(callback);
         }
 
         private class CallbackEvent

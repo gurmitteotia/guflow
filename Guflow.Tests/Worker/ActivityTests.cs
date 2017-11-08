@@ -15,11 +15,14 @@ namespace Guflow.Tests.Worker
         private ActivityArgs _activityArgs;
         private const string _taskToken = "token";
         private Mock<IAmazonSimpleWorkflow> _amazonSimpleWorkflow;
+        private ManualResetEvent _heartbeatRecordedEvent;
+        private const int _heartbeatInterval = 10;
 
         [SetUp]
         public void Setup()
         {
             _amazonSimpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
+            _heartbeatRecordedEvent = new ManualResetEvent(false);
             _activityArgs = new ActivityArgs("input","id" ,"wid", "rid", _taskToken);
         }
 
@@ -162,9 +165,12 @@ namespace Guflow.Tests.Worker
         [Test]
         public async Task Heartbeat_started_when_it_it_enabled_on_activity_by_attribute()
         {
+            SetupUpAmazonSWFCallbackToRaiseEvent();
+
             var activity = new ActivityWithHeartbeatEnabledByAttribute("details", TimeSpan.FromSeconds(1));
             activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
             await activity.ExecuteAsync(_activityArgs);
+            Assert.IsTrue(_heartbeatRecordedEvent.WaitOne(_heartbeatInterval*100));
 
             AssertThatHearbeatIsSendToAmazonSwf("details");
         }
@@ -188,10 +194,12 @@ namespace Guflow.Tests.Worker
         [Test]
         public async Task Heartbeat_started_when_it_it_enabled_on_activity_programmatically()
         {
+            SetupUpAmazonSWFCallbackToRaiseEvent();
             var activity = new ActivityWithHeartbeatEnabledProgrammatically("details", TimeSpan.FromSeconds(1));
             activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
             await activity.ExecuteAsync(_activityArgs);
 
+            Assert.IsTrue(_heartbeatRecordedEvent.WaitOne(_heartbeatInterval*100));
             AssertThatHearbeatIsSendToAmazonSwf("details");
         }
 
@@ -243,7 +251,8 @@ namespace Guflow.Tests.Worker
             activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
            
             await activity.ExecuteAsync(_activityArgs);
-
+            
+            Assert.IsTrue(_heartbeatRecordedEvent.WaitOne(_heartbeatInterval *100));
             Assert.That(activity.CancellationRequested, Is.True);
         }
 
@@ -256,6 +265,14 @@ namespace Guflow.Tests.Worker
                 return true;
             };
             _amazonSimpleWorkflow.Verify(s=>s.RecordActivityTaskHeartbeatAsync(It.Is<RecordActivityTaskHeartbeatRequest>(r=>req(r)), It.IsAny<CancellationToken>()));
+        }
+
+        private void SetupUpAmazonSWFCallbackToRaiseEvent()
+        {
+            _amazonSimpleWorkflow
+                .Setup(s => s.RecordActivityTaskHeartbeatAsync(It.IsAny<RecordActivityTaskHeartbeatRequest>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback(() =>{_heartbeatRecordedEvent.Set();});
         }
 
         private void AssertThatNoHearbeatIsSendToAmazonSwf()
@@ -421,7 +438,7 @@ namespace Guflow.Tests.Worker
             public string TaskToken { get; private set; }
         }
 
-        [EnableHeartbeat(IntervalInMilliSeconds = 10)]
+        [EnableHeartbeat(IntervalInMilliSeconds = _heartbeatInterval)]
         private class ActivityWithHeartbeatEnabledByAttribute : Activity
         {
             private readonly TimeSpan _activityExecutionTime;
@@ -475,7 +492,7 @@ namespace Guflow.Tests.Worker
             public ActivityWithHeartbeatEnabledProgrammatically(string details, TimeSpan activityExecutionTime)
             {
                 _activityExecutionTime = activityExecutionTime;
-                Hearbeat.Enable(TimeSpan.FromMilliseconds(10));
+                Hearbeat.Enable(TimeSpan.FromMilliseconds(_heartbeatInterval));
                 Hearbeat.ProvideDetails(() => details);
             }
             [Execute]
@@ -568,8 +585,7 @@ namespace Guflow.Tests.Worker
                 Thread.Sleep(_executionTime);
             }
 
-            public bool CancellationRequested { get { return _cancellationToken.IsCancellationRequested; } }
-
+            public bool CancellationRequested => _cancellationToken.IsCancellationRequested;
         }
 
         private class CancelledActivity : Activity
@@ -597,7 +613,7 @@ namespace Guflow.Tests.Worker
 
             _amazonSimpleWorkflow.Setup(
                 w => w.RecordActivityTaskHeartbeatAsync(It.IsAny<RecordActivityTaskHeartbeatRequest>(),
-                    It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
+                    It.IsAny<CancellationToken>())).ReturnsAsync(response).Callback(()=>_heartbeatRecordedEvent.Set());
         }
     }
 }

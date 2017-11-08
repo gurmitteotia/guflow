@@ -148,14 +148,12 @@ namespace Guflow.Worker
 
         private void RaiseCancellationRequestedEvent()
         {
-            var handler = CancellationRequested;
-            handler?.Invoke(this, EventArgs.Empty);
+            CancellationRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private void RaiseActivityTerminatedEvent()
         {
-            var handler = ActivityTerminated;
-            handler?.Invoke(this, EventArgs.Empty);
+            ActivityTerminated?.Invoke(this, EventArgs.Empty);
         }
         private static bool IsCancellationRequested(RecordActivityTaskHeartbeatResponse response)
         {
