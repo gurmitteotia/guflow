@@ -17,7 +17,7 @@ namespace Guflow.Tests.Worker
         private Mock<IAmazonSimpleWorkflow> _simpleWorkflow;
         private const int HeartbeatIntervel = 10;
         private AutoResetEvent _heartbeatReportedToSwf;
-        private readonly int _waitTimeForEvent = HeartbeatIntervel * 200;
+        private readonly int _waitTimeForEvent = HeartbeatIntervel * 500;
         
         [SetUp]
         public void Setup()
