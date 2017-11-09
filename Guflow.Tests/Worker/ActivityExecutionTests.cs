@@ -30,17 +30,13 @@ namespace Guflow.Tests.Worker
         [Test]
         public async Task Can_limit_the_activity_execution()
         {
-            var concurrentExecution = ActivityExecution.Concurrent(2);
+            var concurrentExecution = ActivityExecution.Concurrent(3);
             concurrentExecution.Set(_activitiesHost);
 
-            await concurrentExecution.ExecuteAsync(NewWorkerTask());
-            await concurrentExecution.ExecuteAsync(NewWorkerTask());
-            await concurrentExecution.ExecuteAsync(NewWorkerTask());
-            await concurrentExecution.ExecuteAsync(NewWorkerTask());
-            await concurrentExecution.ExecuteAsync(NewWorkerTask());
+            for(int i=0;i<20;i++)
+                await concurrentExecution.ExecuteAsync(NewWorkerTask());
 
-
-            Assert.That(TestActivity.MaxConcurrentExecution , Is.EqualTo(2));
+            Assert.That(TestActivity.MaxConcurrentExecution , Is.EqualTo(3));
         }
 
         [Test]
@@ -123,8 +119,10 @@ namespace Guflow.Tests.Worker
             [Execute]
             public async Task<ActivityResponse> Execute()
             {
-                _concurrentTaskRecords.Add(Interlocked.Increment(ref _noOfConcurrentTasks));
-                await Task.Delay(_random.Next(100,1000));
+                var concurrentTasks = Interlocked.Increment(ref _noOfConcurrentTasks);
+                Console.WriteLine($"Concurrent tasks{concurrentTasks}");
+                _concurrentTaskRecords.Add(concurrentTasks);
+                await Task.Delay(_random.Next(10,100));
                 Interlocked.Decrement(ref _noOfConcurrentTasks);
                 return Complete(_result);
             }
