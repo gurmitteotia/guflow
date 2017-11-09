@@ -24,6 +24,5 @@
   </metadata>
   <files>
     <file src="bin\release\Guflow.dll" target="lib\net45" />
-    <file src="bin\release\Guflow.xml" target="lib\net45" />
   </files>
 </package>
