@@ -18,12 +18,9 @@ namespace Guflow.Worker
                     _signaled = false;
                     return Completed;
                 }
-                else
-                {
-                    var tcs = new TaskCompletionSource<bool>();
-                    _waits.Enqueue(tcs);
-                    return tcs.Task;
-                }
+                var tcs = new TaskCompletionSource<bool>();
+                _waits.Enqueue(tcs);
+                return tcs.Task;
             }
         }
 

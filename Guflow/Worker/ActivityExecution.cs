@@ -11,7 +11,9 @@ namespace Guflow.Worker
         private readonly Func<WorkerTask, Task> _executeFunc;
         private ActivitiesHost _activitiesHost;
         private readonly AsyncAutoResetEvent _completedEvent = new AsyncAutoResetEvent();
-        private int _totalRunningTasks = 0;
+        private readonly object _syncObject=  new object();
+        private volatile int _totalRunningTasks = 0;
+        private volatile bool _reachedLimit = false;
         private ActivityExecution(uint maximumLimit)
         {
             if (maximumLimit > 1)
@@ -42,17 +44,37 @@ namespace Guflow.Worker
 
         private async Task ExecuteConcurrentlyAsync(WorkerTask workerTask)
         {
-            var totalRunningTasks = Interlocked.Increment(ref _totalRunningTasks);
+            _reachedLimit = false;
             var task = Task.Run(async () =>
             {
-
                 await ExecuteInSequenceSync(workerTask);
-                var remainRunningTasks = Interlocked.Decrement(ref _totalRunningTasks);
-                if (remainRunningTasks < _maximumLimit)
-                    _completedEvent.Set();
+                ExecutionCompleted();
             });
-            if (totalRunningTasks >= _maximumLimit)
+            await WaitIfLimitHasReached();
+        }
+
+        private async Task WaitIfLimitHasReached()
+        {
+            lock (_syncObject)
+            {
+                _totalRunningTasks++;
+                if (_totalRunningTasks >= _maximumLimit)
+                {
+                    _reachedLimit = true;
+                }
+            }
+            if (_reachedLimit)
                 await _completedEvent.WaitAsync();
+        }
+
+        private void ExecutionCompleted()
+        {
+            lock (_syncObject)
+            {
+                _totalRunningTasks--;
+                if(_reachedLimit)
+                    _completedEvent.Set();
+            }
         }
 
         private async Task ExecuteInSequenceSync(WorkerTask workerTask)
