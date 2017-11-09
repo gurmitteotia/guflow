@@ -170,7 +170,7 @@ namespace Guflow.Tests.Worker
             var activity = new ActivityWithHeartbeatEnabledByAttribute("details", TimeSpan.FromSeconds(1));
             activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
             await activity.ExecuteAsync(_activityArgs);
-            Assert.IsTrue(_heartbeatRecordedEvent.WaitOne(_heartbeatInterval*100));
+            Assert.IsTrue(_heartbeatRecordedEvent.WaitOne(_heartbeatInterval*500));
 
             AssertThatHearbeatIsSendToAmazonSwf("details");
         }
@@ -199,7 +199,7 @@ namespace Guflow.Tests.Worker
             activity.SetAmazonSwfClient(_amazonSimpleWorkflow.Object);
             await activity.ExecuteAsync(_activityArgs);
 
-            Assert.IsTrue(_heartbeatRecordedEvent.WaitOne(_heartbeatInterval*100));
+            Assert.IsTrue(_heartbeatRecordedEvent.WaitOne(_heartbeatInterval*500));
             AssertThatHearbeatIsSendToAmazonSwf("details");
         }
 
