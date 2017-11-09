@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Guflow</id>
@@ -10,23 +10,20 @@
     <!-- If true, this value prompts the user to accept the license when
             installing the package. -->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-
     <!-- Any details about this particular release -->
     <releaseNotes>Initial release</releaseNotes>
-
     <description>A fluent API based C#.NET library to program Amazon SWF.</description>
-
     <!-- Copyright information -->
-    <copyright>Copyright ©2017 Gurmit Teotia</copyright>
-
+    <copyright>Copyright ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â©2017 Gurmit Teotia</copyright>
     <!-- Tags appear in the gallery and can be used for tag searches -->
     <tags>Amazon SWF C# Guflow .Net</tags>
     <dependencies>
-      <dependency id="AWSSDK.SimpleWorkflow" version="3.3.0.23" />
-      <dependency id="Newtonsoft.Json" version="10.0.3" />
+      <!--<dependency id="AWSSDK.SimpleWorkflow" version="3.3.0.23" />
+      <dependency id="Newtonsoft.Json" version="10.0.3" />-->
     </dependencies>
   </metadata>
   <files>
-    <file src="..\Guflow\bin\release\Guflow.dll" target="lib\net45" />
+    <file src="bin\release\Guflow.dll" target="lib\net45" />
+    <file src="bin\release\Guflow.xml" target="lib\net45" />
   </files>
 </package>

@@ -100,7 +100,7 @@ namespace Guflow.Tests.Worker
         {
             RecordHeartbeatThrows(new AmazonServiceException("network error"), CallbackForTimes(4));
             int retryAttempts = 0;
-            HandleError errorHandler = e => { Console.WriteLine($"Attempts {e.RetryAttempts}"); retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
+            HandleError errorHandler = e => {retryAttempts = e.RetryAttempts; return ErrorAction.Retry; };
             _activityHearbeat.OnError(errorHandler);
            
             _activityHearbeat.StartHeartbeatIfEnabled(_simpleWorkflow.Object, "token");

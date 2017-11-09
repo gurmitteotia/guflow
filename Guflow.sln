@@ -9,11 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow.Tests", "Guflow.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow.IntegrationTests", "Guflow.IntegrationTests\Guflow.IntegrationTests.csproj", "{FFF19166-CA47-4B4E-8531-3DF994E76AF9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Builds", "Builds", "{19B4998B-9FF8-45D8-BCC2-57602069AA29}"
-	ProjectSection(SolutionItems) = preProject
-		Builds\Guflow.nuspec = Builds\Guflow.nuspec
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90525C23-4849-4A9C-B0B2-8871A3596140}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
