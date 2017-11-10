@@ -14,12 +14,11 @@
     <releaseNotes>Initial release</releaseNotes>
     <description>A fluent API based C#.NET library to program Amazon SWF.</description>
     <!-- Copyright information -->
-    <copyright>Copyright 2017 Gurmit Teotia</copyright>
+    <copyright>Copyright © 2017 - Gurmit Teotia</copyright>
     <!-- Tags appear in the gallery and can be used for tag searches -->
     <tags>Amazon SWF C# Guflow .Net</tags>
     <dependencies>
-      <!--<dependency id="AWSSDK.SimpleWorkflow" version="3.3.0.23" />
-      <dependency id="Newtonsoft.Json" version="10.0.3" />-->
+      <!--Dependencies are updated by build script by reading packages.config file-->
     </dependencies>
   </metadata>
   <files>
