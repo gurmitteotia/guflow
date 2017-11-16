@@ -24,6 +24,13 @@ namespace Guflow.Decider
             return new JumpActions(workflowItems, jumpItem => WorkflowAction.Empty);
         }
 
+        /// <summary>
+        /// Jump to an activity. Exception is thrown if activity is already active or not found in workflow.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="version"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
         public JumpWorkflowAction ToActivity(string name, string version, string positionalName = "")
         {
             Ensure.NotNullAndEmpty(name, "name");
@@ -32,11 +39,22 @@ namespace Guflow.Decider
             var activityItem = _workflowItems.ActivityItemFor(Identity.New(name, version, positionalName));
             return WorkflowAction.JumpTo(activityItem).WithTriggerAction(_triggeringAction(activityItem));
         }
+        /// <summary>
+        /// Jump to an activity. Exception is thrown if activity is already active or not found in workflow. It reads activity name and version
+        /// from <see cref="ActivityDescriptionAttribute"/> of TActivity.
+        /// </summary>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
         public JumpWorkflowAction ToActivity<TActivity>(string positionalName = "") where TActivity: Activity
         {
             var description = ActivityDescriptionAttribute.FindOn<TActivity>();
             return ToActivity(description.Name, description.Version, positionalName);
         }
+        /// <summary>
+        /// Jump to workflow timer. Exceptio is thrown if timer is already active or not found in workflow.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public JumpWorkflowAction ToTimer(string name)
         {
             Ensure.NotNullAndEmpty(name, "name");

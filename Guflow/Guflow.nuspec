@@ -10,8 +10,6 @@
     <!-- If true, this value prompts the user to accept the license when
             installing the package. -->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <!-- Any details about this particular release -->
-    <releaseNotes>Initial release</releaseNotes>
     <description>A fluent API based C#.NET library to program Amazon SWF.</description>
     <!-- Copyright information -->
     <copyright>Copyright © 2017 - Gurmit Teotia</copyright>

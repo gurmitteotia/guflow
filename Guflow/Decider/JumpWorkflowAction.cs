@@ -17,20 +17,35 @@ namespace Guflow.Decider
             return _scheduleAction.GetDecisions().Concat(_triggeredAction.GetDecisions());
         }
 
+        /// <summary>
+        /// Provide a custom trigger action for first joint items when jumping down the executing branch.
+        /// </summary>
+        /// <param name="triggerAction"></param>
+        /// <returns></returns>
         internal JumpWorkflowAction WithTriggerAction(WorkflowAction triggerAction)
         {
             _triggeredAction = triggerAction;
             return this;
         }
+        /// <summary>
+        /// Do not trigger the scheduling of first joint items after source item. By default jumping download the executing branch will trigger
+        /// the scheduling of first joint item.
+        /// </summary>
+        /// <returns></returns>
         public WorkflowAction WithoutTrigger()
         {
             _triggeredAction = Empty;
             return this;
         }
 
-        public WorkflowAction After(TimeSpan interval)
+        /// <summary>
+        /// Jump after a timeout, instead of immediately.
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        public WorkflowAction After(TimeSpan timeout)
         {
-            return _scheduleAction.After(interval);
+            return _scheduleAction.After(timeout);
         }
         private bool Equals(JumpWorkflowAction other)
         {

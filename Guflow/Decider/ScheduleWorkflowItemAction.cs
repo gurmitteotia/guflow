@@ -13,11 +13,21 @@ namespace Guflow.Decider
             _workflowItem = workflowItem;
             _scheduleWorkflowAction = Custom(workflowItem.GetScheduleDecisions().ToArray());
         }
-        public ScheduleWorkflowItemAction After(TimeSpan afterTimeout)
+        /// <summary>
+        /// Cause the item to reschedule after a given timeout.
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        public ScheduleWorkflowItemAction After(TimeSpan timeout)
         {
-           _scheduleWorkflowAction = Custom(_workflowItem.GetRescheduleDecisions(afterTimeout).ToArray());
+           _scheduleWorkflowAction = Custom(_workflowItem.GetRescheduleDecisions(timeout).ToArray());
             return this;
         }
+        /// <summary>
+        /// Limit the rescheduling. Once the limit is reached, Guflow returns the default WorkflowAction for event.
+        /// </summary>
+        /// <param name="limit"></param>
+        /// <returns></returns>
         public WorkflowAction UpTo(Limit limit)
         {
             if (limit.IsExceeded(_workflowItem))
