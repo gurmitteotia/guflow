@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represents a workflow action to jump to child item of workflow.
+    /// </summary>
     public sealed class JumpWorkflowAction : WorkflowAction
     {
         private WorkflowAction _triggeredAction = Empty;
