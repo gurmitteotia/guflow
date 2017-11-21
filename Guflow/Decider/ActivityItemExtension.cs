@@ -6,6 +6,12 @@ namespace Guflow.Decider
 {
     public static class ActivityItemExtension
     {
+        /// <summary>
+        /// Access completed result of activity as dynamic object. If completed result is JSON object then you can directly access its properties.
+        /// Throws exception when last event is not activity completed event.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
         public static dynamic Result(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
@@ -17,6 +23,12 @@ namespace Guflow.Decider
             return activityCompletedEvent.Result.FromJson();
         }
 
+        /// <summary>
+        /// Access completed result of activity as TType object. 
+        /// Throws exception when last event is not activity completed event.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
         public static TType Result<TType>(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
@@ -36,7 +48,11 @@ namespace Guflow.Decider
             }
             return activityCompletedEvent.Result.FromJson<TType>();
         }
-
+        /// <summary>
+        /// Return true if the last event of activity is <seealso cref="ActivityCompletedEvent"/>.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
         public static bool HasCompleted(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");

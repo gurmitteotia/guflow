@@ -22,11 +22,22 @@ namespace Guflow
         private readonly IErrorHandler _errorHandler;
         internal static readonly DecisionTask EmptyDecisionTask = new DecisionTask();
         internal static readonly ActivityTask EmptyActivityTask = new ActivityTask();
-       
+
+        /// <summary>
+        /// Create a domain with given name and a client to communicate with Amazon SWF. You have more control on creating/configuring the AmazonSimpleWorkflowClient.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="simpleWorkflowClient"></param>
         public Domain(string name, IAmazonSimpleWorkflow simpleWorkflowClient)
             :this(name, simpleWorkflowClient, ErrorHandler.NotHandled)
         {
+             
         }
+        /// <summary>
+        /// Create a domain with given name and in given region. You need to provide credentials in config file.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="regionEndpoint"></param>
         public Domain(string name, RegionEndpoint regionEndpoint) : this(name, new AmazonSimpleWorkflowClient(regionEndpoint))
         {
         }
@@ -41,8 +52,7 @@ namespace Guflow
         internal IAmazonSimpleWorkflow Client => _simpleWorkflowClient;
 
         /// <summary>
-        /// Register the TWorkflow with Amazon SWF. It will use the information from WorkflowDescriptionAttribute.
-        /// Registers the workflow if it is not already registered with Amazon SWF.
+        /// Register the TWorkflow with Amazon SWF if not already registered. It will use the information from WorkflowDescriptionAttribute.
         /// </summary>
         /// <typeparam name="TWorkflow">Workflow type to be registered.</typeparam>
         /// <returns></returns>
@@ -51,8 +61,7 @@ namespace Guflow
             await RegisterWorkflowAsync(typeof (TWorkflow));
         }
         /// <summary>
-        /// Register the TWorkflow with Amazon SWF. It will use the information from WorkflowDescriptionAttribute.
-        /// Registers the workflow if it is not already registered with Amazon SWF.
+        /// Register the TWorkflow with Amazon SWF if not already registered. It will use the information from WorkflowDescriptionAttribute.
         /// </summary>
         /// <param name="workflowType">Workflow type to be registerd.</param>
         /// <returns></returns>
@@ -62,8 +71,7 @@ namespace Guflow
             await RegisterWorkflowAsync(WorkflowDescriptionAttribute.FindOn(workflowType));
         }
         /// <summary>
-        /// Register the workflow with Amazon SWF. This overloaded method is useful when you want to dynamically provide the workflow information.
-        /// Registers the workflow if it is not already registered with Amazon SWF.
+        /// Register the workflow with Amazon SWF if not already registered. This overloaded method is useful when you want to dynamically provide the workflow information.
         /// </summary>
         /// <param name="workflowDescription"></param>
         /// <returns></returns>
@@ -80,8 +88,7 @@ namespace Guflow
             await _simpleWorkflowClient.RegisterWorkflowTypeAsync(workflowDescription.RegisterRequest(_name));
         }
         /// <summary>
-        /// Register the activity with Amazon SWF. It will use the information from ActivityDescriptionAttribute.
-        /// Registers the activity only if it is not already registered with Amazon SWF.
+        /// Register the activity with Amazon SWF if not already registered. It will use the information from ActivityDescriptionAttribute.
         /// </summary>
         /// <typeparam name="TActivity"></typeparam>
         /// <returns></returns>
@@ -90,8 +97,7 @@ namespace Guflow
             await RegisterActivityAsync(typeof(TActivity));
         }
         /// <summary>
-        /// Register the activity with Amazon SWF. It will use the information from ActivityDescriptionAttribute.
-        /// Registers the activity only if it is not already registered with Amazon SWF.
+        /// Register the activity with Amazon SWF if not already registered. It will use the information from ActivityDescriptionAttribute.
         /// </summary>
         /// <param name="activityType"></param>
         /// <returns></returns>
@@ -102,8 +108,7 @@ namespace Guflow
         }
 
         /// <summary>
-        /// Register the activity with Amazon SWF. This overloaded method is useful when you want to dynamically provide the activity information.
-        /// Registers the activity if it is not already registered with Amazon SWF.
+        /// Register the activity with Amazon SWF if not already registered. This overloaded method is useful when you want to dynamically provide the activity information.
         /// </summary>
         /// <param name="activityDescription"></param>
         /// <returns></returns>
@@ -120,7 +125,7 @@ namespace Guflow
             await _simpleWorkflowClient.RegisterActivityTypeAsync(activityDescription.RegisterRequest(_name));
         }
         /// <summary>
-        /// Register the domain with Amazon SWF. Register only when it is not already registered.
+        /// Register the domain with Amazon SWF if not already registered.
         /// </summary>
         /// <param name="retentionPeriodInDays"></param>
         /// <param name="description"></param>

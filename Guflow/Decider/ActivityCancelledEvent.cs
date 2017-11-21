@@ -3,6 +3,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Raised when activity is cancelled.
+    /// </summary>
     public class ActivityCancelledEvent : ActivityEvent
     {
         private readonly ActivityTaskCanceledEventAttributes _eventAttributes;
@@ -11,7 +14,10 @@ namespace Guflow.Decider
             _eventAttributes = cancelledActivityEvent.ActivityTaskCanceledEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
-        public string Details{get { return _eventAttributes.Details; }}
+        /// <summary>
+        /// Returns last details status of reported by activity heartbeat.
+        /// </summary>
+        public string Details => _eventAttributes.Details;
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {

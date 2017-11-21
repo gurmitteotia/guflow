@@ -4,6 +4,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represent the activity's event.
+    /// </summary>
     public abstract class ActivityEvent : WorkflowItemEvent
     {
         private string _activityName;
@@ -17,6 +20,7 @@ namespace Guflow.Decider
             : base(eventId)
         {
         }
+        //For internal use.
         protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
         {
             bool foundActivityScheduledEvent=false;

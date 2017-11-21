@@ -3,6 +3,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represent an activity completed event.
+    /// </summary>
     public class ActivityCompletedEvent : ActivityEvent
     {
         private readonly ActivityTaskCompletedEventAttributes _eventAttributes;
@@ -12,7 +15,10 @@ namespace Guflow.Decider
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
 
-        public string Result { get { return _eventAttributes.Result; } }
+        /// <summary>
+        /// Returns activity completed result.
+        /// </summary>
+        public string Result => _eventAttributes.Result;
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {

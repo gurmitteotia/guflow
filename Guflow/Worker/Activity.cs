@@ -101,7 +101,7 @@ namespace Guflow.Worker
         }
         /// <summary>
         /// Do not send any response to Amazon SWF.It is useful when you do not have response to return Amazon SWF and possibly a human intervention is need to send the response
-        /// back to Amazon SWF. Later on you can send the reponse by using ActivityResponse classes.
+        /// back to Amazon SWF. Later on you can send the reponse by using ActivityResponse's derived classes.
         /// </summary>
         protected ActivityResponse Defer => ActivityResponse.Defer;
 

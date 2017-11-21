@@ -5,6 +5,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Reperesent the activity cancellation request event.
+    /// </summary>
     public class ActivityCancelRequestedEvent : WorkflowItemEvent
     {
         private readonly long _cancelRequestedEventId;

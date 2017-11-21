@@ -124,7 +124,6 @@ namespace Guflow
         {
             return $"TaskQueue {_taskListName} Identity {_pollingIdentity}";
         }
-
-        public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue);
     }
+    public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue);
 }

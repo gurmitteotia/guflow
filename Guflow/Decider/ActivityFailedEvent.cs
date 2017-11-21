@@ -3,6 +3,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Raised when activity has failed. By default workflow will be failed when it process the activity failed event.
+    /// </summary>
     public class ActivityFailedEvent : ActivityEvent
     {
         private readonly ActivityTaskFailedEventAttributes _eventAttributes;
@@ -13,8 +16,14 @@ namespace Guflow.Decider
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
 
-        public string Reason { get { return _eventAttributes.Reason; } }
-        public string Details { get { return _eventAttributes.Details; } }
+        /// <summary>
+        /// Returns reason why activity has failed.
+        /// </summary>
+        public string Reason => _eventAttributes.Reason;
+        /// <summary>
+        /// Returns details for activity failure.
+        /// </summary>
+        public string Details => _eventAttributes.Details;
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {

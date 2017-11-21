@@ -3,6 +3,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Indicates that activity has timed out. By default it will cause the workflow to fail.
+    /// </summary>
     public class ActivityTimedoutEvent : ActivityEvent
     {
         private readonly ActivityTaskTimedOutEventAttributes _eventAttributes;
@@ -11,10 +14,15 @@ namespace Guflow.Decider
             _eventAttributes = activityTimedoutEvent.ActivityTaskTimedOutEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
+        /// <summary>
+        /// Returns reason, why activity has failed.
+        /// </summary>
+        public string TimeoutType => _eventAttributes.TimeoutType;
 
-        public string TimeoutType { get { return _eventAttributes.TimeoutType; } }
-
-        public string Details { get { return _eventAttributes.Details; } }
+        /// <summary>
+        /// Returns last heartbeat reported details.
+        /// </summary>
+        public string Details => _eventAttributes.Details;
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
