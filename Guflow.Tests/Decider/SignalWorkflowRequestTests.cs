@@ -15,6 +15,16 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => new SignalWorkflowRequest("", "name"));
             Assert.Throws<ArgumentException>(() => new SignalWorkflowRequest(null, "name"));
         }
-         
+
+        [Test]
+        public void Serialize_signal_input_to_json_format()
+        {
+            var req = new SignalWorkflowRequest("id", "name");
+            req.SignalInput = new {Id = 10};
+
+            var swfRequest = req.SwfFormat("d");
+
+            Assert.That(swfRequest.Input, Is.EqualTo("{\"Id\":10}"));
+        }
     }
 }

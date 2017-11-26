@@ -185,7 +185,7 @@ namespace Guflow
             return response?.DecisionTask;
         } 
 
-        public WorkflowsHost Host(IEnumerable<Workflow> workflows)
+        public WorkflowsHost Host(params Workflow[] workflows)
         {
             return new WorkflowsHost(this,workflows);
         }
@@ -204,7 +204,7 @@ namespace Guflow
         /// </summary>
         /// <param name="activitiesTypes">List of activities to host.</param>
         /// <returns></returns>
-        public ActivitiesHost Host(IEnumerable<Type> activitiesTypes)
+        public ActivitiesHost Host(params Type[] activitiesTypes)
         {
             return new ActivitiesHost(this, activitiesTypes);
         }

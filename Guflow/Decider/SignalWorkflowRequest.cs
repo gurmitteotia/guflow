@@ -15,7 +15,7 @@ namespace Guflow.Decider
         public string WorkflowId { get; private set; }
         public string SignalName { get; private set; }
         public string WorkflowRunId { get; set; }
-        public string SignalInput { get; set; }
+        public object SignalInput { get; set; }
 
         internal SignalWorkflowExecutionRequest SwfFormat(string domainName)
         {
@@ -24,7 +24,7 @@ namespace Guflow.Decider
                 Domain = domainName,
                 RunId = WorkflowRunId,
                 WorkflowId = WorkflowId,
-                Input = SignalInput,
+                Input = SignalInput.ToAwsString(),
                 SignalName = SignalName
             };
         }
