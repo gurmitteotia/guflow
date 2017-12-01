@@ -20,7 +20,7 @@ namespace Guflow.Decider
         public string WorkflowName { get; private set; }
         public string Version { get; private set; }
         public string WorkflowId { get; private set; }
-        public string Input { get; set; }
+        public object Input { get; set; }
         public string ChildPolicy { get; set; }
         public string LambdaRole { get; set; }
         public string TaskListName { get; set; }
@@ -44,7 +44,7 @@ namespace Guflow.Decider
                 Domain = domainName,
                 TaskList = TaskListName.TaskList(),
                 WorkflowId = WorkflowId,
-                Input = Input,
+                Input = Input.ToAwsString(),
                 ChildPolicy = ChildPolicy,
                 LambdaRole = LambdaRole,
                 TagList = Tags,

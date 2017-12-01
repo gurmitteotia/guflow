@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -139,9 +138,9 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Invalid_constructor_argument_tests()
         {
-            Assert.Throws<ArgumentNullException>(() => _domain.Host((IEnumerable<Type>)null));
-            Assert.Throws<ArgumentException>(() => _domain.Host(Enumerable.Empty<Type>()));
-            Assert.Throws<ArgumentException>(() => _domain.Host(new[] { (Type)null }));
+            Assert.Throws<ArgumentNullException>(() => _domain.Host((Type[])null));
+            Assert.Throws<ArgumentException>(() => _domain.Host(Enumerable.Empty<Type>().ToArray()));
+            Assert.Throws<ArgumentException>(() => _domain.Host((Type)null));
 
             Assert.Throws<ArgumentNullException>(() => _domain.Host(new[] { typeof(TestActivity1) }, null));
         }
@@ -149,7 +148,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Invalid_parameters_tests()
         {
-            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            var hostedActivities = _domain.Host(typeof(TestActivity1));
 
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnError(null));
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError(null));

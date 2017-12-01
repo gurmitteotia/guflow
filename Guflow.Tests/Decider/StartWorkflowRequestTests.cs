@@ -26,6 +26,17 @@ namespace Guflow.Tests.Decider
             Assert.That(request.WorkflowId, Is.EqualTo("workflowId"));
         }
 
+        [Test]
+        public void Serialize_complex_input_to_json_format()
+        {
+            var request = StartWorkflowRequest.For<TestWorkflow>("workflowId");
+            request.Input = new {Id = 10};
+
+            var swfRequest = request.SwfFormat("domain");
+
+            Assert.That(swfRequest.Input, Is.EqualTo("{\"Id\":10}"));
+        }
+
         [WorkflowDescription("1.0")]
         private class TestWorkflow : Workflow
         {
