@@ -79,7 +79,7 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="timeouts"></param>
         /// <returns></returns>
-        IFluentActivityItem WithTimeouts(Func<IActivityItem, ScheduleActivityTimeouts> timeouts);
+        IFluentActivityItem WithTimeouts(Func<IActivityItem, ActivityTimeouts> timeouts);
         IFluentTimerItem RescheduleTimer { get; }
     }
 }

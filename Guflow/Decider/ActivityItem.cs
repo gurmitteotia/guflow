@@ -18,7 +18,7 @@ namespace Guflow.Decider
         private Func<IActivityItem, bool> _whenFunc;
         private Func<IActivityItem, WorkflowAction> _onFalseAction;
         private Func<IActivityItem, int?> _priorityFunc;
-        private Func<IActivityItem, ScheduleActivityTimeouts> _timeoutsFunc;
+        private Func<IActivityItem, ActivityTimeouts> _timeoutsFunc;
         private readonly TimerItem _rescheduleTimer;
         internal ActivityItem(Identity identity, IWorkflow workflow)
             : base(identity, workflow)
@@ -34,7 +34,7 @@ namespace Guflow.Decider
             _whenFunc = a => true;
             _onFalseAction = a=>new TriggerActions(this).FirstJoint();
             _priorityFunc = a => null;
-            _timeoutsFunc = a => new ScheduleActivityTimeouts();
+            _timeoutsFunc = a => new ActivityTimeouts();
             _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
         }
 
@@ -161,7 +161,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        public IFluentActivityItem WithTimeouts(Func<IActivityItem, ScheduleActivityTimeouts> timeouts)
+        public IFluentActivityItem WithTimeouts(Func<IActivityItem, ActivityTimeouts> timeouts)
         {
             Ensure.NotNull(timeouts, "timeouts");
             _timeoutsFunc = timeouts;

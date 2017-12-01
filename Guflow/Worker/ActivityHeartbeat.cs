@@ -19,16 +19,23 @@ namespace Guflow.Worker
         private ErrorHandler _errorHandler;
         private IErrorHandler _fallbackErrorHandler = ErrorHandler.NotHandled;
         private bool _enabled = false;
-        public ActivityHeartbeat()
+        internal ActivityHeartbeat()
         {
             _activityDetailsFunc = ()=>string.Empty;
             _cancellationTokenSource = new CancellationTokenSource();
             _errorHandler = ErrorHandler.NotHandled;
         }
+        /// <summary>
+        /// Raise this event cancellation is requested for activity.
+        /// </summary>
         public event EventHandler CancellationRequested;
+        /// <summary>
+        /// Raised when activity is terminated by Amazon SWF. It can happen when activity is exceed its allowed execution time and timedout
+        /// or workflow is terminated.
+        /// </summary>
         public event EventHandler ActivityTerminated;
         /// <summary>
-        /// Enable the activity heartbeat with given interval.. It override the heartbeat interval given in ActivityDescriptionAttribute.
+        /// Enable the activity heartbeat with given interval.
         /// </summary>
         /// <param name="interval"></param>
         public void Enable(TimeSpan interval)

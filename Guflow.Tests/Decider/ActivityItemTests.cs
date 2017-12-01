@@ -151,7 +151,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
             activityItem.WithTimeouts(
                 a =>
-                    new ScheduleActivityTimeouts()
+                    new ActivityTimeouts()
                     {
                         HeartbeatTimeout = TimeSpan.FromSeconds(2),
                         ScheduleToCloseTimeout = TimeSpan.FromSeconds(3),

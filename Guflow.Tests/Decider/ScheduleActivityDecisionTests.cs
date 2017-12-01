@@ -50,7 +50,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_set_the_optional_attribute_on_aws_decision_to_finit_limit()
         {
-            var timeouts = new ScheduleActivityTimeouts();
+            var timeouts = new ActivityTimeouts();
             timeouts.HeartbeatTimeout = TimeSpan.FromSeconds(20);
             timeouts.ScheduleToCloseTimeout = TimeSpan.FromSeconds(30);
             timeouts.ScheduleToStartTimeout = TimeSpan.FromSeconds(40);
@@ -68,7 +68,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_set_the_timeouts_on_aws_decision_to_maximum_limit()
         {
-            var timeouts = new ScheduleActivityTimeouts();
+            var timeouts = new ActivityTimeouts();
             timeouts.HeartbeatTimeout = TimeSpan.MaxValue;
             timeouts.ScheduleToCloseTimeout = TimeSpan.MaxValue;
             timeouts.ScheduleToStartTimeout = TimeSpan.MaxValue;
