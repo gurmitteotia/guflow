@@ -325,11 +325,11 @@ namespace Guflow.Tests.Decider
             }
             public IActivityItem GetActivityOf(WorkflowItemEvent workflowItemEvent)
             {
-                return ActivityOf(workflowItemEvent);
+                return Activity(workflowItemEvent);
             }
             public ITimerItem GetTimerOf(WorkflowItemEvent workflowItemEvent)
             {
-                return TimerOf(workflowItemEvent);
+                return Timer(workflowItemEvent);
             }
         }
         private class StubWorkflow : Workflow

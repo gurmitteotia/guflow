@@ -48,15 +48,76 @@ namespace Guflow.Decider
             }
             return activityCompletedEvent.Result.FromJson<TType>();
         }
+
         /// <summary>
-        /// Return true if the last event of activity is <seealso cref="ActivityCompletedEvent"/>.
+        /// Returns true if the last event of activity is <see cref="ActivityCompletedEvent"/>.
         /// </summary>
         /// <param name="activityItem"></param>
         /// <returns></returns>
-        public static bool HasCompleted(this IActivityItem activityItem)
+        public static bool HasCompleted(this IActivityItem activityItem) => activityItem.LastCompletedEvent() != null;
+
+        /// <summary>
+        /// Returns true if the last event of activity is <see cref="ActivityFailedEvent"/>.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
+        public static bool HasFailed(this IActivityItem activityItem) => activityItem.LastFailedEvent() != null;
+
+        /// <summary>
+        /// Returns true if the last event of activity is <see cref="ActivityTimedoutEvent"/>.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
+        public static bool HasTimedout(this IActivityItem activityItem) => activityItem.LastTimedoutEvent() != null;
+
+        /// <summary>
+        /// Returns true if the last event of activity is <see cref="ActivityCancelledEvent"/>.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
+        public static bool HasCancelled(this IActivityItem activityItem) => activityItem.LastCancelledEvent() != null;
+
+
+        /// <summary>
+        /// Retruns the <see cref="ActivityFailedEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
+        public static ActivityFailedEvent LastFailedEvent(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
-            return activityItem.LastEvent is ActivityCompletedEvent;
+            return activityItem.LastEvent as ActivityFailedEvent;
+        }
+        /// <summary>
+        ///  Retruns the <see cref="ActivityTimedoutEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
+        public static ActivityTimedoutEvent LastTimedoutEvent(this IActivityItem activityItem)
+        {
+            Ensure.NotNull(activityItem, "activityItem");
+            return activityItem.LastEvent as ActivityTimedoutEvent;
+        }
+        /// <summary>
+        /// Retruns the <see cref="ActivityCancelledEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
+        public static ActivityCancelledEvent LastCancelledEvent(this IActivityItem activityItem)
+        {
+            Ensure.NotNull(activityItem, "activityItem");
+            return activityItem.LastEvent as ActivityCancelledEvent;
+        }
+
+        /// <summary>
+        /// Retruns the <see cref="ActivityCompletedEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="activityItem"></param>
+        /// <returns></returns>
+        public static ActivityCompletedEvent LastCompletedEvent(this IActivityItem activityItem)
+        {
+            Ensure.NotNull(activityItem, "activityItem");
+            return activityItem.LastEvent as ActivityCompletedEvent;
         }
     }
 }

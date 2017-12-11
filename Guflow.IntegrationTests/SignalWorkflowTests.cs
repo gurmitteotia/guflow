@@ -88,7 +88,7 @@ namespace Guflow.IntegrationTests
             [WorkflowEvent(EventName.Signal)]
             public WorkflowAction InventoryUpdated(WorkflowSignaledEvent @event)
             {
-                if (!Activities.First<OrderItemActivity>().IsActive)
+                if (!Activity<OrderItemActivity>().IsActive)
                     return Jump.ToActivity<OrderItemActivity>();
 
                 return Ignore(false);

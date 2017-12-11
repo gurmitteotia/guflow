@@ -16,11 +16,29 @@ namespace Guflow.Decider
         {
             _workflowEventMethods = WorkflowEventMethods.For(this);
         }
+        /// <summary>
+        /// Raised when workflow is sucessfully completed in Amazon SWF.
+        /// </summary>
         public event EventHandler<WorkflowCompletedEventArgs> Completed;
+        /// <summary>
+        /// Raised when workflow is failed in Amazon SWF.
+        /// </summary>
         public event EventHandler<WorkflowFailedEventArgs> Failed;
+        /// <summary>
+        /// Raised when workflow is cancelled.
+        /// </summary>
         public event EventHandler<WorkflowCancelledEventArgs> Cancelled;
+        /// <summary>
+        /// Raised when workflow is started.
+        /// </summary>
         public event EventHandler<WorkflowStartedEventArgs> Started;
+        /// <summary>
+        /// Raised when workflow is closed because it is either failed, completed or cancelled.
+        /// </summary>
         public event EventHandler<WorkflowClosedEventArgs> Closed;
+        /// <summary>
+        /// Raised when workflow is restarted.
+        /// </summary>
         public event EventHandler<WorkflowRestartedEventArgs> Restarted;
 
         WorkflowAction IWorkflow.OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent)
@@ -352,25 +370,25 @@ namespace Guflow.Decider
         protected CancelRequest CancelRequest => new CancelRequest(_allWorkflowItems);
 
         /// <summary>
-        /// Returns activity of passed event.
+        /// Returns the child activity for given event.
         /// </summary>
         /// <param name="activityEvent"></param>
         /// <returns></returns>
-        protected IActivityItem ActivityOf(WorkflowItemEvent activityEvent)
+        protected IActivityItem Activity(WorkflowItemEvent activityEvent)
         {
-            Ensure.NotNull(activityEvent, "activityEvent");
+            Ensure.NotNull(activityEvent, "@event");
             return _allWorkflowItems.ActivityOf(activityEvent);
         }
 
         /// <summary>
-        /// Returns timer of passed event.
+        /// Returns child timer for given <see cref="WorkflowItemEvent"/>.
         /// </summary>
-        /// <param name="activityEvent"></param>
+        /// <param name="event"></param>
         /// <returns></returns>
-        protected ITimerItem TimerOf(WorkflowItemEvent activityEvent)
+        protected ITimerItem Timer(WorkflowItemEvent @event)
         {
-            Ensure.NotNull(activityEvent, "activityEvent");
-            return _allWorkflowItems.TimerItemFor(activityEvent);
+            Ensure.NotNull(@event, "@event");
+            return _allWorkflowItems.TimerItemFor(@event);
         }
         /// <summary>
         /// All child items of workflow.
@@ -384,6 +402,29 @@ namespace Guflow.Decider
         /// All schedulable timers of workflows.
         /// </summary>
         protected IEnumerable<ITimerItem> Timers => _allWorkflowItems.AllTimers;
+
+        /// <summary>
+        /// Returns the child activity. Throws exception if activity is not child of this workflow.
+        /// </summary>
+        /// <typeparam name="TType">Activity type</typeparam>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        protected IActivityItem Activity<TType>(string positionalName =null) where TType:Activity => Activities.First<TType>(positionalName);
+
+        /// <summary>
+        /// Returns the child activity. Throws exception if activity is not child of this workflow.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="version"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        protected IActivityItem Activity(string name, string version, string positionalName = null) => Activities.First(name, version, positionalName);
+        /// <summary>
+        /// Returns the child timer by given name. Throws exception when timer is not child of this workflow.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        protected ITimerItem Timer(string name) => Timers.First(name);
 
         /// <summary>
         /// Indicate if workflow history event has any active event. An active event indicates that a scheduling item (activity, timer...) is active. e.g. if an activity is just started but not finished/failed/cancelled

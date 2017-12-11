@@ -4,7 +4,7 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
-    public static class ActivityItemsExtension
+    internal static class ActivityItemsExtension
     {
         /// <summary>
         /// Find first activity given name, version and positional name in workflow.
