@@ -188,7 +188,7 @@ namespace Guflow.Decider
                 return new ActivityScheduledEvent(historyEvent, allHistoryEvents);
             if (historyEvent.IsActivitySchedulingFailedEvent())
                 return new ActivitySchedulingFailedEvent(historyEvent);
-            return WorkflowItemEvent.NotFound;
+            return null;
         }
 
         public static WorkflowItemEvent CreateTimerEventFor(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
@@ -203,13 +203,13 @@ namespace Guflow.Decider
                 return new TimerCancelledEvent(historyEvent, allHistoryEvents);
             if (historyEvent.IsTimerCancellationFailedEvent())
                 return new TimerCancellationFailedEvent(historyEvent);
-            return WorkflowItemEvent.NotFound;
+            return null;
         }
 
         public static WorkflowItemEvent CreateWorkflowItemEventFor(this HistoryEvent historyEvent,IEnumerable<HistoryEvent> allHistoryEvents)
         {
             var activityEvent = historyEvent.CreateActivityEventFor(allHistoryEvents);
-            return activityEvent!=WorkflowItemEvent.NotFound ? activityEvent: historyEvent.CreateTimerEventFor(allHistoryEvents);
+            return activityEvent ?? historyEvent.CreateTimerEventFor(allHistoryEvents);
         }
     }
 }

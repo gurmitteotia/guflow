@@ -52,7 +52,7 @@ namespace Guflow.Tests.Worker
             {
                 FailOnException = false;
             }
-            [Execute]
+            [ActivityMethod]
             public void Execute()
             {
                 throw new Exception("message");

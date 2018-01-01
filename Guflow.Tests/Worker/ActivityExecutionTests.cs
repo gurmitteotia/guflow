@@ -116,7 +116,7 @@ namespace Guflow.Tests.Worker
                 _result = result;
             }
 
-            [Execute]
+            [ActivityMethod]
             public async Task<ActivityResponse> Execute()
             {
                 var concurrentTasks = Interlocked.Increment(ref _noOfConcurrentTasks);

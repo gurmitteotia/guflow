@@ -132,7 +132,7 @@ namespace Guflow.IntegrationTests
         private class FailingActivity : Activity
         {
             public static int ExecutionTimes = 0;
-            [Execute]
+            [ActivityMethod]
             public string Execute(string input)
             {
                 ExecutionTimes++;

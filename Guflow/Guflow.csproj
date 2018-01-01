@@ -232,7 +232,7 @@
     <Compile Include="Worker\ActivityExecution.cs" />
     <Compile Include="Worker\AsyncAutoResetEvent.cs" />
     <Compile Include="Worker\EnableHeartbeatAttribute.cs" />
-    <Compile Include="Worker\ExecuteAttribute.cs" />
+    <Compile Include="Worker\ActivityMethodAttribute.cs" />
     <Compile Include="Worker\ActivitiesHost.cs" />
     <Compile Include="IHost.cs" />
     <Compile Include="Worker\NonActivityTypeException.cs" />

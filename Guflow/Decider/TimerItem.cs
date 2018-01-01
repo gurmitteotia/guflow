@@ -42,7 +42,7 @@ namespace Guflow.Decider
             return timerItem;
         }
 
-        public override WorkflowItemEvent LastEvent => WorkflowHistoryEvents.LastTimerEventFor(this);
+        public override WorkflowItemEvent LatestEvent => WorkflowHistoryEvents.LatestTimerEventFor(this);
 
         public override IEnumerable<WorkflowItemEvent> AllEvents => WorkflowHistoryEvents.AllTimerEventsFor(this);
 

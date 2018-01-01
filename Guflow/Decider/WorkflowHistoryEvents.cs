@@ -24,24 +24,22 @@ namespace Guflow.Decider
         {
         }
 
-        public WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem)
+        public WorkflowItemEvent LatestActivityEventFor(ActivityItem activityItem)
         {
             WorkflowItemEvent result = null;
             if (_cachedActivityEvents.TryGetValue(activityItem, out result)) return result;
 
             result = AllActivityEventsFor(activityItem).FirstOrDefault();
-            result = result ?? WorkflowItemEvent.NotFound;
-            _cachedActivityEvents.Add(activityItem, result);
+           _cachedActivityEvents.Add(activityItem, result);
             return result;
         }
 
-        public WorkflowItemEvent LastTimerEventFor(TimerItem timerItem)
+        public WorkflowItemEvent LatestTimerEventFor(TimerItem timerItem)
         {
             WorkflowItemEvent result = null;
             if (_cachedTimerEvents.TryGetValue(timerItem, out result)) return result;
 
             result = AllTimerEventsFor(timerItem).FirstOrDefault();
-            result = result ?? WorkflowItemEvent.NotFound;
             _cachedTimerEvents.Add(timerItem, result);
             return result;
         }
@@ -79,6 +77,7 @@ namespace Guflow.Decider
             foreach (var historyEvent in _allHistoryEvents)
             {
                 var workflowItemEvent = historyEvent.CreateWorkflowItemEventFor(_allHistoryEvents);
+                if(workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsActive && !workflowItemEvent.InChainOf(allEvents))
                     return true;
                 allEvents.Add(workflowItemEvent);
@@ -91,6 +90,7 @@ namespace Guflow.Decider
             foreach (var historyEvent in _allHistoryEvents)
             {
                 var workflowItemEvent = historyEvent.CreateActivityEventFor(_allHistoryEvents);
+                if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(activityItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
                     allEvents.Add(workflowItemEvent);
@@ -105,6 +105,7 @@ namespace Guflow.Decider
             foreach (var historyEvent in _allHistoryEvents)
             {
                 var workflowItemEvent = historyEvent.CreateTimerEventFor(_allHistoryEvents);
+                if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
                     allEvents.Add(workflowItemEvent);

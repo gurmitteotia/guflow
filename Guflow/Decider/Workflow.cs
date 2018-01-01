@@ -5,6 +5,9 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represents a workflow to schedule its children in Amazon SWF. Derive from this class to create custom workflow.
+    /// </summary>
     public abstract class Workflow : IWorkflow, IWorkflowClosingActions
     {
         private readonly WorkflowItems _allWorkflowItems = new WorkflowItems();
@@ -297,7 +300,7 @@ namespace Guflow.Decider
             return WorkflowAction.CancelWorkflow(details);
         }
         /// <summary>
-        /// Close the current workflow and restart it again.
+        /// Close the current workflow in Amazon SWF and restart it again.
         /// </summary>
         /// <returns></returns>
         protected RestartWorkflowAction RestartWorkflow()
@@ -306,7 +309,7 @@ namespace Guflow.Decider
             return WorkflowAction.RestartWorkflow(workflow.WorkflowHistoryEvents);
         }
         /// <summary>
-        /// Reschedule the item, associated with passed event, again.
+        /// Reschedule the item, associated with passed event.
         /// </summary>
         /// <param name="workflowItemEvent"></param>
         /// <returns></returns>
@@ -318,7 +321,7 @@ namespace Guflow.Decider
         }
         /// <summary>
         /// Start the workflow by scheduling all the startup item. This action is different than RestartWorkflow. Later one will restart the workflow
-        /// by closing the current workflow execution. While this action will not close the workflow and will only schedule the start up item.
+        /// by closing the current workflow execution. While this action will not close the workflow but will only schedule the start up item.
         /// </summary>
         /// <returns></returns>
         protected WorkflowAction StartWorkflow()
@@ -443,12 +446,12 @@ namespace Guflow.Decider
             return WorkflowAction.RecordMarker(markerName, details.ToAwsString());
         }
         /// <summary>
-        /// Returns all marker events from workflow history events.
+        /// Returns all marker events for this workflow.
         /// </summary>
         protected IEnumerable<MarkerRecordedEvent> AllMarkerEvents => ((IWorkflow)this).WorkflowHistoryEvents.AllMarkerRecordedEvents();
 
         /// <summary>
-        /// Returns all signal events from workflow history events.
+        /// Returns all signal send to this workflow.
         /// </summary>
         protected IEnumerable<WorkflowSignaledEvent> AllSignalEvents => ((IWorkflow)this).WorkflowHistoryEvents.AllSignalEvents();
 

@@ -15,7 +15,7 @@ namespace Guflow.Decider
         public static dynamic Result(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
-            var completedEvent = activityItem.LastEvent;
+            var completedEvent = activityItem.LatestEvent;
             var activityCompletedEvent = completedEvent as ActivityCompletedEvent;
             if(activityCompletedEvent == null)
                 throw new InvalidOperationException(string.Format(Resources.Activity_result_can_not_accessed,
@@ -32,7 +32,7 @@ namespace Guflow.Decider
         public static TType Result<TType>(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
-            var completedEvent = activityItem.LastEvent;
+            var completedEvent = activityItem.LatestEvent;
             var activityCompletedEvent = completedEvent as ActivityCompletedEvent;
             if (activityCompletedEvent == null)
                 throw new InvalidOperationException(string.Format(Resources.Activity_result_can_not_accessed,
@@ -86,7 +86,7 @@ namespace Guflow.Decider
         public static ActivityFailedEvent LastFailedEvent(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
-            return activityItem.LastEvent as ActivityFailedEvent;
+            return activityItem.LatestEvent as ActivityFailedEvent;
         }
         /// <summary>
         ///  Retruns the <see cref="ActivityTimedoutEvent"/> and if it is the last event, otherwise null is returned.
@@ -96,7 +96,7 @@ namespace Guflow.Decider
         public static ActivityTimedoutEvent LastTimedoutEvent(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
-            return activityItem.LastEvent as ActivityTimedoutEvent;
+            return activityItem.LatestEvent as ActivityTimedoutEvent;
         }
         /// <summary>
         /// Retruns the <see cref="ActivityCancelledEvent"/> and if it is the last event, otherwise null is returned.
@@ -106,7 +106,7 @@ namespace Guflow.Decider
         public static ActivityCancelledEvent LastCancelledEvent(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
-            return activityItem.LastEvent as ActivityCancelledEvent;
+            return activityItem.LatestEvent as ActivityCancelledEvent;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Guflow.Decider
         public static ActivityCompletedEvent LastCompletedEvent(this IActivityItem activityItem)
         {
             Ensure.NotNull(activityItem, "activityItem");
-            return activityItem.LastEvent as ActivityCompletedEvent;
+            return activityItem.LatestEvent as ActivityCompletedEvent;
         }
     }
 }

@@ -105,7 +105,7 @@ namespace Guflow.Tests.Worker
         private class TestActivity : Activity
         {
 
-            [Execute]
+            [ActivityMethod]
             public async Task<ActivityResponse> Execute(ActivityArgs args)
             {
                 await Task.Delay(10);
@@ -125,7 +125,7 @@ namespace Guflow.Tests.Worker
             {
                 FailOnException = false;
             }
-            [Execute]
+            [ActivityMethod]
             public ActivityResponse Execute(ActivityArgs args)
             {
                 _retryCount++;

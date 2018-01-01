@@ -4,8 +4,8 @@ namespace Guflow.Decider
 {
     internal interface IWorkflowHistoryEvents
     {
-        WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem);
-        WorkflowItemEvent LastTimerEventFor(TimerItem timerItem);
+        WorkflowItemEvent LatestActivityEventFor(ActivityItem activityItem);
+        WorkflowItemEvent LatestTimerEventFor(TimerItem timerItem);
         IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow);
         WorkflowStartedEvent WorkflowStartedEvent();
         bool HasActiveEvent();

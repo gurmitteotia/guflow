@@ -57,13 +57,13 @@ namespace Guflow.Decider
             return new WorkflowBranch(_workflowItems.Concat(workflowBranch._workflowItems).ToArray());
         }
 
-        public bool IsActive(IEnumerable<WorkflowBranch> allBranches)
+        public bool IsActive(IEnumerable<WorkflowBranch> parentBranches)
         {
-            var lastWorkflowEvents = _workflowItems.Select(w => w.LastEvent);
+            var lastWorkflowEvents = _workflowItems.Select(w => w.LatestEvent);
             var sortedLastEvents = lastWorkflowEvents.OrderByDescending(e => e, WorkflowEvent.IdComparer);
-            if (sortedLastEvents.Any(e => e.IsActive))
+            if (sortedLastEvents.Any(e => e!=null && e.IsActive))
                 return true;
-            if (sortedLastEvents.All(e => e == WorkflowItemEvent.NotFound))
+            if (sortedLastEvents.All(e => e == null))
                 return false;
             var immediateParent = _workflowItems.First();
             var latestEvent = sortedLastEvents.First();
@@ -71,9 +71,9 @@ namespace Guflow.Decider
                 return false;
 
             var latestEventItem = _workflowItems.First(i => latestEvent.IsFor(i));
-            var allItemsInBranches = allBranches.SelectMany(b => b._workflowItems);
+            var parentItems = parentBranches.SelectMany(b => b._workflowItems);
 
-            return latestEventItem.CanScheduleAny(allItemsInBranches);
+            return latestEventItem.CanScheduleAny(parentItems);
         }
 
         public WorkflowItem FindFirstJointItem(WorkflowItem beforeItem)

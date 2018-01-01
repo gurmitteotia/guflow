@@ -112,7 +112,7 @@ namespace Guflow.IntegrationTests
         private class OrderItemActivity : Activity
         {
             private static int _executionTimes = 0;
-            [Execute]
+            [ActivityMethod]
             public ActivityResponse OrderItem(string input)
             {
                 if (++_executionTimes == 1)
@@ -126,7 +126,7 @@ namespace Guflow.IntegrationTests
          DefaultHeartbeatTimeoutInSeconds = 10, DefaultScheduleToStartTimeoutInSeconds = 10, DefaultStartToCloseTimeoutInSeconds = 10, DefaultScheduleToCloseTimeoutInSeconds = 20)]
         private class ChargeCustomerActivity : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public string SendEmail()
             {
                 return "Item is on the way";

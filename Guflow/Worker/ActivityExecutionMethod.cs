@@ -18,7 +18,7 @@ namespace Guflow.Worker
         {
             var allMethods = activityType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
-            var executionMethods = allMethods.Where(m => m.GetCustomAttributes<ExecuteAttribute>().Any()).ToArray();
+            var executionMethods = allMethods.Where(m => m.GetCustomAttributes<ActivityMethodAttribute>().Any()).ToArray();
             if (!executionMethods.Any())
                 throw new ActivityExecutionMethodException(string.Format(Resources.Activity_execution_method_missing, activityType.Name));
             if (executionMethods.Length > 1)

@@ -123,7 +123,7 @@ namespace Guflow.IntegrationTests
            DefaultHeartbeatTimeoutInSeconds = 10, DefaultScheduleToStartTimeoutInSeconds = 10, DefaultStartToCloseTimeoutInSeconds = 10, DefaultScheduleToCloseTimeoutInSeconds = 20)]
         private class TestActivityWithInput : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public string Execute(string input)
             {
                 Input = input;

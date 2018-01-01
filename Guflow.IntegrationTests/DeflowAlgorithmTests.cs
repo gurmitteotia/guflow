@@ -90,7 +90,7 @@ namespace Guflow.IntegrationTests
            DefaultHeartbeatTimeoutInSeconds = 10, DefaultScheduleToStartTimeoutInSeconds = 10, DefaultStartToCloseTimeoutInSeconds = 10, DefaultScheduleToCloseTimeoutInSeconds = 20)]
         private class DownloadActivity : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public async Task<string> Execute()
             {
                 await Task.Yield();
@@ -103,7 +103,7 @@ namespace Guflow.IntegrationTests
         private class TranscodeActivity : Activity
         {
             private static readonly Random _random = new Random();
-            [Execute]
+            [ActivityMethod]
             public async Task<string> Execute(TranscodeInput input)
             {
                 await Task.Delay(_random.Next(100, 5000));
@@ -115,7 +115,7 @@ namespace Guflow.IntegrationTests
          DefaultHeartbeatTimeoutInSeconds = 10, DefaultScheduleToStartTimeoutInSeconds = 10, DefaultStartToCloseTimeoutInSeconds = 10, DefaultScheduleToCloseTimeoutInSeconds = 20)]
         private class SendEmailActivity : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public async Task<string> Execute(SendEmailInput input)
             {
                 await Task.Yield();

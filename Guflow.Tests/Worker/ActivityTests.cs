@@ -287,21 +287,21 @@ namespace Guflow.Tests.Worker
         }
         private class MoreThanOnExecutionMethod : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public void Execute1() { }
-            [Execute]
+            [ActivityMethod]
             public void Execute2() { }
         }
         private class ExecutionMethodWithVoidReturnTypeActivity : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public void Execute()
             {
             }
         }
         private class ExecutionMethodWithTaskReturnTypeActivity : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public async Task Execute()
             {
                 await Task.Delay(0);
@@ -317,7 +317,7 @@ namespace Guflow.Tests.Worker
                 _response = response;
             }
 
-            [Execute]
+            [ActivityMethod]
             public async Task<ActivityResponse> Execute()
             {
                 await Task.Delay(0);
@@ -333,7 +333,7 @@ namespace Guflow.Tests.Worker
                 _response = response;
             }
 
-            [Execute]
+            [ActivityMethod]
             public ActivityResponse Execute()
             {
                 return _response;
@@ -348,7 +348,7 @@ namespace Guflow.Tests.Worker
                 _response = response;
             }
 
-            [Execute]
+            [ActivityMethod]
             public async Task<int> Execute()
             {
                 await Task.Delay(0);
@@ -370,7 +370,7 @@ namespace Guflow.Tests.Worker
                 _response = response;
             }
 
-            [Execute]
+            [ActivityMethod]
             public async Task<CustomData> Execute()
             {
                 await Task.Delay(0);
@@ -386,7 +386,7 @@ namespace Guflow.Tests.Worker
                 _response = response;
             }
 
-            [Execute]
+            [ActivityMethod]
             public int Execute()
             {
                 return _response;
@@ -401,7 +401,7 @@ namespace Guflow.Tests.Worker
                 _response = response;
             }
 
-            [Execute]
+            [ActivityMethod]
             public CustomData Execute()
             {
                 return _response;
@@ -418,7 +418,7 @@ namespace Guflow.Tests.Worker
                 FailOnException = failOnException;
             }
 
-            [Execute]
+            [ActivityMethod]
             public void ThrowError()
             {
                 throw _exception;
@@ -427,7 +427,7 @@ namespace Guflow.Tests.Worker
 
         private class ActivityMethodWithArgs : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public void ActivityMethod(Input input, string taskToken)
             {
                 Input = input;
@@ -448,7 +448,7 @@ namespace Guflow.Tests.Worker
                 _activityExecutionTime = activityExecutionTime;
                 Hearbeat.ProvideDetails(()=>details);
             }
-            [Execute]
+            [ActivityMethod]
             public void TranscodeMe()
             {
                 Thread.Sleep(_activityExecutionTime);
@@ -462,7 +462,7 @@ namespace Guflow.Tests.Worker
             public ActivityWithHearbeatIntervalMissing()
             {
             }
-            [Execute]
+            [ActivityMethod]
             public void TranscodeMe()
             {
 
@@ -478,7 +478,7 @@ namespace Guflow.Tests.Worker
                 _activityExecutionTime = activityExecutionTime;
                 Hearbeat.ProvideDetails(() => details);
             }
-            [Execute]
+            [ActivityMethod]
             public void TranscodeMe()
             {
                 Thread.Sleep(_activityExecutionTime);
@@ -495,7 +495,7 @@ namespace Guflow.Tests.Worker
                 Hearbeat.Enable(TimeSpan.FromMilliseconds(_heartbeatInterval));
                 Hearbeat.ProvideDetails(() => details);
             }
-            [Execute]
+            [ActivityMethod]
             public void TranscodeMe()
             {
                 Thread.Sleep(_activityExecutionTime);
@@ -517,7 +517,7 @@ namespace Guflow.Tests.Worker
                 _result = result;
             }
 
-            [Execute]
+            [ActivityMethod]
             public ActivityResponse Execute()
             {
                 return Complete(_result);
@@ -533,7 +533,7 @@ namespace Guflow.Tests.Worker
                 _details = details;
             }
 
-            [Execute]
+            [ActivityMethod]
             public ActivityResponse Execute()
             {
                 return Cancel(_details);
@@ -551,7 +551,7 @@ namespace Guflow.Tests.Worker
                 _reason = reason;
             }
 
-            [Execute]
+            [ActivityMethod]
             public ActivityResponse Execute()
             {
                 return Fail(_reason, _details);
@@ -560,7 +560,7 @@ namespace Guflow.Tests.Worker
 
         private class ActivityReturningDeferResponse : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public ActivityResponse Execute()
             {
                 return Defer;
@@ -578,7 +578,7 @@ namespace Guflow.Tests.Worker
                 _executionTime = executionTime;
             }
 
-            [Execute]
+            [ActivityMethod]
             public void Execute(CancellationToken cancellationToken)
             {
                 _cancellationToken = cancellationToken;
@@ -596,7 +596,7 @@ namespace Guflow.Tests.Worker
             {
                 _cancellationTokenSource.Cancel();
             }
-            [Execute]
+            [ActivityMethod]
             public void Execute()
             {
                 if(_cancellationTokenSource.IsCancellationRequested)

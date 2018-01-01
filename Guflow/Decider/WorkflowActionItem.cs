@@ -14,7 +14,7 @@ namespace Guflow.Decider
             _workflowActionFunc = workflowActionFunc;
         }
 
-        public override WorkflowItemEvent LastEvent => WorkflowItemEvent.NotFound;
+        public override WorkflowItemEvent LatestEvent => null;
 
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
@@ -52,9 +52,6 @@ namespace Guflow.Decider
             var description = ActivityDescriptionAttribute.FindOn<TActivity>();
             return AfterActivity(description.Name, description.Version, positionalName);
         }
-        public override IEnumerable<WorkflowItemEvent> AllEvents
-        {
-            get { return Enumerable.Empty<WorkflowItemEvent>(); }
-        }
+        public override IEnumerable<WorkflowItemEvent> AllEvents => Enumerable.Empty<WorkflowItemEvent>();
     }
 }

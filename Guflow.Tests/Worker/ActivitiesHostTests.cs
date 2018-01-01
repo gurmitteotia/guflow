@@ -227,7 +227,7 @@ namespace Guflow.Tests.Worker
         [ActivityDescription("1.0")]
         private class TestActivity1 : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public void Execute()
             {
                 
@@ -236,7 +236,7 @@ namespace Guflow.Tests.Worker
         [ActivityDescription("2.0")]
         private class TestActivity2 : Activity
         {
-            [Execute]
+            [ActivityMethod]
             public void Execute()
             {
 
