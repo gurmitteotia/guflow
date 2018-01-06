@@ -17,6 +17,10 @@
         /// Unique Id of activity.
         /// </summary>
         public string ActivityId { get; }
+
+        /// <summary>
+        /// Activity input supplied by scheduling workflow.
+        /// </summary>
         public string Input { get; }
         /// <summary>
         /// Workflow id of scheduling workflow.

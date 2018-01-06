@@ -64,7 +64,7 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowItem> StartupItems()
         {
-            return _workflowItems.Where(i => i.HasNoParents());
+            return _workflowItems.Where(i => i.IsStartupItem());
         }
 
         public IEnumerable<WorkflowItem> ChilderenOf(WorkflowItem workflowItem)

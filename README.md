@@ -11,7 +11,7 @@ A C#.Net library to write distributed workflows and activities using [Amazon SWF
 [Amazon SWF](https://aws.amazon.com/swf/) allows you to create distributable, elastic and fault tolerant workflows and acivities. While you can program Amazon SWF directly using REST api or Amazon .NET SDK, it can be very time consuming and error prone approach. Guflow will provide you high level and easy to use APIs to program the Amazon SWF.
 
 ### Documentation
-Guflow is supported by [tutorials](https://github.com/gurmitteotia/guflow/wiki/Tutorial), [documents](https://github.com/gurmitteotia/guflow/wiki) and [samples](https://github.com/gurmitteotia/guflow-samples) to get you started easily.
+Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tutorial), [documentation](https://github.com/gurmitteotia/guflow/wiki) and [samples](https://github.com/gurmitteotia/guflow-samples) to get you started easily.
 
 ### Supported .NET frameworks:
 .NET 4.5 onwards.

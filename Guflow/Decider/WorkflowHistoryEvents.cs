@@ -24,7 +24,7 @@ namespace Guflow.Decider
         {
         }
 
-        public WorkflowItemEvent LatestActivityEventFor(ActivityItem activityItem)
+        public WorkflowItemEvent LastActivityEventFor(ActivityItem activityItem)
         {
             WorkflowItemEvent result = null;
             if (_cachedActivityEvents.TryGetValue(activityItem, out result)) return result;
@@ -34,7 +34,7 @@ namespace Guflow.Decider
             return result;
         }
 
-        public WorkflowItemEvent LatestTimerEventFor(TimerItem timerItem)
+        public WorkflowItemEvent LastTimerEventFor(TimerItem timerItem)
         {
             WorkflowItemEvent result = null;
             if (_cachedTimerEvents.TryGetValue(timerItem, out result)) return result;

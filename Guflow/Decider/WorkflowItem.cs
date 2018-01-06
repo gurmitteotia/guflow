@@ -25,14 +25,14 @@ namespace Guflow.Decider
         {
             get
             {
-                var lastEvent = LatestEvent;
+                var lastEvent = LastEvent;
                 return lastEvent != null && lastEvent.IsActive;
             }
         }
 
-        public abstract WorkflowItemEvent LatestEvent { get; }
+        public abstract WorkflowItemEvent LastEvent { get; }
         public abstract IEnumerable<WorkflowItemEvent> AllEvents { get; }
-        public bool HasNoParents()
+        public bool IsStartupItem()
         {
             return _parentItems.Count == 0;
         }
@@ -103,7 +103,7 @@ namespace Guflow.Decider
 
         public bool IsReadyToScheduleChildren()
         {
-            var lastEvent = LatestEvent;
+            var lastEvent = LastEvent;
             if (lastEvent == null || lastEvent.IsActive)
                 return false;
             var lastEventAction = lastEvent.Interpret(_workflow);
@@ -111,7 +111,7 @@ namespace Guflow.Decider
         }
         public bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
         {
-            var lastEvent = LatestEvent;
+            var lastEvent = LastEvent;
             if (lastEvent == null)
                 return false;
             if (lastEvent.IsActive)
@@ -136,7 +136,7 @@ namespace Guflow.Decider
 
         public WorkflowAction DefaultActionOnLastEvent()
         {
-            return LatestEvent.DefaultAction(_workflow);
+            return LastEvent.DefaultAction(_workflow);
         }
     }
 }

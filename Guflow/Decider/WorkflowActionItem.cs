@@ -14,7 +14,7 @@ namespace Guflow.Decider
             _workflowActionFunc = workflowActionFunc;
         }
 
-        public override WorkflowItemEvent LatestEvent => null;
+        public override WorkflowItemEvent LastEvent => null;
 
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {

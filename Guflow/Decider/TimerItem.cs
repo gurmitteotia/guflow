@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Guflow.Worker;
 
 namespace Guflow.Decider
@@ -42,7 +43,7 @@ namespace Guflow.Decider
             return timerItem;
         }
 
-        public override WorkflowItemEvent LatestEvent => WorkflowHistoryEvents.LatestTimerEventFor(this);
+        public override WorkflowItemEvent LastEvent => WorkflowHistoryEvents.LastTimerEventFor(this);
 
         public override IEnumerable<WorkflowItemEvent> AllEvents => WorkflowHistoryEvents.AllTimerEventsFor(this);
 
@@ -141,7 +142,9 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
             if (!_canSchedule(this))
-                return new TriggerActions(this).FirstJoint().GetDecisions();
+                return IsStartupItem()
+                    ? Enumerable.Empty<WorkflowDecision>() 
+                    : new TriggerActions(this).FirstJoint().GetDecisions();
 
             return new []{new ScheduleTimerDecision(Identity, _fireAfter, this == _rescheduleTimer)};
         }

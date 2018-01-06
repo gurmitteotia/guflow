@@ -38,12 +38,12 @@ namespace Guflow.Decider
             _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
         }
 
-        public override WorkflowItemEvent LatestEvent
+        public override WorkflowItemEvent LastEvent
         {
             get
             {
-                var latestActivityEvent = WorkflowHistoryEvents.LatestActivityEventFor(this);
-                var latestTimerEvent = WorkflowHistoryEvents.LatestTimerEventFor(_rescheduleTimer);
+                var latestActivityEvent = WorkflowHistoryEvents.LastActivityEventFor(this);
+                var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(_rescheduleTimer);
                 if (latestActivityEvent > latestTimerEvent)
                     return latestActivityEvent;
 
@@ -229,7 +229,8 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
             if (!_whenFunc(this))
-                return new TriggerActions(this).FirstJoint().GetDecisions();
+                return IsStartupItem()? Enumerable.Empty<WorkflowDecision>()
+                    :new TriggerActions(this).FirstJoint().GetDecisions();
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.UseInputFunc(GetActivityInput);
@@ -247,8 +248,8 @@ namespace Guflow.Decider
 
         public override WorkflowDecision GetCancelDecision()
         {
-            var lastEvent = LatestEvent;
-            var latestTimerEvent = WorkflowHistoryEvents.LatestTimerEventFor(_rescheduleTimer);
+            var lastEvent = LastEvent;
+            var latestTimerEvent = WorkflowHistoryEvents.LastTimerEventFor(_rescheduleTimer);
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
                 return _rescheduleTimer.GetCancelDecision();
 

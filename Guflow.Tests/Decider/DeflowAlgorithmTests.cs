@@ -347,7 +347,7 @@ namespace Guflow.Tests.Decider
             var addDinner = CompletedActivityGraph(AddDinnerActivity);
             var bookFlight = CompletedActivityGraph(BookFlightActivity);
 
-            var workflow = new WorkflowWithFalseSchedulableConditionForTimer();
+            var workflow = new WorkflowManuallyTriggerJointOnFalseSchedulableConditionForTimer();
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
@@ -357,6 +357,28 @@ namespace Guflow.Tests.Decider
             {
                 new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
             }));
+        }
+
+        [Test]
+        public void No_workflow_item_is_scheduled_when_all_of_its_startup_activities_are_not_scheduled()
+        {
+            var startedEvent = _builder.WorkflowStartedEvent();
+            var workflow = new WorkflowWithNotSchedulableStartupActivities();
+            var historyEvents = new WorkflowHistoryEvents(new []{startedEvent});
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.Empty);
+        }
+
+        [Test]
+        public void No_workflow_item_is_scheduled_when_its_startup_activity_and_timer_are_not_scheduled()
+        {
+            var startedEvent = _builder.WorkflowStartedEvent();
+            var workflow = new WorkflowWithNotSchedulableStartupActivityAndTimer();
+            var historyEvents = new WorkflowHistoryEvents(new[] { startedEvent });
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.Empty);
         }
 
         private IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
@@ -543,6 +565,40 @@ namespace Guflow.Tests.Decider
                 ScheduleTimer(TimerName).When(a => false, a=>Trigger(a).FirstJoint()).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterTimer(TimerName);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        public class WorkflowWithNotSchedulableStartupActivities : Workflow
+        {
+            public WorkflowWithNotSchedulableStartupActivities()
+            {
+                ScheduleActivity(BookHotelActivity, Version).When(_ => false);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version).When(_=>false);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        public class WorkflowWithNotSchedulableStartupActivityAndTimer : Workflow
+        {
+            public WorkflowWithNotSchedulableStartupActivityAndTimer()
+            {
+                ScheduleActivity(BookHotelActivity, Version).When(_ => false);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleTimer(TimerName).When(_ => false);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterTimer(TimerName);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
 
                 ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
             }

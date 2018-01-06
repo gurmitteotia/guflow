@@ -19,7 +19,7 @@ namespace Guflow.Decider
         /// <summary>
         /// Return latest event for workflow item. Returns null when no event is found.
         /// </summary>
-        WorkflowItemEvent LatestEvent { get; }
+        WorkflowItemEvent LastEvent { get; }
 
         /// <summary>
         /// Returns all events 
