@@ -121,7 +121,7 @@
     <Compile Include="MethodInfoExtensions.cs" />
     <Compile Include="NullLog.cs" />
     <Compile Include="RetryableFunc.cs" />
-    <Compile Include="TaskQueue.cs" />
+    <Compile Include="TaskList.cs" />
     <Compile Include="Decider\WorkflowAlreadyHostedException.cs" />
     <Compile Include="Decider\WorkflowsHost.cs" />
     <Compile Include="Decider\WorkflowCancelledEventArgs.cs" />

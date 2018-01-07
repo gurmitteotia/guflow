@@ -62,20 +62,20 @@ namespace Guflow.Decider
             if (string.IsNullOrEmpty(defaultTaskListName))
                 throw new InvalidOperationException(Resources.Default_task_list_is_missing);
 
-            StartExecution(new TaskQueue(defaultTaskListName));
+            StartExecution(new TaskList(defaultTaskListName));
         }
         /// <summary>
-        /// Start execution of hosted workflows on given TaskQueue.
+        /// Start execution of hosted workflows on given TaskList.
         /// </summary>
-        /// <param name="taskQueue"></param>
-        public void StartExecution(TaskQueue taskQueue)
+        /// <param name="taskList"></param>
+        public void StartExecution(TaskList taskList)
         {
             if (_disposed)
                 throw new ObjectDisposedException(Resources.Workflow_execution_already_stopped);
 
-            Ensure.NotNull(taskQueue, "taskQueue");
+            Ensure.NotNull(taskList, "taskList");
             var domain = _domain.OnPollingError(_pollingErrorHandler);
-            ExecuteHostedWorkfowsAsync(taskQueue, domain);
+            ExecuteHostedWorkfowsAsync(taskList, domain);
         }
         /// <summary>
         /// Stop the execution of hosted workflows.
@@ -143,14 +143,14 @@ namespace Guflow.Decider
                 Decisions = decisions.Select(s => s.Decision()).ToList()
             };
         }
-        private async void ExecuteHostedWorkfowsAsync(TaskQueue taskQueue, Domain domain)
+        private async void ExecuteHostedWorkfowsAsync(TaskList taskList, Domain domain)
         {
             Status = HostStatus.Executing;
             try
             {
                 while (!_disposed)
                 {
-                    var workflowTask = await PollForTaskAsync(taskQueue, domain);
+                    var workflowTask = await PollForTaskAsync(taskList, domain);
                     await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
                 }
                 Status = HostStatus.Stopped;
@@ -171,10 +171,10 @@ namespace Guflow.Decider
                 _stoppedEvent.Set();
             }
         }
-        private async Task<WorkflowTask> PollForTaskAsync(TaskQueue taskQueue, Domain domain)
+        private async Task<WorkflowTask> PollForTaskAsync(TaskList taskList, Domain domain)
         {
-            _log.Debug($"Polling for workflow task on queue {taskQueue} and domain {domain}");
-            var workflowTask = await taskQueue.PollForWorkflowTaskAsync(domain);
+            _log.Debug($"Polling for workflow task on queue {taskList} and domain {domain}");
+            var workflowTask = await taskList.PollForWorkflowTaskAsync(domain);
             workflowTask.OnExecutionError(_genericErrorHandler);
             return workflowTask;
         }

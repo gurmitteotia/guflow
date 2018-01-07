@@ -171,7 +171,7 @@ namespace Guflow.Tests.Worker
             using (var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) }))
             {
                 hostedActivities.Execution = ActivityExecution.Sequencial;
-                hostedActivities.StartExecution(new TaskQueue("name"));
+                hostedActivities.StartExecution(new TaskList("name"));
                 Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Executing));
             }
         }
@@ -181,7 +181,7 @@ namespace Guflow.Tests.Worker
         {
             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
             hostedActivities.Execution = ActivityExecution.Sequencial;
-            hostedActivities.StartExecution(new TaskQueue("name"));
+            hostedActivities.StartExecution(new TaskList("name"));
             hostedActivities.StopExecution();
             Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Stopped));
         }
@@ -192,7 +192,7 @@ namespace Guflow.Tests.Worker
             SetupAmazonSwfToThrowsException();
 
              var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
-            hostedActivities.StartExecution(new TaskQueue("name"));
+            hostedActivities.StartExecution(new TaskList("name"));
             hostedActivities.StopExecution();
             Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Faulted));
         }
@@ -204,7 +204,7 @@ namespace Guflow.Tests.Worker
               Exception actualException = null;
             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
             hostedActivities.OnFault += (s, e) => actualException = e.Exception;
-            hostedActivities.StartExecution(new TaskQueue("name"));
+            hostedActivities.StartExecution(new TaskList("name"));
             hostedActivities.StopExecution();
             Assert.That(actualException, Is.Not.Null);
         }

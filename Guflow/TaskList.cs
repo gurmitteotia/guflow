@@ -11,7 +11,7 @@ namespace Guflow
     /// <summary>
     /// Represents the task list to poll for new decisions/activity task on Amazon SWF.
     /// </summary>
-    public sealed class TaskQueue
+    public sealed class TaskList
     {
         private readonly string _taskListName;
         private readonly string _pollingIdentity;
@@ -24,8 +24,13 @@ namespace Guflow
         /// Strategy to read only first page of workflow history event. Use it carefully.
         /// </summary>
         public static readonly ReadHistoryEvents ReadFirstPage = (d,q) => ReadFirstPageAsync(d, q);
-        private ILog _log = Log.GetLogger<TaskQueue>();
-        public TaskQueue(string taskListName, string pollingIdentity = null)
+        private readonly ILog _log = Log.GetLogger<TaskList>();
+        /// <summary>
+        /// Create a new instance of TaskList.
+        /// </summary>
+        /// <param name="taskListName"></param>
+        /// <param name="pollingIdentity"></param>
+        public TaskList(string taskListName, string pollingIdentity = null)
         {
             Ensure.NotNullAndEmpty(taskListName,()=>new ArgumentException(Resources.TaskListName_required, nameof(taskListName)));
             _taskListName = taskListName;
@@ -72,12 +77,12 @@ namespace Guflow
             return !string.IsNullOrEmpty(activityTask?.TaskToken);
         }
 
-        private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskQueue taskQueue, string nextPageToken=null)
+        private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskList taskList, string nextPageToken=null)
         {
-            var decisionTask = await domain.PollForDecisionTaskAsync(taskQueue, nextPageToken);
+            var decisionTask = await domain.PollForDecisionTaskAsync(taskList, nextPageToken);
             if (HasMoreEventsToRead(decisionTask))
             {
-                var nextDecisionTasks = await ReadAllEventsAsync(domain, taskQueue ,decisionTask.NextPageToken);
+                var nextDecisionTasks = await ReadAllEventsAsync(domain, taskList ,decisionTask.NextPageToken);
                 decisionTask.Events.AddRange(nextDecisionTasks.Events);
             }
             return decisionTask;
@@ -92,9 +97,9 @@ namespace Guflow
             return !string.IsNullOrEmpty(decisionTask?.NextPageToken);
         }
 
-        private static async Task<DecisionTask> ReadFirstPageAsync(Domain domain, TaskQueue taskQueue, string nextPageToken= null)
+        private static async Task<DecisionTask> ReadFirstPageAsync(Domain domain, TaskList taskList, string nextPageToken= null)
         {
-            return await domain.PollForDecisionTaskAsync(taskQueue, nextPageToken);
+            return await domain.PollForDecisionTaskAsync(taskList, nextPageToken);
         }
 
         internal PollForDecisionTaskRequest CreateDecisionTaskPollingRequest(string domain, string nextPageToken = null)
@@ -103,7 +108,7 @@ namespace Guflow
             {
                 Identity = _pollingIdentity,
                 Domain = domain,
-                TaskList = new TaskList() { Name = _taskListName },
+                TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = _taskListName },
                 MaximumPageSize = 1000,
                 ReverseOrder = true,
                 NextPageToken = nextPageToken
@@ -116,14 +121,14 @@ namespace Guflow
             {
                 Identity = _pollingIdentity,
                 Domain = forDomain,
-                TaskList = new TaskList() {Name = _taskListName}
+                TaskList = new Amazon.SimpleWorkflow.Model.TaskList() {Name = _taskListName}
             };
         }
 
         public override string ToString()
         {
-            return $"TaskQueue {_taskListName} Identity {_pollingIdentity}";
+            return $"TaskList {_taskListName} Identity {_pollingIdentity}";
         }
     }
-    public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskQueue taskQueue);
+    public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskList taskList);
 }

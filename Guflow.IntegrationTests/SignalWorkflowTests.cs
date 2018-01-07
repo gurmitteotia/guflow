@@ -52,14 +52,14 @@ namespace Guflow.IntegrationTests
         private async Task<WorkflowsHost> HostAsync(params Workflow[] workflows)
         {
             var hostedWorkflows = await _domain.Host(workflows);
-            hostedWorkflows.StartExecution(new TaskQueue(_taskListName));
+            hostedWorkflows.StartExecution(new TaskList(_taskListName));
             return hostedWorkflows;
         }
 
         private async Task<ActivitiesHost> HostAsync(params Type[] activityTypes)
         {
             var hostedActivities = await _domain.Host(activityTypes);
-            hostedActivities.StartExecution(new TaskQueue(_taskListName));
+            hostedActivities.StartExecution(new TaskList(_taskListName));
             return hostedActivities;
         }
 

@@ -70,7 +70,7 @@ namespace Guflow.Tests.Decider
         {
             var hostedWorkflows = _domain.Host(new Workflow[] { new TestWorkflow1() });
 
-            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.StartExecution((TaskQueue)null));
+            Assert.Throws<ArgumentNullException>(() => hostedWorkflows.StartExecution((TaskList)null));
         }
 
         [Test]
@@ -104,7 +104,7 @@ namespace Guflow.Tests.Decider
         {
             using (var hostedWorkflows = new WorkflowsHost(_domain, new[] { new TestWorkflow1() }))
             {
-                hostedWorkflows.StartExecution(new TaskQueue("name"));
+                hostedWorkflows.StartExecution(new TaskList("name"));
                 Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Executing));
             }
         }
@@ -113,7 +113,7 @@ namespace Guflow.Tests.Decider
         public void Status_is_set_to_stopped_when_workflow_host_is_stopped_execution()
         {
             var hostedWorkflows = new WorkflowsHost(_domain, new[] { new TestWorkflow1() });
-            hostedWorkflows.StartExecution(new TaskQueue("name"));
+            hostedWorkflows.StartExecution(new TaskList("name"));
             hostedWorkflows.StopExecution();
             Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Stopped));
         }
@@ -125,7 +125,7 @@ namespace Guflow.Tests.Decider
                 It.IsAny<CancellationToken>())).Throws<Exception>();
 
             var hostedWorkflows = new WorkflowsHost(_domain, new[] { new TestWorkflow1() });
-            hostedWorkflows.StartExecution(new TaskQueue("name"));
+            hostedWorkflows.StartExecution(new TaskList("name"));
             hostedWorkflows.StopExecution();
             Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Faulted));
         }
@@ -138,7 +138,7 @@ namespace Guflow.Tests.Decider
             Exception actualException = null;
             var hostedWorkflows = new WorkflowsHost(_domain, new[] { new TestWorkflow1() });
             hostedWorkflows.OnFault += (s, e) => actualException = e.Exception;
-            hostedWorkflows.StartExecution(new TaskQueue("name"));
+            hostedWorkflows.StartExecution(new TaskList("name"));
             hostedWorkflows.StopExecution();
             Assert.That(actualException, Is.EqualTo(expectedException));
         }

@@ -75,11 +75,11 @@ namespace Guflow.Decider
             return taskPriority.Value.ToString();
         }
 
-        private TaskList ToAwsTaskList(string taskList)
+        private Amazon.SimpleWorkflow.Model.TaskList ToAwsTaskList(string taskList)
         {
             if (string.IsNullOrEmpty(taskList))
                 return null;
-            return new TaskList() {Name = taskList};
+            return new Amazon.SimpleWorkflow.Model.TaskList() {Name = taskList};
         }
 
         private string ToAwsTimeout(TimeSpan? timeout)

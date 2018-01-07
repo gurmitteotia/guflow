@@ -23,7 +23,7 @@ namespace Guflow.Decider
                     new ContinueAsNewWorkflowExecutionDecisionAttributes()
                     {
                         Input = _restartWorkflowAction.Input,
-                        TaskList = string.IsNullOrEmpty(_restartWorkflowAction.TaskList) ? null : new TaskList() { Name = _restartWorkflowAction.TaskList },
+                        TaskList = string.IsNullOrEmpty(_restartWorkflowAction.TaskList) ? null : new Amazon.SimpleWorkflow.Model.TaskList() { Name = _restartWorkflowAction.TaskList },
                         ChildPolicy = _restartWorkflowAction.ChildPolicy,
                         ExecutionStartToCloseTimeout =
                             _restartWorkflowAction.ExecutionStartToCloseTimeout.HasValue

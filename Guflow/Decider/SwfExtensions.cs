@@ -26,11 +26,11 @@ namespace Guflow.Decider
             return value.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture);
         }
 
-        public static TaskList TaskList(this string taskListName)
+        public static Amazon.SimpleWorkflow.Model.TaskList TaskList(this string taskListName)
         {
-            TaskList taskList = null;
+            Amazon.SimpleWorkflow.Model.TaskList taskList = null;
             if (!string.IsNullOrEmpty(taskListName))
-                taskList = new TaskList() { Name = taskListName };
+                taskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = taskListName };
             return taskList;
         }
     }

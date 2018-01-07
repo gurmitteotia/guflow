@@ -287,7 +287,7 @@ namespace Guflow.Tests.Decider
                     ParentInitiatedEventId = 10,
                     ParentWorkflowExecution = new WorkflowExecution() { RunId = "parent runid", WorkflowId = "parent workflow id" },
                     TagList = new List<string>() { "First", "Second" },
-                    TaskList = new TaskList() { Name = "task name" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "task name" },
                     TaskPriority = "1",
                     TaskStartToCloseTimeout = "30",
                 }

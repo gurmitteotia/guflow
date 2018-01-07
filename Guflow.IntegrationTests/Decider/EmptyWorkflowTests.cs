@@ -21,7 +21,7 @@ namespace Guflow.IntegrationTests
             _emptyWorkflow = new EmptyWorkflow();
             _workflowsHost = await _domain.Host(_emptyWorkflow);
             _taskListName = Guid.NewGuid().ToString();
-            _workflowsHost.StartExecution(new TaskQueue(_taskListName));
+            _workflowsHost.StartExecution(new TaskList(_taskListName));
         }
 
         [TearDown]
