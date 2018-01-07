@@ -180,7 +180,7 @@ namespace Guflow.Decider
         private async Task<WorkflowTask> PollForTaskAsync(TaskList taskList, Domain domain, string pollingIdentity)
         {
             _log.Debug($"Polling for workflow task on queue {taskList} and domain {domain}");
-            var workflowTask = await taskList.PollForWorkflowTaskAsync(domain, pollingIdentity);
+            var workflowTask = await taskList.PollForWorkflowTaskAsync(domain, pollingIdentity, _cancellationTokenSource.Token);
             workflowTask.OnExecutionError(_genericErrorHandler);
             return workflowTask;
         }

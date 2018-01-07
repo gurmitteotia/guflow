@@ -147,7 +147,7 @@ namespace Guflow.Tests
             AmazonSwfReturnsDecisionTask(decision1, decision2, decision3);
             var expectedEvents = decision1.Events.Concat(decision2.Events).Concat(decision3.Events).ToArray();
 
-            var decisionTask = await _domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity);
+            var decisionTask = await _domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity, _cancellationToken);
 
             Assert.That(decisionTask.Events, Is.EquivalentTo(expectedEvents));
         }
@@ -162,7 +162,7 @@ namespace Guflow.Tests
 
             _taskList.ReadStrategy = TaskList.ReadFirstPage;
 
-            var decisionTask = await _domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity);
+            var decisionTask = await _domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity, _cancellationToken);
 
             Assert.That(decisionTask.Events, Is.EquivalentTo(decision1.Events));
         }
@@ -227,7 +227,7 @@ namespace Guflow.Tests
                                  .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = expectedDecisionTask }));
             var domain =  _domain.OnPollingError((e) => ErrorAction.Retry);
 
-            var decisionTask = await domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity);
+            var decisionTask = await domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity, _cancellationToken);
 
             Assert.That(decisionTask, Is.EqualTo(expectedDecisionTask));
         }
@@ -241,7 +241,7 @@ namespace Guflow.Tests
 
             var domain = _domain.OnPollingError((e) => e.RetryAttempts < 1 ? ErrorAction.Retry : ErrorAction.Continue);
 
-            var decisionTask = await domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity);
+            var decisionTask = await domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity, _cancellationToken);
 
             Assert.That(decisionTask, Is.EqualTo(Domain.EmptyDecisionTask));
         }
@@ -253,7 +253,7 @@ namespace Guflow.Tests
                                  .Throws(new UnknownResourceException("not found"));
 
             var domain = _domain.OnPollingError((e) => ErrorAction.Continue);
-            var decisionTask = await domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity);
+            var decisionTask = await domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity, _cancellationToken);
 
             Assert.That(decisionTask, Is.EqualTo(Domain.EmptyDecisionTask));
         }
@@ -266,7 +266,7 @@ namespace Guflow.Tests
 
             var domain = _domain.OnPollingError((e) => ErrorAction.Unhandled);
 
-            Assert.ThrowsAsync<UnknownResourceException>(async () => await domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity));
+            Assert.ThrowsAsync<UnknownResourceException>(async () => await domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity, _cancellationToken));
         }
 
         [Test]

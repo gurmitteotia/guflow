@@ -164,24 +164,24 @@ namespace Guflow
             return response?.ActivityTask;
         }
 
-        internal async Task<DecisionTask> PollForDecisionTaskAsync(TaskList taskList, string pollingIdentity)
+        internal async Task<DecisionTask> PollForDecisionTaskAsync(TaskList taskList, string pollingIdentity, CancellationToken token)
         {
-            return await taskList.ReadStrategy(this, taskList, pollingIdentity);
+            return await taskList.ReadStrategy(this, taskList, pollingIdentity, token);
         }
 
-        public async Task<DecisionTask> PollForDecisionTaskAsync(TaskList taskList, string pollingIdentity, string nextPageToken)
+        public async Task<DecisionTask> PollForDecisionTaskAsync(TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken)
         {
             Ensure.NotNull(taskList, "taskList");
             var retryableFunc = new RetryableFunc(_errorHandler);
             return await retryableFunc.ExecuteAsync(
-                    async () => await PollAmazonSwfForDecisionTaskAsync(taskList, pollingIdentity ,nextPageToken),
+                    async () => await PollAmazonSwfForDecisionTaskAsync(taskList, pollingIdentity , token,nextPageToken),
                     EmptyDecisionTask);
         }
 
-        private async Task<DecisionTask> PollAmazonSwfForDecisionTaskAsync(TaskList taskList, string pollingIdentity,string nextPageToken)
+        private async Task<DecisionTask> PollAmazonSwfForDecisionTaskAsync(TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken)
         {
             var request = taskList.CreateDecisionTaskPollingRequest(_name, pollingIdentity, nextPageToken);
-            var response = await _simpleWorkflowClient.PollForDecisionTaskAsync(request);
+            var response = await _simpleWorkflowClient.PollForDecisionTaskAsync(request, token);
             return response?.DecisionTask;
         } 
 

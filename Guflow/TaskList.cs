@@ -18,11 +18,11 @@ namespace Guflow
         /// <summary>
         /// Strategy to read all history events of workflow.
         /// </summary>
-        public static readonly ReadHistoryEvents ReadAllEvents = (d,q,p) => ReadAllEventsAsync(d,q,p);
+        public static readonly ReadHistoryEvents ReadAllEvents = (d,q,p,t) => ReadAllEventsAsync(d,q,p,t);
         /// <summary>
         /// Strategy to read only first page of workflow history event. Use it carefully.
         /// </summary>
-        public static readonly ReadHistoryEvents ReadFirstPage = (d,q,p) => ReadFirstPageAsync(d, q, p);
+        public static readonly ReadHistoryEvents ReadFirstPage = (d,q,p,t) => ReadFirstPageAsync(d, q, p,t);
         private readonly ILog _log = Log.GetLogger<TaskList>();
         /// <summary>
         /// Create a new instance of TaskList.
@@ -51,10 +51,10 @@ namespace Guflow
             }
         }
 
-        internal async Task<WorkflowTask> PollForWorkflowTaskAsync(Domain domain, string pollingIdentity)
+        internal async Task<WorkflowTask> PollForWorkflowTaskAsync(Domain domain, string pollingIdentity, CancellationToken token)
         {
             _log.Debug($"Polling for new decisions on {this} under {domain}");
-            var decisionTask = await domain.PollForDecisionTaskAsync(this, pollingIdentity);
+            var decisionTask = await domain.PollForDecisionTaskAsync(this, pollingIdentity, token);
             if (AreNewDecisionsAreReturned(decisionTask))
                 return WorkflowTask.CreateFor(decisionTask, domain);
 
@@ -76,12 +76,12 @@ namespace Guflow
             return !string.IsNullOrEmpty(activityTask?.TaskToken);
         }
 
-        private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskList taskList, string pollingIdentity, string nextPageToken=null)
+        private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken=null)
         {
-            var decisionTask = await domain.PollForDecisionTaskAsync(taskList, pollingIdentity ,nextPageToken);
+            var decisionTask = await domain.PollForDecisionTaskAsync(taskList, pollingIdentity , token,nextPageToken);
             if (HasMoreEventsToRead(decisionTask))
             {
-                var nextDecisionTasks = await ReadAllEventsAsync(domain, taskList, pollingIdentity ,decisionTask.NextPageToken);
+                var nextDecisionTasks = await ReadAllEventsAsync(domain, taskList, pollingIdentity,token ,decisionTask.NextPageToken);
                 decisionTask.Events.AddRange(nextDecisionTasks.Events);
             }
             return decisionTask;
@@ -96,9 +96,9 @@ namespace Guflow
             return !string.IsNullOrEmpty(decisionTask?.NextPageToken);
         }
 
-        private static async Task<DecisionTask> ReadFirstPageAsync(Domain domain, TaskList taskList, string pollingIdentity, string nextPageToken= null)
+        private static async Task<DecisionTask> ReadFirstPageAsync(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken= null)
         {
-            return await domain.PollForDecisionTaskAsync(taskList,pollingIdentity ,nextPageToken);
+            return await domain.PollForDecisionTaskAsync(taskList,pollingIdentity ,token,nextPageToken);
         }
 
         internal PollForDecisionTaskRequest CreateDecisionTaskPollingRequest(string domain, string pollingIdentity, string nextPageToken = null)
@@ -129,5 +129,5 @@ namespace Guflow
             return $"TaskList {_taskListName}";
         }
     }
-    public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskList taskList, string pollingIdentity);
+    public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token);
 }
