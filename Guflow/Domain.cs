@@ -164,12 +164,7 @@ namespace Guflow
             return response?.ActivityTask;
         }
 
-        internal async Task<DecisionTask> PollForDecisionTaskAsync(TaskList taskList, string pollingIdentity, CancellationToken token)
-        {
-            return await taskList.ReadStrategy(this, taskList, pollingIdentity, token);
-        }
-
-        public async Task<DecisionTask> PollForDecisionTaskAsync(TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken)
+        public async Task<DecisionTask> PollForDecisionTaskAsync(TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken = null)
         {
             Ensure.NotNull(taskList, "taskList");
             var retryableFunc = new RetryableFunc(_errorHandler);

@@ -90,7 +90,7 @@
     <Compile Include="Decider\SignalTests.cs" />
     <Compile Include="Decider\SignalWorkflowRequestTests.cs" />
     <Compile Include="Decider\StartWorkflowRequestTests.cs" />
-    <Compile Include="TaskQueueTests.cs" />
+    <Compile Include="TaskListTests.cs" />
     <Compile Include="Decider\WorkflowCancellationFailedEventTests.cs" />
     <Compile Include="Decider\CancelWorkflowItemActionTests.cs" />
     <Compile Include="Decider\CompleteWorkflowActionTests.cs" />

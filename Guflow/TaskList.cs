@@ -54,7 +54,7 @@ namespace Guflow
         internal async Task<WorkflowTask> PollForWorkflowTaskAsync(Domain domain, string pollingIdentity, CancellationToken token)
         {
             _log.Debug($"Polling for new decisions on {this} under {domain}");
-            var decisionTask = await domain.PollForDecisionTaskAsync(this, pollingIdentity, token);
+            var decisionTask = await ReadStrategy(domain, this, pollingIdentity, token);
             if (AreNewDecisionsAreReturned(decisionTask))
                 return WorkflowTask.CreateFor(decisionTask, domain);
 
@@ -78,7 +78,7 @@ namespace Guflow
 
         private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken=null)
         {
-            var decisionTask = await domain.PollForDecisionTaskAsync(taskList, pollingIdentity , token,nextPageToken);
+            var decisionTask = await domain.PollForDecisionTaskAsync(taskList, pollingIdentity , token, nextPageToken);
             if (HasMoreEventsToRead(decisionTask))
             {
                 var nextDecisionTasks = await ReadAllEventsAsync(domain, taskList, pollingIdentity,token ,decisionTask.NextPageToken);

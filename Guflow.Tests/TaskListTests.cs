@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleWorkflow;
@@ -11,7 +13,7 @@ using NUnit.Framework;
 namespace Guflow.Tests
 {
     [TestFixture]
-    public class TaskQueueTests
+    public class TaskListTests
     {
         private const string _taskListName = "tname";
         private const string _domainName = "domain";
@@ -105,6 +107,39 @@ namespace Guflow.Tests
             Assert.ThrowsAsync<UnknownResourceException>(async () => await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity, _cancellationTokenSource.Token));
         }
 
+        [Test]
+        public async Task By_default_read_all_events_when_decision_task_is_returned_in_multiple_pages()
+        {
+            var decision1 = new DecisionTask { TaskToken = "t,", NextPageToken = "token", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 1 } } };
+            var decision2 = new DecisionTask { TaskToken = "t,", NextPageToken = "token1", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 2 } } };
+            var decision3 = new DecisionTask { TaskToken = "t,", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 3 } } };
+            AmazonSwfReturnsDecisionTask(decision1, decision2, decision3);
+
+            var decisionTask =
+                await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity, _cancellationTokenSource.Token);
+
+            Assert.That(decisionTask, Is.Not.EqualTo(WorkflowTask.Empty));
+            _amazonWorkflowClient.Verify(c=>c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()),Times.Exactly(3));
+        }
+
+
+        [Test]
+        public async Task Task_queue_can_be_configured_to_read_first_page_of_hisotry_events()
+        {
+            var decision1 = new DecisionTask { TaskToken = "t,", NextPageToken = "token", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 1 } } };
+            var decision2 = new DecisionTask { TaskToken = "t,",NextPageToken = "token1", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 2 } } };
+            var decision3 = new DecisionTask { TaskToken = "t,", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 3 } } };
+            AmazonSwfReturnsDecisionTask(decision1, decision2, decision3);
+
+            _taskList.ReadStrategy = TaskList.ReadFirstPage;
+
+            var decisionTask = await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity, _cancellationTokenSource.Token);
+
+            Assert.That(decisionTask, Is.Not.EqualTo(WorkflowTask.Empty));
+            _amazonWorkflowClient.Verify(c => c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+
+        }
+
 
         private void AmazonSwfReturns(DecisionTask decisionTask)
         {
@@ -144,6 +179,14 @@ namespace Guflow.Tests
 
             _amazonWorkflowClient.Setup(c => c.PollForDecisionTaskAsync(It.Is<PollForDecisionTaskRequest>(r => request(r)), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new PollForDecisionTaskResponse() { DecisionTask = new DecisionTask() })).Verifiable();
+        }
+
+        private void AmazonSwfReturnsDecisionTask(DecisionTask decisionTask1, DecisionTask decisionTask2, DecisionTask decisionTask3)
+        {
+            _amazonWorkflowClient.SetupSequence(c => c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(new PollForDecisionTaskResponse { DecisionTask = decisionTask1 }))
+                .Returns(Task.FromResult(new PollForDecisionTaskResponse { DecisionTask = decisionTask2 }))
+                .Returns(Task.FromResult(new PollForDecisionTaskResponse { DecisionTask = decisionTask3 }));
         }
     }
 }

@@ -139,36 +139,6 @@ namespace Guflow.Tests
         }
 
         [Test]
-        public async Task By_default_read_all_events_when_decision_task_is_returned_in_multiple_pages()
-        {
-            var decision1 = new DecisionTask {NextPageToken = "token", Events = new List<HistoryEvent> {new HistoryEvent {EventId = 1}}};
-            var decision2 = new DecisionTask {NextPageToken = "token1", Events = new List<HistoryEvent> { new HistoryEvent { EventId =  2} } };
-            var decision3 = new DecisionTask { Events = new List<HistoryEvent> { new HistoryEvent { EventId = 3 } } };
-            AmazonSwfReturnsDecisionTask(decision1, decision2, decision3);
-            var expectedEvents = decision1.Events.Concat(decision2.Events).Concat(decision3.Events).ToArray();
-
-            var decisionTask = await _domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity, _cancellationToken);
-
-            Assert.That(decisionTask.Events, Is.EquivalentTo(expectedEvents));
-        }
-
-        [Test]
-        public async Task Task_queue_can_be_configured_to_read_first_page_of_hisotry_events()
-        {
-            var decision1 = new DecisionTask { NextPageToken = "token", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 1 } } };
-            var decision2 = new DecisionTask { NextPageToken = "token1", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 2 } } };
-            var decision3 = new DecisionTask { Events = new List<HistoryEvent> { new HistoryEvent { EventId = 3 } } };
-            AmazonSwfReturnsDecisionTask(decision1, decision2, decision3);
-
-            _taskList.ReadStrategy = TaskList.ReadFirstPage;
-
-            var decisionTask = await _domain.PollForDecisionTaskAsync(_taskList, _pollingIdentity, _cancellationToken);
-
-            Assert.That(decisionTask.Events, Is.EquivalentTo(decision1.Events));
-        }
-
-   
-        [Test]
         public async Task Send_signal_request_to_amazon_swf()
         {
             var signalRequest = new SignalWorkflowRequest("workflowId", "signalName")
@@ -347,15 +317,6 @@ namespace Guflow.Tests
                 DefaultStartToCloseTimeoutInSeconds = 8
             };
         }
-
-        private void AmazonSwfReturnsDecisionTask(DecisionTask decisionTask1, DecisionTask decisionTask2, DecisionTask decisionTask3)
-        {
-            _amazonWorkflowClient.SetupSequence(c => c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new PollForDecisionTaskResponse { DecisionTask = decisionTask1 }))
-                .Returns(Task.FromResult(new PollForDecisionTaskResponse { DecisionTask = decisionTask2 }))
-                .Returns(Task.FromResult(new PollForDecisionTaskResponse { DecisionTask = decisionTask3 }));
-        }
-
 
         private void AssertThatAmazonSwfIsSend(StartWorkflowRequest request)
         {
