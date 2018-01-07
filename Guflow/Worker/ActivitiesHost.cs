@@ -22,11 +22,23 @@ namespace Guflow.Worker
         private readonly HostState _state = new HostState();
         private readonly ILog _log = Log.GetLogger<ActivitiesHost>();
         private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
-        internal ActivitiesHost(Domain domain, IEnumerable<Type> activitiesTypes)
+        
+        /// <summary>
+        ///  Create activity host for domain and activities types. Activities should implement default constructor.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="activitiesTypes"></param>
+        public ActivitiesHost(Domain domain, IEnumerable<Type> activitiesTypes)
             : this(domain, activitiesTypes, t => (Activity)Activator.CreateInstance(t))
         {
         }
-        internal ActivitiesHost(Domain domain, IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
+        /// <summary>
+        /// Create new instance of ActivitiesHost and let you control the creation of activity's instance.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="activitiesTypes"></param>
+        /// <param name="instanceCreator"></param>
+        public ActivitiesHost(Domain domain, IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
         {
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(activitiesTypes, "activitiesTypes");

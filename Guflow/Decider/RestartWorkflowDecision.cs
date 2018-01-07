@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
@@ -9,10 +7,11 @@ namespace Guflow.Decider
     internal sealed class RestartWorkflowDecision : WorkflowClosingDecision
     {
         private readonly RestartWorkflowAction _restartWorkflowAction;
-
+        private const int _medium = 12;
         public RestartWorkflowDecision(RestartWorkflowAction restartWorkflowAction)
         {
             _restartWorkflowAction = restartWorkflowAction;
+            Priority = _medium;
         }
      
         internal override Decision Decision()

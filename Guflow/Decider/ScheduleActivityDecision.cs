@@ -15,7 +15,7 @@ namespace Guflow.Decider
         }
 
         public ActivityTimeouts Timeouts { get; internal set; }
-        public string Input { get { return _inputFunc(); } }
+        public string Input => _inputFunc();
         public string TaskList { get; set; }
         public int? TaskPriority { get; set; }
 

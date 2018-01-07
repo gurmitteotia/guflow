@@ -12,7 +12,7 @@ namespace Guflow
         public static readonly Func<Type, ILog> ConsoleLogger = t => new ConsoleLog(t.Name);
         private static Func<Type, ILog> _logFactory = NullLogger;
       
-        public static ILog GetLogger<T>()
+        internal static ILog GetLogger<T>()
         {
             var log = _logFactory(typeof(T));
             log = log ?? NullLog;
@@ -20,7 +20,7 @@ namespace Guflow
             return log;
         }
         /// <summary>
-        /// Register your custom logger to be used by 
+        /// Register your custom logger to be used by Guflow.
         /// </summary>
         /// <param name="logFactoryFunc"></param>
         public static void Register(Func<Type, ILog> logFactoryFunc)
