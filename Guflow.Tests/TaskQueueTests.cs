@@ -24,7 +24,7 @@ namespace Guflow.Tests
         [SetUp]
         public void Setup()
         {
-            _taskList = new TaskList(_taskListName, _pollingIdentity);
+            _taskList = new TaskList(_taskListName);
             _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
             _cancellationTokenSource = new CancellationTokenSource();
             _domain = new Domain(_domainName,_amazonWorkflowClient.Object);
@@ -35,7 +35,7 @@ namespace Guflow.Tests
         {
             AmazonSwfReturns(new DecisionTask());
 
-            var workflowTasks = await _taskList.PollForWorkflowTaskAsync(_domain);
+            var workflowTasks = await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity);
 
             Assert.That(workflowTasks, Is.EqualTo(WorkflowTask.Empty));
         }
@@ -45,7 +45,7 @@ namespace Guflow.Tests
         {
             AmazonSwfReturns(new DecisionTask() { TaskToken = "token" });
 
-            var workflowTasks = await _taskList.PollForWorkflowTaskAsync(_domain);
+            var workflowTasks = await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity);
 
             Assert.That(workflowTasks, Is.Not.EqualTo(WorkflowTask.Empty));
         }
@@ -55,7 +55,7 @@ namespace Guflow.Tests
         {
             AmazonSwfReturns(new ActivityTask());
 
-            var workerTask = await _taskList.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
+            var workerTask = await _taskList.PollForWorkerTaskAsync(_domain, _pollingIdentity ,_cancellationTokenSource.Token);
 
             Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
         }
@@ -64,7 +64,7 @@ namespace Guflow.Tests
         {
             AmazonSwfReturns((ActivityTask)null);
 
-            var workerTask = await _taskList.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
+            var workerTask = await _taskList.PollForWorkerTaskAsync(_domain, _pollingIdentity,_cancellationTokenSource.Token);
 
             Assert.That(workerTask, Is.EqualTo(WorkerTask.Empty));
         }
@@ -74,7 +74,7 @@ namespace Guflow.Tests
         {
             AmazonSwfReturns(new ActivityTask { TaskToken = "token"});
 
-            var workerTask = await _taskList.PollForWorkerTaskAsync(_domain, _cancellationTokenSource.Token);
+            var workerTask = await _taskList.PollForWorkerTaskAsync(_domain,_pollingIdentity ,_cancellationTokenSource.Token);
 
             Assert.That(workerTask, Is.Not.EqualTo(WorkerTask.Empty));
         }
@@ -84,23 +84,12 @@ namespace Guflow.Tests
         {
             SetupAmazonSwfClientToMakeRequest();
 
-            await _taskList.PollForWorkflowTaskAsync(_domain);
+            await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity);
 
             _amazonWorkflowClient.Verify();
         }
 
-        [Test]
-        public async Task By_default_make_polling_request_with_computer_name_as_identity()
-        {
-            SetupAmazonSwfClientToMakeRequestWithPollingIdentity(Environment.MachineName);
-            var taskQueue = new TaskList(_taskListName);
-
-            await taskQueue.PollForWorkflowTaskAsync(_domain);
-
-            _amazonWorkflowClient.Verify();
-        }
-
-        [Test]
+       [Test]
         public void Invalid_arugments_tests()
         {
             Assert.Throws<ArgumentException>(() => new TaskList(null));
@@ -113,7 +102,7 @@ namespace Guflow.Tests
             _amazonWorkflowClient.Setup(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()))
                                  .Throws(new UnknownResourceException("not found"));
 
-            Assert.ThrowsAsync<UnknownResourceException>(async () => await _taskList.PollForWorkflowTaskAsync(_domain));
+            Assert.ThrowsAsync<UnknownResourceException>(async () => await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity));
         }
 
 

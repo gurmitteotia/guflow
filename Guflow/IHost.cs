@@ -35,5 +35,10 @@ namespace Guflow
         /// </summary>
         /// <param name="handleError"></param>
         void OnError(HandleError handleError);
+
+        /// <summary>
+        /// Gets or sets the polling identity of host.
+        /// </summary>
+        string PollingIdentity { get; set; }
     }
 }

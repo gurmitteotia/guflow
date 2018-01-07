@@ -125,6 +125,7 @@ namespace Guflow.Tests.Decider
                 It.IsAny<CancellationToken>())).Throws<Exception>();
 
             var hostedWorkflows = new WorkflowsHost(_domain, new[] { new TestWorkflow1() });
+            hostedWorkflows.OnError(e=>ErrorAction.Unhandled);
             hostedWorkflows.StartExecution(new TaskList("name"));
             hostedWorkflows.StopExecution();
             Assert.That(hostedWorkflows.Status, Is.EqualTo(HostStatus.Faulted));
@@ -137,6 +138,7 @@ namespace Guflow.Tests.Decider
                 It.IsAny<CancellationToken>())).Throws(expectedException);
             Exception actualException = null;
             var hostedWorkflows = new WorkflowsHost(_domain, new[] { new TestWorkflow1() });
+            hostedWorkflows.OnError(e => ErrorAction.Unhandled);
             hostedWorkflows.OnFault += (s, e) => actualException = e.Exception;
             hostedWorkflows.StartExecution(new TaskList("name"));
             hostedWorkflows.StopExecution();

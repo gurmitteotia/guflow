@@ -177,12 +177,15 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_response_exception_are_unhandled()
+        public async Task  By_default_response_exception_are_unhandled()
         {
             _amazonWorkflowClient.Setup(c=>c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
                                  .Throws(new UnknownResourceException("msg"));
 
-            Assert.ThrowsAsync<UnknownResourceException>(async () => await ExecuteWorkflowOnSignalEvent(new WorkflowCompleteOnSignal(), "wid", "rid"));
+            await ExecuteWorkflowOnSignalEvent(new WorkflowCompleteOnSignal(), "wid", "rid");
+
+            _amazonWorkflowClient.Verify(c=>c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),
+                It.IsAny<CancellationToken>()),Times.Once);
         }
 
         [Test]

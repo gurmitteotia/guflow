@@ -43,7 +43,10 @@ namespace Guflow.Worker
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(activitiesTypes, "activitiesTypes");
             Ensure.NotNull(instanceCreator, "instanceCreator");
+            OnPollingError(e=>ErrorAction.Unhandled);
+            OnResponseError(e=>ErrorAction.Unhandled);
             _domain = domain;
+            PollingIdentity = Environment.MachineName;
             _activities = new Activities(activitiesTypes, instanceCreator);
             _activityExecution = ActivityExecution.Concurrent((uint)Environment.ProcessorCount);
         }
@@ -92,7 +95,8 @@ namespace Guflow.Worker
             Ensure.NotNull(taskList, "taskList");
             if (_disposed)
                 throw new ObjectDisposedException(Resources.Activity_execution_already_stopped);
-            ExecuteHostedActivitiesAsync(taskList);
+            var pollingIdentity = PollingIdentity;
+            ExecuteHostedActivitiesAsync(taskList, pollingIdentity);
         }
         /// <summary>
         /// Shut down host.
@@ -147,7 +151,10 @@ namespace Guflow.Worker
             _pollingErrorHandler = _pollingErrorHandler.WithFallback(_genericErrorHandler);
             _responseErrorHandler = _genericErrorHandler.WithFallback(_genericErrorHandler);
         }
-        private async void ExecuteHostedActivitiesAsync(TaskList taskList)
+
+        public string PollingIdentity { get; set; }
+
+        private async void ExecuteHostedActivitiesAsync(TaskList taskList, string pollingIdentity)
         {
             _state.Start();
             var activityExecution = Execution;
@@ -157,7 +164,7 @@ namespace Guflow.Worker
             {
                 while (!_disposed)
                 {
-                    var workerTask = await taskList.PollForWorkerTaskAsync(domain, _cancellationTokenSource.Token).ConfigureAwait(false);
+                    var workerTask = await taskList.PollForWorkerTaskAsync(domain, pollingIdentity ,_cancellationTokenSource.Token).ConfigureAwait(false);
                     workerTask.SetErrorHandler(_genericErrorHandler);
                     await activityExecution.ExecuteAsync(workerTask);
                 }

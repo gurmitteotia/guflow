@@ -98,16 +98,6 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
-        public void By_default_response_errors_are_unhandled()
-        {
-            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
-            _simpleWorkflow.Setup(s=>s.RespondActivityTaskCompletedAsync(It.IsAny<RespondActivityTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
-                            .Throws(new UnknownResourceException(""));
-
-            Assert.ThrowsAsync<UnknownResourceException>(() => hostedActivities.SendAsync(new ActivityCompleteResponse("token", "result")));
-        }
-
-        [Test]
         public async Task Response_error_can_be_handled_to_retry()
         {
             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
@@ -191,7 +181,8 @@ namespace Guflow.Tests.Worker
         {
             SetupAmazonSwfToThrowsException();
 
-             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            hostedActivities.OnError(e=>ErrorAction.Unhandled);
             hostedActivities.StartExecution(new TaskList("name"));
             hostedActivities.StopExecution();
             Assert.That(hostedActivities.Status, Is.EqualTo(HostStatus.Faulted));
@@ -203,6 +194,7 @@ namespace Guflow.Tests.Worker
             SetupAmazonSwfToThrowsException();
               Exception actualException = null;
             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) });
+            hostedActivities.OnError(e => ErrorAction.Unhandled);
             hostedActivities.OnFault += (s, e) => actualException = e.Exception;
             hostedActivities.StartExecution(new TaskList("name"));
             hostedActivities.StopExecution();

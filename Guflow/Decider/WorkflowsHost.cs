@@ -26,13 +26,15 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(workflows, "workflows");
-
+            PollingIdentity = Environment.MachineName;
             workflows = workflows.Where(w => w != null).ToArray();
             if (!workflows.Any())
                 throw new ArgumentException(Resources.No_workflow_to_host, nameof(workflows));
             Status = HostStatus.Initialized;
             _domain = domain;
             _hostedWorkflows = new Workflows(workflows);
+            OnPollingError(e=>ErrorAction.Unhandled);
+            OnResponseError(e=>ErrorAction.Unhandled);
         }
 
         internal Workflow FindBy(string name, string version)
@@ -124,6 +126,9 @@ namespace Guflow.Decider
             _responseErrorHandler = _responseErrorHandler.WithFallback(_genericErrorHandler);
             _pollingErrorHandler = _pollingErrorHandler.WithFallback(_genericErrorHandler);
         }
+
+        public string PollingIdentity { get; set; }
+
         internal async Task SendDecisionsAsync(string taskToken, IEnumerable<WorkflowDecision> decisions)
         {
             var retryAbleFunc = new RetryableFunc(_responseErrorHandler);
@@ -146,11 +151,12 @@ namespace Guflow.Decider
         private async void ExecuteHostedWorkfowsAsync(TaskList taskList, Domain domain)
         {
             Status = HostStatus.Executing;
+            var pollingIdentity = PollingIdentity;
             try
             {
                 while (!_disposed)
                 {
-                    var workflowTask = await PollForTaskAsync(taskList, domain);
+                    var workflowTask = await PollForTaskAsync(taskList, domain, pollingIdentity);
                     await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
                 }
                 Status = HostStatus.Stopped;
@@ -171,10 +177,10 @@ namespace Guflow.Decider
                 _stoppedEvent.Set();
             }
         }
-        private async Task<WorkflowTask> PollForTaskAsync(TaskList taskList, Domain domain)
+        private async Task<WorkflowTask> PollForTaskAsync(TaskList taskList, Domain domain, string pollingIdentity)
         {
             _log.Debug($"Polling for workflow task on queue {taskList} and domain {domain}");
-            var workflowTask = await taskList.PollForWorkflowTaskAsync(domain);
+            var workflowTask = await taskList.PollForWorkflowTaskAsync(domain, pollingIdentity);
             workflowTask.OnExecutionError(_genericErrorHandler);
             return workflowTask;
         }
