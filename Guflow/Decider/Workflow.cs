@@ -168,7 +168,7 @@ namespace Guflow.Decider
         }
         WorkflowAction IWorkflowDefaultActions.Ignore()
         {
-            return Ignore(false);
+            return Ignore;
         }
         internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {
@@ -328,15 +328,13 @@ namespace Guflow.Decider
         {
             return WorkflowAction.StartWorkflow(_allWorkflowItems);
         }
+
         /// <summary>
-        /// Ignore the event and do not take any action.
+        /// Ignore the event and do not take any action. If called in response to a workflow item (activity, timer...) event then it will keep the branch active.
         /// </summary>
-        /// <param name="keepBranchActive"></param>
         /// <returns></returns>
-        protected static WorkflowAction Ignore(bool keepBranchActive)
-        {
-            return WorkflowAction.Ignore(keepBranchActive);
-        }
+        protected IgnoreWorkflowAction Ignore => WorkflowAction.Ignore(CurrentExecutingItem);
+        
         /// <summary>
         /// Provides methods to jump to schedulable items in workflow. It will cause target item to schedule immediatly(or after timeout) without checking
         /// for When condition.

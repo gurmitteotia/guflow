@@ -43,7 +43,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflowSignaledEvent.Interpret(new EmptyWorkflow());
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.Ignore(false)));
+            Assert.That(workflowAction.GetDecisions(),Is.Empty);
         }
         [Test]
         public void Can_return_custom_workflow_action()

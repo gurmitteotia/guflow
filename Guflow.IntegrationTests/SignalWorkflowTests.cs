@@ -91,7 +91,7 @@ namespace Guflow.IntegrationTests
                 if (!Activity<OrderItemActivity>().IsActive)
                     return Jump.ToActivity<OrderItemActivity>();
 
-                return Ignore(false);
+                return Ignore;
             }
 
             private WorkflowAction PauseOnOutOfStock(ActivityFailedEvent @event)
@@ -99,7 +99,7 @@ namespace Guflow.IntegrationTests
                 if (@event.Reason.Equals("OutOfStock"))
                 {
                     _event.Set();
-                    return Ignore(true);
+                    return Ignore;
                 }
 
                 return DefaultAction(@event);

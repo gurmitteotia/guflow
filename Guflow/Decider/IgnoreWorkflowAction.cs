@@ -1,20 +1,49 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Guflow.Decider
 {
-    internal sealed class IgnoreWorkflowAction : WorkflowAction
+    /// <summary>
+    /// Supports ignoring the a event. i.e. takes no action.
+    /// </summary>
+    public sealed class IgnoreWorkflowAction : WorkflowAction
     {
-        private readonly bool _keepBranchActive;
-
-        public IgnoreWorkflowAction(bool keepBranchActive)
+        private readonly WorkflowItem _triggeringItem;
+        private WorkflowAction _triggerAction = Empty;
+        private bool _keepBranchActive;
+        internal IgnoreWorkflowAction(WorkflowItem triggeringItem)
         {
-            _keepBranchActive = keepBranchActive;
+            _triggeringItem = triggeringItem;
+            _keepBranchActive = triggeringItem!=null;
+        }
+
+        /// <summary>
+        /// Ignore action will make the branch inactive. While making the branch it will try to trigger the scheduling of first joint item.
+        /// </summary>
+        /// <returns></returns>
+        public WorkflowAction MakeBranchInactive()
+        {
+            _keepBranchActive = false;
+            if(_triggeringItem!=null)
+                _triggerAction = new TriggerActions(_triggeringItem).FirstJoint();
+            return this;
+        }
+
+        /// <summary>
+        /// Makes the branch inactive and override the trigger workflow workflow.
+        /// </summary>
+        /// <param name="triggerAction"></param>
+        /// <returns></returns>
+        public WorkflowAction MakeBranchInactive(WorkflowAction triggerAction)
+        {
+            Ensure.NotNull(triggerAction, "trigerAction");
+            _triggerAction = triggerAction;
+            _keepBranchActive = false;
+            return this;
         }
 
         internal override IEnumerable<WorkflowDecision> GetDecisions()
         {
-            return Enumerable.Empty<WorkflowDecision>();
+            return _triggerAction.GetDecisions();
         }
 
         internal override bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
@@ -22,10 +51,7 @@ namespace Guflow.Decider
             return _keepBranchActive;
         }
 
-        internal override bool ReadyToScheduleChildren
-        {
-            get { return !_keepBranchActive; }
-        }
+        internal override bool ReadyToScheduleChildren => !_keepBranchActive;
 
         private bool Equals(IgnoreWorkflowAction other)
         {

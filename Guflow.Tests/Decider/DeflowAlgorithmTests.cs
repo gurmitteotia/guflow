@@ -106,7 +106,7 @@ namespace Guflow.Tests.Decider
                     .Concat(chooseSeatActivityCompletedGraph);
 
             var decisions =
-                new WorkflowHasImmediateParentWithIgnoreAction(true).NewExecutionFor(new WorkflowHistoryEvents(allEvents,
+                new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchActive().NewExecutionFor(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId)).Execute();
 
             Assert.That(decisions, Is.Empty);
@@ -125,7 +125,7 @@ namespace Guflow.Tests.Decider
                     .Concat(chooseSeatActivityCompletedGraph);
 
             var decisions =
-                new WorkflowHasImmediateParentWithIgnoreAction(false).NewExecutionFor(new WorkflowHistoryEvents(allEvents,
+                new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive().NewExecutionFor(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId)).Execute();
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
@@ -142,7 +142,7 @@ namespace Guflow.Tests.Decider
                     .Concat(bookFlightActivityCompletedGraph);
 
             var decisions =
-                new WorkflowHasNotImmediateParentWithIgnoreAction(true).NewExecutionFor(new WorkflowHistoryEvents(allEvents,
+                new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchActive().NewExecutionFor(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId)).Execute();
 
             Assert.That(decisions, Is.Empty);
@@ -160,7 +160,7 @@ namespace Guflow.Tests.Decider
                     .Concat(bookFlightActivityCompletedGraph);
 
             var decisions =
-                new WorkflowHasNotImmediateParentWithIgnoreAction(false).NewExecutionFor(new WorkflowHistoryEvents(allEvents,
+                new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchInactive().NewExecutionFor(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId)).Execute();
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
@@ -180,7 +180,7 @@ namespace Guflow.Tests.Decider
                     .Concat(reebokFlightActicityCompletedGraph)
                     .Concat(chooseSeatActivityCompletedGraph)
                     .Concat(bookFlightActivityCompletedGraph);
-            var workflow = new WorkflowHasImmediateParentWithIgnoreAction(false);
+            var workflow = new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive();
 
             var decisions = workflow.NewExecutionFor(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId)).Execute();
@@ -381,6 +381,43 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.Empty);
         }
 
+        [Test]
+        public void Schedule_first_joint_item_when_the_branch_is_made_inactive_by_ignore_action()
+        {
+            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
+            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
+            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
+            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
+            var allEvents = chooseSeatActivityCompletedGraph.Concat(bookFlightActivityCompletedGraph)
+                    .Concat(addDinnerActivity)
+                    .Concat(bookHotelActivityCompletedGraph);
+
+            var decisions =
+                new WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreAction().NewExecutionFor(new WorkflowHistoryEvents(allEvents,
+                    chooseSeatActivityCompletedGraph.Last().EventId, chooseSeatActivityCompletedGraph.First().EventId)).Execute();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
+        }
+
+        [Test]
+        public void Can_override_the_trigger_action_when_a_branch_is_made_inactive_by_ignore_action()
+        {
+            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
+            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
+            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
+            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
+            var allEvents = chooseSeatActivityCompletedGraph.Concat(bookFlightActivityCompletedGraph)
+                .Concat(addDinnerActivity)
+                .Concat(bookHotelActivityCompletedGraph);
+
+            var decisions =
+                new WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreActionAndOverridingTriggerAction().NewExecutionFor(new WorkflowHistoryEvents(allEvents,
+                    chooseSeatActivityCompletedGraph.Last().EventId, chooseSeatActivityCompletedGraph.First().EventId)).Execute();
+
+            Assert.That(decisions, Is.Empty);
+        }
+
+
         private IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
         {
             return _builder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result");
@@ -406,29 +443,59 @@ namespace Guflow.Tests.Decider
         }
 
         [WorkflowDescription("1.0")]
-        private class WorkflowHasImmediateParentWithIgnoreAction : Workflow
+        private class WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive : Workflow
         {
-            public WorkflowHasImmediateParentWithIgnoreAction(bool keepBranchActive)
+            public WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive()
             {
                 ScheduleActivity(BookHotelActivity, Version);
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version);
-                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version).OnCompletion(e => Ignore(keepBranchActive));
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version).OnCompletion(e => Ignore.MakeBranchInactive());
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
             }
         }
 
         [WorkflowDescription("1.0")]
-        private class WorkflowHasNotImmediateParentWithIgnoreAction : Workflow
+        private class WorkflowHasImmediateParentWithIgnoreActionToKeepBranchActive : Workflow
         {
-            public WorkflowHasNotImmediateParentWithIgnoreAction(bool keepBranchActive)
+            public WorkflowHasImmediateParentWithIgnoreActionToKeepBranchActive()
             {
                 ScheduleActivity(BookHotelActivity, Version);
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
-                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Ignore(keepBranchActive));
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version).OnCompletion(e => Ignore);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchActive : Workflow
+        {
+            public WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchActive()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Ignore);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchInactive : Workflow
+        {
+            public WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchInactive()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version).OnCompletion(e => Ignore.MakeBranchInactive());
                 ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
@@ -597,6 +664,45 @@ namespace Guflow.Tests.Decider
 
                 ScheduleTimer(TimerName).When(_ => false);
                 ScheduleActivity(ChooseSeatActivity, Version).AfterTimer(TimerName);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreAction : Workflow
+        {
+            public WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreAction()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity,Version)
+                    .AfterActivity(BookFlightActivity, Version)
+                    .OnCompletion(a => Ignore.MakeBranchInactive());
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity,Version);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreActionAndOverridingTriggerAction : Workflow
+        {
+            public WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreActionAndOverridingTriggerAction()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version)
+                    .AfterActivity(BookFlightActivity, Version)
+                    .OnCompletion(a => Ignore.MakeBranchInactive(Ignore));
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
 

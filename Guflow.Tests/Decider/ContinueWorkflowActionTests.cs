@@ -68,7 +68,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_schedule_the_child_when_one_of_its_parent_activity_ignores_the_action_by_keeping_the_branch_active()
         {
-            var workflow = new WorkflowWithAParentIgnoringCompleteEvent(keepBranchActive:true);
+            var workflow = new WorkflowWithAParentIgnoringCompleteEvent();
             var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(_activityName, _activityVersion, _positionalName), "id", "res")
                                   .Concat(_builder.ActivityCompletedGraph(Identity.New(_siblingActivityName, _siblingActivityVersion), "id2", "re2"));
 
@@ -296,10 +296,10 @@ namespace Guflow.Tests.Decider
 
         private class WorkflowWithAParentIgnoringCompleteEvent : Workflow
         {
-            public WorkflowWithAParentIgnoringCompleteEvent(bool keepBranchActive)
+            public WorkflowWithAParentIgnoringCompleteEvent()
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(Continue);
-                ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnCompletion(e => Ignore(keepBranchActive));
+                ScheduleActivity(_siblingActivityName, _siblingActivityVersion).OnCompletion(e => Ignore);
                 ScheduleActivity("Transcode", "2.0").AfterActivity(_activityName, _activityVersion, _positionalName).AfterActivity(_siblingActivityName, _siblingActivityVersion);
             }
         }

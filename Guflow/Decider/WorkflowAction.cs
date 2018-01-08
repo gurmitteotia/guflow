@@ -76,10 +76,8 @@ namespace Guflow.Decider
             return new StartWorkflowAction(workflowItems);
         }
 
-        internal static WorkflowAction Ignore(bool keepBranchActive)
-        {
-            return new IgnoreWorkflowAction(keepBranchActive);
-        }
+        internal static IgnoreWorkflowAction Ignore(WorkflowItem triggerItem)=> new IgnoreWorkflowAction(triggerItem);
+
         internal static WorkflowAction Cancel(WorkflowItem workflowItem)
         {
             return new WorkflowAction(workflowItem.GetCancelDecision());
