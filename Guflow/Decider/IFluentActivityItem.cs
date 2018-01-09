@@ -5,37 +5,37 @@ namespace Guflow.Decider
     public interface IFluentActivityItem: IFluentWorkflowItem<IFluentActivityItem>
     {
         /// <summary>
-        /// Configure a handler to be called back when activity is completed
+        /// Configure a handler to be called back when this activity is completed
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
         IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> action);
         /// <summary>
-        /// Register a handler to be called back when activity is failed.
+        /// Register a handler to be called back when this activity is failed.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
         IFluentActivityItem OnFailure(Func<ActivityFailedEvent, WorkflowAction> action);
         /// <summary>
-        /// Register a handler to be called back when activity is timedout out.
+        /// Register a handler to be called back when this activity is timedout out.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
         IFluentActivityItem OnTimedout(Func<ActivityTimedoutEvent, WorkflowAction> action);
         /// <summary>
-        /// Register a handler to be called back when cancellation request to scheduled activity is failed.
+        /// Register a handler to be called back when cancellation request to this activity is failed.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
         IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> action);
         /// <summary>
-        /// Register a handler to be called when activity is failed to scheduled.
+        /// Register a handler to be called when this activity is failed to scheduled.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
         IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> action);
         /// <summary>
-        /// Register a handler to be called when activity is cancelled.
+        /// Register a handler to be called when this activity is cancelled.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
@@ -43,7 +43,7 @@ namespace Guflow.Decider
         /// <summary>
         /// Provides input to activity. Input will be passed to activity worker. 
         /// </summary>
-        /// <param name="data">Input, it is a custom type then it will be serialized to JSON format and for premitive type it directly serialize them to string.</param>
+        /// <param name="data">Input, if it is a custom type then it will be serialized to JSON format and for premitive type it will converted to string.</param>
         /// <returns></returns>
         IFluentActivityItem WithInput(Func<IActivityItem, object> data);
 
@@ -62,7 +62,7 @@ namespace Guflow.Decider
         IFluentActivityItem When(Func<IActivityItem, bool> @true);
         /// <summary>
         /// Provide an expression which workflow will evaulate before scheduling this activity. If it is evaulated to false then activity will not be scheduled.
-        /// You also have the option to what happen when condition is evaulated to false. Refer to Deflow algorithm for more details.
+        /// You also have the option to override triggering workflow action. Refer to Deflow algorithm for more details.
         /// </summary>
         /// <param name="true"></param>
         /// <param name="falseAction">WorkflowAction when expression is evaluated to be false.</param>
