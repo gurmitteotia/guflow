@@ -21,6 +21,14 @@ namespace Guflow.Tests.Decider
             _simpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
             _domain = new Domain("domain", _simpleWorkflow.Object);
         }
+
+        [Test]
+        public void Default_polling_identity_is_machine_name()
+        {
+            var host = new WorkflowsHost(_domain, new []{new TestWorkflow1()});
+            Assert.That(host.PollingIdentity, Is.EqualTo(Environment.MachineName));
+        }
+
         [Test]
         public void Returns_matching_hosted_workflow_by_name_and_version()
         {

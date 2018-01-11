@@ -22,6 +22,13 @@ namespace Guflow.Tests.Worker
             SetupAmazonSwfToReturnEmptyActivityTask();
             _domain = new Domain("name", _simpleWorkflow.Object);
         }
+
+        [Test]
+        public void Default_polling_identity_is_machine_name()
+        {
+            var host = new ActivitiesHost(_domain, new[] { typeof(TestActivity1)});
+            Assert.That(host.PollingIdentity, Is.EqualTo(Environment.MachineName));
+        }
         [Test]
         public void Return_the_new_instance_of_activity_type_by_name_and_version()
         {
@@ -130,7 +137,7 @@ namespace Guflow.Tests.Worker
         {
             Assert.Throws<ArgumentNullException>(() => _domain.Host((Type[])null));
             Assert.Throws<ArgumentException>(() => _domain.Host(Enumerable.Empty<Type>().ToArray()));
-            Assert.Throws<ArgumentException>(() => _domain.Host((Type)null));
+            Assert.Throws<ArgumentException>(() => _domain.Host(new[]{(Type)null}));
 
             Assert.Throws<ArgumentNullException>(() => _domain.Host(new[] { typeof(TestActivity1) }, null));
         }
@@ -138,7 +145,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Invalid_parameters_tests()
         {
-            var hostedActivities = _domain.Host(typeof(TestActivity1));
+            var hostedActivities = _domain.Host(new[]{typeof(TestActivity1)});
 
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnError(null));
             Assert.Throws<ArgumentNullException>(() => hostedActivities.OnPollingError(null));

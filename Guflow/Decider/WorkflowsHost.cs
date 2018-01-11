@@ -22,6 +22,11 @@ namespace Guflow.Decider
         private bool _disposed = false;
         private readonly ILog _log = Log.GetLogger<WorkflowsHost>();
         private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
+        /// <summary>
+        /// Create a host for given workflows.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <param name="workflows"></param>
         public WorkflowsHost(Domain domain, IEnumerable<Workflow> workflows)
         {
             Ensure.NotNull(domain, "domain");

@@ -129,10 +129,7 @@ namespace Guflow.Decider
             _parentItems.Add(parentItem);
         }
 
-        protected IWorkflowHistoryEvents WorkflowHistoryEvents
-        {
-            get { return _workflow.WorkflowHistoryEvents; }
-        }
+        protected IWorkflowHistoryEvents WorkflowHistoryEvents => _workflow.WorkflowHistoryEvents;
 
         public WorkflowAction DefaultActionOnLastEvent()
         {
