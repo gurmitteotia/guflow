@@ -460,6 +460,12 @@ namespace Guflow.Decider
         {
             get { return ((IWorkflow)this).WorkflowHistoryEvents.AllWorkflowCancellationRequestedEvents(); }
         }
+
+        /// <summary>
+        /// Returns new events
+        /// </summary>
+        protected IEnumerable<WorkflowEvent> NewEvents => ((IWorkflow) this).WorkflowHistoryEvents.NewEvents();
+
         /// <summary>
         /// Supports sending signal to other workflows.
         /// </summary>

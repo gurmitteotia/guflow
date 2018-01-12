@@ -15,6 +15,7 @@ namespace Guflow.Tests.Worker
     {
         private Domain _domain;
         private Mock<IAmazonSimpleWorkflow> _simpleWorkflow;
+        private const string DefaultPollingTask = "dlist";
         [SetUp]
         public void Setup()
         {
@@ -96,6 +97,39 @@ namespace Guflow.Tests.Worker
             var hostedActivities = _domain.Host(new[] { typeof(TestActivity1), typeof(TestActivity2) }, t => new TestActivity2());
             Assert.Throws<InvalidOperationException>(() => hostedActivities.StartExecution());
         }
+
+        [Test]
+        public void Poll_for_work_on_default_task_list_when_multiple_activities_has_same_default_task_list()
+        {
+            
+            var @event = PollingEvent();
+            using (var hostedActivities = _domain.Host(new[] { typeof(TestActivity1), typeof(TestActivity3) }))
+            {
+                hostedActivities.StartExecution();
+                @event.WaitOne();
+            }
+
+            AssertThatAmazonSwfIsPolled();
+        }
+
+        private ManualResetEvent PollingEvent()
+        {
+            var @event = new ManualResetEvent(false);
+            Func<PollForActivityTaskRequest, bool> request = (r) => r.Identity == DefaultPollingTask;
+            _simpleWorkflow.Setup(s => s.PollForActivityTaskAsync(It.Is<PollForActivityTaskRequest>(r => request(r)),
+                    It.IsAny<CancellationToken>()))
+                .Returns(async () => { await Task.Delay(100); return new PollForActivityTaskResponse(); })
+                .Callback(() => @event.Set());
+            return @event;
+        }
+
+        private void AssertThatAmazonSwfIsPolled()
+        {
+            Func<PollForActivityTaskRequest, bool> request = (r) => r.Identity == DefaultPollingTask;
+            _simpleWorkflow.Verify(s => s.PollForActivityTaskAsync(It.Is<PollForActivityTaskRequest>(r => request(r)),
+                It.IsAny<CancellationToken>()));
+        }
+
 
         [Test]
         public void Throws_exception_when_starting_execution_without_task_queue_and_hosted_activity_does_not_have_default_task_queue()
@@ -223,7 +257,7 @@ namespace Guflow.Tests.Worker
                     await Task.Delay(100, c);
                 });
         }
-        [ActivityDescription("1.0")]
+        [ActivityDescription("1.0", DefaultTaskListName = DefaultPollingTask)]
         private class TestActivity1 : Activity
         {
             [ActivityMethod]
@@ -234,6 +268,16 @@ namespace Guflow.Tests.Worker
         }
         [ActivityDescription("2.0")]
         private class TestActivity2 : Activity
+        {
+            [ActivityMethod]
+            public void Execute()
+            {
+
+            }
+        }
+
+        [ActivityDescription("1.0", DefaultTaskListName = DefaultPollingTask)]
+        private class TestActivity3 : Activity
         {
             [ActivityMethod]
             public void Execute()

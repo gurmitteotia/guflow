@@ -48,17 +48,26 @@ namespace Guflow.Decider
         {
             var interpretedWorkflowActions = new List<WorkflowAction>();
             
-            for (var eventId = _newEventsStartId;eventId<=_newEventsEndId;eventId++)
+            foreach(var workflowEvent in NewEvents())
+            { 
+                workflow.SetCurrentExecutingEvent(workflowEvent);
+                interpretedWorkflowActions.Add(workflowEvent.Interpret(workflow));
+            }
+            return interpretedWorkflowActions.Where(w=>w!=null).SelectMany(a => a.GetDecisions()).Distinct();
+        }
+
+        public IEnumerable<WorkflowEvent> NewEvents()
+        {
+            var events = new List<WorkflowEvent>();
+            for (var eventId = _newEventsStartId; eventId <= _newEventsEndId; eventId++)
             {
                 var historyEvent = _allHistoryEvents.First(h => h.EventId == eventId);
                 var workflowEvent = historyEvent.CreateInterpretableEvent(_allHistoryEvents);
                 if (workflowEvent == null)
                     continue;
-                workflow.SetCurrentExecutingEvent(workflowEvent);
-                interpretedWorkflowActions.Add(workflowEvent.Interpret(workflow));
+                events.Add(workflowEvent);
             }
-
-            return interpretedWorkflowActions.Where(w=>w!=null).SelectMany(a => a.GetDecisions()).Distinct();
+            return events;
         }
 
         public WorkflowStartedEvent WorkflowStartedEvent()

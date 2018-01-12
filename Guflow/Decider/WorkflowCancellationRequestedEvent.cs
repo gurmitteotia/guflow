@@ -2,6 +2,9 @@
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represents a cancel request made to this workflow.
+    /// </summary>
     public class WorkflowCancellationRequestedEvent : WorkflowEvent
     {
         private readonly WorkflowExecutionCancelRequestedEventAttributes _eventAttributes;

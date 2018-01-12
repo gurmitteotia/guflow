@@ -9,6 +9,7 @@ namespace Guflow.Decider
         IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow);
         WorkflowStartedEvent WorkflowStartedEvent();
         bool HasActiveEvent();
+        IEnumerable<WorkflowEvent> NewEvents();
         IEnumerable<WorkflowItemEvent> AllActivityEventsFor(ActivityItem activityItem);
         IEnumerable<WorkflowItemEvent> AllTimerEventsFor(TimerItem timerItem);
         IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents();

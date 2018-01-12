@@ -19,10 +19,7 @@ namespace Guflow.Worker
             PopulateHostedActivities(activitiesTypes);
         }
 
-        public int Count
-        {
-            get { return _hostedActivities.Count; }
-        }
+        public int Count => _hostedActivities.Count;
 
         public Activity FindBy(string activityName, string activityVersion)
         {
@@ -57,9 +54,7 @@ namespace Guflow.Worker
             }
         }
 
-        public Type Single()
-        {
-            return _hostedActivities.Values.First();
-        }
+        public IEnumerable<ActivityDescriptionAttribute> ActivityDescriptions
+            => _hostedActivities.Values.Select(ActivityDescriptionAttribute.FindOn);
     }
 }

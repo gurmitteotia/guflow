@@ -22,7 +22,6 @@ namespace Guflow
         private readonly IErrorHandler _errorHandler;
         internal static readonly DecisionTask EmptyDecisionTask = new DecisionTask();
         internal static readonly ActivityTask EmptyActivityTask = new ActivityTask();
-
         /// <summary>
         /// Create a domain with given name and a client to communicate with Amazon SWF. You have more control on creating/configuring the AmazonSimpleWorkflowClient.
         /// </summary>
@@ -158,9 +157,8 @@ namespace Guflow
 
         private async Task<ActivityTask> PollAmazonSwfForActivityTaskAsync(TaskList taskList, string pollingIdentity, CancellationToken cancellationToken)
         {
-            var activityTaskPollingRequest = taskList.CreateActivityTaskPollingRequest(_name, pollingIdentity);
-            Console.WriteLine("Polling for activity task on queue {0} and on domain {1}", activityTaskPollingRequest.TaskList.Name, activityTaskPollingRequest.Domain);
-            var response = await _simpleWorkflowClient.PollForActivityTaskAsync(activityTaskPollingRequest, cancellationToken);
+            var request = taskList.CreateActivityTaskPollingRequest(_name, pollingIdentity);
+            var response = await _simpleWorkflowClient.PollForActivityTaskAsync(request, cancellationToken);
             return response?.ActivityTask;
         }
 

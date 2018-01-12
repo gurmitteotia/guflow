@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
 using System.Threading;
 using System.Threading.Tasks;
 using Guflow.Properties;
@@ -22,7 +24,7 @@ namespace Guflow.Worker
         private readonly HostState _state = new HostState();
         private readonly ILog _log = Log.GetLogger<ActivitiesHost>();
         private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
-        
+
         /// <summary>
         ///  Create activity host for domain and activities types. Activities should implement default constructor.
         /// </summary>
@@ -43,8 +45,8 @@ namespace Guflow.Worker
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(activitiesTypes, "activitiesTypes");
             Ensure.NotNull(instanceCreator, "instanceCreator");
-            OnPollingError(e=>ErrorAction.Unhandled);
-            OnResponseError(e=>ErrorAction.Unhandled);
+            OnPollingError(e => ErrorAction.Unhandled);
+            OnResponseError(e => ErrorAction.Unhandled);
             _domain = domain;
             PollingIdentity = Environment.MachineName;
             _activities = new Activities(activitiesTypes, instanceCreator);
@@ -75,15 +77,8 @@ namespace Guflow.Worker
         /// </summary>
         public void StartExecution()
         {
-            if (_activities.Count != 1)
-                throw new InvalidOperationException(Resources.Can_not_determine_the_task_list_to_poll_for_activity_task);
-
-            var singleActivityType = _activities.Single();
-            var activityDescription = ActivityDescriptionAttribute.FindOn(singleActivityType);
-            if (string.IsNullOrEmpty(activityDescription.DefaultTaskListName))
-                throw new InvalidOperationException(Resources.Default_task_list_is_missing);
-
-            StartExecution(new TaskList(activityDescription.DefaultTaskListName));
+            var defaultTaskListName = DetectTaskList();
+            StartExecution(new TaskList(defaultTaskListName));
         }
 
         /// <summary>
@@ -151,7 +146,9 @@ namespace Guflow.Worker
             _pollingErrorHandler = _pollingErrorHandler.WithFallback(_genericErrorHandler);
             _responseErrorHandler = _genericErrorHandler.WithFallback(_genericErrorHandler);
         }
-
+        /// <summary>
+        /// Gets or sets the polling identity. It will be recorded in Amazon SWf events.
+        /// </summary>
         public string PollingIdentity { get; set; }
 
         private async void ExecuteHostedActivitiesAsync(TaskList taskList, string pollingIdentity)
@@ -164,7 +161,8 @@ namespace Guflow.Worker
             {
                 while (!_disposed)
                 {
-                    var workerTask = await taskList.PollForWorkerTaskAsync(domain, pollingIdentity ,_cancellationTokenSource.Token).ConfigureAwait(false);
+                    _log.Debug($"Polling for activity tasks on queue {taskList} in domain {domain}");
+                    var workerTask = await taskList.PollForWorkerTaskAsync(domain, pollingIdentity, _cancellationTokenSource.Token).ConfigureAwait(false);
                     workerTask.SetErrorHandler(_genericErrorHandler);
                     await activityExecution.ExecuteAsync(workerTask);
                 }
@@ -201,6 +199,19 @@ namespace Guflow.Worker
             var faultHandler = OnFault;
             faultHandler?.Invoke(this, new HostFaultEventArgs(exception));
             _state.Fault();
+        }
+
+        private string DetectTaskList()
+        {
+            var taskLists = _activities.ActivityDescriptions.Select(d => d.DefaultTaskListName).ToArray();
+            var defaultTaskList = taskLists.FirstOrDefault(f => !string.IsNullOrEmpty(f));
+            if (string.IsNullOrEmpty(defaultTaskList))
+                throw new InvalidOperationException(Resources.Can_not_determine_the_task_list_to_poll_for_activity_task);
+
+            if (taskLists.Any(f => f != defaultTaskList))
+                throw new InvalidOperationException(Resources.Can_not_determine_the_task_list_to_poll_for_activity_task);
+
+            return defaultTaskList;
         }
     }
 }
