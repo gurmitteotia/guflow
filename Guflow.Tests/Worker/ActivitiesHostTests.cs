@@ -92,9 +92,9 @@ namespace Guflow.Tests.Worker
         }
 
         [Test]
-        public void Throws_exception_when_starting_execution_without_task_queue_for_multiple_hosted_activities()
+        public void Throws_exception_when_starting_execution_without_task_queue_for_multiple_hosted_activities_having_different_task_list()
         {
-            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1), typeof(TestActivity2) }, t => new TestActivity2());
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1), typeof(TestActivity2) });
             Assert.Throws<InvalidOperationException>(() => hostedActivities.StartExecution());
         }
 
@@ -105,6 +105,7 @@ namespace Guflow.Tests.Worker
             var @event = PollingEvent();
             using (var hostedActivities = _domain.Host(new[] { typeof(TestActivity1), typeof(TestActivity3) }))
             {
+                hostedActivities.PollingIdentity = DefaultPollingTask;
                 hostedActivities.StartExecution();
                 @event.WaitOne();
             }
@@ -134,7 +135,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Throws_exception_when_starting_execution_without_task_queue_and_hosted_activity_does_not_have_default_task_queue()
         {
-            var hostedActivities = _domain.Host(new[] { typeof(TestActivity1) }, t => new TestActivity2());
+            var hostedActivities = _domain.Host(new[] { typeof(TestActivity2) });
             Assert.Throws<InvalidOperationException>(() => hostedActivities.StartExecution());
         }
 

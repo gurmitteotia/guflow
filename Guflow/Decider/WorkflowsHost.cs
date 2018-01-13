@@ -60,16 +60,8 @@ namespace Guflow.Decider
         /// </summary>
         public void StartExecution()
         {
-            if (_hostedWorkflows.Count != 1)
-            {
-                throw new InvalidOperationException(Resources.Can_not_determine_the_task_list_to_poll_for_workflow_decisions);
-            }
-            var singleHostedWorkflow = _hostedWorkflows.Single();
-            var defaultTaskListName = WorkflowDescriptionAttribute.FindOn(singleHostedWorkflow.GetType()).DefaultTaskListName;
-            if (string.IsNullOrEmpty(defaultTaskListName))
-                throw new InvalidOperationException(Resources.Default_task_list_is_missing);
-
-            StartExecution(new TaskList(defaultTaskListName));
+            var defaultTaskList = DetectTaskList();
+            StartExecution(new TaskList(defaultTaskList));
         }
         /// <summary>
         /// Start execution of hosted workflows on given TaskList.
@@ -190,6 +182,19 @@ namespace Guflow.Decider
             return workflowTask;
         }
 
+        private string DetectTaskList()
+        {
+            var taskLists = _hostedWorkflows.Descriptions.Select(d => d.DefaultTaskListName).ToArray();
+            var defaultTaskList = taskLists.FirstOrDefault(f => !string.IsNullOrEmpty(f));
+            if (string.IsNullOrEmpty(defaultTaskList))
+                throw new InvalidOperationException(Resources.Can_not_determine_the_task_list_to_poll_for_activity_task);
+
+            if (taskLists.Any(f => f != defaultTaskList))
+                throw new InvalidOperationException(Resources.Can_not_determine_the_task_list_to_poll_for_activity_task);
+
+            return defaultTaskList;
+        }
+
         private class Workflows
         {
             private readonly Dictionary<string, Workflow> _workflows = new Dictionary<string, Workflow>();
@@ -207,13 +212,8 @@ namespace Guflow.Decider
                     throw new WorkflowNotHostedException(string.Format(Resources.Workflow_not_hosted, name, version));
                 return hostedWorkflow;
             }
-
-            public int Count => _workflows.Count;
-
-            public Workflow Single()
-            {
-                return _workflows.Values.First();
-            }
+            public IEnumerable<WorkflowDescriptionAttribute> Descriptions
+                                                => _workflows.Values.Select(s => WorkflowDescriptionAttribute.FindOn(s.GetType()));
             private void PopulateHostedWorkflows(IEnumerable<Workflow> workflows)
             {
                 foreach (var workflow in workflows)

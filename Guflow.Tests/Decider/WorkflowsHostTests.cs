@@ -14,6 +14,7 @@ namespace Guflow.Tests.Decider
     {
         private Domain _domain;
         private Mock<IAmazonSimpleWorkflow> _simpleWorkflow;
+        private const string TaskList = "dlist";
 
         [SetUp]
         public void Setup()
@@ -58,7 +59,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Throws_exception_multiple_hosted_workflows_execution_start_without_providing_the_task_queue()
+        public void Throws_exception_workflows_having_different_task_list_are_hosted_without_giving_task_list()
         {
             var hostedWorkflows = _domain.Host(new Workflow[] { new TestWorkflow1(), new TestWorkflow2() });
 
@@ -98,6 +99,37 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnError(null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnResponseError(null));
             Assert.Throws<ArgumentNullException>(() => hostedWorkflows.OnPollingError(null));
+        }
+
+        [Test]
+        public void Poll_on_default_task_list_when_multiple_workflows_have_same_defautl_task_list()
+        {
+            var @pollingEvent = PollingEvent();
+            using (var host = new WorkflowsHost(_domain, new Workflow[] {new TestWorkflow2(), new TestWorkflow3()}))
+            {
+                host.PollingIdentity = TaskList;
+                host.StartExecution();
+                @pollingEvent.WaitOne();
+            }
+
+            AssertThatSWFIsPolledWithDefaultTaskList();
+        }
+        private ManualResetEvent PollingEvent()
+        {
+            var @event = new ManualResetEvent(false);
+            Func<PollForDecisionTaskRequest, bool> request = (r) => r.Identity == TaskList;
+            _simpleWorkflow.Setup(s => s.PollForDecisionTaskAsync(It.Is<PollForDecisionTaskRequest>(r => request(r))
+                    , It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PollForDecisionTaskResponse())
+                .Callback(() => @event.Set());
+            return @event;
+        }
+
+        private void AssertThatSWFIsPolledWithDefaultTaskList()
+        {
+            Func<PollForDecisionTaskRequest, bool> request = (r) => r.Identity == TaskList;
+            _simpleWorkflow.Verify(s => s.PollForDecisionTaskAsync(It.Is<PollForDecisionTaskRequest>(r => request(r))
+                , It.IsAny<CancellationToken>()));
         }
 
         [Test]
@@ -162,8 +194,12 @@ namespace Guflow.Tests.Decider
                 return CancelWorkflow("detail");
             }
         }
-        [WorkflowDescription("1.0")]
+        [WorkflowDescription("1.0", DefaultTaskListName = "dlist")]
         private class TestWorkflow2 : Workflow
+        {
+        }
+        [WorkflowDescription("1.0", DefaultTaskListName = "dlist")]
+        private class TestWorkflow3 : Workflow
         {
         }
     }
