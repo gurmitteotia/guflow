@@ -271,6 +271,7 @@ namespace Guflow.Tests.Worker
             _amazonSimpleWorkflow
                 .Setup(s => s.RecordActivityTaskHeartbeatAsync(It.IsAny<RecordActivityTaskHeartbeatRequest>(),
                     It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new RecordActivityTaskHeartbeatResponse(){ActivityTaskStatus = new ActivityTaskStatus()})
                 .Callback(() =>{heartbeatEvent.Set();});
             return heartbeatEvent;
         }
