@@ -11,24 +11,24 @@ namespace Guflow.Tests.Worker
     [TestFixture]
     public class ActivityExecutionUnhandledErrorTests
     {
-        private ActivitiesHost _activitiesHost;
+        private ActivityHost _activityHost;
         private Mock<IAmazonSimpleWorkflow> _amazonSimpleWorkflow;
         [SetUp]
         public void Setup()
         {
             _amazonSimpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
             var domain = new Domain("name", _amazonSimpleWorkflow.Object);
-            _activitiesHost = new ActivitiesHost(domain, new[] { typeof(TestActivity) });
+            _activityHost = new ActivityHost(domain, new[] { typeof(TestActivity) });
         }
         [Test]
         public async Task Fault_the_activity_host_when_execution_excepiton_is_unhandled()
         {
             var concurrentExecution = ActivityExecution.Sequencial;
-            concurrentExecution.Set(_activitiesHost);
+            concurrentExecution.Set(_activityHost);
 
             await concurrentExecution.ExecuteAsync(NewWorkerTask());
 
-            Assert.That(_activitiesHost.Status , Is.EqualTo(HostStatus.Faulted));
+            Assert.That(_activityHost.Status , Is.EqualTo(HostStatus.Faulted));
         }
         private static WorkerTask NewWorkerTask()
         {

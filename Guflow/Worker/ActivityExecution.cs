@@ -9,7 +9,7 @@ namespace Guflow.Worker
     {
         private readonly uint _maximumLimit;
         private readonly Func<WorkerTask, Task> _executeFunc;
-        private ActivitiesHost _activitiesHost;
+        private ActivityHost _activityHost;
         private readonly AsyncAutoResetEvent _completedEvent = new AsyncAutoResetEvent();
         private readonly object _syncObject=  new object();
         private volatile int _totalRunningTasks = 0;
@@ -37,9 +37,9 @@ namespace Guflow.Worker
             await _executeFunc(workerTask);
         }
 
-        internal void Set(ActivitiesHost activitiesHost)
+        internal void Set(ActivityHost activityHost)
         {
-            _activitiesHost = activitiesHost;
+            _activityHost = activityHost;
         }
 
         private async Task ExecuteConcurrentlyAsync(WorkerTask workerTask)
@@ -81,12 +81,12 @@ namespace Guflow.Worker
         {
             try
             {
-                var response = await workerTask.ExecuteFor(_activitiesHost);
-                await _activitiesHost.SendAsync(response);
+                var response = await workerTask.ExecuteFor(_activityHost);
+                await _activityHost.SendAsync(response);
             }
             catch (Exception exception)
             {
-               _activitiesHost.Fault(exception);
+               _activityHost.Fault(exception);
             }
         }
     }

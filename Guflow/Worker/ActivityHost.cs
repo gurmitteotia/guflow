@@ -11,7 +11,7 @@ namespace Guflow.Worker
     /// <summary>
     /// A host to execute the activities.
     /// </summary>
-    public class ActivitiesHost : IDisposable, IHost
+    public class ActivityHost : IDisposable, IHost
     {
         private readonly Domain _domain;
         private readonly Activities _activities;
@@ -22,7 +22,7 @@ namespace Guflow.Worker
         private ActivityExecution _activityExecution;
         private volatile bool _disposed;
         private readonly HostState _state = new HostState();
-        private readonly ILog _log = Log.GetLogger<ActivitiesHost>();
+        private readonly ILog _log = Log.GetLogger<ActivityHost>();
         private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
 
         /// <summary>
@@ -30,17 +30,17 @@ namespace Guflow.Worker
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="activitiesTypes"></param>
-        public ActivitiesHost(Domain domain, IEnumerable<Type> activitiesTypes)
+        public ActivityHost(Domain domain, IEnumerable<Type> activitiesTypes)
             : this(domain, activitiesTypes, t => (Activity)Activator.CreateInstance(t))
         {
         }
         /// <summary>
-        /// Create new instance of ActivitiesHost and let you control the creation of activity's instance.
+        /// Create new instance of ActivityHost and let you control the creation of activity's instance.
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="activitiesTypes"></param>
         /// <param name="instanceCreator"></param>
-        public ActivitiesHost(Domain domain, IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
+        public ActivityHost(Domain domain, IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
         {
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(activitiesTypes, "activitiesTypes");
@@ -155,7 +155,7 @@ namespace Guflow.Worker
         {
             _state.Start();
             var activityExecution = Execution;
-            activityExecution.Set(activitiesHost: this);
+            activityExecution.Set(activityHost: this);
             var domain = _domain.OnPollingError(_pollingErrorHandler);
             try
             {

@@ -183,9 +183,9 @@ namespace Guflow
         /// </summary>
         /// <param name="workflows"></param>
         /// <returns></returns>
-        public WorkflowsHost Host(IEnumerable<Workflow> workflows)
+        public WorkflowHost Host(IEnumerable<Workflow> workflows)
         {
-            return new WorkflowsHost(this,workflows);
+            return new WorkflowHost(this,workflows);
         }
         /// <summary>
         /// Create host for activities.
@@ -193,18 +193,18 @@ namespace Guflow
         /// <param name="activitiesTypes">List of activities to host.</param>
         /// <param name="instanceCreator">Factory to create activity instances.</param>
         /// <returns></returns>
-        public ActivitiesHost Host(IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
+        public ActivityHost Host(IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
         {
-            return new ActivitiesHost(this, activitiesTypes, instanceCreator);
+            return new ActivityHost(this, activitiesTypes, instanceCreator);
         }
         /// <summary>
         /// Create the host for activities. It expect activity to have parameterless constructure.
         /// </summary>
         /// <param name="activitiesTypes">List of activities to host.</param>
         /// <returns></returns>
-        public ActivitiesHost Host(IEnumerable<Type> activitiesTypes)
+        public ActivityHost Host(IEnumerable<Type> activitiesTypes)
         {
-            return new ActivitiesHost(this, activitiesTypes);
+            return new ActivityHost(this, activitiesTypes);
         }
         /// <summary>
         /// Issue a cancellation request to running workflow.

@@ -10,8 +10,8 @@ namespace Guflow.IntegrationTests
     [TestFixture]
     public class ActivityInputTests
     {
-        private WorkflowsHost _workflowsHost;
-        private ActivitiesHost _activitiesHost;
+        private WorkflowHost _workflowHost;
+        private ActivityHost _activityHost;
         private TestDomain _domain;
         private static string _taskListName;
 
@@ -20,14 +20,14 @@ namespace Guflow.IntegrationTests
         {
             _domain = new TestDomain();
             _taskListName = Guid.NewGuid().ToString();
-            _activitiesHost = await HostAsync(typeof(TestActivityWithInput));
+            _activityHost = await HostAsync(typeof(TestActivityWithInput));
         }
 
         [TearDown]
         public void TearDown()
         {
-            _workflowsHost.StopExecution();
-            _activitiesHost.StopExecution();
+            _workflowHost.StopExecution();
+            _activityHost.StopExecution();
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace Guflow.IntegrationTests
             var @event = new ManualResetEvent(false);
             var workflow = new WorkflowToScheduleActivityWithDefaultInput();
             workflow.Closed += (s, e) => @event.Set();
-            _workflowsHost = await HostAsync(workflow);
+            _workflowHost = await HostAsync(workflow);
 
             await _domain.StartWorkflow<WorkflowToScheduleActivityWithDefaultInput>("input", _taskListName);
             @event.WaitOne();
@@ -50,7 +50,7 @@ namespace Guflow.IntegrationTests
             var @event = new ManualResetEvent(false);
             var workflow = new WorkflowToScheduleActivityWithCustomInput("activity input");
             workflow.Closed += (s, e) => @event.Set();
-            _workflowsHost = await HostAsync(workflow);
+            _workflowHost = await HostAsync(workflow);
 
             await _domain.StartWorkflow<WorkflowToScheduleActivityWithCustomInput>("input", _taskListName);
             @event.WaitOne();
@@ -64,7 +64,7 @@ namespace Guflow.IntegrationTests
             var @event = new ManualResetEvent(false);
             var workflow = new WorkflowToAccessDynamicInput();
             workflow.Closed += (s, e) => @event.Set();
-            _workflowsHost = await HostAsync(workflow);
+            _workflowHost = await HostAsync(workflow);
             var input = new {Name = "name", Age = 10}.ToJson();
             
             await _domain.StartWorkflow<WorkflowToScheduleActivityWithCustomInput>(input, _taskListName);
@@ -73,14 +73,14 @@ namespace Guflow.IntegrationTests
             Assert.That(TestActivityWithInput.Input, Is.EqualTo(input));
         }
 
-        private async Task<WorkflowsHost> HostAsync(params Workflow[] workflows)
+        private async Task<WorkflowHost> HostAsync(params Workflow[] workflows)
         {
             var hostedWorkflows = await _domain.Host(workflows);
             hostedWorkflows.StartExecution(new TaskList(_taskListName));
             return hostedWorkflows;
         }
 
-        private async Task<ActivitiesHost> HostAsync(params Type[] activityTypes)
+        private async Task<ActivityHost> HostAsync(params Type[] activityTypes)
         {
             var hostedActivities = await _domain.Host(activityTypes);
             hostedActivities.StartExecution(new TaskList(_taskListName));

@@ -446,20 +446,20 @@ namespace Guflow.Decider
         /// <summary>
         /// Returns all marker events for this workflow.
         /// </summary>
-        protected IEnumerable<MarkerRecordedEvent> AllMarkerEvents => ((IWorkflow)this).WorkflowHistoryEvents.AllMarkerRecordedEvents();
+        protected IEnumerable<MarkerRecordedEvent> AllMarkerEvents
+                                        => ((IWorkflow)this).WorkflowHistoryEvents.AllMarkerRecordedEvents();
 
         /// <summary>
         /// Returns all signal send to this workflow.
         /// </summary>
-        protected IEnumerable<WorkflowSignaledEvent> AllSignalEvents => ((IWorkflow)this).WorkflowHistoryEvents.AllSignalEvents();
+        protected IEnumerable<WorkflowSignaledEvent> AllSignalEvents 
+                                            => ((IWorkflow)this).WorkflowHistoryEvents.AllSignalEvents();
 
         /// <summary>
         /// Returns all cancelletion request made to this workflow.
         /// </summary>
         protected IEnumerable<WorkflowCancellationRequestedEvent> AllCancellationRequestedEvents
-        {
-            get { return ((IWorkflow)this).WorkflowHistoryEvents.AllWorkflowCancellationRequestedEvents(); }
-        }
+                                    => ((IWorkflow)this).WorkflowHistoryEvents.AllWorkflowCancellationRequestedEvents();
 
         /// <summary>
         /// Returns new events

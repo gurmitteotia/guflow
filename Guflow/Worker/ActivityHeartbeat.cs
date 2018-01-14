@@ -56,7 +56,7 @@ namespace Guflow.Worker
             _activityDetailsFunc = details;
         }
         /// <summary>
-        /// Register an error handler for any heartbeat specific error. If you do do not handle it here then ActivitiesHost generic error handler is used.
+        /// Register an error handler for any heartbeat specific error. If you do do not handle it here then ActivityHost generic error handler is used.
         /// </summary>
         /// <param name="handleError"></param>
         public void OnError(HandleError handleError)

@@ -11,7 +11,7 @@ namespace Guflow.Decider
     /// <summary>
     /// Host the execution of workflows.
     /// </summary>
-    public sealed class WorkflowsHost : IDisposable, IHost
+    public sealed class WorkflowHost : IDisposable, IHost
     {
         private readonly Domain _domain;
         private readonly Workflows _hostedWorkflows;
@@ -20,14 +20,14 @@ namespace Guflow.Decider
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private bool _disposed = false;
-        private readonly ILog _log = Log.GetLogger<WorkflowsHost>();
+        private readonly ILog _log = Log.GetLogger<WorkflowHost>();
         private readonly ManualResetEventSlim _stoppedEvent = new ManualResetEventSlim(false);
         /// <summary>
         /// Create a host for given workflows.
         /// </summary>
         /// <param name="domain"></param>
         /// <param name="workflows"></param>
-        public WorkflowsHost(Domain domain, IEnumerable<Workflow> workflows)
+        public WorkflowHost(Domain domain, IEnumerable<Workflow> workflows)
         {
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(workflows, "workflows");

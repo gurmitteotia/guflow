@@ -123,7 +123,7 @@
     <Compile Include="RetryableFunc.cs" />
     <Compile Include="TaskList.cs" />
     <Compile Include="Decider\WorkflowAlreadyHostedException.cs" />
-    <Compile Include="Decider\WorkflowsHost.cs" />
+    <Compile Include="Decider\WorkflowHost.cs" />
     <Compile Include="Decider\WorkflowCancelledEventArgs.cs" />
     <Compile Include="Decider\WorkflowCompletedEventArgs.cs" />
     <Compile Include="Decider\WorkflowDescriptionMissingException.cs" />
@@ -233,7 +233,7 @@
     <Compile Include="Worker\AsyncAutoResetEvent.cs" />
     <Compile Include="Worker\EnableHeartbeatAttribute.cs" />
     <Compile Include="Worker\ActivityMethodAttribute.cs" />
-    <Compile Include="Worker\ActivitiesHost.cs" />
+    <Compile Include="Worker\ActivityHost.cs" />
     <Compile Include="IHost.cs" />
     <Compile Include="Worker\NonActivityTypeException.cs" />
     <Compile Include="Worker\WorkerTask.cs" />

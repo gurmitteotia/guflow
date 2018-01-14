@@ -8,7 +8,7 @@ namespace Guflow.Worker
     internal class WorkerTask
     {
         private readonly ActivityTask _activityTask;
-        private readonly Func<ActivitiesHost, Task<ActivityResponse>> _execute;
+        private readonly Func<ActivityHost, Task<ActivityResponse>> _execute;
         private IErrorHandler _errorHandler;
         public static readonly WorkerTask Empty = new WorkerTask();
 
@@ -28,14 +28,14 @@ namespace Guflow.Worker
             return new WorkerTask(activityTask, ErrorHandler.Default(e=>ErrorAction.Unhandled));
         }
 
-        public async Task<ActivityResponse> ExecuteFor(ActivitiesHost activitiesHost)
+        public async Task<ActivityResponse> ExecuteFor(ActivityHost activityHost)
         {
-            return await _execute(activitiesHost);
+            return await _execute(activityHost);
         }
 
-        private async Task<ActivityResponse> ExecuteActivityTask(ActivitiesHost activitiesHost)
+        private async Task<ActivityResponse> ExecuteActivityTask(ActivityHost activityHost)
         {
-            var activity = activitiesHost.FindBy(_activityTask.ActivityType.Name, _activityTask.ActivityType.Version);
+            var activity = activityHost.FindBy(_activityTask.ActivityType.Name, _activityTask.ActivityType.Version);
             var activityArgs = new ActivityArgs(_activityTask.Input,
                                                 _activityTask.ActivityId,
                                                 _activityTask.WorkflowExecution.WorkflowId,

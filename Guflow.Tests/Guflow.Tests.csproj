@@ -86,7 +86,7 @@
     <Compile Include="Decider\WorkflowItemExtensionsTests.cs" />
     <Compile Include="DomainTests.cs" />
     <Compile Include="ErrorHandlerTests.cs" />
-    <Compile Include="Decider\WorkflowsHostTests.cs" />
+    <Compile Include="Decider\WorkflowHostTests.cs" />
     <Compile Include="Decider\SignalTests.cs" />
     <Compile Include="Decider\SignalWorkflowRequestTests.cs" />
     <Compile Include="Decider\StartWorkflowRequestTests.cs" />
@@ -143,7 +143,7 @@
     <Compile Include="Worker\ActivityHeartbeatTests.cs" />
     <Compile Include="Worker\ActivityTests.cs" />
     <Compile Include="Worker\ActivityExecutionTests.cs" />
-    <Compile Include="Worker\ActivitiesHostTests.cs" />
+    <Compile Include="Worker\ActivityHostTests.cs" />
     <Compile Include="Worker\WorkerTaskTests.cs" />
   </ItemGroup>
   <ItemGroup>

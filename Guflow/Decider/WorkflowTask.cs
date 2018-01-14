@@ -10,7 +10,7 @@ namespace Guflow.Decider
     internal class WorkflowTask
     {
         private readonly DecisionTask _decisionTask;
-        private readonly Func<WorkflowsHost,CancellationToken,Task> _actionToExecute;
+        private readonly Func<WorkflowHost,CancellationToken,Task> _actionToExecute;
         private IErrorHandler _executionErrorHandler = ErrorHandler.NotHandled;
         private static readonly WorkflowDecision[] EmptyDecisions = new WorkflowDecision[0];
 
@@ -32,24 +32,24 @@ namespace Guflow.Decider
             return new WorkflowTask(decisionTask);
         }
 
-        public async Task ExecuteForAsync(WorkflowsHost workflowsHost, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ExecuteForAsync(WorkflowHost workflowHost, CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _actionToExecute(workflowsHost, cancellationToken);
+            await _actionToExecute(workflowHost, cancellationToken);
         }
         internal void OnExecutionError(IErrorHandler errorHandler)
         {
             _executionErrorHandler = errorHandler;
         }
-        private async Task ExecuteTasks(WorkflowsHost workflowsHost, CancellationToken cancellationToken)
+        private async Task ExecuteTasks(WorkflowHost workflowHost, CancellationToken cancellationToken)
         {
             var workflowType = _decisionTask.WorkflowType;
-            var workflow = workflowsHost.FindBy(workflowType.Name, workflowType.Version);
+            var workflow = workflowHost.FindBy(workflowType.Name, workflowType.Version);
             var historyEvents = new WorkflowHistoryEvents(_decisionTask.Events, 
                                 _decisionTask.PreviousStartedEventId +1, _decisionTask.StartedEventId);
             using (var execution = workflow.NewExecutionFor(historyEvents))
             {
                 var decisions = Perform(execution);
-                await workflowsHost.SendDecisionsAsync(_decisionTask.TaskToken, decisions);
+                await workflowHost.SendDecisionsAsync(_decisionTask.TaskToken, decisions);
                 RaisePostExecutionEvents(decisions, workflow);
             }
         }

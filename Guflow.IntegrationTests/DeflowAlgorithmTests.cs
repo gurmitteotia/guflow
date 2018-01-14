@@ -10,8 +10,8 @@ namespace Guflow.IntegrationTests
     [TestFixture]
     public class DeflowAlgorithmTests
     {
-        private WorkflowsHost _workflowsHost;
-        private ActivitiesHost _activitiesHost;
+        private WorkflowHost _workflowHost;
+        private ActivityHost _activityHost;
         private TestDomain _domain;
         private static string _taskListName;
 
@@ -20,14 +20,14 @@ namespace Guflow.IntegrationTests
         {
             _domain = new TestDomain();
             _taskListName = Guid.NewGuid().ToString();
-            _activitiesHost = await HostAsync(typeof(DownloadActivity), typeof(TranscodeActivity), typeof(SendEmailActivity));
+            _activityHost = await HostAsync(typeof(DownloadActivity), typeof(TranscodeActivity), typeof(SendEmailActivity));
         }
 
         [TearDown]
         public void TearDown()
         {
-            _workflowsHost.StopExecution();
-            _activitiesHost.StopExecution();
+            _workflowHost.StopExecution();
+            _activityHost.StopExecution();
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace Guflow.IntegrationTests
             var @event = new ManualResetEvent(false);
             var workflow = new WorkflowWithMultipleParent();
             workflow.Closed += (s, e) => @event.Set();
-            _workflowsHost = await HostAsync(workflow);
+            _workflowHost = await HostAsync(workflow);
 
             await _domain.StartWorkflow<WorkflowWithMultipleParent>("input", _taskListName);
             @event.WaitOne();
@@ -45,14 +45,14 @@ namespace Guflow.IntegrationTests
             Assert.That(SendEmailActivity.Input.File2, Is.EqualTo("TranscodedPathAV"));
         }
 
-        private async Task<WorkflowsHost> HostAsync(params Workflow[] workflows)
+        private async Task<WorkflowHost> HostAsync(params Workflow[] workflows)
         {
             var hostedWorkflows = await _domain.Host(workflows);
             hostedWorkflows.StartExecution(new TaskList(_taskListName));
             return hostedWorkflows;
         }
 
-        private async Task<ActivitiesHost> HostAsync(params Type[] activityTypes)
+        private async Task<ActivityHost> HostAsync(params Type[] activityTypes)
         {
             var hostedActivities = await _domain.Host(activityTypes);
             hostedActivities.StartExecution(new TaskList(_taskListName));
