@@ -26,6 +26,16 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Serialize_complex_detail_object_to_json()
+        {
+            var action = WorkflowAction.CancelWorkflow(new { Id = 10, Name = "hello" });
+
+            var decision = action.GetDecisions();
+
+            Assert.That(decision, Is.EquivalentTo(new[] { new CancelWorkflowDecision(@"{""Id"":10,""Name"":""hello""}") }));
+        }
+
+        [Test]
         public void Can_be_returned_as_custom_action_in_workflow()
         {
             var workflow = new SingleActivityWorkflow("detail");
