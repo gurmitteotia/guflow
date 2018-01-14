@@ -169,6 +169,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t reply to a signal when not send by a workflow..
+        /// </summary>
+        internal static string Can_not_reply_to_signal {
+            get {
+                return ResourceManager.GetString("Can_not_reply_to_signal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Concurrent execution limit should be more than zero..
         /// </summary>
         internal static string Concurrent_execution_limit_should_be_more_than_zero {

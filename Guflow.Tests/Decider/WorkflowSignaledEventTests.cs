@@ -26,6 +26,8 @@ namespace Guflow.Tests.Decider
             Assert.That(_workflowSignaledEvent.Input, Is.EqualTo("input"));
             Assert.That(_workflowSignaledEvent.ExternalWorkflowRunid, Is.EqualTo("externalWorkflowRunid"));
             Assert.That(_workflowSignaledEvent.ExternalWorkflowId, Is.EqualTo("externalWorkflowRunid"));
+            Assert.IsTrue(_workflowSignaledEvent.IsSentByWorkflow);
+
         }
         [Test]
         public void Does_not_populate_external_workflow_properties_when_not_signed_by_external_workflow()
@@ -35,6 +37,7 @@ namespace Guflow.Tests.Decider
             Assert.That(workflowSignaledEvent.Input, Is.EqualTo("input"));
             Assert.That(workflowSignaledEvent.ExternalWorkflowRunid, Is.Null);
             Assert.That(workflowSignaledEvent.ExternalWorkflowId, Is.Null);
+            Assert.IsFalse(workflowSignaledEvent.IsSentByWorkflow);
         }
         [Test]
         public void By_default_returns_workflow_ignore_action()
@@ -63,6 +66,14 @@ namespace Guflow.Tests.Decider
             var decisions = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput")).GetDecisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision("newSignal","newInput",workflowSignaledEvent.ExternalWorkflowId,workflowSignaledEvent.ExternalWorkflowRunid)}));
+        }
+
+        [Test]
+        public void Reply_to_signal_event_not_sent_by_a_workflow_generate_exception()
+        {
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input"));
+
+            Assert.Throws<SignalException>(()=> workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal", "newInput")));
         }
 
         private class WorkflowWithCustomActionOnSignal : Workflow

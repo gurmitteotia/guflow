@@ -462,10 +462,10 @@ namespace Guflow.Decider
                                     => ((IWorkflow)this).WorkflowHistoryEvents.AllWorkflowCancellationRequestedEvents();
 
         /// <summary>
-        /// Returns new events
+        /// Get event id of latest history event.
         /// </summary>
-        protected IEnumerable<WorkflowEvent> NewEvents => ((IWorkflow) this).WorkflowHistoryEvents.NewEvents();
-
+        protected long LatestEventId
+            => ((IWorkflow) this).WorkflowHistoryEvents.LatestEventId;
         /// <summary>
         /// Supports sending signal to other workflows.
         /// </summary>
@@ -563,6 +563,18 @@ namespace Guflow.Decider
         protected virtual WorkflowAction DuringCancellation(string details)
         {
             return CancelWorkflow(details);
+        }
+        /// <summary>
+        /// Called before executing the new events
+        /// </summary>
+        protected internal void BeforeExecution()
+        {
+        }
+        /// <summary>
+        /// Called after all the new events are executed.
+        /// </summary>
+        protected internal void AfterExecution()
+        {
         }
         internal WorkflowEventsExecution NewExecutionFor(IWorkflowHistoryEvents workflowHistoryEvents)
         {

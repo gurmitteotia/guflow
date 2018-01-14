@@ -1,4 +1,6 @@
-﻿namespace Guflow.Decider
+﻿using Guflow.Properties;
+
+namespace Guflow.Decider
 {
     public class Signal
     {
@@ -20,6 +22,9 @@
         public WorkflowAction ReplyTo(WorkflowSignaledEvent workflowSignaledEvent)
         {
             Ensure.NotNull(workflowSignaledEvent, "workflowSignaledEvent");
+            if(!workflowSignaledEvent.IsSentByWorkflow)
+                throw new SignalException(Resources.Can_not_reply_to_signal);
+
             return WorkflowAction.Signal(_signalName, _input, workflowSignaledEvent.ExternalWorkflowId, workflowSignaledEvent.ExternalWorkflowRunid);
         }
     }

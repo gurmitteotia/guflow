@@ -44,16 +44,17 @@ namespace Guflow.Decider
             return result;
         }
 
+        //TODO: Move this code outside of this class.
         public IEnumerable<WorkflowDecision> InterpretNewEventsFor(IWorkflow workflow)
         {
-            var interpretedWorkflowActions = new List<WorkflowAction>();
+            var result = new List<WorkflowAction>();
             
             foreach(var workflowEvent in NewEvents())
             { 
                 workflow.SetCurrentExecutingEvent(workflowEvent);
-                interpretedWorkflowActions.Add(workflowEvent.Interpret(workflow));
+                result.Add(workflowEvent.Interpret(workflow));
             }
-            return interpretedWorkflowActions.Where(w=>w!=null).SelectMany(a => a.GetDecisions()).Distinct();
+            return result.Where(w=>w!=null).SelectMany(a => a.GetDecisions()).Distinct();
         }
 
         public IEnumerable<WorkflowEvent> NewEvents()
@@ -149,5 +150,8 @@ namespace Guflow.Decider
                     yield return new WorkflowCancellationRequestedEvent(historyEvent);
             }
         }
+
+        public long LatestEventId => _allHistoryEvents.First().EventId;
+
     }
 }

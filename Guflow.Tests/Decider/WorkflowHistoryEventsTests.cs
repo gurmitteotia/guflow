@@ -363,6 +363,15 @@ namespace Guflow.Tests.Decider
             Assert.That(allWorkflowCancellationRequestedEvents, Is.EqualTo(new[] { new WorkflowCancellationRequestedEvent(cancellationEventGraph.First()), new WorkflowCancellationRequestedEvent(cancellationEventGraph.Last()) }));
         }
 
+        [Test]
+        public void Latest_event_id()
+        {
+            var events = _builder.TimerFiredGraph(Identity.Timer("id"), TimeSpan.FromSeconds(2));
+            var workflowHistoryEvents = new WorkflowHistoryEvents(events);
+
+            Assert.That(workflowHistoryEvents.LatestEventId, Is.EqualTo(events.First().EventId));
+        }
+
         private WorkflowHistoryEvents CreateActivityCompletedEventGraph()
         {
             var activityCompletedEventGraph = _builder.ActivityCompletedGraph(Identity.New("activity", "1.0"), "id", "result").ToArray();

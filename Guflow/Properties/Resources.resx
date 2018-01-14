@@ -255,4 +255,7 @@
   <data name="Heartbeat_is_enabled_but_interval_is_missing" xml:space="preserve">
     <value>Heartbeat on activity {0} is enabled but heartbeat interval is not configured.</value>
   </data>
+  <data name="Can_not_reply_to_signal" xml:space="preserve">
+    <value>Can't reply to a signal when not send by a workflow.</value>
+  </data>
 </root>

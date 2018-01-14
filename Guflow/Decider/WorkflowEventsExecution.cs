@@ -17,16 +17,24 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowDecision> Execute()
         {
-            var workflowDecisions = _workflowHistoryEvents.InterpretNewEventsFor(_workflow);
-            return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
+            _workflow.BeforeExecution();
+            try
+            {
+                var workflowDecisions = _workflowHistoryEvents.InterpretNewEventsFor(_workflow).ToArray();
+                return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
+            }
+            finally
+            {
+                _workflow.AfterExecution();
+            }
         }
-        private IEnumerable<WorkflowDecision> FilterOutIncompatibleDecisions(IEnumerable<WorkflowDecision> workflowDecisions)
+        private IEnumerable<WorkflowDecision> FilterOutIncompatibleDecisions(WorkflowDecision[] workflowDecisions)
         {
             var compatibleWorkflows = workflowDecisions.Where(d => !d.IsIncompaitbleWith(workflowDecisions.Where(f => !f.Equals(d)))).ToArray();
 
-            var workflowClosingDecisions = compatibleWorkflows.OfType<WorkflowClosingDecision>();
-            if (workflowClosingDecisions.Any())
-                return workflowClosingDecisions.GenerateFinalDecisionsFor(_workflow);
+            var closingDecisions = compatibleWorkflows.OfType<WorkflowClosingDecision>().ToArray();
+            if (closingDecisions.Any())
+                return closingDecisions.GenerateFinalDecisionsFor(_workflow);
 
             return compatibleWorkflows;
         }
