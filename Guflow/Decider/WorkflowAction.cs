@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represent instructions to Amazon SWF which are send in response to an event.
+    /// </summary>
     public class WorkflowAction
     {
         private readonly IEnumerable<WorkflowDecision> _workflowDecisions;
@@ -31,12 +34,24 @@ namespace Guflow.Decider
              return decisions.Any(d => workflowItems.Any(d.IsFor));
         }
         
-        public static WorkflowAction operator +(WorkflowAction left, WorkflowAction right)
+        /// <summary>
+        /// Combine two workflow actions togather. Useful if multiple workflow actions needs to be returned in response of an event.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static WorkflowAction operator+(WorkflowAction left, WorkflowAction right)
         {
             Ensure.NotNull(left,nameof(left));
             Ensure.NotNull(right, nameof(right));
             return new CompositeWorkflowAction(left,right);
         }
+
+        /// <summary>
+        /// Combine two workflow actions togather. Useful if multiple workflow actions needs to be returned in response of an event.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public WorkflowAction And(WorkflowAction other)
         {
             return this + other;
@@ -47,17 +62,17 @@ namespace Guflow.Decider
         {
             return new WorkflowAction(workflowDecisions);
         }
-        internal static WorkflowAction FailWorkflow(string reason, string detail)
+        internal static WorkflowAction FailWorkflow(string reason, object detail)
         {
-            return new WorkflowAction(new FailWorkflowDecision(reason,detail));
+            return new WorkflowAction(new FailWorkflowDecision(reason,detail.ToAwsString()));
         }
-        internal static WorkflowAction CompleteWorkflow(string result)
+        internal static WorkflowAction CompleteWorkflow(object result)
         {
-            return new WorkflowAction(new CompleteWorkflowDecision(result));
+            return new WorkflowAction(new CompleteWorkflowDecision(result.ToAwsString()));
         }
-        internal static WorkflowAction CancelWorkflow(string detail)
+        internal static WorkflowAction CancelWorkflow(object detail)
         {
-            return new WorkflowAction(new CancelWorkflowDecision(detail));
+            return new WorkflowAction(new CancelWorkflowDecision(detail.ToAwsString()));
         }
         internal static ScheduleWorkflowItemAction Schedule(WorkflowItem workflowItem)
         {

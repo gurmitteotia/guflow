@@ -26,6 +26,16 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Serialize_complex_result_to_json()
+        {
+            var workflowAction = WorkflowAction.CompleteWorkflow(new {Id =10, Name = "hello"});
+
+            var decision = workflowAction.GetDecisions();
+
+            Assert.That(decision, Is.EquivalentTo(new[] { new CompleteWorkflowDecision(@"{""Id"":10,""Name"":""hello""}")}));
+        }
+
+        [Test]
         public void Can_be_returned_as_custom_action_in_workflow()
         {
             var workflow = new WorkflowReturningCompleteWorkflowAction("result");

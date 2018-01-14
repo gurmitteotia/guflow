@@ -277,7 +277,7 @@ namespace Guflow.Decider
         /// <param name="reason">Short reason, why workflow is failing.</param>
         /// <param name="details">Any detail about failure.</param>
         /// <returns></returns>
-        protected static WorkflowAction FailWorkflow(string reason, string details)
+        protected static WorkflowAction FailWorkflow(string reason, object details)
         {
             return WorkflowAction.FailWorkflow(reason, details);
         }
@@ -286,7 +286,7 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
-        protected static WorkflowAction CompleteWorkflow(string result)
+        protected static WorkflowAction CompleteWorkflow(object result)
         {
             return WorkflowAction.CompleteWorkflow(result);
         }
