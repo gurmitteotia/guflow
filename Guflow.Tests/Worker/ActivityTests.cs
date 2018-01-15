@@ -15,7 +15,7 @@ namespace Guflow.Tests.Worker
         private ActivityArgs _activityArgs;
         private const string _taskToken = "token";
         private const int HeartbeatInterval = 10;
-        private const int WaitPeriod = HeartbeatInterval * 1000;
+        private const int WaitPeriod = HeartbeatInterval * 5000;
 
         [SetUp]
         public void Setup()

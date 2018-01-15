@@ -14,7 +14,7 @@ namespace Guflow.Tests.Worker
         
         private const int HeartbeatIntervel = 10;
         private const string HearbeatDetails = "details";
-        private const int WaitPeriod = HeartbeatIntervel * 100;
+        private const int WaitPeriod = HeartbeatIntervel * 500;
         [SetUp]
         public void Setup()
         {
@@ -44,7 +44,7 @@ namespace Guflow.Tests.Worker
             var hearbeat = new ActivityHeartbeat(); 
             hearbeat.StartHeartbeatIfEnabled(heartbeatApi, "token");
 
-            Assert.IsFalse(heartbeatApi.Wait(WaitPeriod));
+            Assert.IsFalse(heartbeatApi.Wait(HeartbeatIntervel * 100));
             Assert.That(heartbeatApi.HearbeatRecorded, Is.False);
         }
 
@@ -57,7 +57,7 @@ namespace Guflow.Tests.Worker
 
             StartHearbeat(heartbeatApi);
 
-            Assert.That(cancellelationRequestedEvent.WaitOne(HeartbeatIntervel * 50), "Cancellation request event is not raised");
+            Assert.That(cancellelationRequestedEvent.WaitOne(WaitPeriod), "Cancellation request event is not raised");
         }
 
         [Test]
