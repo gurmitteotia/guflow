@@ -101,7 +101,7 @@ namespace Guflow.Tests.Worker
                 TaskToken = "token",
                 WorkflowExecution = new WorkflowExecution(){ RunId = "rid", WorkflowId = "wid"},
                 Input = "input"
-            });
+            }, Mock.Of<IHeartbeatSwfApi>());
         }
         [ActivityDescription("1.0")]
         private class TestActivity : Activity

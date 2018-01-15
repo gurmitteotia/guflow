@@ -236,6 +236,8 @@
     <Compile Include="Worker\ActivityMethodAttribute.cs" />
     <Compile Include="Worker\ActivityHost.cs" />
     <Compile Include="IHost.cs" />
+    <Compile Include="Worker\HeartbeatSwfApi.cs" />
+    <Compile Include="Worker\IHeartbeatSwfApi.cs" />
     <Compile Include="Worker\NonActivityTypeException.cs" />
     <Compile Include="Worker\WorkerTask.cs" />
   </ItemGroup>

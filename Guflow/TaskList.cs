@@ -66,7 +66,7 @@ namespace Guflow
         {
             var activityTask = await domain.PollForActivityTaskAsync(this, pollingIdentity ,cancellationToken);
             if (NewTasksAreReturned(activityTask))
-                return WorkerTask.CreateFor(activityTask);
+                return WorkerTask.CreateFor(activityTask, new HeartbeatSwfApi(domain.Client));
 
             return WorkerTask.Empty;
         }

@@ -144,6 +144,7 @@
     <Compile Include="Worker\ActivityTests.cs" />
     <Compile Include="Worker\ActivityExecutionTests.cs" />
     <Compile Include="Worker\ActivityHostTests.cs" />
+    <Compile Include="Worker\TestHeartbeatSwfApi.cs" />
     <Compile Include="Worker\WorkerTaskTests.cs" />
   </ItemGroup>
   <ItemGroup>

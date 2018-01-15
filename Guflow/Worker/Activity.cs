@@ -14,7 +14,7 @@ namespace Guflow.Worker
     public abstract class Activity
     {
         private readonly ActivityExecutionMethod _executionMethod;
-        private IAmazonSimpleWorkflow _amazonSimpleWorkflow;
+        private IHeartbeatSwfApi _heartbeatApi;
         private IErrorHandler _errorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -28,9 +28,9 @@ namespace Guflow.Worker
             FailOnException = true;
         }
 
-        internal void SetAmazonSwfClient(IAmazonSimpleWorkflow amazonSwf)
+        internal void SetSwfApi(IHeartbeatSwfApi heartbeatApi)
         {
-            _amazonSimpleWorkflow = amazonSwf;
+            _heartbeatApi = heartbeatApi;
         }
         internal void SetErrorHandler(IErrorHandler errorHandler)
         {
@@ -43,7 +43,7 @@ namespace Guflow.Worker
             {
                 _currentTaskToken = activityArgs.TaskToken;
                 Hearbeat.SetFallbackErrorHandler(_errorHandler);
-                Hearbeat.StartHeartbeatIfEnabled(_amazonSimpleWorkflow, activityArgs.TaskToken);
+                Hearbeat.StartHeartbeatIfEnabled(_heartbeatApi, activityArgs.TaskToken);
                 var retryableFunc = new RetryableFunc(_errorHandler);
                 return await retryableFunc.ExecuteAsync(()=>ExecuteActivityMethod(activityArgs), Defer);
             }

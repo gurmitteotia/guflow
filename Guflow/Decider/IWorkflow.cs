@@ -7,9 +7,7 @@ namespace Guflow.Decider
         IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem workflowItem);
         WorkflowItem FindWorkflowItemBy(Identity identity);
         void SetCurrentExecutingEvent(WorkflowEvent workflowEvent);
-
         IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
-
         WorkflowAction OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent);
         WorkflowAction OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent);
         WorkflowAction OnActivityFailure(ActivityFailedEvent activityFailedEvent);

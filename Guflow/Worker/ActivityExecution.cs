@@ -5,6 +5,9 @@ using Guflow.Properties;
 
 namespace Guflow.Worker
 {
+    /// <summary>
+    /// Represent activity concurrent execution strategy
+    /// </summary>
     public class ActivityExecution
     {
         private readonly uint _maximumLimit;
@@ -24,8 +27,16 @@ namespace Guflow.Worker
             _maximumLimit = maximumLimit;
         }
 
+        /// <summary>
+        /// Allow only one activity task to be executed.
+        /// </summary>
         public static readonly ActivityExecution Sequencial = new ActivityExecution(1);
 
+        /// <summary>
+        /// Allow configured number of activity task to executed in parallel.
+        /// </summary>
+        /// <param name="maximumLimit"></param>
+        /// <returns></returns>
         public static ActivityExecution Concurrent(uint maximumLimit)
         {
             Ensure.That(maximumLimit != 0, () => new ArgumentException(Resources.Concurrent_execution_limit_should_be_more_than_zero, "maximumLimit"));

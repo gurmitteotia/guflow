@@ -8,6 +8,7 @@ namespace Guflow.Worker
     internal class WorkerTask
     {
         private readonly ActivityTask _activityTask;
+        private readonly IHeartbeatSwfApi _heartbeatSwfApi;
         private readonly Func<ActivityHost, Task<ActivityResponse>> _execute;
         private IErrorHandler _errorHandler;
         public static readonly WorkerTask Empty = new WorkerTask();
@@ -16,16 +17,17 @@ namespace Guflow.Worker
         {
             _execute = (a) => Task.FromResult(ActivityResponse.Defer);
         }
-        private WorkerTask(ActivityTask activityTask, IErrorHandler errorHandler)
+        private WorkerTask(ActivityTask activityTask, IHeartbeatSwfApi heartbeatSwfApi, IErrorHandler errorHandler)
         {
             _activityTask = activityTask;
+            _heartbeatSwfApi = heartbeatSwfApi;
             _errorHandler = errorHandler;
             _execute = ExecuteActivityTask;
         }
 
-        public static WorkerTask CreateFor(ActivityTask activityTask)
+        public static WorkerTask CreateFor(ActivityTask activityTask, IHeartbeatSwfApi heartbeatSwfApi)
         {
-            return new WorkerTask(activityTask, ErrorHandler.Default(e=>ErrorAction.Unhandled));
+            return new WorkerTask(activityTask,heartbeatSwfApi , ErrorHandler.Default(e=>ErrorAction.Unhandled));
         }
 
         public async Task<ActivityResponse> ExecuteFor(ActivityHost activityHost)
@@ -43,6 +45,7 @@ namespace Guflow.Worker
                                                 _activityTask.TaskToken);
             activityArgs.StartedEventId = _activityTask.StartedEventId;
             activity.SetErrorHandler(_errorHandler);
+            activity.SetSwfApi(_heartbeatSwfApi);
             return await activity.ExecuteAsync(activityArgs);
         }
 
