@@ -164,7 +164,7 @@ namespace Guflow.Tests.Worker
         {
             var hearbeatApi = new TestHeartbeatSwfApi(()=>false);
 
-            var activity = new ActivityWithHeartbeatEnabledByAttribute("details", TimeSpan.FromSeconds(1));
+            var activity = new ActivityWithHeartbeatEnabledByAttribute("details", TimeSpan.FromSeconds(5));
             activity.SetSwfApi(hearbeatApi);
             await activity.ExecuteAsync(_activityArgs);
             Assert.IsTrue(hearbeatApi.Wait(WaitPeriod));
@@ -183,7 +183,7 @@ namespace Guflow.Tests.Worker
         public async Task Does_not_send_hearbeat_to_amazon_swf_when_not_enabled()
         {
             var hearbeatApi = new TestHeartbeatSwfApi(() => false);
-            var activity = new ActivityWithoutHearbeat("details", TimeSpan.FromSeconds(1));
+            var activity = new ActivityWithoutHearbeat("details", TimeSpan.FromSeconds(5));
             activity.SetSwfApi(hearbeatApi);
             await activity.ExecuteAsync(_activityArgs);
 
@@ -195,7 +195,7 @@ namespace Guflow.Tests.Worker
         public async Task Heartbeat_started_when_it_it_enabled_on_activity_programmatically()
         {
             var hearbeatApi = new TestHeartbeatSwfApi(() => false);
-            var activity = new ActivityWithHeartbeatEnabledProgrammatically("details", TimeSpan.FromSeconds(1));
+            var activity = new ActivityWithHeartbeatEnabledProgrammatically("details", TimeSpan.FromSeconds(5));
             activity.SetSwfApi(hearbeatApi);
             await activity.ExecuteAsync(_activityArgs);
 

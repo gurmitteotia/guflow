@@ -5,7 +5,7 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Represent the activity's event.
+    /// Base class for activity events.
     /// </summary>
     public abstract class ActivityEvent : WorkflowItemEvent
     {
@@ -14,13 +14,25 @@ namespace Guflow.Decider
         private string _activityPositionalName;
         private long _startedEventId;
         private long _scheduledEventId;
+        /// <summary>
+        /// Returns the worker polling identity.
+        /// </summary>
         public string WorkerIdentity { get; private set; }
+
+        /// <summary>
+        /// Returns the input activity was scheduled with.
+        /// </summary>
         public string Input { get; private set; }
         protected ActivityEvent(long eventId)
             : base(eventId)
         {
         }
-        //For internal use.
+        /// <summary>
+        /// For internal use only.
+        /// </summary>
+        /// <param name="allHistoryEvents"></param>
+        /// <param name="startedEventId"></param>
+        /// <param name="scheduledEventId"></param>
         protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
         {
             bool foundActivityScheduledEvent=false;

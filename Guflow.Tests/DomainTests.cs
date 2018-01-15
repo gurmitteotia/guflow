@@ -42,15 +42,7 @@ namespace Guflow.Tests
 
             AssertThatAmazonSwfIsSendRegistrationRequestFor(WorkflowDescription());
         }
-        [Test]
-        public async Task Can_register_the_workflow_using_workflow_description()
-        {
-            AmazonSwfReturnsWorkflowEmptyListFor(_workflowName, _domainName);
-
-            await _domain.RegisterWorkflowAsync(WorkflowDescription());
-
-            AssertThatAmazonSwfIsSendRegistrationRequestFor(WorkflowDescription());
-        }
+     
         [Test]
         public async Task Register_the_workflow_when_version_is_different()
         {
@@ -76,15 +68,6 @@ namespace Guflow.Tests
             AmazonSwfReturnsActivityEmptyListFor(_activityName, _domainName);
 
             await _domain.RegisterActivityAsync<TestActivity>();
-
-            AssertThatAmazonSwfIsSendRegistrationRequestFor(ActivityDescription());
-        }
-        [Test]
-        public async Task Can_register_the_activity_using_activity_description()
-        {
-            AmazonSwfReturnsActivityEmptyListFor(_activityName, _domainName);
-
-            await _domain.RegisterActivityAsync(ActivityDescription());
 
             AssertThatAmazonSwfIsSendRegistrationRequestFor(ActivityDescription());
         }
@@ -132,8 +115,6 @@ namespace Guflow.Tests
         {
             Assert.Throws<ArgumentException>(() => new Domain(null, _amazonWorkflowClient.Object));
             Assert.Throws<ArgumentNullException>(() => new Domain("name", (IAmazonSimpleWorkflow)null));
-            Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.RegisterWorkflowAsync((WorkflowDescriptionAttribute) null));
-            Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.RegisterActivityAsync((ActivityDescriptionAttribute)null));
             Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.SignalWorkflowAsync(null));
             Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.CancelWorkflowAsync(null));
         }

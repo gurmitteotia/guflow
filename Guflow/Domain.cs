@@ -69,12 +69,7 @@ namespace Guflow
             Ensure.NotNull(workflowType, "activityType");
             await RegisterWorkflowAsync(WorkflowDescriptionAttribute.FindOn(workflowType));
         }
-        /// <summary>
-        /// Register the workflow with Amazon SWF if not already registered. This overloaded method is useful when you want to dynamically provide the workflow information.
-        /// </summary>
-        /// <param name="workflowDescription"></param>
-        /// <returns></returns>
-        public async Task RegisterWorkflowAsync(WorkflowDescriptionAttribute workflowDescription)
+        private async Task RegisterWorkflowAsync(WorkflowDescriptionAttribute workflowDescription)
         {
             Ensure.NotNull(workflowDescription, "workflowDescription");
             var registeredWorkflowInfos = await ListWorkflowsFromAmazonBy(workflowDescription.Name);
@@ -106,12 +101,7 @@ namespace Guflow
             await RegisterActivityAsync(ActivityDescriptionAttribute.FindOn(activityType));
         }
 
-        /// <summary>
-        /// Register the activity with Amazon SWF if not already registered. This overloaded method is useful when you want to dynamically provide the activity information.
-        /// </summary>
-        /// <param name="activityDescription"></param>
-        /// <returns></returns>
-        public async Task RegisterActivityAsync(ActivityDescriptionAttribute activityDescription)
+        private async Task RegisterActivityAsync(ActivityDescriptionAttribute activityDescription)
         {
             Ensure.NotNull(activityDescription, "activityDescription");
             var registeredActivitiesInfo = await ListActivitiesFromAmazonBy(activityDescription.Name);
