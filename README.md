@@ -18,3 +18,6 @@ Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tu
 
 ### Future plan
 You can see the list of all features and bugs [here](https://github.com/gurmitteotia/guflow/issues) and their status in [project board](https://github.com/gurmitteotia/guflow/projects/1?)
+
+### Getting help
+Please post your messages to [google group](https://groups.google.com/forum/#!forum/guflow)

@@ -6,7 +6,7 @@ namespace Guflow
     public interface IHost
     {
         /// <summary>
-        /// Start execution of host on default task list.
+        /// Start execution of host on common default task list. Throws exception when default task list is not same for all hosted items(workflows, activities).
         /// </summary>
         void StartExecution();
         /// <summary>
