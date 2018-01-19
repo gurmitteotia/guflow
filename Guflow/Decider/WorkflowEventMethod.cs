@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+using System.Reflection;
 using System.Threading;
 
 namespace Guflow.Decider

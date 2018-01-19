@@ -1,4 +1,5 @@
-﻿using Guflow.Decider;
+﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+using Guflow.Decider;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider

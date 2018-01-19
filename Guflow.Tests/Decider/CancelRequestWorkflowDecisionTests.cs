@@ -1,4 +1,5 @@
-﻿using Amazon.SimpleWorkflow;
+﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+using Amazon.SimpleWorkflow;
 using Guflow.Decider;
 using NUnit.Framework;
 

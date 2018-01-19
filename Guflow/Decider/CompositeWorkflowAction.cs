@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Guflow.Decider

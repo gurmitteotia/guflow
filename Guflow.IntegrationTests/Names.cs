@@ -1,4 +1,5 @@
-﻿namespace Guflow.IntegrationTests
+﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+namespace Guflow.IntegrationTests
 {
     public static class Names
     {

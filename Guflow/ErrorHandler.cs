@@ -1,4 +1,5 @@
-﻿namespace Guflow
+﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+namespace Guflow
 {
     internal class ErrorHandler : IErrorHandler
     {
