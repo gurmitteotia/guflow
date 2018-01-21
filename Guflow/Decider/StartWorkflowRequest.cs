@@ -50,8 +50,8 @@ namespace Guflow.Decider
                 LambdaRole = LambdaRole,
                 TagList = Tags,
                 TaskPriority = TaskPriority.SwfFormat(),
-                TaskStartToCloseTimeout = TaskStartToCloseTimeout.SwfFormat(),
-                ExecutionStartToCloseTimeout = ExecutionStartToCloseTimeout.SwfFormat()
+                TaskStartToCloseTimeout = TaskStartToCloseTimeout.Seconds(),
+                ExecutionStartToCloseTimeout = ExecutionStartToCloseTimeout.Seconds()
 
             };
         }

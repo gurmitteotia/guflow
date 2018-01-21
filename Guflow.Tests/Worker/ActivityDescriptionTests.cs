@@ -55,6 +55,15 @@ namespace Guflow.Tests.Worker
             Assert.Throws<ArgumentNullException>(() => ActivityDescriptionAttribute.FindOn(null));
         }
 
+        [Test]
+        public void Read_activity_description_from_factory_method_when_provided()
+        {
+            var description = ActivityDescription.FindOn<ActivityWithFactoryDescriptionMethod>();
+
+            Assert.That(description.Name, Is.EqualTo(nameof(ActivityWithFactoryDescriptionMethod)));
+            Assert.That(description.Version, Is.EqualTo("1.0"));
+        }
+
         private class ActivityWithoutAttribute : Activity
         {
         }
@@ -79,6 +88,14 @@ namespace Guflow.Tests.Worker
         private class NonActivity
         {
 
+        }
+
+        private class ActivityWithFactoryDescriptionMethod : Activity
+        {
+            private static ActivityDescription ActivityDescription()
+            {
+                return new ActivityDescription(nameof(ActivityWithFactoryDescriptionMethod), "1.0");
+            }
         }
     }
 }

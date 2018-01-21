@@ -20,7 +20,7 @@ namespace Guflow.Decider
                 return null;
             return value.Value.ToString();
         }
-        public static string SwfFormat(this TimeSpan? value)
+        public static string Seconds(this TimeSpan? value)
         {
             if (!value.HasValue)
                 return null;

@@ -220,6 +220,7 @@
     <Compile Include="Worker\ActivityCancelResponse.cs" />
     <Compile Include="Worker\ActivityCompleteResponse.cs" />
     <Compile Include="Worker\ActivityConfigurationException.cs" />
+    <Compile Include="Worker\ActivityDescription.cs" />
     <Compile Include="Worker\ActivityDescriptionAttribute.cs" />
     <Compile Include="Worker\ActivityDescriptionMissingException.cs" />
     <Compile Include="Worker\ActivityExecutionMethod.cs" />
