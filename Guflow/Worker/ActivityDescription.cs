@@ -1,12 +1,11 @@
-﻿using System;
-using System.Configuration;
-using System.Reflection;
-using Guflow.Properties;
+﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System;
 
 namespace Guflow.Worker
 {
     /// <summary>
-    /// It is used to describe an activity. Its attributes are used while registering the activity with Amazon SWF.
+    /// It describe an activity. Its attributes are used while registering the activity with Amazon SWF or communicating with Amazon SWF.
     /// </summary>
     public class ActivityDescription
     {
