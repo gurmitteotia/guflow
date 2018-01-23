@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 
 using System;
+using System.Runtime.Remoting.Messaging;
+using Guflow.Properties;
 
 namespace Guflow.Worker
 {
@@ -9,28 +11,25 @@ namespace Guflow.Worker
     /// </summary>
     public class ActivityDescription
     {
+        private static readonly IDescriptionStrategy _strategy = new CompositeDescriptionStrategy(new []{DescriptionStrategy.FactoryMethod, DescriptionStrategy.FromAttribute});
        /// <summary>
         /// Create the instance with activity name and version.
         /// </summary>
-        /// <param name="name"></param>
         /// <param name="version"></param>
-        public ActivityDescription(string name, string version)
+        public ActivityDescription(string version)
         {
-            Ensure.NotNullAndEmpty(name,nameof(name));
-            Ensure.NotNullAndEmpty(version,nameof(version));
-
-            Name = name;
+            Ensure.NotNullAndEmpty(version,nameof(version), Resources.Empty_version);
             Version = version;
         }
         /// <summary>
-        /// Gets the name of activity.
+        /// Gets or sets the name of activity.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; }
 
-        //Gets or sets the version of activity.
+        /// <summary>
+        /// Gets or sets the version of activity.
+        /// </summary>
         public string Version { get; }
-
-        /*
         /// <summary>
         /// Gets or sets the description of activity.
         /// </summary>
@@ -44,26 +43,40 @@ namespace Guflow.Worker
         /// Gets or sets the default priority for activity.
         /// </summary>
         public int DefaultTaskPriority { get; set; }
-
+        /// <summary>
+        /// Gets or sets the default star to close timeout for activity task.
+        /// </summary>
         public TimeSpan? DefaultStartToCloseTimeout { get; set; }
-
+        /// <summary>
+        /// Gets or sets the default heartbeat timeout for activity task.
+        /// </summary>
         public TimeSpan? DefaultHeartbeatTimeout { get; set; }
-       
-
+        /// <summary>
+        /// Gets or sets default schedule to close timeout for activity task.
+        /// </summary>
         public TimeSpan? DefaultScheduleToCloseTimeout { get; set; }
-       
+        /// <summary>
+        /// Gets or sets the default schedule to start timeout for activity task.
+        /// </summary>
         public TimeSpan? DefaultScheduleToStartTimeout { get; set; }
-
-        */
-        internal static ActivityDescriptionAttribute FindOn<TActivity>() where TActivity : Activity
+        
+        internal static ActivityDescription FindOn<TActivity>() where TActivity : Activity
         {
             return FindOn(typeof(TActivity));
         }
 
-        internal static ActivityDescriptionAttribute FindOn(Type activityType)
+        internal static ActivityDescription FindOn(Type activityType)
         {
             Ensure.NotNull(activityType, "activityType");
-            return null;
+            if (!typeof(Activity).IsAssignableFrom(activityType))
+                throw new NonActivityTypeException(string.Format(Resources.Non_activity_type, activityType.Name, typeof(Activity).Name));
+            var activityDescription = _strategy.FindDescription(activityType);
+
+            if (activityDescription == null)
+                throw new ActivityDescriptionMissingException(string.Format(Resources.Activity_description_missing, activityType.Name));
+
+            if (string.IsNullOrEmpty(activityDescription.Name)) activityDescription.Name = activityType.Name;
+            return activityDescription;
         }
         /*
         internal RegisterActivityTypeRequest RegisterRequest(string domainName)

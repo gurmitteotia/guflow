@@ -85,6 +85,7 @@
     <Compile Include="Decider\ChildPolicy.cs" />
     <Compile Include="Decider\CompositeWorkflowAction.cs" />
     <Compile Include="Decider\SignalException.cs" />
+    <Compile Include="DescriptionStartegy.cs" />
     <Compile Include="HostFaultEventArgs.cs" />
     <Compile Include="Decider\IFluentWorkflowActionItem.cs" />
     <Compile Include="Decider\IgnoreWorkflowAction.cs" />

@@ -20,8 +20,6 @@ namespace Guflow.Worker
             PopulateHostedActivities(activitiesTypes);
         }
 
-        public int Count => _hostedActivities.Count;
-
         public Activity FindBy(string activityName, string activityVersion)
         {
             Type hostedActivityType;

@@ -70,7 +70,7 @@ namespace Guflow.Worker
 
             var activityDescription = activityType.GetCustomAttribute<ActivityDescriptionAttribute>();
             if (activityDescription == null)
-                throw new ActivityDescriptionMissingException(string.Format(Resources.Activity_attribute_missing, activityType.Name));
+                throw new ActivityDescriptionMissingException(string.Format(Resources.Activity_description_missing, activityType.Name));
 
             if (string.IsNullOrWhiteSpace(activityDescription.Version))
                 throw new ConfigurationErrorsException(string.Format(Resources.Empty_version, activityType.Name));
@@ -95,6 +95,26 @@ namespace Guflow.Worker
                 DefaultTaskScheduleToCloseTimeout = DefaultScheduleToCloseTimeout,
                 DefaultTaskScheduleToStartTimeout = DefaultScheduleToStartTimeout
             };
+        }
+        internal ActivityDescription ActivityDescription()
+        {
+            return new ActivityDescription(Version)
+            {
+                Name = Name,
+                Description = Description,
+                DefaultTaskListName = DefaultTaskListName,
+                DefaultTaskPriority = DefaultTaskPriority,
+                DefaultHeartbeatTimeout = AwsFormat(DefaultHeartbeatTimeoutInSeconds),
+                DefaultScheduleToCloseTimeout = AwsFormat(DefaultScheduleToCloseTimeoutInSeconds),
+                DefaultScheduleToStartTimeout = AwsFormat(DefaultScheduleToStartTimeoutInSeconds),
+                DefaultStartToCloseTimeout = AwsFormat(DefaultStartToCloseTimeoutInSeconds)
+            };
+        }
+
+        private TimeSpan? AwsFormat(uint seconds)
+        {
+            if (seconds == 0) return null;
+            return TimeSpan.FromSeconds(seconds);
         }
     }
 }
