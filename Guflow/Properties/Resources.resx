@@ -165,8 +165,8 @@
   <data name="Workflow_already_hosted" xml:space="preserve">
     <value>Workflow name {0} and version {1} is already hosted.</value>
   </data>
-  <data name="Workflow_attribute_missing" xml:space="preserve">
-    <value>WorkflowDescriptionAttribute is not applied on workflow {0}.</value>
+  <data name="Workflow_description_not_supplied" xml:space="preserve">
+    <value>WorkflowDescription is not supplied on workflow {0}.</value>
   </data>
   <data name="Workflow_deprecated" xml:space="preserve">
     <value>Workflow name {0} and version {1} is deprecated. </value>

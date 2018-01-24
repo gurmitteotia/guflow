@@ -10,16 +10,17 @@ namespace Guflow.Tests.Decider
     public class WorkflowDescriptionTests
     {
         [Test]
-        public void Throws_exception_when_attribute_is_not_applied()
+        public void Throws_exception_when_workflow_description_is_not_supplied()
         {
-            Assert.Throws<WorkflowDescriptionMissingException>(() => WorkflowDescriptionAttribute.FindOn<WorkflowWithoutAttribute>());
+            Assert.Throws<WorkflowDescriptionMissingException>(() => WorkflowDescription.FindOn<WorkflowWithoutAttribute>());
         }
 
         [Test]
-        public void Timeouts_are_null_when_not_set()
+        public void Workflow_description_has_only_version_property_set()
         {
-            var workflowDescription = WorkflowDescriptionAttribute.FindOn<WorkflowWithoutTimeoutSet>();
+            var workflowDescription = WorkflowDescription.FindOn<WorkflowWithoutTimeoutSet>();
            
+            
             Assert.IsNull(workflowDescription.DefaultExecutionStartToCloseTimeout);
             Assert.IsNull(workflowDescription.DefaultTaskStartToCloseTimeout);
         }
@@ -51,6 +52,23 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => WorkflowDescriptionAttribute.FindOn(null));
         }
 
+        [Test]
+        public void Read_workflow_description_from_factory_method_when_provided()
+        {
+            var d = WorkflowDescription.FindOn<WorkflowWithDescriptionFactoryMethod>();
+
+            Assert.That(d.Name, Is.EqualTo("test"));
+            Assert.That(d.Version, Is.EqualTo("1.0"));
+            Assert.That(d.Description, Is.EqualTo("desc"));
+            Assert.That(d.DefaultTaskListName, Is.EqualTo("tname"));
+            Assert.That(d.DefaultTaskPriority, Is.EqualTo(1));
+            Assert.That(d.DefaultExecutionStartToCloseTimeout, Is.EqualTo(TimeSpan.FromSeconds(10)));
+            Assert.That(d.DefaultTaskStartToCloseTimeout, Is.EqualTo(TimeSpan.FromSeconds(9)));
+            Assert.That(d.DefaultChildPolicy, Is.EqualTo("policy"));
+            Assert.That(d.DefaultLambdaRole, Is.EqualTo("lambdarole"));
+            
+        }
+
         private class WorkflowWithoutAttribute : Workflow
         {
         }
@@ -61,7 +79,7 @@ namespace Guflow.Tests.Decider
             
         }
 
-        [WorkflowDescription("1.0", DefaultExecutionStartToCloseTimeoutInSeconds = 10, DefaultTaskStartToCloseTimeoutInSeconds = 0)]
+        [WorkflowDescription("1.0", DefaultExecutionStartToCloseTimeoutInSeconds = 10, DefaultTaskStartToCloseTimeoutInSeconds = 9)]
         private class WorkflowWithTimeoutSet : Workflow
         {
 
@@ -72,10 +90,24 @@ namespace Guflow.Tests.Decider
         {
 
         }
-
         private class NonWorkflow
         {
             
+        }
+
+        private class WorkflowWithDescriptionFactoryMethod : Workflow
+        {
+            private static  WorkflowDescription WorkflowDescription => new WorkflowDescription("1.0")
+            {
+                Name = "test",
+                Description = "desc",
+                DefaultTaskListName = "tname",
+                DefaultExecutionStartToCloseTimeout = TimeSpan.FromSeconds(10),
+                DefaultTaskStartToCloseTimeout = TimeSpan.FromSeconds(9),
+                DefaultChildPolicy= "policy",
+                DefaultLambdaRole ="lambdarole", 
+                DefaultTaskPriority =1
+            };
         }
     }
 }

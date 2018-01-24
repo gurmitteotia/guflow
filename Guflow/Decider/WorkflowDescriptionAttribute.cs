@@ -66,7 +66,7 @@ namespace Guflow.Decider
 
             var workflowDescription = workflowType.GetCustomAttribute<WorkflowDescriptionAttribute>();
             if (workflowDescription == null)
-                throw new WorkflowDescriptionMissingException(string.Format(Resources.Workflow_attribute_missing, workflowType.Name));
+                throw new WorkflowDescriptionMissingException(string.Format(Resources.Workflow_description_not_supplied, workflowType.Name));
             
             if (string.IsNullOrWhiteSpace(workflowDescription.Version))
                 throw new ConfigurationErrorsException(string.Format(Resources.Empty_version, workflowType.Name));
@@ -91,6 +91,11 @@ namespace Guflow.Decider
                 DefaultLambdaRole = DefaultLambdaRole,
                 DefaultTaskPriority = DefaultTaskPriority.ToString()
             };
+        }
+
+        internal WorkflowDescription WorkflowDescription()
+        {
+            return new WorkflowDescription(Version);
         }
     }
 }

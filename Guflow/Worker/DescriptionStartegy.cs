@@ -4,9 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Guflow.Worker;
 
-namespace Guflow
+namespace Guflow.Worker
 {
     internal interface IDescriptionStrategy
     {
@@ -54,7 +53,7 @@ namespace Guflow
         private static ActivityDescription BuildFromFactoryMethod(Type activityType)
         {
             
-            var method = activityType.GetMethods(BindingFlags.Static | BindingFlags.GetField|BindingFlags.NonPublic)
+            var method = activityType.GetMethods(BindingFlags.Static | BindingFlags.GetField|BindingFlags.NonPublic| BindingFlags.Public)
                             .FirstOrDefault(IsFactoryMethod);
             return (ActivityDescription)method?.Invoke(null, null);
         }

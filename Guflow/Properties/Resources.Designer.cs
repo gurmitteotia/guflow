@@ -448,20 +448,20 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to WorkflowDescriptionAttribute is not applied on workflow {0}..
-        /// </summary>
-        internal static string Workflow_attribute_missing {
-            get {
-                return ResourceManager.GetString("Workflow_attribute_missing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Workflow name {0} and version {1} is deprecated. .
         /// </summary>
         internal static string Workflow_deprecated {
             get {
                 return ResourceManager.GetString("Workflow_deprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WorkflowDescription is not supplied on workflow {0}..
+        /// </summary>
+        internal static string Workflow_description_not_supplied {
+            get {
+                return ResourceManager.GetString("Workflow_description_not_supplied", resourceCulture);
             }
         }
         
