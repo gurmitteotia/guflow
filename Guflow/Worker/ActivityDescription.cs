@@ -2,6 +2,8 @@
 
 using System;
 using System.Runtime.Remoting.Messaging;
+using Amazon.SimpleWorkflow.Model;
+using Guflow.Decider;
 using Guflow.Properties;
 
 namespace Guflow.Worker
@@ -11,7 +13,7 @@ namespace Guflow.Worker
     /// </summary>
     public class ActivityDescription
     {
-        private static readonly IDescriptionStrategy _strategy = new CompositeDescriptionStrategy(new []{DescriptionStrategy.FactoryMethod, DescriptionStrategy.FromAttribute});
+        private static readonly IDescriptionStrategy Strategy = new CompositeDescriptionStrategy(new []{DescriptionStrategy.FactoryMethod, DescriptionStrategy.FromAttribute});
        /// <summary>
         /// Create the instance with activity name and version.
         /// </summary>
@@ -70,7 +72,7 @@ namespace Guflow.Worker
             Ensure.NotNull(activityType, "activityType");
             if (!typeof(Activity).IsAssignableFrom(activityType))
                 throw new NonActivityTypeException(string.Format(Resources.Non_activity_type, activityType.Name, typeof(Activity).Name));
-            var activityDescription = _strategy.FindDescription(activityType);
+            var activityDescription = Strategy.FindDescription(activityType);
 
             if (activityDescription == null)
                 throw new ActivityDescriptionMissingException(string.Format(Resources.Activity_description_missing, activityType.Name));
@@ -78,7 +80,7 @@ namespace Guflow.Worker
             if (string.IsNullOrEmpty(activityDescription.Name)) activityDescription.Name = activityType.Name;
             return activityDescription;
         }
-        /*
+        
         internal RegisterActivityTypeRequest RegisterRequest(string domainName)
         {
             return new RegisterActivityTypeRequest
@@ -94,6 +96,6 @@ namespace Guflow.Worker
                 DefaultTaskScheduleToCloseTimeout = DefaultScheduleToCloseTimeout.Seconds(),
                 DefaultTaskScheduleToStartTimeout = DefaultScheduleToStartTimeout.Seconds()
             };
-        }*/
+        }
     }
 }

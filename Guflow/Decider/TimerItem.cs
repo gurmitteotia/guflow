@@ -93,7 +93,7 @@ namespace Guflow.Decider
 
         public IFluentTimerItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
-            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            var description = ActivityDescription.FindOn<TActivity>();
             return AfterActivity(description.Name, description.Version, positionalName);
         }
         public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> action)

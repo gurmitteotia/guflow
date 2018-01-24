@@ -99,10 +99,10 @@ namespace Guflow
         public async Task RegisterActivityAsync(Type activityType)
         {
             Ensure.NotNull(activityType, "activityType");
-            await RegisterActivityAsync(ActivityDescriptionAttribute.FindOn(activityType));
+            await RegisterActivityAsync(ActivityDescription.FindOn(activityType));
         }
 
-        private async Task RegisterActivityAsync(ActivityDescriptionAttribute activityDescription)
+        private async Task RegisterActivityAsync(ActivityDescription activityDescription)
         {
             Ensure.NotNull(activityDescription, "activityDescription");
             var registeredActivitiesInfo = await ListActivitiesFromAmazonBy(activityDescription.Name);

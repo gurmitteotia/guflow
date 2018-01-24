@@ -231,7 +231,7 @@ namespace Guflow.Decider
         /// <returns></returns>
         protected IFluentActivityItem ScheduleActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
-            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            var description = ActivityDescription.FindOn<TActivity>();
             return ScheduleActivity(description.Name, description.Version, positionalName);
         }
         /// <summary>

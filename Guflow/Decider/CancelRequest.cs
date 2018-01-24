@@ -38,7 +38,7 @@ namespace Guflow.Decider
         /// <returns></returns>
         public WorkflowAction ForActivity<TActivity>(string positionalName = "") where TActivity: Activity
         {
-            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            var description = ActivityDescription.FindOn<TActivity>();
             return ForActivity(description.Name, description.Version, positionalName);
         }
         /// <summary>

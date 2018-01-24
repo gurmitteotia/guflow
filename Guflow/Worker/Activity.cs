@@ -124,8 +124,10 @@ namespace Guflow.Worker
 
             if (intervalMillisec == 0)
             {
-                var description = ActivityDescriptionAttribute.FindOn(GetType());
-                intervalMillisec = description.DefaultHeartbeatTimeoutInSeconds * 1000;
+                var description = ActivityDescription.FindOn(GetType());
+                intervalMillisec = description.DefaultHeartbeatTimeout.HasValue
+                    ? (uint)description.DefaultHeartbeatTimeout.Value.TotalMilliseconds
+                    : 0;
             }
             if (intervalMillisec == 0)
                 throw new ActivityConfigurationException(

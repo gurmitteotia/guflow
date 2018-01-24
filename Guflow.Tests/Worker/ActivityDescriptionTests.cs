@@ -12,7 +12,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Throws_exception_when_activity_description_not_supplied()
         {
-            Assert.Throws<ActivityDescriptionMissingException>(() => ActivityDescriptionAttribute.FindOn<ActivityWithoutDescription>());
+            Assert.Throws<ActivityDescriptionMissingException>(() => ActivityDescription.FindOn<ActivityWithoutDescription>());
         }
 
         [Test]

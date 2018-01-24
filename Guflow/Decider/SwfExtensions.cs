@@ -9,22 +9,16 @@ namespace Guflow.Decider
     {
         public static string SwfFormat(this uint? value)
         {
-            if(!value.HasValue)
-                return null;
-            return value.Value.ToString();
+            return value?.ToString();
         }
 
         public static string SwfFormat(this int? value)
         {
-            if (!value.HasValue)
-                return null;
-            return value.Value.ToString();
+            return value?.ToString();
         }
         public static string Seconds(this TimeSpan? value)
         {
-            if (!value.HasValue)
-                return null;
-            return value.Value.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+            return value?.TotalSeconds.ToString(CultureInfo.InvariantCulture);
         }
 
         public static Amazon.SimpleWorkflow.Model.TaskList TaskList(this string taskListName)
