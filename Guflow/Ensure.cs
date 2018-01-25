@@ -18,6 +18,10 @@ namespace Guflow
         {
             That(!string.IsNullOrEmpty(argument), () => new ArgumentException(argumentName));
         }
+        public static void NotNullAndEmpty(string argument, string argumentName, string msg)
+        {
+            That(!string.IsNullOrEmpty(argument), () => new ArgumentException(msg, argumentName));
+        }
         public static void NotNullAndEmpty<T>(string argument, Func<T> exception) where T : Exception
         {
             That(!string.IsNullOrEmpty(argument), exception);

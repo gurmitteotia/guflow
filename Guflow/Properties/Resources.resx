@@ -136,7 +136,7 @@
     <value>Timer with name {0} is already added to workflowClosingActions.</value>
   </data>
   <data name="Empty_version" xml:space="preserve">
-    <value>Version is empty for {0}.</value>
+    <value>Version is empty.</value>
   </data>
   <data name="Invalid_parameter" xml:space="preserve">
     <value>Target method {0} has incompatible parameter {1} which can't be assigned from source object {2}'s property.</value>
@@ -165,8 +165,8 @@
   <data name="Workflow_already_hosted" xml:space="preserve">
     <value>Workflow name {0} and version {1} is already hosted.</value>
   </data>
-  <data name="Workflow_attribute_missing" xml:space="preserve">
-    <value>WorkflowDescriptionAttribute is not applied on workflow {0}.</value>
+  <data name="Workflow_description_not_supplied" xml:space="preserve">
+    <value>WorkflowDescription is not supplied on workflow {0}.</value>
   </data>
   <data name="Workflow_deprecated" xml:space="preserve">
     <value>Workflow name {0} and version {1} is deprecated. </value>
@@ -183,8 +183,8 @@
   <data name="Workflow_execution_already_stopped" xml:space="preserve">
     <value>Workflow execution is already stopped. Start with new instance to begin execution.</value>
   </data>
-  <data name="Activity_attribute_missing" xml:space="preserve">
-    <value>ActivityDescriptionAttribute is not applied on activity {0}.</value>
+  <data name="Activity_description_missing" xml:space="preserve">
+    <value>ActivityDescription is not supplied for activity {0}.</value>
   </data>
   <data name="Non_activity_type" xml:space="preserve">
     <value>Activity type {0} does not derive from {1} class.</value>

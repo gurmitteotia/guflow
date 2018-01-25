@@ -48,7 +48,7 @@ namespace Guflow.Decider
         /// <returns></returns>
         public JumpWorkflowAction ToActivity<TActivity>(string positionalName = "") where TActivity: Activity
         {
-            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            var description = ActivityDescription.FindOn<TActivity>();
             return ToActivity(description.Name, description.Version, positionalName);
         }
         /// <summary>

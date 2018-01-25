@@ -10,87 +10,73 @@ namespace Guflow.Decider
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed class WorkflowDescriptionAttribute : Attribute
     {
-        private uint? _defaultExecutionStartToCloseTimeout;
-        private uint? _defaultTaskStartToCloseTimeout;
-
+       
         public WorkflowDescriptionAttribute(string version)
         {
            Version = version;
         }
 
+        /// <summary>
+        /// Gets or sets the workflow name.
+        /// </summary>
         public string Name { get; set; }
-        public string Version { get; set; }
+
+        /// <summary>
+        /// Gets the workflow version.
+        /// </summary>
+        public string Version { get; }
+        /// <summary>
+        /// Gets the workflow description.
+        /// </summary>
         public string Description { get; set; }
+        /// <summary>
+        /// Gets or sets the default task list name
+        /// </summary>
         public string DefaultTaskListName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default child policy. Child policy determine how child workflow is treated when its parent workflow is terminated.
+        /// </summary>
         public string DefaultChildPolicy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default lambada role.
+        /// </summary>
         public string DefaultLambdaRole { get; set; }
 
-        public uint DefaultExecutionStartToCloseTimeoutInSeconds
-        {
-            get
-            {
-                return _defaultExecutionStartToCloseTimeout ?? default(uint);
-            }
-            set { _defaultExecutionStartToCloseTimeout = value; }
-        }
-
-        public uint DefaultTaskStartToCloseTimeoutInSeconds
-        {
-            get
-            {
-                return _defaultTaskStartToCloseTimeout ?? default(uint);
-            }
-            set { _defaultTaskStartToCloseTimeout = value; }
-        }
+        /// <summary>
+        /// Gets or sets the workflow start to close timeout in seconds.
+        /// </summary>
+        public uint DefaultExecutionStartToCloseTimeoutInSeconds { get; set; }
+      
+        /// <summary>
+        /// Gets or sets the timout for decision tasks.
+        /// </summary>
+        public uint DefaultTaskStartToCloseTimeoutInSeconds { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the default task priority.
+        /// </summary>
         public int DefaultTaskPriority { get; set; }
-
-        internal string DefaultExecutionStartToCloseTimeout
+        internal WorkflowDescription WorkflowDescription()
         {
-            get
+            return new WorkflowDescription(Version)
             {
-                return _defaultExecutionStartToCloseTimeout.SwfFormat();
-            }
-        }
-
-        internal string DefaultTaskStartToCloseTimeout { get { return _defaultTaskStartToCloseTimeout.SwfFormat(); } }
-
-        public static WorkflowDescriptionAttribute FindOn<TWorkflow>() where TWorkflow : Workflow
-        {
-            return FindOn(typeof(TWorkflow));
-        }
-        public static WorkflowDescriptionAttribute FindOn(Type workflowType)
-        {
-            Ensure.NotNull(workflowType, "workflowType");
-            if(!typeof(Workflow).IsAssignableFrom(workflowType))
-                throw new NonWorkflowTypeException(string.Format(Resources.Non_Workflow_type,workflowType.Name,typeof(Workflow).Name));
-
-            var workflowDescription = workflowType.GetCustomAttribute<WorkflowDescriptionAttribute>();
-            if (workflowDescription == null)
-                throw new WorkflowDescriptionMissingException(string.Format(Resources.Workflow_attribute_missing, workflowType.Name));
-            
-            if (string.IsNullOrWhiteSpace(workflowDescription.Version))
-                throw new ConfigurationErrorsException(string.Format(Resources.Empty_version, workflowType.Name));
-
-            if (string.IsNullOrWhiteSpace(workflowDescription.Name))
-                workflowDescription.Name = workflowType.Name;
-            return workflowDescription;
-        }
-
-        internal RegisterWorkflowTypeRequest RegisterRequest(string domainName)
-        {
-            return new RegisterWorkflowTypeRequest
-            {
+                DefaultTaskListName = DefaultTaskListName,
                 Name = Name,
-                Version = Version,
                 Description = Description,
-                Domain = domainName,
-                DefaultExecutionStartToCloseTimeout = DefaultExecutionStartToCloseTimeout,
-                DefaultTaskList = DefaultTaskListName.TaskList(),
-                DefaultTaskStartToCloseTimeout = DefaultTaskStartToCloseTimeout,
+                DefaultTaskPriority = DefaultTaskPriority,
                 DefaultChildPolicy = DefaultChildPolicy,
                 DefaultLambdaRole = DefaultLambdaRole,
-                DefaultTaskPriority = DefaultTaskPriority.ToString()
+                DefaultTaskStartToCloseTimeout = AwsFormat(DefaultTaskStartToCloseTimeoutInSeconds),
+                DefaultExecutionStartToCloseTimeout = AwsFormat(DefaultExecutionStartToCloseTimeoutInSeconds)
             };
+        }
+
+        private TimeSpan? AwsFormat(uint seconds)
+        {
+            if (seconds == 0) return null;
+            return TimeSpan.FromSeconds(seconds);
         }
     }
 }

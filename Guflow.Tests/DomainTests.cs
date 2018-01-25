@@ -270,9 +270,9 @@ namespace Guflow.Tests
             Assert.That(activityTask, Is.EqualTo(Domain.EmptyActivityTask));
         }
 
-        private static WorkflowDescriptionAttribute WorkflowDescription()
+        private static WorkflowDescription WorkflowDescription()
         {
-            return new WorkflowDescriptionAttribute("1.0")
+            return new WorkflowDescription("1.0")
             {
                 Name = _workflowName,
                 DefaultChildPolicy = "ChildPolicy",
@@ -280,8 +280,8 @@ namespace Guflow.Tests
                 DefaultTaskListName = "tname",
                 DefaultTaskPriority = 10,
                 Description = "desc",
-                DefaultTaskStartToCloseTimeoutInSeconds = 11,
-                DefaultExecutionStartToCloseTimeoutInSeconds = 12
+                DefaultTaskStartToCloseTimeout = TimeSpan.FromSeconds(11),
+                DefaultExecutionStartToCloseTimeout = TimeSpan.FromSeconds(12)
             };
         }
 
@@ -448,7 +448,7 @@ namespace Guflow.Tests
             _amazonWorkflowClient.Setup(a => a.ListActivityTypesAsync(It.IsAny<ListActivityTypesRequest>(), default(CancellationToken)))
                 .Returns(Task.FromResult(emptyListResponse)).Callback(requestedParameters);
         }
-        private void AssertThatAmazonSwfIsSendRegistrationRequestFor(WorkflowDescriptionAttribute attribute)
+        private void AssertThatAmazonSwfIsSendRegistrationRequestFor(WorkflowDescription attribute)
         {
             Func<RegisterWorkflowTypeRequest, bool> parameter = (r) =>
             {
@@ -459,8 +459,8 @@ namespace Guflow.Tests
                 Assert.That(r.DefaultTaskList.Name, Is.EqualTo(attribute.DefaultTaskListName));
                 Assert.That(r.DefaultChildPolicy.Value, Is.EqualTo(attribute.DefaultChildPolicy));
                 Assert.That(r.DefaultLambdaRole, Is.EqualTo(attribute.DefaultLambdaRole));
-                Assert.That(r.DefaultExecutionStartToCloseTimeout, Is.EqualTo(attribute.DefaultExecutionStartToCloseTimeout));
-                Assert.That(r.DefaultTaskStartToCloseTimeout, Is.EqualTo(attribute.DefaultTaskStartToCloseTimeout));
+                Assert.That(r.DefaultExecutionStartToCloseTimeout, Is.EqualTo(attribute.DefaultExecutionStartToCloseTimeout.Seconds()));
+                Assert.That(r.DefaultTaskStartToCloseTimeout, Is.EqualTo(attribute.DefaultTaskStartToCloseTimeout.Seconds()));
                 return true;
             };
 

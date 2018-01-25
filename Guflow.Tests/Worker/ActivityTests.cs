@@ -2,8 +2,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.SimpleWorkflow;
-using Amazon.SimpleWorkflow.Model;
 using Guflow.Worker;
 using Moq;
 using NUnit.Framework;

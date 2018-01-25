@@ -28,7 +28,7 @@ namespace Guflow.Decider
         public static IActivityItem ParentActivity<TActivity>(this IWorkflowItem workflowItem, string positionalName = "") where TActivity: Activity
         {
             Ensure.NotNull(workflowItem, "workflowItem");
-            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            var description = ActivityDescription.FindOn<TActivity>();
             return workflowItem.ParentActivity(description.Name, description.Version, positionalName);
         }
         public static IActivityItem ParentActivity(this IWorkflowItem workflowItem)

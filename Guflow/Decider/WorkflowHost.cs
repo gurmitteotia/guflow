@@ -213,13 +213,13 @@ namespace Guflow.Decider
                     throw new WorkflowNotHostedException(string.Format(Resources.Workflow_not_hosted, name, version));
                 return hostedWorkflow;
             }
-            public IEnumerable<WorkflowDescriptionAttribute> Descriptions
-                                                => _workflows.Values.Select(s => WorkflowDescriptionAttribute.FindOn(s.GetType()));
+            public IEnumerable<WorkflowDescription> Descriptions
+                                                => _workflows.Values.Select(s => WorkflowDescription.FindOn(s.GetType()));
             private void PopulateHostedWorkflows(IEnumerable<Workflow> workflows)
             {
                 foreach (var workflow in workflows)
                 {
-                    var workflowDescription = WorkflowDescriptionAttribute.FindOn(workflow.GetType());
+                    var workflowDescription = WorkflowDescription.FindOn(workflow.GetType());
                     var hostedWorkflowKey = workflowDescription.Name + workflowDescription.Version;
                     if (_workflows.ContainsKey(hostedWorkflowKey))
                         throw new WorkflowAlreadyHostedException(string.Format(Resources.Workflow_already_hosted, workflowDescription.Name, workflowDescription.Version));

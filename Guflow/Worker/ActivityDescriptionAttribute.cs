@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
-using System.Configuration;
-using System.Reflection;
-using Amazon.SimpleWorkflow.Model;
-using Guflow.Decider;
-using Guflow.Properties;
 
 namespace Guflow.Worker
 {
@@ -14,87 +9,73 @@ namespace Guflow.Worker
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed class ActivityDescriptionAttribute : Attribute
     {
-        private uint? _defaultStartToCloseTimeoutInSeconds;
-        private uint? _defaultHeartbeatTimeoutInSeconds;
-        private uint? _defaultScheduleToCloseTimeoutInSeconds;
-        private uint? _defaultScheduleToStartTimeout;
+       
         public ActivityDescriptionAttribute(string version)
         {
             Version = version;
         }
 
+        /// <summary>
+        /// Gets or sets the name of activity.
+        /// </summary>
         public string Name { get; set; }
-        public string Version { get; set; }
+        /// <summary>
+        /// Gets the version of activity.
+        /// </summary>
+        public string Version { get; }
+        /// <summary>
+        /// Gets or sets the description of activity.
+        /// </summary>
         public string Description { get; set; }
+        /// <summary>
+        /// Gets or sets the default task list name.
+        /// </summary>
         public string DefaultTaskListName { get; set; }
+        /// <summary>
+        /// Gets or sets the default task priority.
+        /// </summary>
         public int DefaultTaskPriority { get; set; }
 
-        public uint DefaultStartToCloseTimeoutInSeconds
+        /// <summary>
+        /// Gets or sets the activity task start to close timeout in seconds.
+        /// </summary>
+        public uint DefaultStartToCloseTimeoutInSeconds { get; set; }
+      
+        /// <summary>
+        /// Gets or sets the activity task heartbeat timeout in seconds.
+        /// </summary>
+        public uint DefaultHeartbeatTimeoutInSeconds { get; set; }
+   
+        /// <summary>
+        /// Gets or sets the activity schedule to close timeout in seconds.
+        /// </summary>
+        public uint DefaultScheduleToCloseTimeoutInSeconds { get; set; }
+      
+        /// <summary>
+        /// Gets or sets the activity schedule to start timeout in seconds.
+        /// </summary>
+        public uint DefaultScheduleToStartTimeoutInSeconds { get; set; }
+       
+     
+        internal ActivityDescription ActivityDescription()
         {
-            get { return _defaultStartToCloseTimeoutInSeconds ?? default(uint); }
-            set { _defaultStartToCloseTimeoutInSeconds = value; }
-        }
-
-        public uint DefaultHeartbeatTimeoutInSeconds
-        {
-            get { return _defaultHeartbeatTimeoutInSeconds ?? default(uint); }
-            set { _defaultHeartbeatTimeoutInSeconds = value; }
-        }
-
-        public uint DefaultScheduleToCloseTimeoutInSeconds
-        {
-            get { return _defaultScheduleToCloseTimeoutInSeconds ?? default(uint); }
-            set { _defaultScheduleToCloseTimeoutInSeconds = value; }
-        }
-
-        public uint DefaultScheduleToStartTimeoutInSeconds
-        {
-            get { return _defaultScheduleToStartTimeout ?? default(uint); }
-            set { _defaultScheduleToStartTimeout = value; }
-        }
-
-        internal string DefaultStartToCloseTimeout { get { return _defaultStartToCloseTimeoutInSeconds.SwfFormat(); } }
-        internal string DefaultHeartbeatTimeout { get { return _defaultHeartbeatTimeoutInSeconds.SwfFormat(); } }
-        internal string DefaultScheduleToCloseTimeout { get {return  _defaultScheduleToCloseTimeoutInSeconds.SwfFormat(); } }
-        internal string DefaultScheduleToStartTimeout { get { return _defaultScheduleToStartTimeout.SwfFormat(); } }
-        public static ActivityDescriptionAttribute FindOn<TActivity>() where TActivity : Activity
-        {
-            return FindOn(typeof(TActivity));
-        }
-        public static ActivityDescriptionAttribute FindOn(Type activityType)
-        {
-            Ensure.NotNull(activityType, "activityType");
-
-            if (!typeof(Activity).IsAssignableFrom(activityType))
-                throw new NonActivityTypeException(string.Format(Resources.Non_activity_type, activityType.Name, typeof(Activity).Name));
-
-            var activityDescription = activityType.GetCustomAttribute<ActivityDescriptionAttribute>();
-            if (activityDescription == null)
-                throw new ActivityDescriptionMissingException(string.Format(Resources.Activity_attribute_missing, activityType.Name));
-
-            if (string.IsNullOrWhiteSpace(activityDescription.Version))
-                throw new ConfigurationErrorsException(string.Format(Resources.Empty_version, activityType.Name));
-
-            if (string.IsNullOrWhiteSpace(activityDescription.Name))
-                activityDescription.Name = activityType.Name;
-            return activityDescription;
-        }
-
-        internal RegisterActivityTypeRequest RegisterRequest(string domainName)
-        {
-            return new RegisterActivityTypeRequest
+            return new ActivityDescription(Version)
             {
                 Name = Name,
-                Version = Version,
                 Description = Description,
-                Domain = domainName,
-                DefaultTaskList = DefaultTaskListName.TaskList(),
-                DefaultTaskStartToCloseTimeout = DefaultStartToCloseTimeout,
-                DefaultTaskPriority = DefaultTaskPriority.ToString(),
-                DefaultTaskHeartbeatTimeout = DefaultHeartbeatTimeout,
-                DefaultTaskScheduleToCloseTimeout = DefaultScheduleToCloseTimeout,
-                DefaultTaskScheduleToStartTimeout = DefaultScheduleToStartTimeout
+                DefaultTaskListName = DefaultTaskListName,
+                DefaultTaskPriority = DefaultTaskPriority,
+                DefaultHeartbeatTimeout = AwsFormat(DefaultHeartbeatTimeoutInSeconds),
+                DefaultScheduleToCloseTimeout = AwsFormat(DefaultScheduleToCloseTimeoutInSeconds),
+                DefaultScheduleToStartTimeout = AwsFormat(DefaultScheduleToStartTimeoutInSeconds),
+                DefaultStartToCloseTimeout = AwsFormat(DefaultStartToCloseTimeoutInSeconds)
             };
+        }
+
+        private TimeSpan? AwsFormat(uint seconds)
+        {
+            if (seconds == 0) return null;
+            return TimeSpan.FromSeconds(seconds);
         }
     }
 }

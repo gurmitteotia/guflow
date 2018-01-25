@@ -84,7 +84,10 @@
     <Compile Include="Decider\CancelWorkflowRequest.cs" />
     <Compile Include="Decider\ChildPolicy.cs" />
     <Compile Include="Decider\CompositeWorkflowAction.cs" />
+    <Compile Include="Decider\DescriptionStrategy.cs" />
     <Compile Include="Decider\SignalException.cs" />
+    <Compile Include="Decider\WorkflowDescription.cs" />
+    <Compile Include="Worker\DescriptionStartegy.cs" />
     <Compile Include="HostFaultEventArgs.cs" />
     <Compile Include="Decider\IFluentWorkflowActionItem.cs" />
     <Compile Include="Decider\IgnoreWorkflowAction.cs" />
@@ -220,6 +223,7 @@
     <Compile Include="Worker\ActivityCancelResponse.cs" />
     <Compile Include="Worker\ActivityCompleteResponse.cs" />
     <Compile Include="Worker\ActivityConfigurationException.cs" />
+    <Compile Include="Worker\ActivityDescription.cs" />
     <Compile Include="Worker\ActivityDescriptionAttribute.cs" />
     <Compile Include="Worker\ActivityDescriptionMissingException.cs" />
     <Compile Include="Worker\ActivityExecutionMethod.cs" />

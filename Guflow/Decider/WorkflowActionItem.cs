@@ -50,7 +50,7 @@ namespace Guflow.Decider
 
         public IFluentWorkflowActionItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
-            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            var description = ActivityDescription.FindOn<TActivity>();
             return AfterActivity(description.Name, description.Version, positionalName);
         }
         public override IEnumerable<WorkflowItemEvent> AllEvents => Enumerable.Empty<WorkflowItemEvent>();

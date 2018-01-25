@@ -30,7 +30,7 @@ namespace Guflow.Decider
         /// <returns></returns>
         public static IActivityItem First<TActivity>(this IEnumerable<IActivityItem> activityItems, string positionalName = "") where TActivity: Activity
         {
-            var description = ActivityDescriptionAttribute.FindOn<TActivity>();
+            var description = ActivityDescription.FindOn<TActivity>();
             return activityItems.First(description.Name, description.Version, positionalName);
         }
     }

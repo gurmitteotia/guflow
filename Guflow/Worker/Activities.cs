@@ -20,8 +20,6 @@ namespace Guflow.Worker
             PopulateHostedActivities(activitiesTypes);
         }
 
-        public int Count => _hostedActivities.Count;
-
         public Activity FindBy(string activityName, string activityVersion)
         {
             Type hostedActivityType;
@@ -38,7 +36,7 @@ namespace Guflow.Worker
 
         private static bool MatchDescription(Activity activityInstance, string activityName, string activityVersion)
         {
-            var activityDescription = ActivityDescriptionAttribute.FindOn(activityInstance.GetType());
+            var activityDescription = ActivityDescription.FindOn(activityInstance.GetType());
             return activityDescription.Name.Equals(activityName) &&
                    activityDescription.Version.Equals(activityVersion);
         }
@@ -47,7 +45,7 @@ namespace Guflow.Worker
         {
             foreach (var activityType in activitiesTypes)
             {
-                var activityDescription = ActivityDescriptionAttribute.FindOn(activityType);
+                var activityDescription = ActivityDescription.FindOn(activityType);
                 var hostedActivityKey = activityDescription.Name + activityDescription.Version;
                 if (_hostedActivities.ContainsKey(hostedActivityKey))
                     throw new ActivityAlreadyHostedException(string.Format(Resources.Activity_already_hosted, activityDescription.Name, activityDescription.Version));
@@ -55,7 +53,7 @@ namespace Guflow.Worker
             }
         }
 
-        public IEnumerable<ActivityDescriptionAttribute> ActivityDescriptions
-            => _hostedActivities.Values.Select(ActivityDescriptionAttribute.FindOn);
+        public IEnumerable<ActivityDescription> ActivityDescriptions
+            => _hostedActivities.Values.Select(ActivityDescription.FindOn);
     }
 }

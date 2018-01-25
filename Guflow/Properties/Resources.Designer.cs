@@ -70,11 +70,11 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ActivityDescriptionAttribute is not applied on activity {0}..
+        ///   Looks up a localized string similar to ActivityDescription is not supplied for activity {0}..
         /// </summary>
-        internal static string Activity_attribute_missing {
+        internal static string Activity_description_missing {
             get {
-                return ResourceManager.GetString("Activity_attribute_missing", resourceCulture);
+                return ResourceManager.GetString("Activity_description_missing", resourceCulture);
             }
         }
         
@@ -250,7 +250,7 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Version is empty for {0}..
+        ///   Looks up a localized string similar to Version is empty..
         /// </summary>
         internal static string Empty_version {
             get {
@@ -448,20 +448,20 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to WorkflowDescriptionAttribute is not applied on workflow {0}..
-        /// </summary>
-        internal static string Workflow_attribute_missing {
-            get {
-                return ResourceManager.GetString("Workflow_attribute_missing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Workflow name {0} and version {1} is deprecated. .
         /// </summary>
         internal static string Workflow_deprecated {
             get {
                 return ResourceManager.GetString("Workflow_deprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WorkflowDescription is not supplied on workflow {0}..
+        /// </summary>
+        internal static string Workflow_description_not_supplied {
+            get {
+                return ResourceManager.GetString("Workflow_description_not_supplied", resourceCulture);
             }
         }
         
