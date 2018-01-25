@@ -68,9 +68,9 @@ namespace Guflow
         public async Task RegisterWorkflowAsync(Type workflowType)
         {
             Ensure.NotNull(workflowType, "activityType");
-            await RegisterWorkflowAsync(WorkflowDescriptionAttribute.FindOn(workflowType));
+            await RegisterWorkflowAsync(WorkflowDescription.FindOn(workflowType));
         }
-        private async Task RegisterWorkflowAsync(WorkflowDescriptionAttribute workflowDescription)
+        private async Task RegisterWorkflowAsync(WorkflowDescription workflowDescription)
         {
             Ensure.NotNull(workflowDescription, "workflowDescription");
             var registeredWorkflowInfos = await ListWorkflowsFromAmazonBy(workflowDescription.Name);

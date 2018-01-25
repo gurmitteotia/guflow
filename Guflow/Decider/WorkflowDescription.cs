@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 
 using System;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Properties;
 using Guflow.Worker;
 
@@ -14,10 +15,12 @@ namespace Guflow.Decider
         private static readonly IDescriptionStrategy Strategy = new CompositeDescriptionStrategy(new[] { DescriptionStrategy.FactoryMethod, DescriptionStrategy.FromAttribute });
         public WorkflowDescription(string version)
         {
+            Ensure.NotNullAndEmpty(version, nameof(version), Resources.Empty_version);
             Version = version;
         }
-
-        //Gets or sets the name of workflow.
+        /// <summary>
+        /// Gets or sets the name of workflow.
+        /// </summary>
         public string Name { get; set; }
         /// <summary>
         /// Gets the version of workflow.
@@ -37,12 +40,12 @@ namespace Guflow.Decider
         /// <summary>
         /// Gets or sets the timeout on how long workflow to stay active after it is started.
         /// </summary>
-        public TimeSpan DefaultExecutionStartToCloseTimeout { get; set; }
+        public TimeSpan? DefaultExecutionStartToCloseTimeout { get; set; }
 
         /// <summary>
         /// Gets or sets the timeout for decision task to be processed by decider.
         /// </summary>
-        public TimeSpan DefaultTaskStartToCloseTimeout { get; set; }
+        public TimeSpan? DefaultTaskStartToCloseTimeout { get; set; }
 
         /// <summary>
         /// Gets or sets the child policy for this workflow. Child policy dictat how child workflow should be treated if its parent workflow is terminated.
@@ -71,8 +74,25 @@ namespace Guflow.Decider
 
             if (workflowDescription == null)
                 throw new WorkflowDescriptionMissingException(string.Format(Resources.Workflow_description_not_supplied, workflowType.Name));
-
+            if (string.IsNullOrEmpty(workflowDescription.Name)) workflowDescription.Name = workflowType.Name;
             return workflowDescription;
         }
+        internal RegisterWorkflowTypeRequest RegisterRequest(string domainName)
+        {
+            return new RegisterWorkflowTypeRequest
+            {
+                Name = Name,
+                Version = Version,
+                Description = Description,
+                Domain = domainName,
+                DefaultExecutionStartToCloseTimeout = DefaultExecutionStartToCloseTimeout.Seconds(),
+                DefaultTaskList = DefaultTaskListName.TaskList(),
+                DefaultTaskStartToCloseTimeout = DefaultTaskStartToCloseTimeout.Seconds(),
+                DefaultChildPolicy = DefaultChildPolicy,
+                DefaultLambdaRole = DefaultLambdaRole,
+                DefaultTaskPriority = DefaultTaskPriority.ToString()
+            };
+        }
+
     }
 }

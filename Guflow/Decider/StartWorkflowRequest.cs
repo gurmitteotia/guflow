@@ -33,7 +33,7 @@ namespace Guflow.Decider
         public static StartWorkflowRequest For<T>(string workflowId) where T: Workflow
         {
             Ensure.NotNullAndEmpty(workflowId, "workflowId");
-            var workflowDescription = WorkflowDescriptionAttribute.FindOn<T>();
+            var workflowDescription = WorkflowDescription.FindOn<T>();
             return new StartWorkflowRequest(workflowDescription.Name, workflowDescription.Version, workflowId);
         }
 
