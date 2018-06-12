@@ -23,7 +23,7 @@ namespace Guflow.Decider
             _timerStartedEventId = timerStartedEventId;
             foreach (var historyEvent in allHistoryEvents)
             {
-                if (historyEvent.IsTimerStartedEventFor(timerStartedEventId))
+                if (historyEvent.IsTimerStartedEvent(timerStartedEventId))
                 {
                     _firedAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
                     AwsIdentity = AwsIdentity.Raw(historyEvent.TimerStartedEventAttributes.TimerId);

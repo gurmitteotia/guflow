@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
+using ThirdParty.BouncyCastle.Asn1;
 using ChildPolicy = Guflow.Decider.ChildPolicy;
 
 namespace Guflow.Tests.Decider
@@ -362,7 +363,7 @@ namespace Guflow.Tests.Decider
                     Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = false }).ToJson()
                 }
             });
-           return historyEvents;
+            return historyEvents;
         }
 
         public IEnumerable<HistoryEvent> TimerStartedGraph(Identity identity, TimeSpan fireAfter, bool isARescheduleTimer = false)
@@ -657,7 +658,7 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public IEnumerable<HistoryEvent> Concat(params IEnumerable<HistoryEvent> []graphs)
+        public IEnumerable<HistoryEvent> Concat(params IEnumerable<HistoryEvent>[] graphs)
         {
             var result = new List<HistoryEvent>();
             foreach (var graph in graphs)
@@ -666,6 +667,49 @@ namespace Guflow.Tests.Decider
             }
             result.Reverse();
             return result;
+        }
+        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(string id, string name, object input, object result, string control, TimeSpan? startToClose)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.CompletedIds(ref _currentEventId);
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Completion),
+                EventType = EventType.LambdaFunctionCompleted,
+                LambdaFunctionCompletedEventAttributes = new LambdaFunctionCompletedEventAttributes()
+                {
+                    Result = result.ToAwsString(),
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.LambdaFunctionStarted,
+
+                LambdaFunctionStartedEventAttributes = new LambdaFunctionStartedEventAttributes()
+                {
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.LambdaFunctionScheduled,
+                LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
+                {
+                    Control = control,
+                    Id = id,
+                    Name = name,
+                    Input = input.ToAwsString(),
+                    StartToCloseTimeout = startToClose.Seconds()
+                }
+            });
+
+            return historyEvents;
         }
 
         private class EventIds
@@ -679,7 +723,7 @@ namespace Guflow.Tests.Decider
             public const string Failed = "Failed";
             public const string Generic = "Generic";
 
-            private readonly Dictionary<string,long> _ids;
+            private readonly Dictionary<string, long> _ids;
 
             private EventIds(Dictionary<string, long> ids)
             {
@@ -832,5 +876,7 @@ namespace Guflow.Tests.Decider
                 return new EventIds(ids);
             }
         }
+
+
     }
 }

@@ -41,7 +41,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_return_fail_workflow_decision()
         {
-            var decisions = _activityCancellationFailedEvent.Interpret(new TestWorkflow()).GetDecisions();
+            var decisions = _activityCancellationFailedEvent.Interpret(new TestWorkflow()).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision("ACTIVITY_CANCELLATION_FAILED", _cause) }));
         }

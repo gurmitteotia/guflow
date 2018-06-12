@@ -21,7 +21,7 @@ namespace Guflow.Tests.Decider
         {
             var action = WorkflowAction.FailWorkflow("reason", "detail");
 
-            var decision = action.GetDecisions();
+            var decision = action.Decisions();
 
             Assert.That(decision, Is.EquivalentTo(new[] { new FailWorkflowDecision("reason", "detail") }));
         }
@@ -31,7 +31,7 @@ namespace Guflow.Tests.Decider
         {
             var action = WorkflowAction.FailWorkflow("reason", new { Id = 10, Name = "hello" });
 
-            var decision = action.GetDecisions();
+            var decision = action.Decisions();
 
             Assert.That(decision, Is.EquivalentTo(new[] { new FailWorkflowDecision("reason", @"{""Id"":10,""Name"":""hello""}") }));
         }
@@ -44,7 +44,7 @@ namespace Guflow.Tests.Decider
             var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion, SingleActivityWorkflow.PositionalName), "id", "res");
             var completedActivityEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
 
-            var decisions = completedActivityEvent.Interpret(workflow).GetDecisions();
+            var decisions = completedActivityEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("reason", "detail")}));
         }

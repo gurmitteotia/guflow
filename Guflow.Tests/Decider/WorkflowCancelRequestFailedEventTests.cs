@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_returns_fail_workflow_decision_when_interpreted()
         {
-            var decisions = _cancelRequestFailedEvent.Interpret(new EmptyWorkflow()).GetDecisions();
+            var decisions = _cancelRequestFailedEvent.Interpret(new EmptyWorkflow()).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision("FAILED_TO_SEND_CANCEL_REQUEST","cause")}));
         }

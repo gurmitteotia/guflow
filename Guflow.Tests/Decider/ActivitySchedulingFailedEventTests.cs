@@ -36,7 +36,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
 
-            var decisions = _activitySchedulingFailedEvent.Interpret(workflow).GetDecisions();
+            var decisions = _activitySchedulingFailedEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new[]{new FailWorkflowDecision("ACTIVITY_SCHEDULING_FAILED",_cause)}));
         }

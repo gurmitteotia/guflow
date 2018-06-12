@@ -181,7 +181,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = activityFailedEvent.InterpretNewEventsFor(workflow);
 
-            Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(new ActivityItem(Identity.New(_activityName,_activityVersion,_positionalName),workflow)).GetDecisions()));
+            Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(new ActivityItem(Identity.New(_activityName,_activityVersion,_positionalName),workflow)).Decisions()));
         }
 
 

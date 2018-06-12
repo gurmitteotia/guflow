@@ -22,7 +22,7 @@ namespace Guflow.Decider
             _tags.Add(tag);
         }
 
-        internal override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> Decisions()
         {
             return new[] {new RestartWorkflowDecision(this), };
         }

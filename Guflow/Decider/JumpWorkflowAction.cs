@@ -16,9 +16,9 @@ namespace Guflow.Decider
         {
             _scheduleAction = new ScheduleWorkflowItemAction(jumpToItem);
         }
-        internal override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> Decisions()
         {
-            return _scheduleAction.GetDecisions().Concat(_triggeredAction.GetDecisions());
+            return _scheduleAction.Decisions().Concat(_triggeredAction.Decisions());
         }
 
         /// <summary>

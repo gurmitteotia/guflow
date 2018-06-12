@@ -86,6 +86,7 @@
     <Compile Include="Decider\DeflowAlgorithmTests.cs" />
     <Compile Include="Decider\HistoryEventsBuilder.cs" />
     <Compile Include="Decider\JumpWorkflowActionTests.cs" />
+    <Compile Include="Decider\LambdaFunctionCompletedEventTests.cs" />
     <Compile Include="Decider\RestartWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowDecisionTests.cs" />
     <Compile Include="Decider\TimerItemsExtensionTests.cs" />

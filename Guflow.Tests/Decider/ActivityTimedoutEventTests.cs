@@ -49,7 +49,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
 
-            var decisions = _activityTimedoutEvent.Interpret(workflow).GetDecisions();
+            var decisions = _activityTimedoutEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision(_timeoutType,_detail)}));
         }
@@ -59,7 +59,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
             var activityTimedoutEvent = CreateActivityTimedoutEvent(_timeoutType, "");
-            var decisions = activityTimedoutEvent.Interpret(workflow).GetDecisions();
+            var decisions = activityTimedoutEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision(_timeoutType, "ActivityTimedout")}));
         }

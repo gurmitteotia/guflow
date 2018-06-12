@@ -23,7 +23,7 @@ namespace Guflow.Decider
         protected WorkflowAction():this(Enumerable.Empty<WorkflowDecision>())
         {
         }
-        internal virtual IEnumerable<WorkflowDecision> GetDecisions()
+        internal virtual IEnumerable<WorkflowDecision> Decisions()
         {
             return _workflowDecisions;
         }
@@ -31,8 +31,7 @@ namespace Guflow.Decider
 
         internal virtual bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
         {
-             var decisions = GetDecisions();
-             return decisions.Any(d => workflowItems.Any(d.IsFor));
+             return Decisions().Any(d => workflowItems.Any(d.IsFor));
         }
         
         /// <summary>

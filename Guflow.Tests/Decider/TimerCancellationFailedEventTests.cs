@@ -39,7 +39,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_return_workflow_failed_action()
         {
-            var decisions = _timerCancellationFailedEvent.Interpret(new TestWorkflow()).GetDecisions();
+            var decisions = _timerCancellationFailedEvent.Interpret(new TestWorkflow()).Decisions();
             Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("TIMER_CANCELLATION_FAILED",_cause)}));
         }
 
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new WorkflowWithActivity();
             var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.New(_activityName, _activityVersion), _cause);
-            var decisions = timerCancellationFailedEvent.Interpret(workflow).GetDecisions();
+            var decisions = timerCancellationFailedEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("RESCHEDULE_TIMER_CANCELLATION_FAILED", _cause)}));
         }

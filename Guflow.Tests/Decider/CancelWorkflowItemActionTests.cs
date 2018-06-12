@@ -36,7 +36,7 @@ namespace Guflow.Tests.Decider
             var timerItem = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(timerItem);
 
-            var decisions = workflowAction.GetDecisions();
+            var decisions = workflowAction.Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(Identity.Timer("TimerName")) }));
         }
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
-            var decisions = workflowAction.GetDecisions();
+            var decisions = workflowAction.Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver")) }));
         }
@@ -59,7 +59,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
-            var decisions = workflowAction.GetDecisions();
+            var decisions = workflowAction.Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver")) }));
         }
@@ -71,7 +71,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
-            var decisions = workflowAction.GetDecisions();
+            var decisions = workflowAction.Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(Identity.New("activityName1", "ver")) }));
         }
@@ -83,7 +83,7 @@ namespace Guflow.Tests.Decider
             workflow.NewExecutionFor(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
             var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
-            var decisions = completedActivityEvent.Interpret(workflow).GetDecisions();
+            var decisions = completedActivityEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new CancelActivityDecision(Identity.New("ActivityToCancel", "1.2"))}));
         }
@@ -94,7 +94,7 @@ namespace Guflow.Tests.Decider
             var workflow = new WorkflowToReturnCancelledTimerAction();
             var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
-            var decisions = completedActivityEvent.Interpret(workflow).GetDecisions();
+            var decisions = completedActivityEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new CancelTimerDecision(Identity.Timer("SomeTimer"))}));
         }
@@ -106,7 +106,7 @@ namespace Guflow.Tests.Decider
             workflow.NewExecutionFor(new WorkflowHistoryEvents(new[] {new HistoryEvent()}));
             var cancelRequestEvent = new WorkflowCancellationRequestedEvent(_builder.WorkflowCancellationRequestedEvent("cause"));
 
-            var workflowAction = cancelRequestEvent.Interpret(workflow).GetDecisions();
+            var workflowAction = cancelRequestEvent.Interpret(workflow).Decisions();
 
             Assert.That(workflowAction, Is.EquivalentTo(new WorkflowDecision[] { new CancelActivityDecision(Identity.New(_activityName, _activityVersion)), new CancelTimerDecision(Identity.Timer(_timerName)) }));
         }

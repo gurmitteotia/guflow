@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
             var timerFiredEventGraph= _builder.TimerFiredGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
             var timerEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
 
-            var decisions = timerEvent.Interpret(workflow).GetDecisions();
+            var decisions = timerEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new []{new SignalWorkflowDecision("name","input","id","runid")}));
         }

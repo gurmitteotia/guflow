@@ -27,7 +27,7 @@ namespace Guflow.Tests.Decider
         {
             var signalAction = new Signal("name", "input");
 
-            var decisions = signalAction.ForWorkflow("id", "runid").GetDecisions();
+            var decisions = signalAction.ForWorkflow("id", "runid").Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision("name", "input", "id", "runid")}));
         }
@@ -38,7 +38,7 @@ namespace Guflow.Tests.Decider
             var receivedSignalEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("someName","input1","rid","wid"));
             var signalAction = new Signal("name", "input");
 
-            var decisions = signalAction.ReplyTo(receivedSignalEvent).GetDecisions();
+            var decisions = signalAction.ReplyTo(receivedSignalEvent).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision("name", "input", "wid", "rid")}));
         }

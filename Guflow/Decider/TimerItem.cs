@@ -145,7 +145,7 @@ namespace Guflow.Decider
             if (!_canSchedule(this))
                 return IsStartupItem()
                     ? Enumerable.Empty<WorkflowDecision>() 
-                    : new TriggerActions(this).FirstJoint().GetDecisions();
+                    : new TriggerActions(this).FirstJoint().Decisions();
 
             return new []{new ScheduleTimerDecision(Identity, _fireAfter, this == _rescheduleTimer)};
         }

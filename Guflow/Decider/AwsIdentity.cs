@@ -25,21 +25,23 @@ namespace Guflow.Decider
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((AwsIdentity)obj);
         }
 
         public static bool operator ==(AwsIdentity left, AwsIdentity right)
         {
+            if (ReferenceEquals(left, null) && ReferenceEquals(right, null))
+                return true;
             if (ReferenceEquals(left,null))
+                return false;
+            if (ReferenceEquals(right, null))
                 return false;
             return left.Equals(right);
         }
         public static bool operator !=(AwsIdentity left, AwsIdentity right)
         {
-            if (ReferenceEquals(left, null))
-                return false;
-            return !left.Equals(right);
+            return !(left == right);
         }
         public static implicit operator string(AwsIdentity instance)
         {

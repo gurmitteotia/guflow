@@ -29,7 +29,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_returns_workflow_failed_decision()
         {
-            var decisions = _cancellationFailedEvent.Interpret(new EmptyWorkflow()).GetDecisions();
+            var decisions = _cancellationFailedEvent.Interpret(new EmptyWorkflow()).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision("FAILED_TO_CANCEL_WORKFLOW","cause")}));
         }

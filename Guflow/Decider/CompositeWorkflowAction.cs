@@ -20,9 +20,9 @@ namespace Guflow.Decider
             return _left.CanScheduleAny(workflowItems) || _right.CanScheduleAny(workflowItems);
         }
 
-        internal override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> Decisions()
         {
-            return _left.GetDecisions().Concat(_right.GetDecisions());
+            return _left.Decisions().Concat(_right.Decisions());
         }
     }
 }

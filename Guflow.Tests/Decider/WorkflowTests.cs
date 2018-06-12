@@ -342,7 +342,7 @@ namespace Guflow.Tests.Decider
             public WorkflowToReturnCustomActionOnClosing(WorkflowDecision workflowDecision)
             {
                 _customAction = new Mock<WorkflowAction>();
-                _customAction.Setup(w => w.GetDecisions()).Returns(new[] {workflowDecision});
+                _customAction.Setup(w => w.Decisions()).Returns(new[] {workflowDecision});
             }
             protected override WorkflowAction DuringCompletion(string result)
             {

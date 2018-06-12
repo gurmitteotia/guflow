@@ -41,11 +41,11 @@ namespace Guflow.Decider
             _scheduledEventId = scheduledEventId;
             foreach (var historyEvent in allHistoryEvents)
             {
-                if (historyEvent.IsActivityStartedEventFor(startedEventId))
+                if (historyEvent.IsActivityStartedEvent(startedEventId))
                 {
                     WorkerIdentity = historyEvent.ActivityTaskStartedEventAttributes.Identity;
                 }
-                else if (historyEvent.IsActivityScheduledEventFor(scheduledEventId))
+                else if (historyEvent.IsActivityScheduledEvent(scheduledEventId))
                 {
                     _activityName = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
                     _activityVersion = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;

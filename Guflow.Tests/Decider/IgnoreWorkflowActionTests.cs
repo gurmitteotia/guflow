@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
         public void Return_empty_decisions()
         {
             var workflowAction = WorkflowAction.Ignore(null);
-            Assert.That(workflowAction.GetDecisions(),Is.Empty);
+            Assert.That(workflowAction.Decisions(),Is.Empty);
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = activityCompletedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction.GetDecisions(), Is.Empty);
+            Assert.That(workflowAction.Decisions(), Is.Empty);
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {

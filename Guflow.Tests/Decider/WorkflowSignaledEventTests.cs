@@ -47,7 +47,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflowSignaledEvent.Interpret(new EmptyWorkflow());
 
-            Assert.That(workflowAction.GetDecisions(),Is.Empty);
+            Assert.That(workflowAction.Decisions(),Is.Empty);
         }
         [Test]
         public void Can_return_custom_workflow_action()
@@ -64,7 +64,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input","runid","wid"));
 
-            var decisions = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput")).GetDecisions();
+            var decisions = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput")).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision("newSignal","newInput",workflowSignaledEvent.ExternalWorkflowId,workflowSignaledEvent.ExternalWorkflowRunid)}));
         }

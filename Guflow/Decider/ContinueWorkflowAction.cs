@@ -24,7 +24,7 @@ namespace Guflow.Decider
         {
             return _completedWorkflowItem.GetHashCode();
         }
-        internal override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> Decisions()
         {
             var childItems = _completedWorkflowItem.Children();
             if (!childItems.Any())

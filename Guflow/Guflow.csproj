@@ -85,6 +85,8 @@
     <Compile Include="Decider\ChildPolicy.cs" />
     <Compile Include="Decider\CompositeWorkflowAction.cs" />
     <Compile Include="Decider\DescriptionStrategy.cs" />
+    <Compile Include="Decider\IFluentLambdaItem.cs" />
+    <Compile Include="Decider\LamdbaFunctionCompletedEvent.cs" />
     <Compile Include="Decider\SignalException.cs" />
     <Compile Include="Decider\WorkflowDescription.cs" />
     <Compile Include="Worker\DescriptionStartegy.cs" />

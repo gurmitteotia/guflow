@@ -21,7 +21,7 @@ namespace Guflow.Tests.Decider
         {
             var recordMarkerDecision = WorkflowAction.RecordMarker("name", "detail");
 
-            var workflowDecisions = recordMarkerDecision.GetDecisions();
+            var workflowDecisions = recordMarkerDecision.Decisions();
 
             Assert.That(workflowDecisions,Is.EquivalentTo(new []{ new RecordMarkerWorkflowDecision("name","detail")}));
         }
@@ -32,7 +32,7 @@ namespace Guflow.Tests.Decider
             var timerFiredEventGraph = _builder.TimerFiredGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
             var timerFiredEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
 
-            var decisions = timerFiredEvent.Interpret(new WorkflowToReturnRecordMarker("markerName", "details")).GetDecisions();
+            var decisions = timerFiredEvent.Interpret(new WorkflowToReturnRecordMarker("markerName", "details")).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new []{new RecordMarkerWorkflowDecision("markerName","details")}));
         }

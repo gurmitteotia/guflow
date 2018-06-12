@@ -13,7 +13,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowAction = WorkflowAction.FailWorkflow("reason", "detail") + WorkflowAction.CompleteWorkflow("result");
 
-            var workflowDecisions = workflowAction.GetDecisions();
+            var workflowDecisions = workflowAction.Decisions();
 
             Assert.That(workflowDecisions,Is.EquivalentTo(new WorkflowDecision []{new FailWorkflowDecision("reason","detail"),new CompleteWorkflowDecision("result")}));
         }
@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowAction = WorkflowAction.FailWorkflow("reason", "detail").And(WorkflowAction.CompleteWorkflow("result"));
 
-            var workflowDecisions = workflowAction.GetDecisions();
+            var workflowDecisions = workflowAction.Decisions();
 
             Assert.That(workflowDecisions, Is.EquivalentTo(new WorkflowDecision[] { new FailWorkflowDecision("reason", "detail"), new CompleteWorkflowDecision("result") }));
         }

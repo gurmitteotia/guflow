@@ -55,7 +55,7 @@ namespace Guflow.Decider
                 workflow.SetCurrentExecutingEvent(workflowEvent);
                 result.Add(workflowEvent.Interpret(workflow));
             }
-            return result.Where(w=>w!=null).SelectMany(a => a.GetDecisions()).Distinct();
+            return result.Where(w=>w!=null).SelectMany(a => a.Decisions()).Distinct();
         }
 
         public IEnumerable<WorkflowEvent> NewEvents()

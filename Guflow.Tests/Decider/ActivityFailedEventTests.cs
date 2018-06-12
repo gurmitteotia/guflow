@@ -49,7 +49,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
 
-            var decisions = _activityFailedEvent.Interpret(workflow).GetDecisions();
+            var decisions = _activityFailedEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision(_reason,_detail)}));
         }

@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
             var emptyWorkflow = new EmptyWorkflow();
             var startWorkflowAction = emptyWorkflow.StartupAction;
 
-            var startupDecisions = startWorkflowAction.GetDecisions();
+            var startupDecisions = startWorkflowAction.Decisions();
 
             CollectionAssert.AreEqual(startupDecisions, new[] { new CompleteWorkflowDecision("Workflow is completed because no schedulable item was found.") });
         }
@@ -34,7 +34,7 @@ namespace Guflow.Tests.Decider
             var workflow = new TestWorkflow();
             var startWorkflowAction = workflow.StartupAction;
 
-            var workflowStartedDecisions = startWorkflowAction.GetDecisions();
+            var workflowStartedDecisions = startWorkflowAction.Decisions();
 
             Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Download", "1.0")) }));
         }
@@ -56,7 +56,7 @@ namespace Guflow.Tests.Decider
             var workflow = new WorkflowToScheduleAction("reason", "detailss");
             var startWorkflowAction = workflow.StartupAction;
 
-            var action = startWorkflowAction.GetDecisions();
+            var action = startWorkflowAction.Decisions();
 
             Assert.That(action, Is.EqualTo(new []{new FailWorkflowDecision("reason", "detailss")}));
         }

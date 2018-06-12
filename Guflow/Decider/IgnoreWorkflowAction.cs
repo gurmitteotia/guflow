@@ -42,9 +42,9 @@ namespace Guflow.Decider
             return this;
         }
 
-        internal override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> Decisions()
         {
-            return _triggerAction.GetDecisions();
+            return _triggerAction.Decisions();
         }
 
         internal override bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)

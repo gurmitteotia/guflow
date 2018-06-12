@@ -35,9 +35,9 @@ namespace Guflow.Decider
                 _scheduleWorkflowAction = _workflowItem.DefaultActionOnLastEvent();
             return this;
         }
-        internal override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> Decisions()
         {
-            return _scheduleWorkflowAction.GetDecisions();
+            return _scheduleWorkflowAction.Decisions();
         }
         private bool Equals(ScheduleWorkflowItemAction other)
         {

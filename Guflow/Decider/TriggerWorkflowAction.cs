@@ -20,7 +20,7 @@ namespace Guflow.Decider
             _findFirstJointItem = b => b.FindFirstJointItem(jumpedItem);
         }
 
-        internal override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> Decisions()
         {
             var triggeredDecisions = new List<WorkflowDecision>();
             var childBranches = _triggeringItem.ChildBranches();

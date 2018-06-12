@@ -24,7 +24,7 @@ namespace Guflow.Decider
         {
             return _workflowItems.GetHashCode();
         }
-        internal override IEnumerable<WorkflowDecision> GetDecisions()
+        internal override IEnumerable<WorkflowDecision> Decisions()
         {
             var startupWorkflowItems = _workflowItems.StartupItems();
 

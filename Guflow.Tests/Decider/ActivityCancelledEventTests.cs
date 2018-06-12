@@ -40,7 +40,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
 
-            var decisions = _activityCancelledEvent.Interpret(workflow).GetDecisions();
+            var decisions = _activityCancelledEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new CancelWorkflowDecision(_detail)}) );
         }

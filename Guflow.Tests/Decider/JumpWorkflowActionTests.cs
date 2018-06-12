@@ -38,7 +38,7 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(Identity.Timer("Somename"), _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(workflowItem);
 
-            var decisions = workflowAction.GetDecisions();
+            var decisions = workflowAction.Decisions();
 
             Assert.That(decisions, Is.EquivalentTo(workflowItem.GetScheduleDecisions()));
         }
@@ -49,7 +49,7 @@ namespace Guflow.Tests.Decider
             var workflowItem = new ActivityItem(Identity.New("name", "ver", "pos"), _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(workflowItem).After(TimeSpan.FromSeconds(2));
 
-            var decisions = workflowAction.GetDecisions();
+            var decisions = workflowAction.Decisions();
 
             Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.New("name", "ver", "pos"), TimeSpan.FromSeconds(2), true) }));
         }

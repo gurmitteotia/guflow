@@ -40,7 +40,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new WorkflowWithTimer();
 
-            var decisions = _timerCancelledEvent.Interpret(workflow).GetDecisions();
+            var decisions = _timerCancelledEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions,Is.EqualTo(new []{new CancelWorkflowDecision("TIMER_CANCELLED")}));
         }
@@ -70,7 +70,7 @@ namespace Guflow.Tests.Decider
             var workflow = new SingleActivityWorkflow();
             var timerCancelledEvent = CreateRescheduledTimerCancelledEvent(Identity.New(SingleActivityWorkflow.ActivityName, SingleActivityWorkflow.ActivityVersion),_fireAfter);
 
-            var decisions = timerCancelledEvent.Interpret(workflow).GetDecisions();
+            var decisions = timerCancelledEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new CancelWorkflowDecision("RESCHEDULE_TIMER_CANCELLED")}));
         }

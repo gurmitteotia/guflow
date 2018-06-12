@@ -231,7 +231,7 @@ namespace Guflow.Decider
         {
             if (!_whenFunc(this))
                 return IsStartupItem()? Enumerable.Empty<WorkflowDecision>()
-                    :new TriggerActions(this).FirstJoint().GetDecisions();
+                    :new TriggerActions(this).FirstJoint().Decisions();
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.UseInputFunc(GetActivityInput);

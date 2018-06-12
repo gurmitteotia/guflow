@@ -111,17 +111,17 @@ namespace Guflow.Decider
         {
             return historyEvent.EventType == EventType.StartTimerFailed;
         }
-        public static bool IsActivityStartedEventFor(this HistoryEvent historyEvent, long startedEventId)
+        public static bool IsActivityStartedEvent(this HistoryEvent historyEvent, long startedEventId)
         {
             return historyEvent.EventType == EventType.ActivityTaskStarted && historyEvent.EventId == startedEventId;
         }
 
-        public static bool IsActivityScheduledEventFor(this HistoryEvent historyEvent, long scheduledEventId)
+        public static bool IsActivityScheduledEvent(this HistoryEvent historyEvent, long scheduledEventId)
         {
             return historyEvent.EventType == EventType.ActivityTaskScheduled && historyEvent.EventId == scheduledEventId;
         }
 
-        public static bool IsTimerStartedEventFor(this HistoryEvent historyEvent, long timerStartedEventId)
+        public static bool IsTimerStartedEvent(this HistoryEvent historyEvent, long timerStartedEventId)
         {
             return historyEvent.EventType == EventType.TimerStarted && historyEvent.EventId == timerStartedEventId;
         }
@@ -129,6 +129,12 @@ namespace Guflow.Decider
         public static bool IsMarkerRecordedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.MarkerRecorded;
+        }
+
+        public static bool IsLambdaScheduledEvent(this HistoryEvent historyEvent, long scheduledEventId)
+        {
+            return historyEvent.EventType == EventType.LambdaFunctionScheduled &&
+                   historyEvent.EventId == scheduledEventId;
         }
         public static WorkflowEvent CreateInterpretableEvent(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {

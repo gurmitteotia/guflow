@@ -21,7 +21,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_request_workflow_decision()
         {
-            var workflowDecisions = WorkflowAction.CancelWorkflowRequest("wid", "rid").GetDecisions();
+            var workflowDecisions = WorkflowAction.CancelWorkflowRequest("wid", "rid").Decisions();
 
             Assert.That(workflowDecisions,Is.EqualTo(new[]{new CancelRequestWorkflowDecision("wid","rid")}));
         }
@@ -33,7 +33,7 @@ namespace Guflow.Tests.Decider
             var timerFiredEventGraph = _builder.TimerFiredGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
             var timerEvent = new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
 
-            var decisions = timerEvent.Interpret(workflow).GetDecisions();
+            var decisions = timerEvent.Interpret(workflow).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new CancelRequestWorkflowDecision("id", "runid")}));
         }
