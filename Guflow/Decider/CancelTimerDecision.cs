@@ -12,7 +12,7 @@ namespace Guflow.Decider
             _timerIdentity = timerIdentity;
         }
 
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision()
             {

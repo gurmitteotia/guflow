@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
         {
             var cancelWorkflow = new CancelWorkflowDecision("details");
             
-            Decision decision = cancelWorkflow.Decision();
+            Decision decision = cancelWorkflow.SwfDecision();
 
             Assert.That(decision.CancelWorkflowExecutionDecisionAttributes,Is.Not.Null);
             Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.CancelWorkflowExecution));

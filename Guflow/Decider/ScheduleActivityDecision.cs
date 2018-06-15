@@ -21,7 +21,7 @@ namespace Guflow.Decider
         public int? TaskPriority { get; set; }
 
 
-        public override bool IsFor(WorkflowItem workflowItem)
+        internal override bool IsFor(WorkflowItem workflowItem)
         {
             return workflowItem.Has(_identity);
         }
@@ -43,7 +43,7 @@ namespace Guflow.Decider
             return _identity.GetHashCode();
         }
 
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision()
             {

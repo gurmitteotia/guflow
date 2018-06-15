@@ -28,7 +28,7 @@ namespace Guflow.Decider
         {
             return string.Format("{0}{1}", _reason, _details).GetHashCode();
         }
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision
             {

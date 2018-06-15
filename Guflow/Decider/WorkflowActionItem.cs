@@ -22,7 +22,7 @@ namespace Guflow.Decider
             return _workflowActionFunc(this).Decisions();
         }
 
-        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan afterTimeout)
+        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout)
         {
             return GetScheduleDecisions();
         }

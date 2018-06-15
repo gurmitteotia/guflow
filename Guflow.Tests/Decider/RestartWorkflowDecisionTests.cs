@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
            var restartWorkflowDecision = new RestartWorkflowDecision(restartWorkflowAction);
            
 
-            var decision = restartWorkflowDecision.Decision();
+            var decision = restartWorkflowDecision.SwfDecision();
 
             Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.ContinueAsNewWorkflowExecution));
             Assert.That(decision.ContinueAsNewWorkflowExecutionDecisionAttributes.ChildPolicy, Is.EqualTo(Amazon.SimpleWorkflow.ChildPolicy.REQUEST_CANCEL));
@@ -47,7 +47,7 @@ namespace Guflow.Tests.Decider
             var restartWorkflowDecision = new RestartWorkflowDecision(new RestartWorkflowAction());
             
 
-            var decision = restartWorkflowDecision.Decision();
+            var decision = restartWorkflowDecision.SwfDecision();
 
             Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.ContinueAsNewWorkflowExecution));
             Assert.That(decision.ContinueAsNewWorkflowExecutionDecisionAttributes.ChildPolicy, Is.Null);

@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
             var activityIdentity = Identity.New("activity", "1.0");
             var cancelActivityDecision = new CancelActivityDecision(activityIdentity);
 
-            Decision swfDecision = cancelActivityDecision.Decision();
+            Decision swfDecision = cancelActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.RequestCancelActivityTask));
             Assert.That(swfDecision.RequestCancelActivityTaskDecisionAttributes.ActivityId,Is.EqualTo(activityIdentity.Id.ToString()));

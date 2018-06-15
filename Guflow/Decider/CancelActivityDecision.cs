@@ -13,7 +13,7 @@ namespace Guflow.Decider
             _activityIdentiy = activityIdentiy;
         }
 
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision()
             {

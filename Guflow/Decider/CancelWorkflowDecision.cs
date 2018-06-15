@@ -27,7 +27,7 @@ namespace Guflow.Decider
             return string.IsNullOrEmpty(_details) ? GetType().GetHashCode() : _details.GetHashCode();
         }
 
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision
             {

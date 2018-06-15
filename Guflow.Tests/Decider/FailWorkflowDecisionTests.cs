@@ -29,7 +29,7 @@ namespace Guflow.Tests.Decider
         {
             var failWorkflowDecision = new FailWorkflowDecision("reason","detail");
 
-            var decision = failWorkflowDecision.Decision();
+            var decision = failWorkflowDecision.SwfDecision();
 
             Assert.That(decision.DecisionType,Is.EqualTo(DecisionType.FailWorkflowExecution));
             Assert.That(decision.FailWorkflowExecutionDecisionAttributes,Is.Not.Null);

@@ -15,7 +15,7 @@ namespace Guflow.Decider
             Priority = _medium;
         }
      
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision
             {

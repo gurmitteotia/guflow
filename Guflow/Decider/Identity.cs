@@ -21,10 +21,17 @@ namespace Guflow.Decider
         {
             return new Identity(name,string.Empty,string.Empty);
         }
+
+        public static Identity Lambda(string name, string positionalName = "")
+        {
+            return new Identity(name, string.Empty, positionalName);
+        }
+
         public static Identity New(string name, string version, string positionalName = "")
         {
             return new Identity(name, version, positionalName);
         }
+
         public override bool Equals(object other)
         {
             var otherIdentity = other as Identity;
@@ -32,10 +39,12 @@ namespace Guflow.Decider
                 return false;
             return _id.Equals(otherIdentity.Id);
         }
+
         public override int GetHashCode()
         {
             return _id.GetHashCode();
         }
+
         public override string ToString()
         {
             return string.Format("{{Name {0}, Version {1} and Positional Name {2}}}", Name, Version, PositionalName);
@@ -45,6 +54,7 @@ namespace Guflow.Decider
         {
             return format.Serialize(this);
         }
+
         public static Identity From(string data, IdentityFormat format)
         {
             return format.Deserialize(data);

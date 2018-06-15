@@ -87,8 +87,10 @@
     <Compile Include="Decider\HistoryEventsBuilder.cs" />
     <Compile Include="Decider\JumpWorkflowActionTests.cs" />
     <Compile Include="Decider\LambdaFunctionCompletedEventTests.cs" />
+    <Compile Include="Decider\LamdbaItemTests.cs" />
     <Compile Include="Decider\RestartWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowDecisionTests.cs" />
+    <Compile Include="Decider\ScheduleLambdaDecisionTests.cs" />
     <Compile Include="Decider\TimerItemsExtensionTests.cs" />
     <Compile Include="Decider\WorkflowItemExtensionsTests.cs" />
     <Compile Include="DomainTests.cs" />

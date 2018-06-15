@@ -44,7 +44,7 @@ namespace Guflow.Tests.Decider
         //    _event = new LamdbaFunctionCompletedEvent(eventGraph.First(), eventGraph);
         //    var decisions = _event.Interpret(new WorkflowWithLambda()).Decisions();
 
-        //    Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(Identity.Timer("timer"),TimeSpan.Zero)}));
+        //    Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.Zero) }));
         //}
 
         //private class WorkflowWithLambda : Workflow

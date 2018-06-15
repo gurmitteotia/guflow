@@ -16,7 +16,7 @@ namespace Guflow.Decider
             _details = details;
         }
 
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision()
             {

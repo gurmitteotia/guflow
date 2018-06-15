@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_return_aws_decision_to_schedule_the_activity()
         {
-            var swfDecision = _scheduleActivityDecision.Decision();
+            var swfDecision = _scheduleActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.ScheduleActivityTask));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ActivityId,Is.EqualTo(_activityIdentity.Id.ToString()));
@@ -40,7 +40,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_aws_activity_decision_has_null_timeouts()
         {
-            var swfDecision = _scheduleActivityDecision.Decision();
+            var swfDecision = _scheduleActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.HeartbeatTimeout,Is.Null);
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ScheduleToCloseTimeout, Is.Null);
@@ -58,7 +58,7 @@ namespace Guflow.Tests.Decider
             timeouts.StartToCloseTimeout = TimeSpan.FromSeconds(50);
             _scheduleActivityDecision.Timeouts = timeouts;
 
-            var swfDecision = _scheduleActivityDecision.Decision();
+            var swfDecision = _scheduleActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.HeartbeatTimeout,Is.EqualTo("20"));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ScheduleToCloseTimeout, Is.EqualTo("30"));
@@ -76,7 +76,7 @@ namespace Guflow.Tests.Decider
             timeouts.StartToCloseTimeout = TimeSpan.MaxValue;
             _scheduleActivityDecision.Timeouts = timeouts;
 
-            var swfDecision = _scheduleActivityDecision.Decision();
+            var swfDecision = _scheduleActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.HeartbeatTimeout, Is.EqualTo("NONE"));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ScheduleToCloseTimeout, Is.EqualTo("NONE"));
@@ -87,7 +87,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void  By_default_optional_attributes_of_aws_activity_decision_are_null()
         {
-            var swfDecision = _scheduleActivityDecision.Decision();
+            var swfDecision = _scheduleActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.Input,Is.Null);
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.TaskList, Is.Null);
@@ -100,7 +100,7 @@ namespace Guflow.Tests.Decider
             _scheduleActivityDecision.UseInputFunc(()=>"input");
             _scheduleActivityDecision.TaskList = "list";
             _scheduleActivityDecision.TaskPriority = 20;
-            var swfDecision = _scheduleActivityDecision.Decision();
+            var swfDecision = _scheduleActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.Input, Is.EqualTo("input"));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.TaskList.Name, Is.EqualTo("list"));

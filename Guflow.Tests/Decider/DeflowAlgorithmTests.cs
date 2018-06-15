@@ -321,6 +321,26 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Return_a_custom_action_when_scheduling_condition_is_evaluated_to_false()
+        {
+
+            var bookHotel = CompletedActivityGraph(BookHotelActivity);
+            var addDinner = CompletedActivityGraph(AddDinnerActivity);
+            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+
+            var workflow = new TriggerJointOnFalseSchedulableCondition();
+            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
+            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
+
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                new CompleteWorkflowDecision("result"), 
+            }));
+        }
+
+        [Test]
         public void By_default_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false_for_timer()
         {
 
@@ -357,6 +377,26 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
                 new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
+            }));
+        }
+
+        [Test]
+        public void Return_custom_action_when_scheduling_condition_is_evaluated_to_false_for_timer()
+        {
+
+            var bookHotel = CompletedActivityGraph(BookHotelActivity);
+            var addDinner = CompletedActivityGraph(AddDinnerActivity);
+            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+
+            var workflow = new ManuallyTriggerCustomActionOnFalseSchedulableConditionForTimer();
+            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
+            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
+
+            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                new CompleteWorkflowDecision("result")
             }));
         }
 
@@ -605,6 +645,23 @@ namespace Guflow.Tests.Decider
         }
 
         [WorkflowDescription("1.0")]
+        private class TriggerJointOnFalseSchedulableCondition : Workflow
+        {
+            public TriggerJointOnFalseSchedulableCondition()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).When(a => false, a => CompleteWorkflow("result")).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
         private class WorkflowWithFalseSchedulableConditionForTimer : Workflow
         {
             public WorkflowWithFalseSchedulableConditionForTimer()
@@ -631,6 +688,23 @@ namespace Guflow.Tests.Decider
 
                 ScheduleActivity(BookFlightActivity, Version);
                 ScheduleTimer(TimerName).When(a => false, a=>Trigger(a).FirstJoint()).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterTimer(TimerName);
+
+                ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class ManuallyTriggerCustomActionOnFalseSchedulableConditionForTimer : Workflow
+        {
+            public ManuallyTriggerCustomActionOnFalseSchedulableConditionForTimer()
+            {
+                ScheduleActivity(BookHotelActivity, Version);
+                ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleTimer(TimerName).When(a => false, a => CompleteWorkflow("result")).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterTimer(TimerName);
 

@@ -31,7 +31,7 @@ namespace Guflow.Decider
             return _timerIdentity.GetHashCode();
         }
 
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision()
             {

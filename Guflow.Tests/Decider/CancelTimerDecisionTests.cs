@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
             var timerIdentity = Identity.Timer("timer");
             var cancelTimerDecision = new CancelTimerDecision(timerIdentity);
 
-            Decision swfDecision = cancelTimerDecision.Decision();
+            Decision swfDecision = cancelTimerDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.CancelTimer));
             Assert.That(swfDecision.CancelTimerDecisionAttributes.TimerId,Is.EqualTo(timerIdentity.Id.ToString()));

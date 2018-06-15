@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
         {
             var recordMarkerDecision = new RecordMarkerWorkflowDecision("name","detail");
 
-            var decision = recordMarkerDecision.Decision();
+            var decision = recordMarkerDecision.SwfDecision();
 
             Assert.That(decision.DecisionType,Is.EqualTo(DecisionType.RecordMarker));
             Assert.That(decision.RecordMarkerDecisionAttributes.MarkerName, Is.EqualTo("name"));

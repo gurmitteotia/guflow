@@ -250,7 +250,6 @@ namespace Guflow.Decider
             return timerItem;
         }
 
-       
         /// <summary>
         /// Schedule a workflow action directly.
         /// </summary>

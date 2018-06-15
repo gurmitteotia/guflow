@@ -22,7 +22,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowDecision = new CancelRequestWorkflowDecision("wid","rid");
 
-            var swfDecision = workflowDecision.Decision();
+            var swfDecision = workflowDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.RequestCancelExternalWorkflowExecution));
             Assert.That(swfDecision.RequestCancelExternalWorkflowExecutionDecisionAttributes.WorkflowId,Is.EqualTo("wid"));

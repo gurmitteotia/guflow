@@ -14,7 +14,7 @@ namespace Guflow.Decider
             _result = result;
             Priority = proposal ? _veryLow : _low;
         }
-        internal override Decision Decision()
+        internal override Decision SwfDecision()
         {
             return new Decision
             {

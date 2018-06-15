@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
         {
             var completeDecision = new CompleteWorkflowDecision("result");
             
-            Decision decision = completeDecision.Decision();
+            Decision decision = completeDecision.SwfDecision();
 
             Assert.That(decision.CompleteWorkflowExecutionDecisionAttributes,Is.Not.Null);
             Assert.That(decision.DecisionType,Is.EqualTo(DecisionType.CompleteWorkflowExecution));

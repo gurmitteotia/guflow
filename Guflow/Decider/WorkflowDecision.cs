@@ -6,11 +6,11 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
-    internal abstract class WorkflowDecision
+    public abstract class WorkflowDecision
     {
         private readonly bool _canCloseWorkflow;
         protected readonly bool Proposal;
-        internal abstract Decision Decision();
+        internal abstract Decision SwfDecision();
         internal static readonly WorkflowDecision Empty = new EmptyWorkflowDecision();
        
         protected WorkflowDecision(bool canCloseWorkflow, bool proposal=false)
@@ -27,8 +27,7 @@ namespace Guflow.Decider
                 return workflowDecisions.Any(w => w._canCloseWorkflow && !w.Proposal);
             return false;
         }
-
-        public virtual bool IsFor(WorkflowItem workflowItem)
+        internal virtual bool IsFor(WorkflowItem workflowItem)
         {
             return false;
         }
@@ -39,7 +38,7 @@ namespace Guflow.Decider
                 : base(false)
             {
             }
-            internal override Decision Decision()
+            internal override Decision SwfDecision()
             {
                 throw new NotSupportedException();
             }

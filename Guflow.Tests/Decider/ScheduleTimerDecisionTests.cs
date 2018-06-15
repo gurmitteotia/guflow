@@ -25,7 +25,7 @@ namespace Guflow.Tests.Decider
             var timerIdentity = Identity.Timer("timer");
             var scheduleTimerDecision = new ScheduleTimerDecision(timerIdentity, TimeSpan.FromSeconds(2),true);
 
-            var swfDecision = scheduleTimerDecision.Decision();
+            var swfDecision = scheduleTimerDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.StartTimer));
             Assert.That(swfDecision.StartTimerDecisionAttributes.TimerId,Is.EqualTo(timerIdentity.Id.ToString()));
@@ -40,7 +40,7 @@ namespace Guflow.Tests.Decider
             
             var scheduleTimerDecision = new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2.6), true);
 
-            var swfDecision = scheduleTimerDecision.Decision();
+            var swfDecision = scheduleTimerDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType, Is.EqualTo(DecisionType.StartTimer));
             Assert.That(swfDecision.StartTimerDecisionAttributes.StartToFireTimeout, Is.EqualTo("3"));
@@ -52,7 +52,7 @@ namespace Guflow.Tests.Decider
 
             var scheduleTimerDecision = new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2.6));
 
-            var swfDecision = scheduleTimerDecision.Decision();
+            var swfDecision = scheduleTimerDecision.SwfDecision();
 
             Assert.That(swfDecision.StartTimerDecisionAttributes.Control.FromJson<TimerScheduleData>().IsARescheduleTimer, Is.EqualTo(false));
         }

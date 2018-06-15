@@ -231,7 +231,7 @@ namespace Guflow.Decider
         {
             if (!_whenFunc(this))
                 return IsStartupItem()? Enumerable.Empty<WorkflowDecision>()
-                    :new TriggerActions(this).FirstJoint().Decisions();
+                    : _onFalseAction(this).Decisions();
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.UseInputFunc(GetActivityInput);
@@ -241,9 +241,9 @@ namespace Guflow.Decider
             return new []{scheduleActivityDecision};
         }
 
-        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan afterTimeout)
+        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout)
         {
-            _rescheduleTimer.FireAfter(afterTimeout);
+            _rescheduleTimer.FireAfter(timeout);
             return _rescheduleTimer.GetScheduleDecisions();
         }
 

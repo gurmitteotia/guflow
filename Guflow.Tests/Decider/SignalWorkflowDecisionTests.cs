@@ -25,7 +25,7 @@ namespace Guflow.Tests.Decider
         {
             var signalDecision = new SignalWorkflowDecision("name","input","wid","rid");
 
-            var awsDecision = signalDecision.Decision();
+            var awsDecision = signalDecision.SwfDecision();
 
             Assert.That(awsDecision.DecisionType,Is.EqualTo(DecisionType.SignalExternalWorkflowExecution));
             Assert.That(awsDecision.SignalExternalWorkflowExecutionDecisionAttributes.SignalName, Is.EqualTo("name"));

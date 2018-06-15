@@ -143,7 +143,7 @@ namespace Guflow.Decider
             return new RespondDecisionTaskCompletedRequest
             {
                 TaskToken = taskToken,
-                Decisions = decisions.Select(s => s.Decision()).ToList()
+                Decisions = decisions.Select(s => s.SwfDecision()).ToList()
             };
         }
         private async void ExecuteHostedWorkfowsAsync(TaskList taskList, Domain domain)
