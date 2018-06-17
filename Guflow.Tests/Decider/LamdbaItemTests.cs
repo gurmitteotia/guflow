@@ -66,6 +66,10 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => lambdaItem.WithInput(null));
             Assert.Throws<ArgumentNullException>(() => lambdaItem.WithTimeout(null));
             Assert.Throws<ArgumentNullException>(() => lambdaItem.OnCompletion(null));
+            Assert.Throws<ArgumentNullException>(() => lambdaItem.OnFailure(null));
+            Assert.Throws<ArgumentNullException>(() => lambdaItem.OnTimedout(null));
+            Assert.Throws<ArgumentNullException>(() => lambdaItem.OnSchedulingFailed(null));
+            Assert.Throws<ArgumentNullException>(() => lambdaItem.OnStartFailed(null));
         }
 
         [Test]

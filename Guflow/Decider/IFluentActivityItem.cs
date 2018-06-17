@@ -28,13 +28,13 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> action);
+        IFluentActivityItem OnCancellationFailed(Func<ActivityCancellationFailedEvent, WorkflowAction> action);
         /// <summary>
         /// Register a handler to be called when this activity is failed to scheduled.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> action);
+        IFluentActivityItem OnSchedulingFailed(Func<ActivitySchedulingFailedEvent, WorkflowAction> action);
         /// <summary>
         /// Register a handler to be called when this activity is cancelled.
         /// </summary>

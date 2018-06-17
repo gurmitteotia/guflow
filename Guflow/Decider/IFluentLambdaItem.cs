@@ -10,14 +10,14 @@ namespace Guflow.Decider
     public interface IFluentLambdaItem : IFluentWorkflowItem<IFluentActivityItem>
     {
         /// <summary>
-        /// Provide input to scheduling lambda function.
+        /// Provide input for lamdba lambda function. Complex input type are serialized to JSON while for primitive types their string represenation is sent.
         /// </summary>
         /// <param name="input">Functor, which will return input for lambda function.</param>
         /// <returns></returns>
         IFluentLambdaItem WithInput(Func<ILambdaItem, object> input);
 
         /// <summary>
-        /// Provides the timeout for lambda function to finish. If lambda function does not finish within this period then SWF will raise LambdaFunctionTimedoutEvent.
+        /// Configure the timeout for lambda function. If lambda function does not finish within this period then SWF will raise LambdaFunctionTimedoutEvent.
         /// </summary>
         /// <param name="timout">Functor, which will return the timeout for lambda function</param>
         /// <returns></returns>
@@ -28,6 +28,33 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="completedAction">Functtor, which will return the workflow action.</param>
         /// <returns></returns>
-        IFluentLambdaItem OnCompletion(Func<LamdbaFunctionCompletedEvent, WorkflowAction> completedAction);
+        IFluentLambdaItem OnCompletion(Func<LamdbaCompletedEvent, WorkflowAction> completedAction);
+
+        /// <summary>
+        /// Provides the workflow action for lambda failed event. By default workflow is failed.
+        /// </summary>
+        /// <param name="failedAction"></param>
+        /// <returns></returns>
+        IFluentLambdaItem OnFailure(Func<LambdaFailedEvent, WorkflowAction> failedAction);
+
+        /// <summary>
+        /// Provides the workflow action for lambda timeout event. By default workflow is failed.
+        /// </summary>
+        /// <param name="timedoutAction"></param>
+        /// <returns></returns>
+        IFluentLambdaItem OnTimedout(Func<LambdaTimedoutEvent, WorkflowAction> timedoutAction);
+
+        /// <summary>
+        /// Provides the workflow action lamdba scheduling failed event. By default workflow is failed.
+        /// </summary>
+        /// <param name="schedulingFailedAction"></param>
+        IFluentLambdaItem OnSchedulingFailed(Func<LambdaSchedulingFailedEvent, WorkflowAction> schedulingFailedAction);
+
+        /// <summary>
+        /// Provides the workflow action when SWF is failed to start the lamdba function. By default  workflow is failed.
+        /// </summary>
+        /// <param name="startFailedAction"></param>
+        /// <returns></returns>
+        IFluentLambdaItem OnStartFailed(Func<LambdaStartFailedEvent, WorkflowAction> startFailedAction);
     }
 }

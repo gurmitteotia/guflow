@@ -61,7 +61,7 @@ namespace Guflow.Decider
 
         public override string ToString()
         {
-            return string.Format("{0} for activity name {1}, version {2} and positional name {3}", GetType().Name, _activityName, _activityVersion, _activityPositionalName);
+            return $"{GetType().Name} for activity name {_activityName}, version {_activityVersion} and positional name {_activityPositionalName}";
         }
 
         internal override bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)

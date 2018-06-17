@@ -65,7 +65,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowReturnCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleActivity(_activityName, _activityVersion).OnFailedCancellation(c => workflowAction);
+                ScheduleActivity(_activityName, _activityVersion).OnCancellationFailed(c => workflowAction);
             }
         }
     }

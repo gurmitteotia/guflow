@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
+using Microsoft.Win32;
 using ThirdParty.BouncyCastle.Asn1;
 using ChildPolicy = Guflow.Decider.ChildPolicy;
 
@@ -56,11 +57,11 @@ namespace Guflow.Tests.Decider
         public IEnumerable<HistoryEvent> ActivityFailedGraph(Identity activityIdentity, string identity, string reason, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.CompletedIds(ref _currentEventId);
+            var eventIds = EventIds.FailedIds(ref _currentEventId);
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskFailed,
-                EventId = eventIds.EventId(EventIds.Completion),
+                EventId = eventIds.EventId(EventIds.Failed),
                 ActivityTaskFailedEventAttributes = new ActivityTaskFailedEventAttributes()
                 {
                     Details = detail,
@@ -98,11 +99,11 @@ namespace Guflow.Tests.Decider
         public IEnumerable<HistoryEvent> ActivityTimedoutGraph(Identity activityIdentity, string identity, string timeoutType, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.CompletedIds(ref _currentEventId);
+            var eventIds = EventIds.TimedoutIds(ref _currentEventId);
             historyEvents.Add(new HistoryEvent()
             {
                 EventType = EventType.ActivityTaskTimedOut,
-                EventId = eventIds.EventId(EventIds.Completion),
+                EventId = eventIds.EventId(EventIds.Timedout),
                 ActivityTaskTimedOutEventAttributes = new ActivityTaskTimedOutEventAttributes()
                 {
                     Details = detail,
@@ -429,7 +430,7 @@ namespace Guflow.Tests.Decider
         public IEnumerable<HistoryEvent> ActivityStartedGraph(Identity activityIdentity, string identity)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.ActivityStartedIds(ref _currentEventId);
+            var eventIds = EventIds.StartedIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
@@ -658,6 +659,7 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
+
         public IEnumerable<HistoryEvent> Concat(params IEnumerable<HistoryEvent>[] graphs)
         {
             var result = new List<HistoryEvent>();
@@ -668,6 +670,7 @@ namespace Guflow.Tests.Decider
             result.Reverse();
             return result;
         }
+
         public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(Identity identity, object input, object result, string control, TimeSpan? startToClose)
         {
             var historyEvents = new List<HistoryEvent>();
@@ -712,6 +715,194 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
+        public IEnumerable<HistoryEvent> LambdaFailedEventGraph(Identity identity, object input, string reason, string details, string control, TimeSpan? timeout = null)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.FailedIds(ref _currentEventId);
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Failed),
+                EventType = EventType.LambdaFunctionFailed,
+                LambdaFunctionFailedEventAttributes = new LambdaFunctionFailedEventAttributes()
+                {
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    Reason = reason,
+                    Details = details,
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.LambdaFunctionStarted,
+
+                LambdaFunctionStartedEventAttributes = new LambdaFunctionStartedEventAttributes()
+                {
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.LambdaFunctionScheduled,
+                LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
+                {
+                    Control = control,
+                    Id = identity.Id,
+                    Name = identity.Name,
+                    Input = input.ToAwsString(),
+                    StartToCloseTimeout = timeout.Seconds()
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public IEnumerable<HistoryEvent> LamdbaTimedoutEventGraph(Identity identity, object input, string timedoutType, string control, TimeSpan? timeout = null)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.TimedoutIds(ref _currentEventId);
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Timedout),
+                EventType = EventType.LambdaFunctionTimedOut,
+                LambdaFunctionTimedOutEventAttributes = new LambdaFunctionTimedOutEventAttributes
+                {
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    TimeoutType = timedoutType,
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.LambdaFunctionStarted,
+
+                LambdaFunctionStartedEventAttributes = new LambdaFunctionStartedEventAttributes()
+                {
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.LambdaFunctionScheduled,
+                LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
+                {
+                    Control = control,
+                    Id = identity.Id,
+                    Name = identity.Name,
+                    Input = input.ToAwsString(),
+                    StartToCloseTimeout = timeout.Seconds()
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public HistoryEvent LambdaSchedulingFailedEventGraph(Identity identity, string reason)
+        {
+            var eventIds = EventIds.SchedulingFailedIds(ref _currentEventId);
+            return new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Failed),
+                EventType = EventType.ScheduleLambdaFunctionFailed,
+                ScheduleLambdaFunctionFailedEventAttributes = new ScheduleLambdaFunctionFailedEventAttributes
+                {
+                    Id = identity.Id,
+                    Name = identity.Name,
+                    Cause = reason
+                }
+            };
+        }
+
+        public IEnumerable<HistoryEvent> LamdbaStartFailedEventGraph(Identity identity, string input, string cause, string message, string control, TimeSpan? timeout = null)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.LambdaStartFailedIds(ref _currentEventId);
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Failed),
+                EventType = EventType.StartLambdaFunctionFailed,
+                StartLambdaFunctionFailedEventAttributes = new StartLambdaFunctionFailedEventAttributes
+                {
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled),
+                    Cause = cause,
+                    Message = message
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.LambdaFunctionScheduled,
+                LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
+                {
+                    Control = control,
+                    Id = identity.Id,
+                    Name = identity.Name,
+                    Input = input.ToAwsString(),
+                    StartToCloseTimeout = timeout.Seconds()
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public HistoryEvent LambdaScheduledEventGraph(Identity identity, object input, string control, TimeSpan? timeout = null)
+        {
+            var eventIds = EventIds.ScheduledIds(ref _currentEventId);
+            return new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.LambdaFunctionScheduled,
+                LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes
+                {
+                    Id = identity.Id,
+                    Name = identity.Name,
+                    Input = input.ToAwsString(),
+                    Control = control,
+                    StartToCloseTimeout = timeout.Seconds()
+                }
+            };
+        }
+
+        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(Identity identity, object input, string control, TimeSpan? timeout=null)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.StartedIds(ref _currentEventId);
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.LambdaFunctionStarted,
+                LambdaFunctionStartedEventAttributes = new LambdaFunctionStartedEventAttributes
+                {
+                    ScheduledEventId = eventIds.EventId(EventIds.Scheduled),
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.LambdaFunctionScheduled,
+                LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
+                {
+                    Control = control,
+                    Id = identity.Id,
+                    Name = identity.Name,
+                    Input = input.ToAwsString(),
+                    StartToCloseTimeout = timeout.Seconds()
+                }
+            });
+
+            return historyEvents;
+        }
+
+
         private class EventIds
         {
             public const string Completion = "Completion";
@@ -721,6 +912,7 @@ namespace Guflow.Tests.Decider
             public const string Cancelled = "Cancelled";
             public const string TimerFired = "TimerFired";
             public const string Failed = "Failed";
+            public const string Timedout = "Timedout";
             public const string Generic = "Generic";
 
             private readonly Dictionary<string, long> _ids;
@@ -741,6 +933,32 @@ namespace Guflow.Tests.Decider
                 var ids = new Dictionary<string, long>()
                 {
                     {Completion, eventId},
+                    {Started, eventId - 1},
+                    {Scheduled, eventId - 2}
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds FailedIds(ref long eventId)
+            {
+                const long totalEvents = 3;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Failed, eventId},
+                    {Started, eventId - 1},
+                    {Scheduled, eventId - 2}
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds TimedoutIds(ref long eventId)
+            {
+                const long totalEvents = 3;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Timedout, eventId},
                     {Started, eventId - 1},
                     {Scheduled, eventId - 2}
                 };
@@ -794,6 +1012,18 @@ namespace Guflow.Tests.Decider
                 return new EventIds(ids);
             }
 
+            public static EventIds LambdaStartFailedIds(ref long eventId)
+            {
+                const long totalEvents = 2;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Failed, eventId},
+                    {Scheduled, eventId-1},
+                };
+                return new EventIds(ids);
+            }
+
             public static EventIds CancellationFailedIds(ref long eventId)
             {
                 const long totalEvents = 2;
@@ -839,7 +1069,7 @@ namespace Guflow.Tests.Decider
                 return new EventIds(ids);
             }
 
-            public static EventIds ActivityStartedIds(ref long eventId)
+            public static EventIds StartedIds(ref long eventId)
             {
 
                 const long totalEvents = 2;
@@ -876,7 +1106,5 @@ namespace Guflow.Tests.Decider
                 return new EventIds(ids);
             }
         }
-
-
     }
 }

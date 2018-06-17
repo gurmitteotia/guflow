@@ -82,7 +82,7 @@ namespace Guflow.Decider
             get { return _workflowItems.Where(i=>i.GetType()!=typeof(WorkflowActionItem)); }
         }
 
-        public LambdaItem LambdaFunction(WorkflowItemEvent @event)
+        public LambdaItem LambdaItem(WorkflowItemEvent @event)
         {
             var item = _workflowItems.OfType<LambdaItem>().FirstOrDefault(@event.IsFor);
             if(item == null)

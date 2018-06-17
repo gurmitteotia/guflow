@@ -86,8 +86,14 @@
     <Compile Include="Decider\DeflowAlgorithmTests.cs" />
     <Compile Include="Decider\HistoryEventsBuilder.cs" />
     <Compile Include="Decider\JumpWorkflowActionTests.cs" />
-    <Compile Include="Decider\LambdaFunctionCompletedEventTests.cs" />
+    <Compile Include="Decider\LambdaCompletedEventTests.cs" />
+    <Compile Include="Decider\LambdaStartFailedEventTests.cs" />
+    <Compile Include="Decider\LambdaTimedoutEventTests.cs" />
+    <Compile Include="Decider\LamdbaFailedEventTests.cs" />
     <Compile Include="Decider\LamdbaItemTests.cs" />
+    <Compile Include="Decider\LamdbaScheduledEventTests.cs" />
+    <Compile Include="Decider\LamdbaSchedulingFailedEventTests.cs" />
+    <Compile Include="Decider\LamdbaStartedEventTests.cs" />
     <Compile Include="Decider\RestartWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowDecisionTests.cs" />
     <Compile Include="Decider\ScheduleLambdaDecisionTests.cs" />

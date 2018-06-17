@@ -9,10 +9,10 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
-    public class LambdaFunctionCompletedEventTests
+    public class LambdaCompletedEventTests
     {
         private HistoryEventsBuilder _builder;
-        private LamdbaFunctionCompletedEvent _event;
+        private LamdbaCompletedEvent _event;
 
         [SetUp]
         public void Setup()
@@ -23,9 +23,8 @@ namespace Guflow.Tests.Decider
         public void Properties_are_populated_from_history_event()
         {
             var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
-            _event = new LamdbaFunctionCompletedEvent(eventGraph.First(), eventGraph);
+            _event = new LamdbaCompletedEvent(eventGraph.First(), eventGraph);
 
-            Assert.That(_event.Name, Is.EqualTo("lambda_name"));
             Assert.That(_event.Result, Is.EqualTo("result"));
             Assert.That(_event.Input, Is.EqualTo("input"));
         }
@@ -34,14 +33,14 @@ namespace Guflow.Tests.Decider
         public void Throws_exception_when_lambda_scheduled_event_not_found()
         {
             var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
-            Assert.Throws<IncompleteEventGraphException>(()=>_event = new LamdbaFunctionCompletedEvent(eventGraph.First(), Enumerable.Empty<HistoryEvent>()));
+            Assert.Throws<IncompleteEventGraphException>(()=>_event = new LamdbaCompletedEvent(eventGraph.First(), Enumerable.Empty<HistoryEvent>()));
         }
 
         [Test]
         public void Schedule_children()
         {
             var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
-            _event = new LamdbaFunctionCompletedEvent(eventGraph.First(), eventGraph);
+            _event = new LamdbaCompletedEvent(eventGraph.First(), eventGraph);
             var decisions = _event.Interpret(new WorkflowWithLambda()).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name"), TimeSpan.Zero) }));
@@ -51,7 +50,7 @@ namespace Guflow.Tests.Decider
         public void Can_schedule_custom_action()
         {
             var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
-            _event = new LamdbaFunctionCompletedEvent(eventGraph.First(), eventGraph);
+            _event = new LamdbaCompletedEvent(eventGraph.First(), eventGraph);
             var decisions = _event.Interpret(new WorkflowWithCustomAction(WorkflowAction.CompleteWorkflow("result"))).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result")}));

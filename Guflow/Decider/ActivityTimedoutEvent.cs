@@ -16,7 +16,7 @@ namespace Guflow.Decider
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
         /// <summary>
-        /// Returns reason, why activity has failed.
+        /// Returns reason, why activity has timedout.
         /// </summary>
         public string TimeoutType => _eventAttributes.TimeoutType;
 

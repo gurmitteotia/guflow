@@ -561,8 +561,8 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => activityItem.WithInput(null));
             Assert.Throws<ArgumentNullException>(() => activityItem.OnCancelled(null));
             Assert.Throws<ArgumentNullException>(() => activityItem.OnCompletion(null));
-            Assert.Throws<ArgumentNullException>(() => activityItem.OnFailedCancellation(null));
-            Assert.Throws<ArgumentNullException>(() => activityItem.OnFailedScheduling(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnCancellationFailed(null));
+            Assert.Throws<ArgumentNullException>(() => activityItem.OnSchedulingFailed(null));
             Assert.Throws<ArgumentNullException>(() => activityItem.OnFailure(null));
             Assert.Throws<ArgumentNullException>(() => activityItem.OnTaskList(null));
             Assert.Throws<ArgumentNullException>(() => activityItem.OnTimedout(null));

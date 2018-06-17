@@ -10,7 +10,11 @@ namespace Guflow.Decider
     {
         private Func<ILambdaItem, object> _input;
         private Func<ILambdaItem, TimeSpan?> _timeout;
-        private Func<LamdbaFunctionCompletedEvent, WorkflowAction> _completedAction;
+        private Func<LamdbaCompletedEvent, WorkflowAction> _completedAction;
+        private Func<LambdaFailedEvent, WorkflowAction> _failedAction;
+        private Func<LambdaTimedoutEvent, WorkflowAction> _timedoutAction;
+        private Func<LambdaSchedulingFailedEvent, WorkflowAction> _schedulingFailedAction;
+        private Func<LambdaStartFailedEvent, WorkflowAction> _startFailedAction;
 
         private readonly TimerItem _rescheduleTimer;
         public LambdaItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
@@ -18,7 +22,11 @@ namespace Guflow.Decider
             _input = (item) => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _timeout = item => null;
             _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
-            _completedAction = item => WorkflowAction.ContinueWorkflow(this);
+            _completedAction = _ => WorkflowAction.ContinueWorkflow(this);
+            _failedAction = @event => WorkflowAction.FailWorkflow(@event.Reason, @event.Details);
+            _timedoutAction = @event => WorkflowAction.FailWorkflow("LAMBDA_FUNCTION_TIMED_OUT", @event.TimedoutType);
+            _schedulingFailedAction = @event => WorkflowAction.FailWorkflow("LAMBDA_FUNCTION_SCHEDULING_FAILED", @event.Cause);
+            _startFailedAction = @event => WorkflowAction.FailWorkflow(@event.Cause, @event.Message);
         }
 
         public string PositionalName => Identity.PositionalName;
@@ -76,16 +84,64 @@ namespace Guflow.Decider
             return this;
         }
 
-        public IFluentLambdaItem OnCompletion(Func<LamdbaFunctionCompletedEvent, WorkflowAction> completedAction)
+        public IFluentLambdaItem OnCompletion(Func<LamdbaCompletedEvent, WorkflowAction> completedAction)
         {
             Ensure.NotNull(completedAction, nameof(completedAction));
             _completedAction = completedAction;
             return this;
         }
 
-        public WorkflowAction CompletedWorkflowAction(LamdbaFunctionCompletedEvent @event)
+        public IFluentLambdaItem OnFailure(Func<LambdaFailedEvent, WorkflowAction> failedAction)
+        {
+            Ensure.NotNull(failedAction, nameof(failedAction));
+            _failedAction = failedAction;
+            return this;
+        }
+
+        public IFluentLambdaItem OnTimedout(Func<LambdaTimedoutEvent, WorkflowAction> timedoutAction)
+        {
+            Ensure.NotNull(timedoutAction, nameof(timedoutAction));
+            _timedoutAction = timedoutAction;
+            return this;
+        }
+
+        public IFluentLambdaItem OnSchedulingFailed(Func<LambdaSchedulingFailedEvent, WorkflowAction> schedulingFailedAction)
+        {
+            Ensure.NotNull(schedulingFailedAction, nameof(schedulingFailedAction));
+            _schedulingFailedAction = schedulingFailedAction;
+            return this;
+        }
+
+        public IFluentLambdaItem OnStartFailed(Func<LambdaStartFailedEvent, WorkflowAction> startFailedAction)
+        {
+            Ensure.NotNull(startFailedAction, nameof(startFailedAction));
+            _startFailedAction = startFailedAction;
+            return this;
+        }
+
+        public WorkflowAction CompletedWorkflowAction(LamdbaCompletedEvent @event)
         {
             return _completedAction(@event);
+        }
+
+        public WorkflowAction FailedWorkflowAction(LambdaFailedEvent @event)
+        {
+            return _failedAction(@event);
+        }
+
+        public WorkflowAction TimedoutWorkflowAction(LambdaTimedoutEvent @event)
+        {
+            return _timedoutAction(@event);
+        }
+
+        public WorkflowAction SchedulingFailedWorkflowAction(LambdaSchedulingFailedEvent @event)
+        {
+            return _schedulingFailedAction(@event);
+        }
+
+        public WorkflowAction StartFailedWorkflowAction(LambdaStartFailedEvent @event)
+        {
+            return _startFailedAction(@event);
         }
     }
 }

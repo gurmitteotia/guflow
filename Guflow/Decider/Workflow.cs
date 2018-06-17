@@ -144,10 +144,34 @@ namespace Guflow.Decider
             return Handle(EventName.CancellationFailed, workflowCancellationFailedEvent);
         }
 
-        WorkflowAction IWorkflow.WorkflowAction(LamdbaFunctionCompletedEvent @event)
+        WorkflowAction IWorkflow.WorkflowAction(LamdbaCompletedEvent @event)
         {
-            var lambda = _allWorkflowItems.LambdaFunction(@event);
+            var lambda = _allWorkflowItems.LambdaItem(@event);
             return lambda.CompletedWorkflowAction(@event);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(LambdaFailedEvent lamdbaFailedEvent)
+        {
+            var lambda = _allWorkflowItems.LambdaItem(lamdbaFailedEvent);
+            return lambda.FailedWorkflowAction(lamdbaFailedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(LambdaTimedoutEvent lambdaTimedoutEvent)
+        {
+            var lambda = _allWorkflowItems.LambdaItem(lambdaTimedoutEvent);
+            return lambda.TimedoutWorkflowAction(lambdaTimedoutEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(LambdaSchedulingFailedEvent lamdbaSchedulingFailedEvent)
+        {
+            var lambda = _allWorkflowItems.LambdaItem(lamdbaSchedulingFailedEvent);
+            return lambda.SchedulingFailedWorkflowAction(lamdbaSchedulingFailedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(LambdaStartFailedEvent lambdaStartFailedEvent)
+        {
+            var lambda = _allWorkflowItems.LambdaItem(lambdaStartFailedEvent);
+            return lambda.StartFailedWorkflowAction(lambdaStartFailedEvent);
         }
 
         private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)

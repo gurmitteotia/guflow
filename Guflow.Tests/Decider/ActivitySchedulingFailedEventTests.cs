@@ -63,7 +63,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnFailedScheduling(e => workflowAction);
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnSchedulingFailed(e => workflowAction);
             }
         }
     }

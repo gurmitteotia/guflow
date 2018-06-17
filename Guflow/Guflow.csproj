@@ -87,8 +87,15 @@
     <Compile Include="Decider\DescriptionStrategy.cs" />
     <Compile Include="Decider\IFluentLambdaItem.cs" />
     <Compile Include="Decider\ILambdaItem.cs" />
+    <Compile Include="Decider\LambdaEvent.cs" />
+    <Compile Include="Decider\LambdaFailedEvent.cs" />
     <Compile Include="Decider\LambdaItem.cs" />
-    <Compile Include="Decider\LamdbaFunctionCompletedEvent.cs" />
+    <Compile Include="Decider\LambdaScheduledEvent.cs" />
+    <Compile Include="Decider\LambdaSchedulingFailedEvent.cs" />
+    <Compile Include="Decider\LambdaStartedEvent.cs" />
+    <Compile Include="Decider\LambdaStartFailedEvent.cs" />
+    <Compile Include="Decider\LamdbaCompletedEvent.cs" />
+    <Compile Include="Decider\LambdaTimedoutEvent.cs" />
     <Compile Include="Decider\ScheduleLambdaDecision.cs" />
     <Compile Include="Decider\SignalException.cs" />
     <Compile Include="Decider\WorkflowDescription.cs" />

@@ -112,7 +112,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        public IFluentActivityItem OnFailedScheduling(Func<ActivitySchedulingFailedEvent, WorkflowAction> action)
+        public IFluentActivityItem OnSchedulingFailed(Func<ActivitySchedulingFailedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");
             _onFailedSchedulingAction = action;
@@ -126,7 +126,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        public IFluentActivityItem OnFailedCancellation(Func<ActivityCancellationFailedEvent, WorkflowAction> action)
+        public IFluentActivityItem OnCancellationFailed(Func<ActivityCancellationFailedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");
 
