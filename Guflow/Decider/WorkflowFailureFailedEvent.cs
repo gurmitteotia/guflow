@@ -14,7 +14,7 @@ namespace Guflow.Decider
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.OnWorkflowFailureFailed(this);
+            return workflow.WorkflowAction(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

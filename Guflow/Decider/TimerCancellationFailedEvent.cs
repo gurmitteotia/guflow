@@ -14,7 +14,7 @@ namespace Guflow.Decider
         public string Cause { get { return _eventAttributes.Cause; } }
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.OnTimerCancellationFailed(this);
+            return workflow.WorkflowAction(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

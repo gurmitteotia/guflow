@@ -65,6 +65,7 @@ namespace Guflow.Tests.Decider
             var lambdaItem = new LambdaItem(Identity.Lambda("name"), Mock.Of<IWorkflow>());
             Assert.Throws<ArgumentNullException>(() => lambdaItem.WithInput(null));
             Assert.Throws<ArgumentNullException>(() => lambdaItem.WithTimeout(null));
+            Assert.Throws<ArgumentNullException>(() => lambdaItem.OnCompletion(null));
         }
 
         [Test]

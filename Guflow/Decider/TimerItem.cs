@@ -96,6 +96,14 @@ namespace Guflow.Decider
             var description = ActivityDescription.FindOn<TActivity>();
             return AfterActivity(description.Name, description.Version, positionalName);
         }
+
+        public IFluentTimerItem AfterLambda(string name, string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            AddParent(Identity.Lambda(name, positionalName));
+            return this;
+        }
+
         public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");

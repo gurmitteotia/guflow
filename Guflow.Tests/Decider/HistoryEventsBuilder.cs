@@ -668,7 +668,7 @@ namespace Guflow.Tests.Decider
             result.Reverse();
             return result;
         }
-        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(string id, string name, object input, object result, string control, TimeSpan? startToClose)
+        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(Identity identity, object input, object result, string control, TimeSpan? startToClose)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -702,8 +702,8 @@ namespace Guflow.Tests.Decider
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
                     Control = control,
-                    Id = id,
-                    Name = name,
+                    Id = identity.Id,
+                    Name = identity.Name,
                     Input = input.ToAwsString(),
                     StartToCloseTimeout = startToClose.Seconds()
                 }

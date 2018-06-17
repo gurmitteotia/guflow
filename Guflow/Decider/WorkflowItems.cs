@@ -12,53 +12,54 @@ namespace Guflow.Decider
         {
             return _workflowItems.Add(workflowItem);
         }
-        public ActivityItem ActivityItemFor(WorkflowItemEvent workflowItemEvent)
+        public ActivityItem ActivityItem(WorkflowItemEvent workflowItemEvent)
         {
-            var workflowActivity = ActivityOf(workflowItemEvent);
+            var workflowActivity = Activity(workflowItemEvent);
 
             if (workflowActivity == null)
                 throw new IncompatibleWorkflowException(string.Format("Can not find activity for event {0}.", workflowItemEvent));
 
             return workflowActivity;
         }
-        public ActivityItem ActivityItemFor(Identity identity)
+        public ActivityItem ActivityItem(Identity identity)
         {
-            var workflowActivity = ActivityOf(identity);
+            var workflowActivity = Activity(identity);
 
             if (workflowActivity == null)
-                throw new WorkflowItemNotFoundException(string.Format("Can not find activity by name {0}, version {1} and positional markerName {2} in workflow.", identity.Name, identity.Version, identity.PositionalName));
+                throw new WorkflowItemNotFoundException(
+                    $"Can not find activity by name {identity.Name}, version {identity.Version} and positional markerName {identity.PositionalName} in workflow.");
             return workflowActivity;
         }
-        public TimerItem TimerItemFor(Identity identity)
+        public TimerItem TimerItem(Identity identity)
         {
             var workflowTimer = TimerOf(identity);
             if (workflowTimer == null)
-                throw new WorkflowItemNotFoundException(string.Format("Can not find timer by name {0}.", identity.Name));
+                throw new WorkflowItemNotFoundException($"Can not find timer by name {identity.Name}.");
             return workflowTimer;
         }
-        public ITimer TimerFor(WorkflowItemEvent workflowItemEvent)
+        public ITimer Timer(WorkflowItemEvent workflowItemEvent)
         {
             var timer = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor) as ITimer;
 
             if (timer == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find timer for event {0}", workflowItemEvent));
+                throw new IncompatibleWorkflowException($"Can not find timer for event {workflowItemEvent}");
 
             return timer;
         }
-        public TimerItem TimerItemFor(WorkflowItemEvent timerEvent)
+        public TimerItem TimerItem(WorkflowItemEvent timerEvent)
         {
             return _workflowItems.OfType<TimerItem>().FirstOrDefault(timerEvent.IsFor);
         }
-        public WorkflowItem WorkflowItemFor(WorkflowItemEvent workflowItemEvent)
+        public WorkflowItem WorkflowItem(WorkflowItemEvent workflowItemEvent)
         {
             var workflowItem = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor);
 
             if (workflowItem == null)
-                throw new IncompatibleWorkflowException(string.Format("Can not find workflow item for event {0}", workflowItemEvent));
+                throw new IncompatibleWorkflowException($"Can not find workflow item for event {workflowItemEvent}");
 
             return workflowItem;
         }
-        public WorkflowItem WorkflowItemFor(Identity identity)
+        public WorkflowItem WorkflowItem(Identity identity)
         {
             return _workflowItems.FirstOrDefault(i => i.Has(identity));
         }
@@ -68,15 +69,11 @@ namespace Guflow.Decider
             return _workflowItems.Where(i => i.IsStartupItem());
         }
 
-        public IEnumerable<WorkflowItem> ChilderenOf(WorkflowItem workflowItem)
+        public IEnumerable<WorkflowItem> Childeren(WorkflowItem workflowItem)
         {
             return _workflowItems.Where(i => i.IsChildOf(workflowItem));
         }
-        public IEnumerable<WorkflowItem> ParentsOf(WorkflowItem workflowItem)
-        {
-            return _workflowItems.Where(workflowItem.IsChildOf);
-        }
-        public ActivityItem ActivityOf(WorkflowItemEvent activityEvent)
+        public ActivityItem Activity(WorkflowItemEvent activityEvent)
         {
             return _workflowItems.OfType<ActivityItem>().FirstOrDefault(activityEvent.IsFor);
         }
@@ -85,27 +82,25 @@ namespace Guflow.Decider
             get { return _workflowItems.Where(i=>i.GetType()!=typeof(WorkflowActionItem)); }
         }
 
-        public IEnumerable<IActivityItem> AllActivities
+        public LambdaItem LambdaFunction(WorkflowItemEvent @event)
         {
-            get { return _workflowItems.OfType<ActivityItem>(); }
+            var item = _workflowItems.OfType<LambdaItem>().FirstOrDefault(@event.IsFor);
+            if(item == null)
+                throw new IncompatibleWorkflowException($"Can not find workflow item for event {@event}");
+            return item;
         }
 
-        public IEnumerable<ITimerItem> AllTimers
-        {
-            get { return _workflowItems.OfType<TimerItem>(); }
-        }
+        public IEnumerable<IActivityItem> AllActivities => _workflowItems.OfType<ActivityItem>();
+
+        public IEnumerable<ITimerItem> AllTimers => _workflowItems.OfType<TimerItem>();
+
         private TimerItem TimerOf(Identity identity)
         {
             return _workflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));
         }
-        private ActivityItem ActivityOf(Identity identity)
+        private ActivityItem Activity(Identity identity)
         {
             return _workflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
-        }
-
-        public IEnumerable<WorkflowBranch> ChildBranchesOf(WorkflowItem workflowItem)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Guflow.Decider
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.OnActivityCancellationFailed(this);
+            return workflow.WorkflowAction(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

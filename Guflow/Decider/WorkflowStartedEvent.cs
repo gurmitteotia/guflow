@@ -79,7 +79,7 @@ namespace Guflow.Decider
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.OnWorkflowStarted(this);
+            return workflow.WorkflowAction(this);
         }
     }
 }

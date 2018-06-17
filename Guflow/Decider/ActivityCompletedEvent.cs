@@ -23,7 +23,7 @@ namespace Guflow.Decider
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.OnActivityCompletion(this);            
+            return workflow.WorkflowAction(this);            
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

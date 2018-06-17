@@ -22,7 +22,7 @@ namespace Guflow.Decider
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.OnActivityCancelled(this);
+            return workflow.WorkflowAction(this);
         }
 
         internal bool IsCancelledEventFor(long cancelRequestedEventId)

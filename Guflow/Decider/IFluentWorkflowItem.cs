@@ -26,5 +26,13 @@ namespace Guflow.Decider
         /// <param name="positionalName">Positional name.</param>
         /// <returns></returns>
         T AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity;
+
+        /// <summary>
+        /// Schedule this item after named lambda function is completed.
+        /// </summary>
+        /// <param name="name">Lambda function name</param>
+        /// <param name="positionalName">Positional name</param>
+        /// <returns></returns>
+        T AfterLambda(string name, string positionalName = "");
     }
 }

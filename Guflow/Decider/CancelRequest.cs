@@ -27,7 +27,7 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(name,"name");
             Ensure.NotNullAndEmpty(version, "version");
 
-            var activityItem = _workflowItems.ActivityItemFor(Identity.New(name, version, positionalName));
+            var activityItem = _workflowItems.ActivityItem(Identity.New(name, version, positionalName));
             return WorkflowAction.Cancel(activityItem);
         }
         /// <summary>
@@ -50,7 +50,7 @@ namespace Guflow.Decider
         {
             Ensure.NotNullAndEmpty(timerName, "timerName");
 
-            var timerItem = _workflowItems.TimerItemFor(Identity.Timer(timerName));
+            var timerItem = _workflowItems.TimerItem(Identity.Timer(timerName));
             return WorkflowAction.Cancel(timerItem);
         }
         /// <summary>

@@ -9,24 +9,25 @@ namespace Guflow.Decider
         WorkflowItem FindWorkflowItemBy(Identity identity);
         void SetCurrentExecutingEvent(WorkflowEvent workflowEvent);
         IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
-        WorkflowAction OnWorkflowStarted(WorkflowStartedEvent workflowStartedEvent);
-        WorkflowAction OnActivityCompletion(ActivityCompletedEvent activityCompletedEvent);
-        WorkflowAction OnActivityFailure(ActivityFailedEvent activityFailedEvent);
-        WorkflowAction OnActivityTimeout(ActivityTimedoutEvent activityTimedoutEvent);
-        WorkflowAction OnActivityCancelled(ActivityCancelledEvent activityCancelledEvent);
-        WorkflowAction OnTimerFired(TimerFiredEvent timerFiredEvent);
-        WorkflowAction OnTimerStartFailure(TimerStartFailedEvent timerStartFailedEvent);
-        WorkflowAction OnTimerCancelled(TimerCancelledEvent timerCancelledEvent);
-        WorkflowAction OnActivityCancellationFailed(ActivityCancellationFailedEvent activityCancellationFailedEvent);
-        WorkflowAction OnTimerCancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);
-        WorkflowAction OnActivitySchedulingFailed(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);
-        WorkflowAction OnWorkflowSignaled(WorkflowSignaledEvent workflowSignaledEvent);
-        WorkflowAction OnWorkflowCancellationRequested(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent);
-        WorkflowAction OnRecordMarkerFailed(RecordMarkerFailedEvent recordMarkerFailedEvent);
-        WorkflowAction OnWorkflowSignalFailed(WorkflowSignalFailedEvent workflowSignalFailedEvent);
-        WorkflowAction OnWorkflowCompletionFailed(WorkflowCompletionFailedEvent workflowCompletionFailedEvent);
-        WorkflowAction OnWorkflowFailureFailed(WorkflowFailureFailedEvent workflowFailureFailedEvent);
-        WorkflowAction OnWorkflowCancelRequestFailed(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent);
-        WorkflowAction OnWorkflowCancellationFailed(WorkflowCancellationFailedEvent workflowCancellationFailedEvent);
+        WorkflowAction WorkflowAction(WorkflowStartedEvent workflowStartedEvent);
+        WorkflowAction WorkflowAction(ActivityCompletedEvent activityCompletedEvent);
+        WorkflowAction WorkflowAction(ActivityFailedEvent activityFailedEvent);
+        WorkflowAction WorkflowAction(ActivityTimedoutEvent activityTimedoutEvent);
+        WorkflowAction WorkflowAction(ActivityCancelledEvent activityCancelledEvent);
+        WorkflowAction WorkflowAction(TimerFiredEvent timerFiredEvent);
+        WorkflowAction WorkflowAction(TimerStartFailedEvent timerStartFailedEvent);
+        WorkflowAction WorkflowAction(TimerCancelledEvent timerCancelledEvent);
+        WorkflowAction WorkflowAction(ActivityCancellationFailedEvent activityCancellationFailedEvent);
+        WorkflowAction WorkflowAction(TimerCancellationFailedEvent timerCancellationFailedEvent);
+        WorkflowAction WorkflowAction(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);
+        WorkflowAction WorkflowAction(WorkflowSignaledEvent workflowSignaledEvent);
+        WorkflowAction WorkflowAction(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent);
+        WorkflowAction WorkflowAction(RecordMarkerFailedEvent recordMarkerFailedEvent);
+        WorkflowAction WorkflowAction(WorkflowSignalFailedEvent workflowSignalFailedEvent);
+        WorkflowAction WorkflowAction(WorkflowCompletionFailedEvent workflowCompletionFailedEvent);
+        WorkflowAction WorkflowAction(WorkflowFailureFailedEvent workflowFailureFailedEvent);
+        WorkflowAction WorkflowAction(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent);
+        WorkflowAction WorkflowAction(WorkflowCancellationFailedEvent workflowCancellationFailedEvent);
+        WorkflowAction WorkflowAction(LamdbaFunctionCompletedEvent lamdbaFunctionCompletedEvent);
     }
 }

@@ -22,7 +22,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Properties_are_populated_from_history_event()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph("Id", "lambda_name", "input", "result", "", TimeSpan.FromSeconds(10));
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
             _event = new LamdbaFunctionCompletedEvent(eventGraph.First(), eventGraph);
 
             Assert.That(_event.Name, Is.EqualTo("lambda_name"));
@@ -33,28 +33,48 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_lambda_scheduled_event_not_found()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph("Id", "lambda_name", "input", "result", "", TimeSpan.FromSeconds(10));
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
             Assert.Throws<IncompleteEventGraphException>(()=>_event = new LamdbaFunctionCompletedEvent(eventGraph.First(), Enumerable.Empty<HistoryEvent>()));
         }
 
-        //[Test]
-        //public void Schedule_children()
-        //{
-        //    var eventGraph = _builder.LambdaCompletedEventGraph("Id", "lambda_name", "input", "result", "", TimeSpan.FromSeconds(10));
-        //    _event = new LamdbaFunctionCompletedEvent(eventGraph.First(), eventGraph);
-        //    var decisions = _event.Interpret(new WorkflowWithLambda()).Decisions();
+        [Test]
+        public void Schedule_children()
+        {
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
+            _event = new LamdbaFunctionCompletedEvent(eventGraph.First(), eventGraph);
+            var decisions = _event.Interpret(new WorkflowWithLambda()).Decisions();
 
-        //    Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.Zero) }));
-        //}
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name"), TimeSpan.Zero) }));
+        }
 
-        //private class WorkflowWithLambda : Workflow
-        //{
-        //    public WorkflowWithLambda()
-        //    {
-        //        ScheduleLambda("lambda_name");
+        [Test]
+        public void Can_schedule_custom_action()
+        {
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
+            _event = new LamdbaFunctionCompletedEvent(eventGraph.First(), eventGraph);
+            var decisions = _event.Interpret(new WorkflowWithCustomAction(WorkflowAction.CompleteWorkflow("result"))).Decisions();
 
-        //        ScheduleTimer("timer_name").AfterLambda("lambda_name");
-        //    }
-        //}
+            Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result")}));
+        }
+
+        private class WorkflowWithLambda : Workflow
+        {
+            public WorkflowWithLambda()
+            {
+                ScheduleLambda("lambda_name");
+
+                ScheduleTimer("timer_name").AfterLambda("lambda_name");
+            }
+        }
+
+        private class WorkflowWithCustomAction : Workflow
+        {
+            public WorkflowWithCustomAction(WorkflowAction action)
+            {
+                ScheduleLambda("lambda_name").OnCompletion(e=>action);
+
+                ScheduleTimer("timer_name").AfterLambda("lambda_name");
+            }
+        }
     }
 }

@@ -88,6 +88,11 @@ namespace Guflow.Decider
             return AfterActivity(description.Name, description.Version, positionalName);
         }
 
+        public IFluentActivityItem AfterLambda(string name, string positionalName = "")
+        {
+            throw new NotImplementedException();
+        }
+
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");

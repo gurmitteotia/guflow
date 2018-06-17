@@ -29,7 +29,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_the_activity_completed_event()
         {
-            _workflow.Setup(w => w.OnActivityCompletion(It.IsAny<ActivityCompletedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<ActivityCompletedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityCompletedEventGraph();
 
             var workflowDecisions =historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -40,7 +40,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_the_activity_failed_event()
         {
-            _workflow.Setup(w => w.OnActivityFailure(It.IsAny<ActivityFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<ActivityFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityFailedEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -51,7 +51,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_the_activity_timedout_event()
         {
-            _workflow.Setup(w => w.OnActivityTimeout(It.IsAny<ActivityTimedoutEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<ActivityTimedoutEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityTimedoutEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -62,7 +62,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_the_activity_cancelled_event()
         {
-            _workflow.Setup(w => w.OnActivityCancelled(It.IsAny<ActivityCancelledEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<ActivityCancelledEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityCancelledEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -73,7 +73,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_the_activity_cancellation_failed_event()
         {
-            _workflow.Setup(w => w.OnActivityCancellationFailed(It.IsAny<ActivityCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<ActivityCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateActivityCancellationFailedEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -84,7 +84,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_workflow_started_event()
         {
-            _workflow.Setup(w => w.OnWorkflowStarted(It.IsAny<WorkflowStartedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<WorkflowStartedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateWorkflowStartedEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -95,7 +95,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_timer_fired_event()
         {
-            _workflow.Setup(w => w.OnTimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerFiredEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -106,7 +106,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_timer_failed_event()
         {
-            _workflow.Setup(w => w.OnTimerStartFailure(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerFailedEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -117,7 +117,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_timer_cancelled_event()
         {
-            _workflow.Setup(w => w.OnTimerCancelled(It.IsAny<TimerCancelledEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerCancelledEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerCancelledEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -128,7 +128,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_timer_cancellation_failed_event()
         {
-            _workflow.Setup(w => w.OnTimerCancellationFailed(It.IsAny<TimerCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateTimerCancellationFailedEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -138,7 +138,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_workflow_signaled_event()
         {
-            _workflow.Setup(w => w.OnWorkflowSignaled(It.IsAny<WorkflowSignaledEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<WorkflowSignaledEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateWorkflowSignaledEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -149,7 +149,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_workflow_signaled_failed_event()
         {
-            _workflow.Setup(w => w.OnWorkflowSignalFailed(It.IsAny<WorkflowSignalFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<WorkflowSignalFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = new WorkflowHistoryEvents(new []{_builder.WorkflowSignalFailedEvent("cause","wid","rid")});
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -159,7 +159,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_workflow_cancellation_requested_event()
         {
-            _workflow.Setup(w => w.OnWorkflowCancellationRequested(It.IsAny<WorkflowCancellationRequestedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<WorkflowCancellationRequestedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = CreateWorkflowCancellationRequestedEventGraph();
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -169,7 +169,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_workflow_completion_failed_event()
         {
-            _workflow.Setup(w => w.OnWorkflowCompletionFailed(It.IsAny<WorkflowCompletionFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<WorkflowCompletionFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = new WorkflowHistoryEvents(new[]{_builder.WorkflowCompletionFailureEvent("cause")});
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -179,7 +179,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_workflow_failure_failed_event()
         {
-            _workflow.Setup(w => w.OnWorkflowFailureFailed(It.IsAny<WorkflowFailureFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<WorkflowFailureFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = new WorkflowHistoryEvents(new[] { _builder.WorkflowFailureFailedEvent("cause") });
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -190,7 +190,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_workflow_cancel_request_failed_event()
         {
-            _workflow.Setup(w => w.OnWorkflowCancelRequestFailed(It.IsAny<WorkflowCancelRequestFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<WorkflowCancelRequestFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = new WorkflowHistoryEvents(new[] { _builder.WorkflowCancelRequestFailedEvent("cause") });
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -201,7 +201,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_interpret_workflow_cancellation_failed_failed_event()
         {
-            _workflow.Setup(w => w.OnWorkflowCancellationFailed(It.IsAny<WorkflowCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<WorkflowCancellationFailedEvent>())).Returns(_interpretedWorkflowAction);
             var historyEvents = new WorkflowHistoryEvents(new[] { _builder.WorkflowCancellationFailedEvent("cause") });
 
             var workflowDecisions = historyEvents.InterpretNewEventsFor(_workflow.Object);
@@ -224,8 +224,8 @@ namespace Guflow.Tests.Decider
         {
             var timerFailedDecision = new Mock<WorkflowDecision>(false,false);
             var timerFailedAction = WorkflowAction.Custom(timerFailedDecision.Object);
-            _workflow.Setup(w => w.OnTimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
-            _workflow.Setup(w => w.OnTimerStartFailure(It.IsAny<TimerStartFailedEvent>())).Returns(timerFailedAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerStartFailedEvent>())).Returns(timerFailedAction);
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
 
             var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
@@ -236,8 +236,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_filter_out_duplicate_workflow_decisions()
         {
-            _workflow.Setup(w => w.OnTimerFired(It.IsAny<TimerFiredEvent>())).Returns((WorkflowAction)null);
-            _workflow.Setup(w => w.OnTimerStartFailure(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerFiredEvent>())).Returns((WorkflowAction)null);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
 
             var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);
@@ -248,8 +248,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_filter_out_null_workflow_decisions()
         {
-            _workflow.Setup(w => w.OnTimerFired(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
-            _workflow.Setup(w => w.OnTimerStartFailure(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
+            _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
             var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
 
             var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEventsFor(_workflow.Object);

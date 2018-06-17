@@ -32,6 +32,10 @@ namespace Guflow.Decider
         /// </summary>
         public string Input { get; private set; }
 
+        internal override WorkflowAction Interpret(IWorkflow workflow)
+        {
+            return workflow.WorkflowAction(this);
+        }
 
         private void PopulateProperties(long scheduledEventId, IEnumerable<HistoryEvent> eventGraph)
         {

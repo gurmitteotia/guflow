@@ -13,7 +13,7 @@ namespace Guflow.Decider
         }
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return workflow.OnTimerFired(this);
+            return workflow.WorkflowAction(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

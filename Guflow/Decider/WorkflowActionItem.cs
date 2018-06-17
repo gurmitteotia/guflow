@@ -38,12 +38,16 @@ namespace Guflow.Decider
 
         public IFluentWorkflowActionItem AfterTimer(string name)
         {
+            Ensure.NotNullAndEmpty(name, nameof(name));
             AddParent(Identity.Timer(name));
             return this;
         }
 
         public IFluentWorkflowActionItem AfterActivity(string name, string version, string positionalName = "")
         {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+
             AddParent(Identity.New(name, version, positionalName));
             return this;
         }
@@ -53,6 +57,14 @@ namespace Guflow.Decider
             var description = ActivityDescription.FindOn<TActivity>();
             return AfterActivity(description.Name, description.Version, positionalName);
         }
+
+        public IFluentWorkflowActionItem AfterLambda(string name, string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+
+            throw new NotImplementedException();
+        }
+
         public override IEnumerable<WorkflowItemEvent> AllEvents => Enumerable.Empty<WorkflowItemEvent>();
     }
 }
