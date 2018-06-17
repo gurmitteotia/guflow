@@ -27,6 +27,7 @@ namespace Guflow.Tests.Decider
             Assert.That(_event.Cause, Is.EqualTo("reason"));
             Assert.That(_event.Message, Is.EqualTo("message"));
             Assert.That(_event.Timeout, Is.EqualTo(TimeSpan.FromSeconds(10)));
+            Assert.IsFalse(_event.IsActive);
         }
 
         [Test]

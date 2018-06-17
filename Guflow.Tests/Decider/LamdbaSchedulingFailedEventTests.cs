@@ -23,6 +23,7 @@ namespace Guflow.Tests.Decider
         public void Populate_properties_from_failed_history_event()
         {
             Assert.That(_event.Cause, Is.EqualTo("reason"));
+            Assert.IsFalse(_event.IsActive);
         }
 
 

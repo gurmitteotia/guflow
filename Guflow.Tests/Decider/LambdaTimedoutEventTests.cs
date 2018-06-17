@@ -25,6 +25,7 @@ namespace Guflow.Tests.Decider
         {
             Assert.That(_event.Input, Is.EqualTo("input"));
             Assert.That(_event.TimedoutType, Is.EqualTo("reason"));
+            Assert.IsFalse(_event.IsActive);
         }
 
         [Test]

@@ -18,15 +18,16 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new HistoryEventsBuilder();
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
+            _event = new LamdbaCompletedEvent(eventGraph.First(), eventGraph);
+
         }
         [Test]
         public void Properties_are_populated_from_history_event()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
-            _event = new LamdbaCompletedEvent(eventGraph.First(), eventGraph);
-
             Assert.That(_event.Result, Is.EqualTo("result"));
             Assert.That(_event.Input, Is.EqualTo("input"));
+            Assert.IsFalse(_event.IsActive);
         }
 
         [Test]
@@ -39,8 +40,6 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Schedule_children()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
-            _event = new LamdbaCompletedEvent(eventGraph.First(), eventGraph);
             var decisions = _event.Interpret(new WorkflowWithLambda()).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name"), TimeSpan.Zero) }));
@@ -49,8 +48,6 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_schedule_custom_action()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
-            _event = new LamdbaCompletedEvent(eventGraph.First(), eventGraph);
             var decisions = _event.Interpret(new WorkflowWithCustomAction(WorkflowAction.CompleteWorkflow("result"))).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result")}));

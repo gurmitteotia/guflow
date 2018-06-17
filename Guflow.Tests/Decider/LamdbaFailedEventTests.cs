@@ -11,30 +11,29 @@ namespace Guflow.Tests.Decider
     public class LamdbaFailedEventTests
     {
         private HistoryEventsBuilder _builder;
+        private LambdaFailedEvent _event;
 
         [SetUp]
         public void Setup()
         {
             _builder = new HistoryEventsBuilder();
+            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "details", "cont");
+            _event = new LambdaFailedEvent(eventGraph.First(), eventGraph);
         }
 
         [Test]
         public void Populate_properties_from_failed_history_event()
         {
-            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "details", "cont");
-            var @event = new LambdaFailedEvent(eventGraph.First(), eventGraph);
-
-            Assert.That(@event.Input, Is.EqualTo("input"));
-            Assert.That(@event.Reason, Is.EqualTo("reason"));
-            Assert.That(@event.Details, Is.EqualTo("details"));
+            Assert.That(_event.Input, Is.EqualTo("input"));
+            Assert.That(_event.Reason, Is.EqualTo("reason"));
+            Assert.That(_event.Details, Is.EqualTo("details"));
+            Assert.IsFalse(_event.IsActive);
         }
 
         [Test]
         public void By_default_fails_the_workflow()
         {
-            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "details", "cont");
-            var @event = new LambdaFailedEvent(eventGraph.First(), eventGraph);
-            var decision = @event.Interpret(new WorkflowWithLambda()).Decisions();
+            var decision = _event.Interpret(new WorkflowWithLambda()).Decisions();
 
             Assert.That(decision, Is.EqualTo(new[]{new FailWorkflowDecision("reason", "details")}));
         }
@@ -42,16 +41,14 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_return_custom_action()
         {
-            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "details", "cont");
-            var @event = new LambdaFailedEvent(eventGraph.First(), eventGraph);
             var customAction = WorkflowAction.CompleteWorkflow("result");
-            var workflowAction = @event.Interpret(new WorkflowWithCustomAction(customAction));
+            var workflowAction = _event.Interpret(new WorkflowWithCustomAction(customAction));
 
             Assert.That(workflowAction, Is.EqualTo(customAction));
         }
 
         [Test]
-        public void Throws_exception_when_lamdba_is_found_for_failed_event()
+        public void Throws_exception_when_lamdba_is_not_found_for_failed_event()
         {
             var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("differnt_name"), "input", "reason", "details", "cont");
             var @event = new LambdaFailedEvent(eventGraph.First(), eventGraph);
