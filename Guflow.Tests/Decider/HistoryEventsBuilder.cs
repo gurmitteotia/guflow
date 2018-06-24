@@ -671,7 +671,7 @@ namespace Guflow.Tests.Decider
             return result;
         }
 
-        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(Identity identity, object input, object result, string control, TimeSpan? startToClose)
+        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(Identity identity, object input, object result, string control, TimeSpan? startToClose = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -820,7 +820,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LamdbaStartFailedEventGraph(Identity identity, string input, string cause, string message, string control, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaStartFailedEventGraph(Identity identity, string input, string cause, string message, string control, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.LambdaStartFailedIds(ref _currentEventId);

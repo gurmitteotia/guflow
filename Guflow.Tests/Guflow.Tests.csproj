@@ -89,11 +89,11 @@
     <Compile Include="Decider\LambdaCompletedEventTests.cs" />
     <Compile Include="Decider\LambdaStartFailedEventTests.cs" />
     <Compile Include="Decider\LambdaTimedoutEventTests.cs" />
-    <Compile Include="Decider\LamdbaFailedEventTests.cs" />
-    <Compile Include="Decider\LamdbaItemTests.cs" />
-    <Compile Include="Decider\LamdbaScheduledEventTests.cs" />
-    <Compile Include="Decider\LamdbaSchedulingFailedEventTests.cs" />
-    <Compile Include="Decider\LamdbaStartedEventTests.cs" />
+    <Compile Include="Decider\LambdaFailedEventTests.cs" />
+    <Compile Include="Decider\LambdaItemTests.cs" />
+    <Compile Include="Decider\LambdaScheduledEventTests.cs" />
+    <Compile Include="Decider\LambdaSchedulingFailedEventTests.cs" />
+    <Compile Include="Decider\LambdaStartedEventTests.cs" />
     <Compile Include="Decider\RestartWorkflowActionTests.cs" />
     <Compile Include="Decider\RestartWorkflowDecisionTests.cs" />
     <Compile Include="Decider\ScheduleLambdaDecisionTests.cs" />

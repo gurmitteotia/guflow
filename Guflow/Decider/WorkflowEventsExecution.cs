@@ -21,7 +21,7 @@ namespace Guflow.Decider
             _workflow.BeforeExecution();
             try
             {
-                var workflowDecisions = _workflowHistoryEvents.InterpretNewEventsFor(_workflow).ToArray();
+                var workflowDecisions = _workflowHistoryEvents.InterpretNewEvents(_workflow).ToArray();
                 return FilterOutIncompatibleDecisions(workflowDecisions).Where(d => d != WorkflowDecision.Empty);
             }
             finally

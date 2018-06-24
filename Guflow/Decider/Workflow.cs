@@ -144,7 +144,7 @@ namespace Guflow.Decider
             return Handle(EventName.CancellationFailed, workflowCancellationFailedEvent);
         }
 
-        WorkflowAction IWorkflow.WorkflowAction(LamdbaCompletedEvent @event)
+        WorkflowAction IWorkflow.WorkflowAction(LambdaCompletedEvent @event)
         {
             var lambda = _allWorkflowItems.LambdaItem(@event);
             return lambda.CompletedWorkflowAction(@event);

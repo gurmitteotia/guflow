@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Guflow.Worker;
 
 namespace Guflow.Decider
@@ -10,7 +11,7 @@ namespace Guflow.Decider
     {
         private Func<ILambdaItem, object> _input;
         private Func<ILambdaItem, TimeSpan?> _timeout;
-        private Func<LamdbaCompletedEvent, WorkflowAction> _completedAction;
+        private Func<LambdaCompletedEvent, WorkflowAction> _completedAction;
         private Func<LambdaFailedEvent, WorkflowAction> _failedAction;
         private Func<LambdaTimedoutEvent, WorkflowAction> _timedoutAction;
         private Func<LambdaSchedulingFailedEvent, WorkflowAction> _schedulingFailedAction;
@@ -31,11 +32,29 @@ namespace Guflow.Decider
 
         public string PositionalName => Identity.PositionalName;
 
-        public override WorkflowItemEvent LastEvent { get; }
-        public override IEnumerable<WorkflowItemEvent> AllEvents { get; }
+        public override WorkflowItemEvent LastEvent
+        {
+            get
+            {
+                var lambdaEvent = WorkflowHistoryEvents.LastLambdaEvent(this);
+                var timerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer);
+                if (lambdaEvent > timerEvent) return lambdaEvent;
+                return timerEvent;
+            }
+        }
+
+        public override IEnumerable<WorkflowItemEvent> AllEvents
+        {
+            get
+            {
+                var lambdaEvents = WorkflowHistoryEvents.AllLambdaEvents(this);
+                var timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer);
+                return lambdaEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
+            }
+        }
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
-            return new []{new ScheduleLambdaDecision(Identity, _input(this), _timeout(this))};
+            return new[] { new ScheduleLambdaDecision(Identity, _input(this), _timeout(this)) };
         }
 
         public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout)
@@ -84,7 +103,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        public IFluentLambdaItem OnCompletion(Func<LamdbaCompletedEvent, WorkflowAction> completedAction)
+        public IFluentLambdaItem OnCompletion(Func<LambdaCompletedEvent, WorkflowAction> completedAction)
         {
             Ensure.NotNull(completedAction, nameof(completedAction));
             _completedAction = completedAction;
@@ -119,7 +138,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        public WorkflowAction CompletedWorkflowAction(LamdbaCompletedEvent @event)
+        public WorkflowAction CompletedWorkflowAction(LambdaCompletedEvent @event)
         {
             return _completedAction(@event);
         }

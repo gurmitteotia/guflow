@@ -94,7 +94,7 @@
     <Compile Include="Decider\LambdaSchedulingFailedEvent.cs" />
     <Compile Include="Decider\LambdaStartedEvent.cs" />
     <Compile Include="Decider\LambdaStartFailedEvent.cs" />
-    <Compile Include="Decider\LamdbaCompletedEvent.cs" />
+    <Compile Include="Decider\LambdaCompletedEvent.cs" />
     <Compile Include="Decider\LambdaTimedoutEvent.cs" />
     <Compile Include="Decider\ScheduleLambdaDecision.cs" />
     <Compile Include="Decider\SignalException.cs" />

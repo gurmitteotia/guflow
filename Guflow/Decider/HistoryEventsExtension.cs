@@ -136,6 +136,36 @@ namespace Guflow.Decider
             return historyEvent.EventType == EventType.LambdaFunctionScheduled &&
                    historyEvent.EventId == scheduledEventId;
         }
+
+        private static bool IsLambdaCompletedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.LambdaFunctionCompleted;
+        }
+        private static bool IsLambdaFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.LambdaFunctionFailed;
+        }
+        private static bool IsLambdaTimedoutEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.LambdaFunctionTimedOut;
+        }
+        private static bool IsLambdaStartedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.LambdaFunctionStarted;
+        }
+
+        private static bool IsLambdaStartFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.StartLambdaFunctionFailed;
+        }
+        private static bool IsLambdaScheduledEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.LambdaFunctionScheduled;
+        }
+        private static bool IsLambdaSchedulingFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ScheduleLambdaFunctionFailed;
+        }
         public static WorkflowEvent CreateInterpretableEvent(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             if (historyEvent.IsActivityCompletedEvent())
@@ -210,6 +240,26 @@ namespace Guflow.Decider
                 return new TimerCancelledEvent(historyEvent, allHistoryEvents);
             if (historyEvent.IsTimerCancellationFailedEvent())
                 return new TimerCancellationFailedEvent(historyEvent);
+            return null;
+        }
+
+        public static WorkflowItemEvent LambdaEvent(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allEvents)
+        {
+            if(historyEvent.IsLambdaCompletedEvent())
+                return new LambdaCompletedEvent(historyEvent, allEvents);
+            if(historyEvent.IsLambdaFailedEvent())
+                return new LambdaFailedEvent(historyEvent, allEvents);
+            if (historyEvent.IsLambdaTimedoutEvent())
+                return new LambdaTimedoutEvent(historyEvent, allEvents);
+            if (historyEvent.IsLambdaStartedEvent())
+                return new LambdaStartedEvent(historyEvent, allEvents);
+            if (historyEvent.IsLambdaStartFailedEvent())
+                return new LambdaStartFailedEvent(historyEvent, allEvents);
+            if (historyEvent.IsLambdaScheduledEvent())
+                return new LambdaScheduledEvent(historyEvent);
+            if (historyEvent.IsLambdaSchedulingFailedEvent())
+                return new LambdaSchedulingFailedEvent(historyEvent);
+
             return null;
         }
 

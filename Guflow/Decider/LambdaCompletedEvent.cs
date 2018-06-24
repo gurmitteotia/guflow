@@ -8,9 +8,9 @@ namespace Guflow.Decider
     /// <summary>
     /// Reported when scheduled lambda function is successfully completed.
     /// </summary>
-    public class LamdbaCompletedEvent : LambdaEvent
+    public class LambdaCompletedEvent : LambdaEvent
     {
-        internal LamdbaCompletedEvent(HistoryEvent completedEvent, IEnumerable<HistoryEvent> eventGraph) : base(completedEvent.EventId)
+        internal LambdaCompletedEvent(HistoryEvent completedEvent, IEnumerable<HistoryEvent> eventGraph) : base(completedEvent.EventId)
         {
             var attributes = completedEvent.LambdaFunctionCompletedEventAttributes;
             Result = attributes.Result;

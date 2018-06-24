@@ -17,7 +17,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new HistoryEventsBuilder();
-            var eventGraph = _builder.LamdbaStartFailedEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "message", "control", TimeSpan.FromSeconds(10));
+            var eventGraph = _builder.LambdaStartFailedEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "message", "control", TimeSpan.FromSeconds(10));
             _event = new LambdaStartFailedEvent(eventGraph.First(), eventGraph);
         }
 

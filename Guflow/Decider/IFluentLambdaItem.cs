@@ -28,7 +28,7 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="completedAction">Functtor, which will return the workflow action.</param>
         /// <returns></returns>
-        IFluentLambdaItem OnCompletion(Func<LamdbaCompletedEvent, WorkflowAction> completedAction);
+        IFluentLambdaItem OnCompletion(Func<LambdaCompletedEvent, WorkflowAction> completedAction);
 
         /// <summary>
         /// Provides the workflow action for lambda failed event. By default workflow is failed.

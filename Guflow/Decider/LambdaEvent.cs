@@ -2,12 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
     public abstract class LambdaEvent : WorkflowItemEvent
     {
+        private long _scheduledEventId;
         protected LambdaEvent(long eventId) : base(eventId)
         {
         }
@@ -23,6 +25,7 @@ namespace Guflow.Decider
 
         protected void PopulateProperties(long scheduledEventId, IEnumerable<HistoryEvent> eventGraph)
         {
+            _scheduledEventId = scheduledEventId;
             foreach (var historyEvent in eventGraph)
             {
                 if (historyEvent.IsLambdaScheduledEvent(scheduledEventId))
@@ -37,6 +40,22 @@ namespace Guflow.Decider
             }
             if (AwsIdentity == null)
                 throw new IncompleteEventGraphException($"Can not find lambda scheduled event for id {scheduledEventId}.");
+        }
+
+        internal override bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)
+        {
+            var lambdaEvents = workflowItemEvents.OfType<LambdaEvent>();
+            foreach (var lambdaEvent in lambdaEvents)
+            {
+                if (IsInChain(lambdaEvent))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool IsInChain(LambdaEvent other)
+        {
+            return _scheduledEventId == other._scheduledEventId;
         }
     }
 }

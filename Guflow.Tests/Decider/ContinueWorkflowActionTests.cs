@@ -51,7 +51,7 @@ namespace Guflow.Tests.Decider
             var workflow = new SingleActivityWorkflow();
             var workflowHistoryEvents = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
-            var decisions = workflowHistoryEvents.InterpretNewEventsFor(workflow);
+            var decisions = workflowHistoryEvents.InterpretNewEvents(workflow);
 
             Assert.That(decisions,Is.EqualTo(new []{new CompleteWorkflowDecision("Workflow is completed.",true)}));
         }
@@ -179,7 +179,7 @@ namespace Guflow.Tests.Decider
             var workflow = new WorkflowWithCustomContinue();
             var activityFailedEvent = CreateFailedActivityEventGraph(_activityName, _activityVersion, _positionalName);
 
-            var decisions = activityFailedEvent.InterpretNewEventsFor(workflow);
+            var decisions = activityFailedEvent.InterpretNewEvents(workflow);
 
             Assert.That(decisions,Is.EquivalentTo(WorkflowAction.ContinueWorkflow(new ActivityItem(Identity.New(_activityName,_activityVersion,_positionalName),workflow)).Decisions()));
         }

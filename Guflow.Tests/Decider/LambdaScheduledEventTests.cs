@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
-    public class LamdbaScheduledEventTests
+    public class LambdaScheduledEventTests
     {
         private HistoryEventsBuilder _builder;
         private LambdaScheduledEvent _event;
