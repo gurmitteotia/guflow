@@ -87,6 +87,7 @@
     <Compile Include="Decider\HistoryEventsBuilder.cs" />
     <Compile Include="Decider\JumpWorkflowActionTests.cs" />
     <Compile Include="Decider\LambdaCompletedEventTests.cs" />
+    <Compile Include="Decider\LambdaScheduleTests.cs" />
     <Compile Include="Decider\LambdaStartFailedEventTests.cs" />
     <Compile Include="Decider\LambdaTimedoutEventTests.cs" />
     <Compile Include="Decider\LambdaFailedEventTests.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="Worker\ActivityHostTests.cs" />
     <Compile Include="Worker\TestHeartbeatSwfApi.cs" />
     <Compile Include="Worker\WorkerTaskTests.cs" />
+    <Compile Include="WorkflowTestExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

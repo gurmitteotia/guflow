@@ -16,6 +16,7 @@ namespace Guflow.Tests.Decider
         private HistoryEventsBuilder _builder;
         private Mock<IWorkflow> _workflow;
         private Identity _lambdaIdentity;
+        private const string LambdaName = "lambda";
         [SetUp]
         public void Setup()
         {
@@ -23,7 +24,7 @@ namespace Guflow.Tests.Decider
             _workflow = new Mock<IWorkflow>();
             _workflow.SetupGet(w => w.WorkflowHistoryEvents)
                 .Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph()));
-            _lambdaIdentity = Identity.Lambda("name");
+            _lambdaIdentity = Identity.Lambda(LambdaName);
         }
         [Test]
         public void Schedule_lamdba_function()
@@ -74,6 +75,10 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => lambdaItem.OnTimedout(null));
             Assert.Throws<ArgumentNullException>(() => lambdaItem.OnSchedulingFailed(null));
             Assert.Throws<ArgumentNullException>(() => lambdaItem.OnStartFailed(null));
+            Assert.Throws<ArgumentException>(() => lambdaItem.AfterActivity(null, "1.0"));
+            Assert.Throws<ArgumentException>(() => lambdaItem.AfterActivity("name", null));
+            Assert.Throws<ArgumentException>(() => lambdaItem.AfterTimer(null));
+            Assert.Throws<ArgumentException>(() => lambdaItem.AfterLambda(null));
         }
 
         [Test]
@@ -270,7 +275,6 @@ namespace Guflow.Tests.Decider
 
             Assert.IsTrue(ReferenceEquals(lamdbaItem.LastEvent, lamdbaItem.LastEvent));
         }
-
         private LambdaItem CreateLambdaItem(IEnumerable<HistoryEvent> allEvents)
         {
             _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(allEvents));

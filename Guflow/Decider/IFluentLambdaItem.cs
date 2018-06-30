@@ -7,7 +7,7 @@ namespace Guflow.Decider
     /// <summary>
     /// Fluent API to schedule the Lambda function in workflow.
     /// </summary>
-    public interface IFluentLambdaItem : IFluentWorkflowItem<IFluentActivityItem>
+    public interface IFluentLambdaItem : IFluentWorkflowItem<IFluentLambdaItem>
     {
         /// <summary>
         /// Provide input for lamdba lambda function. Complex input type are serialized to JSON while for primitive types their string represenation is sent.

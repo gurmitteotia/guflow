@@ -68,22 +68,25 @@ namespace Guflow.Decider
             return WorkflowDecision.Empty;
         }
 
-        public IFluentActivityItem AfterTimer(string name)
+        public IFluentLambdaItem AfterTimer(string name)
         {
             throw new NotImplementedException();
         }
 
-        public IFluentActivityItem AfterActivity(string name, string version, string positionalName = "")
+        public IFluentLambdaItem AfterActivity(string name, string version, string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name, version, positionalName));
+            return this;
+        }
+
+        public IFluentLambdaItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
             throw new NotImplementedException();
         }
 
-        public IFluentActivityItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
-        {
-            throw new NotImplementedException();
-        }
-
-        public IFluentActivityItem AfterLambda(string name, string positionalName = "")
+        public IFluentLambdaItem AfterLambda(string name, string positionalName = "")
         {
             throw new NotImplementedException();
         }
