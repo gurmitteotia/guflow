@@ -202,6 +202,8 @@ namespace Guflow.Decider
                 return new WorkflowCancelRequestFailedEvent(historyEvent);
             if (historyEvent.IsWorkflowCancellationFailedEvent())
                 return new WorkflowCancellationFailedEvent(historyEvent);
+            if (historyEvent.IsLambdaCompletedEvent())
+                return new LambdaCompletedEvent(historyEvent, allHistoryEvents);
             return null;
         }
 

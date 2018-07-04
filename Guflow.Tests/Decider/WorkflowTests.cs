@@ -71,6 +71,7 @@ namespace Guflow.Tests.Decider
             var workflow = new StubWorkflow();
             _workflowEvents.Setup(w => w.InterpretNewEvents(workflow)).Returns(new[] { new CompleteWorkflowDecision("complete", true) });
 
+            //var workflowDecisions = workflow.NewExecutionFor(_workflowEvents.Object).Execute();
             var workflowDecisions = workflow.NewExecutionFor(_workflowEvents.Object).Execute();
 
             Assert.That(workflowDecisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("complete") }));

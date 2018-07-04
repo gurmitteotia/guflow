@@ -70,7 +70,9 @@ namespace Guflow.Decider
 
         public IFluentLambdaItem AfterTimer(string name)
         {
-            throw new NotImplementedException();
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            AddParent(Identity.Timer(name));
+            return this;
         }
 
         public IFluentLambdaItem AfterActivity(string name, string version, string positionalName = "")
@@ -83,12 +85,16 @@ namespace Guflow.Decider
 
         public IFluentLambdaItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
-            throw new NotImplementedException();
+            var description = ActivityDescription.FindOn<TActivity>();
+            AddParent(Identity.New(description.Name, description.Version, positionalName));
+            return this;
         }
 
         public IFluentLambdaItem AfterLambda(string name, string positionalName = "")
         {
-            throw new NotImplementedException();
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            AddParent(Identity.Lambda(name, positionalName));
+            return this;
         }
 
         public IFluentLambdaItem WithInput(Func<ILambdaItem, object> input)
@@ -101,7 +107,6 @@ namespace Guflow.Decider
         public IFluentLambdaItem WithTimeout(Func<ILambdaItem, TimeSpan?> timout)
         {
             Ensure.NotNull(timout, nameof(timout));
-
             _timeout = timout;
             return this;
         }

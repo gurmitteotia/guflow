@@ -27,16 +27,6 @@ namespace Guflow.Tests.Decider
             _lambdaIdentity = Identity.Lambda(LambdaName);
         }
         [Test]
-        public void Schedule_lamdba_function()
-        {
-            var lambdaItem = new LambdaItem(_lambdaIdentity, _workflow.Object);
-
-            var decisions = lambdaItem.GetScheduleDecisions();
-
-            Assert.That(decisions, Is.EqualTo(new []{new ScheduleLambdaDecision(_lambdaIdentity, "does not matter")}));
-        }
-
-        [Test]
         public void By_default_lambda_function_is_scheduled_with_workflow_input()
         {
             var workflow = new Mock<IWorkflow>();
