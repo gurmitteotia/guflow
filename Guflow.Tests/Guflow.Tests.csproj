@@ -82,7 +82,7 @@
     <Compile Include="Decider\Cancel\CancelRequestTests.cs" />
     <Compile Include="Decider\Cancel\CancelRequestWorkflowDecisionTests.cs" />
     <Compile Include="Decider\Timer\CancelTimerDecisionTests.cs" />
-    <Compile Include="Decider\Cancel\CancelWorkflowActionTests.cs" />
+    <Compile Include="Decider\Action\CancelWorkflowActionTests.cs" />
     <Compile Include="Decider\Cancel\CancelWorkflowDecisionTests.cs" />
     <Compile Include="Decider\DeflowAlgorithmTests.cs" />
     <Compile Include="Decider\HistoryEventsBuilder.cs" />

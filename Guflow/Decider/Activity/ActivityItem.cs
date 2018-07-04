@@ -90,7 +90,7 @@ namespace Guflow.Decider
 
         public IFluentActivityItem AfterLambda(string name, string positionalName = "")
         {
-            Ensure.NotNull(name, nameof(name));
+            Ensure.NotNullAndEmpty(name, nameof(name));
             AddParent(Identity.Lambda(name, positionalName));
             return this;
         }
