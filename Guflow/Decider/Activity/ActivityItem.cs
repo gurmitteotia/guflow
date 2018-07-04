@@ -90,7 +90,9 @@ namespace Guflow.Decider
 
         public IFluentActivityItem AfterLambda(string name, string positionalName = "")
         {
-            throw new NotImplementedException();
+            Ensure.NotNull(name, nameof(name));
+            AddParent(Identity.Lambda(name, positionalName));
+            return this;
         }
 
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> action)

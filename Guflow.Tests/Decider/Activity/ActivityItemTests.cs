@@ -167,46 +167,6 @@ namespace Guflow.Tests.Decider
             Assert.That(decision.Timeouts.StartToCloseTimeout, Is.EqualTo(TimeSpan.FromSeconds(5)));
         }
 
-        [Test]
-        public void Parent_activities_test()
-        {
-            var workflowWithParentActivity = new WorkflowWithParentActivity("parent1","1.0","pos");
-            var childActivity = new ActivityItem(Identity.New("child","1.0"),workflowWithParentActivity);
-            childActivity.AfterActivity("parent1", "1.0","pos");
-
-            var parentActivities = childActivity.ParentActivities;
-            
-            Assert.That(parentActivities,Is.EquivalentTo(new []{new ActivityItem(Identity.New("parent1","1.0","pos"),null)}));
-            Assert.That(parentActivities.First().Name, Is.EqualTo("parent1"));
-            Assert.That(parentActivities.First().Version, Is.EqualTo("1.0"));
-            Assert.That(parentActivities.First().PositionalName, Is.EqualTo("pos"));
-        }
-
-        [Test]
-        public void Parent_timers_test()
-        {
-            var workflowWithParentActivity = new WorkflowWithParentTimer("parent1");
-            var childActivity = new ActivityItem(Identity.New("child", "1.0"), workflowWithParentActivity);
-            childActivity.AfterTimer("parent1");
-
-            var parentActivities = childActivity.ParentTimers;
-
-            Assert.That(parentActivities, Is.EquivalentTo(new[] { TimerItem.New(Identity.Timer("parent1"), null),  }));
-            Assert.That(parentActivities.First().Name, Is.EqualTo("parent1"));
-        }
-
-        [Test]
-        public void Last_event_can_be_activity_started_event()
-        {
-            var eventGraph = _builder.ActivityStartedGraph(_activityIdenity, "id");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(workflowHistoryEvents);
-            var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
-
-            var latestEvent = activityItem.LastEvent;
-
-            Assert.That(latestEvent,Is.EqualTo(new ActivityStartedEvent(eventGraph.First(),eventGraph)));
-        }
 
         [Test]
         public void Last_event_is_cached()
@@ -220,50 +180,6 @@ namespace Guflow.Tests.Decider
             var latestEventCached = activityItem.LastEvent;
 
             Assert.IsTrue(ReferenceEquals(latestEvent, latestEventCached));
-        }
-
-        [Test]
-        public void Last_event_can_be_activity_scheduled_event()
-        {
-            var eventGraph = _builder.ActivityScheduledGraph(_activityIdenity);
-            var activityItem = CreateActivityItemWith(eventGraph);
-
-            var latestEvent = activityItem.LastEvent;
-
-            Assert.That(latestEvent, Is.EqualTo(new ActivityScheduledEvent(eventGraph.First(),eventGraph)));
-        }
-
-        [Test]
-        public void Last_event_can_be_activity_cancel_requested_event()
-        {
-            var eventGraph = _builder.ActivityCancelRequestedGraph(_activityIdenity, "workerid");
-            var activityItem = CreateActivityItemWith(eventGraph);
-
-            var latestEvent = activityItem.LastEvent;
-
-            Assert.That(latestEvent, Is.EqualTo(new ActivityCancelRequestedEvent(eventGraph.First())));
-        }
-
-        [Test]
-        public void Last_event_can_be_activity_cancellation_failed_event()
-        {
-            var eventGraph = _builder.ActivityCancellationFailedGraph(_activityIdenity, "workerid");
-            var activityItem = CreateActivityItemWith(eventGraph);
-            
-            var latestEvent = activityItem.LastEvent;
-
-            Assert.That(latestEvent, Is.EqualTo(new ActivityCancellationFailedEvent(eventGraph.First())) );
-        }
-
-        [Test]
-        public void Last_event_can_be_activity_scheduling_failed_event()
-        {
-            var eventGraph = _builder.ActivitySchedulingFailedGraph(_activityIdenity, "workerid");
-            var activityItem = CreateActivityItemWith(eventGraph);
-
-            var latestEvent = activityItem.LastEvent;
-
-            Assert.That(latestEvent,Is.EqualTo(new ActivitySchedulingFailedEvent(eventGraph.First())));
         }
 
         [Test]
@@ -573,6 +489,7 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => activityItem.AfterActivity(null, "1.0"));
             Assert.Throws<ArgumentException>(() => activityItem.AfterActivity("34", null));
             Assert.Throws<ArgumentException>(() => activityItem.AfterTimer(null));
+            Assert.Throws<ArgumentException>(() => activityItem.AfterLambda(null));
         }
 
         private ScheduleActivityDecision ScheduleDecision(ActivityItem activityItem)
