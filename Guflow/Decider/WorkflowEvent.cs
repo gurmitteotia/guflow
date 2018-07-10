@@ -35,12 +35,11 @@ namespace Guflow.Decider
 
         public override string ToString()
         {
-            return string.Format("{0} with event id {1}", GetType().Name, _eventId);
+            return $"{GetType().Name} with event id {_eventId}";
         }
         private bool Equals(WorkflowEvent other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            return _eventId == other._eventId;
+            return _eventId == other?._eventId;
         }
 
         public override bool Equals(object other)

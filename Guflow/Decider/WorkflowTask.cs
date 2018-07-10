@@ -11,7 +11,7 @@ namespace Guflow.Decider
     internal class WorkflowTask
     {
         private readonly DecisionTask _decisionTask;
-        private readonly Func<WorkflowHost,CancellationToken,Task> _actionToExecute;
+        private readonly Func<WorkflowHost, CancellationToken, Task> _actionToExecute;
         private IErrorHandler _executionErrorHandler = ErrorHandler.NotHandled;
         private static readonly WorkflowDecision[] EmptyDecisions = new WorkflowDecision[0];
 
@@ -23,7 +23,7 @@ namespace Guflow.Decider
 
         private WorkflowTask()
         {
-            _actionToExecute =  async  (w,c) => { await Task.Yield(); };
+            _actionToExecute = async (w, c) => { await Task.Yield(); };
         }
 
         public static readonly WorkflowTask Empty = new WorkflowTask();
@@ -45,25 +45,23 @@ namespace Guflow.Decider
         {
             var workflowType = _decisionTask.WorkflowType;
             var workflow = workflowHost.FindBy(workflowType.Name, workflowType.Version);
-            var historyEvents = new WorkflowHistoryEvents(_decisionTask.Events, 
-                                _decisionTask.PreviousStartedEventId +1, _decisionTask.StartedEventId);
-            using (var execution = workflow.NewExecutionFor(historyEvents))
-            {
-                var decisions = Perform(execution);
-                await workflowHost.SendDecisionsAsync(_decisionTask.TaskToken, decisions);
-                RaisePostExecutionEvents(decisions, workflow);
-            }
+            var historyEvents = new WorkflowHistoryEvents(_decisionTask.Events,
+                                _decisionTask.PreviousStartedEventId + 1, _decisionTask.StartedEventId);
+
+            var decisions = Perform(() => workflow.Decisions(historyEvents));
+            await workflowHost.SendDecisionsAsync(_decisionTask.TaskToken, decisions);
+            RaisePostExecutionEvents(decisions, workflow);
         }
-        private WorkflowDecision [] Perform(WorkflowEventsExecution execution)
+        private WorkflowDecision[] Perform(Func<IEnumerable<WorkflowDecision>> decisions)
         {
             var retryableAction = new RetryableFunc(_executionErrorHandler);
-            return retryableAction.Execute(()=>execution.Execute().ToArray(), EmptyDecisions);
+            return retryableAction.Execute(() => decisions().ToArray(), EmptyDecisions);
         }
         private void RaisePostExecutionEvents(IEnumerable<WorkflowDecision> workflowDecisions, Workflow workflow)
         {
             var postExecutionEvents = new PostExecutionEvents(workflow, _decisionTask.WorkflowExecution.WorkflowId, _decisionTask.WorkflowExecution.RunId);
             var workflowClosingDecisions = workflowDecisions.OfType<WorkflowClosingDecision>().ToList();
-            workflowClosingDecisions.ForEach(d=>d.Raise(postExecutionEvents));
+            workflowClosingDecisions.ForEach(d => d.Raise(postExecutionEvents));
         }
     }
 }

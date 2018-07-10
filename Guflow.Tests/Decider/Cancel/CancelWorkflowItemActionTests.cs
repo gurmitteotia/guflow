@@ -80,10 +80,9 @@ namespace Guflow.Tests.Decider
         public void Cancel_request_for_activity_can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnCancelActivityAction();
-            workflow.NewExecutionFor(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
-            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var events = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
-            var decisions = completedActivityEvent.Interpret(workflow).Decisions();
+            var decisions = workflow.Decisions(events);
 
             Assert.That(decisions, Is.EqualTo(new []{new CancelActivityDecision(Identity.New("ActivityToCancel", "1.2"))}));
         }
@@ -92,9 +91,9 @@ namespace Guflow.Tests.Decider
         public void Cancel_request_for_timer_can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnCancelledTimerAction();
-            var completedActivityEvent = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
+            var events = CreateCompletedActivityEvent(_activityName, _activityVersion, _positionalName);
 
-            var decisions = completedActivityEvent.Interpret(workflow).Decisions();
+            var decisions = workflow.Decisions(events);
 
             Assert.That(decisions, Is.EqualTo(new []{new CancelTimerDecision(Identity.Timer("SomeTimer"))}));
         }
@@ -103,18 +102,17 @@ namespace Guflow.Tests.Decider
         public void Cancel_request_for_multiple_items_can_be_returned_as_workflow_action()
         {
             var workflow = new WorkflowtoReturnCancelActionForMultipleItems();
-            workflow.NewExecutionFor(new WorkflowHistoryEvents(new[] {new HistoryEvent()}));
-            var cancelRequestEvent = new WorkflowCancellationRequestedEvent(_builder.WorkflowCancellationRequestedEvent("cause"));
+            var historyEvents = new WorkflowHistoryEvents(new[]{_builder.WorkflowCancellationRequestedEvent("cause")});
 
-            var workflowAction = cancelRequestEvent.Interpret(workflow).Decisions();
+            var decisions = workflow.Decisions(historyEvents);
 
-            Assert.That(workflowAction, Is.EquivalentTo(new WorkflowDecision[] { new CancelActivityDecision(Identity.New(_activityName, _activityVersion)), new CancelTimerDecision(Identity.Timer(_timerName)) }));
+            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[] { new CancelActivityDecision(Identity.New(_activityName, _activityVersion)), new CancelTimerDecision(Identity.Timer(_timerName)) }));
         }
 
-        private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
+        private IWorkflowHistoryEvents CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
             var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
-            return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
+            return new WorkflowHistoryEvents(allHistoryEvents);
         }
         private class WorkflowToReturnCancelActivityAction : Workflow
         {

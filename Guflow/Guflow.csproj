@@ -98,6 +98,7 @@
     <Compile Include="Decider\Lambda\LambdaTimedoutEvent.cs" />
     <Compile Include="Decider\Lambda\ScheduleLambdaDecision.cs" />
     <Compile Include="Decider\Signal\SignalException.cs" />
+    <Compile Include="Decider\WorkflowDecisionsExtension.cs" />
     <Compile Include="Decider\WorkflowDescription.cs" />
     <Compile Include="Worker\DescriptionStartegy.cs" />
     <Compile Include="HostFaultEventArgs.cs" />
@@ -205,8 +206,6 @@
     <Compile Include="Decider\NameTooLongException.cs" />
     <Compile Include="Decider\Cancel\WorkflowCancellationRequestedEvent.cs" />
     <Compile Include="Decider\WorkflowClosingDecision.cs" />
-    <Compile Include="Decider\WorkflowDecisionExtension.cs" />
-    <Compile Include="Decider\WorkflowEventsExecution.cs" />
     <Compile Include="Decider\WorkflowFailedEventArgs.cs" />
     <Compile Include="Decider\WorkflowFailureFailedEvent.cs" />
     <Compile Include="Decider\WorkflowItem.cs" />

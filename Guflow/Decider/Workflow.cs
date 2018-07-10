@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Guflow.Properties;
 using Guflow.Worker;
 
@@ -622,10 +623,27 @@ namespace Guflow.Decider
         protected internal void AfterExecution()
         {
         }
-        internal WorkflowEventsExecution NewExecutionFor(IWorkflowHistoryEvents workflowHistoryEvents)
+       
+        internal IEnumerable<WorkflowDecision> Decisions(IWorkflowHistoryEvents historyEvents)
         {
-            _currentWorkflowHistoryEvents = workflowHistoryEvents;
-            return new WorkflowEventsExecution(this, workflowHistoryEvents);
+            var result = new List<WorkflowAction>();
+            try
+            {
+                _currentWorkflowHistoryEvents = historyEvents;
+                BeforeExecution();
+                foreach (var workflowEvent in historyEvents.NewEvents())
+                {
+                    _currentExecutingEvent = workflowEvent;
+                    result.Add(workflowEvent.Interpret(this));
+                }
+                var decisions = result.Where(w => w != null).SelectMany(a => a.Decisions()).Distinct();
+                return decisions.CompatibleDecisions(this).Where(d => d != WorkflowDecision.Empty); ;
+            }
+            finally
+            {   
+                AfterExecution();
+                _currentWorkflowHistoryEvents = null;
+            }
         }
         internal void FinishExecution()
         {

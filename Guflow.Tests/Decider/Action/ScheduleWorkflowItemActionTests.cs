@@ -71,7 +71,7 @@ namespace Guflow.Tests.Decider
             var completed3 = CreateCompletedActivityEventGraph(_activityName, _activityVersion, _positionalName);
             var historyEvents = new WorkflowHistoryEvents(completed3.Concat(completed2.Concat(completed1)), completed3.Last().EventId, completed3.First().EventId);
 
-            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(_activityName, _activityVersion , _positionalName))}));
         }
@@ -87,7 +87,7 @@ namespace Guflow.Tests.Decider
 
             var historyEvents = new WorkflowHistoryEvents(completed4.Concat(completed3.Concat(completed2.Concat(completed1))), completed4.Last().EventId, completed4.First().EventId);
 
-            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("completed") }));
         }
@@ -101,7 +101,7 @@ namespace Guflow.Tests.Decider
 
             var historyEvents = new WorkflowHistoryEvents(completed2.Concat(completed1), completed2.Last().EventId, completed2.First().EventId);
 
-            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.New(_activityName, _activityVersion, _positionalName), TimeSpan.FromSeconds(2), true) }));
         }
@@ -116,7 +116,7 @@ namespace Guflow.Tests.Decider
 
             var historyEvents = new WorkflowHistoryEvents(completed3.Concat(completed2.Concat(completed1)), completed3.Last().EventId, completed3.First().EventId);
 
-            var decisions = workflow.NewExecutionFor(historyEvents).Execute();
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("completed") }));
         }

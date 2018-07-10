@@ -30,7 +30,7 @@ namespace Guflow.Tests.Decider
         public void Activity_can_be_scheduled_after_lambda()
         {
             var eventGraph = LambdaCompletedEventGraph();
-            var decision = new ActivityAfterLambdaWorkflow().Interpret(eventGraph);
+            var decision = new ActivityAfterLambdaWorkflow().Decisions(eventGraph);
 
             Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
         }
@@ -39,7 +39,7 @@ namespace Guflow.Tests.Decider
         public void Activity_can_be_scheduled_after_time()
         {
             var eventGraph = TimerCompletedEventGraph();
-            var decision = new ActivityAfterTimerWorkflow().Interpret(eventGraph);
+            var decision = new ActivityAfterTimerWorkflow().Decisions(eventGraph);
 
             Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
         }
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
         public void Activity_can_be_scheduled_after_activity()
         {
             var eventGraph = ActivityEventGraph();
-            var decision = new ActivityAfterActivityWorkflow().Interpret(eventGraph);
+            var decision = new ActivityAfterActivityWorkflow().Decisions(eventGraph);
 
             Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
         }

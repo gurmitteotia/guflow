@@ -35,7 +35,7 @@ namespace Guflow.Tests.Decider
             var allEvents = addDinnerActivity.Concat(bookHotelActivityCompletedGraph).Concat(bookFlightActivityStartedGraph);
 
             var decisions =
-                new TestWorkflow().Interpret(new WorkflowHistoryEvents(allEvents,addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+                new TestWorkflow().Decisions(new WorkflowHistoryEvents(allEvents,addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.Empty);
 
@@ -49,7 +49,7 @@ namespace Guflow.Tests.Decider
             var allEvents = addDinnerActivity.Concat(bookHotelActivityCompletedGraph);
 
             var decisions =
-                new TestWorkflow().Interpret(new WorkflowHistoryEvents(allEvents,
+                new TestWorkflow().Decisions(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.EqualTo(new[]{new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version))}));
@@ -66,7 +66,7 @@ namespace Guflow.Tests.Decider
             var allEvents = addDinnerActivity.Concat(bookHotelActivityCompletedGraph).Concat(bookFlightActivityStartedGraph);
 
             var decisions =
-                new TestWorkflow().Interpret(new WorkflowHistoryEvents(allEvents,
+                 new TestWorkflow().Decisions(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.Empty);
@@ -87,7 +87,7 @@ namespace Guflow.Tests.Decider
                     .Concat(chooseSeatActivityCompletedGraph);
 
             var decisions =
-                new TestWorkflow().Interpret(new WorkflowHistoryEvents(allEvents,
+                new TestWorkflow().Decisions(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
@@ -106,7 +106,7 @@ namespace Guflow.Tests.Decider
                     .Concat(chooseSeatActivityCompletedGraph);
 
             var decisions =
-                new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchActive().Interpret(new WorkflowHistoryEvents(allEvents,
+                new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchActive().Decisions(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.Empty);
@@ -125,7 +125,7 @@ namespace Guflow.Tests.Decider
                     .Concat(chooseSeatActivityCompletedGraph);
 
             var decisions =
-                new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive().Interpret(new WorkflowHistoryEvents(allEvents,
+                new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive().Decisions(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
@@ -142,7 +142,7 @@ namespace Guflow.Tests.Decider
                     .Concat(bookFlightActivityCompletedGraph);
 
             var decisions =
-                new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchActive().Interpret(new WorkflowHistoryEvents(allEvents,
+                new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchActive().Decisions(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.Empty);
@@ -160,7 +160,7 @@ namespace Guflow.Tests.Decider
                     .Concat(bookFlightActivityCompletedGraph);
 
             var decisions =
-                new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchInactive().Interpret(new WorkflowHistoryEvents(allEvents,
+                new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchInactive().Decisions(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
@@ -182,7 +182,7 @@ namespace Guflow.Tests.Decider
                     .Concat(bookFlightActivityCompletedGraph);
             var workflow = new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive();
 
-            var decisions = workflow.Interpret(new WorkflowHistoryEvents(allEvents,
+            var decisions = workflow.Decisions(new WorkflowHistoryEvents(allEvents,
                     addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
 
             Assert.That(decisions, Is.Empty);
@@ -198,7 +198,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
             
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new []
             {
@@ -217,7 +217,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions =workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -235,7 +235,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -253,7 +253,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -270,7 +270,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -291,7 +291,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -311,7 +311,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -331,7 +331,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -351,7 +351,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -371,7 +371,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -391,7 +391,7 @@ namespace Guflow.Tests.Decider
             var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
             var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -405,7 +405,7 @@ namespace Guflow.Tests.Decider
             var startedEvent = _builder.WorkflowStartedEvent();
             var workflow = new WorkflowWithNotSchedulableStartupActivities();
             var historyEvents = new WorkflowHistoryEvents(new []{startedEvent});
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.Empty);
         }
@@ -416,7 +416,7 @@ namespace Guflow.Tests.Decider
             var startedEvent = _builder.WorkflowStartedEvent();
             var workflow = new WorkflowWithNotSchedulableStartupActivityAndTimer();
             var historyEvents = new WorkflowHistoryEvents(new[] { startedEvent });
-            var decisions = workflow.Interpret(historyEvents);
+            var decisions = workflow.Decisions(historyEvents);
 
             Assert.That(decisions, Is.Empty);
         }
@@ -433,7 +433,7 @@ namespace Guflow.Tests.Decider
                     .Concat(bookHotelActivityCompletedGraph);
 
             var decisions =
-                new WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreAction().Interpret(new WorkflowHistoryEvents(allEvents,
+                new WorkflowWithBranchBecomingInActiveByIgnoreAction().Decisions(new WorkflowHistoryEvents(allEvents,
                     chooseSeatActivityCompletedGraph.Last().EventId, chooseSeatActivityCompletedGraph.First().EventId));
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
@@ -451,7 +451,7 @@ namespace Guflow.Tests.Decider
                 .Concat(bookHotelActivityCompletedGraph);
 
             var decisions =
-                new WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreActionAndOverridingTriggerAction().Interpret(new WorkflowHistoryEvents(allEvents,
+                new WorkflowWithBranchBecomingInActiveAndOverridingTriggerAction().Decisions(new WorkflowHistoryEvents(allEvents,
                     chooseSeatActivityCompletedGraph.Last().EventId, chooseSeatActivityCompletedGraph.First().EventId));
 
             Assert.That(decisions, Is.Empty);
@@ -747,9 +747,9 @@ namespace Guflow.Tests.Decider
 
 
         [WorkflowDescription("1.0")]
-        private class WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreAction : Workflow
+        private class WorkflowWithBranchBecomingInActiveByIgnoreAction : Workflow
         {
-            public WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreAction()
+            public WorkflowWithBranchBecomingInActiveByIgnoreAction()
             {
                 ScheduleActivity(BookHotelActivity, Version);
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
@@ -766,9 +766,9 @@ namespace Guflow.Tests.Decider
         }
 
         [WorkflowDescription("1.0")]
-        private class WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreActionAndOverridingTriggerAction : Workflow
+        private class WorkflowWithBranchBecomingInActiveAndOverridingTriggerAction : Workflow
         {
-            public WorkflowWithOneOfBranchIsBecomingInActiveByIgnoreActionAndOverridingTriggerAction()
+            public WorkflowWithBranchBecomingInActiveAndOverridingTriggerAction()
             {
                 ScheduleActivity(BookHotelActivity, Version);
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);

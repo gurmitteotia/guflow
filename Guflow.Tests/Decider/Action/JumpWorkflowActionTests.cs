@@ -83,7 +83,7 @@ namespace Guflow.Tests.Decider
             var workflow = new WorkflowToJumpToDifferentBranch();
             var historyEvents = new WorkflowHistoryEvents(siblingActivity, siblingActivity.Last().EventId, siblingActivity.First().EventId);
 
-            Assert.Throws<OutOfBranchJumpException>(()=> workflow.NewExecutionFor(historyEvents).Execute());
+            Assert.Throws<OutOfBranchJumpException>(()=> workflow.Decisions(historyEvents));
         }
 
         private class WorkflowToReturnScheduleActivityAction : Workflow
