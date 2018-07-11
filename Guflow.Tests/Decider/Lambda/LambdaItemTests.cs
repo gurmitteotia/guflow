@@ -13,14 +13,14 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class LambdaItemTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
         private Mock<IWorkflow> _workflow;
         private Identity _lambdaIdentity;
         private const string LambdaName = "lambda";
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _workflow = new Mock<IWorkflow>();
             _workflow.SetupGet(w => w.WorkflowHistoryEvents)
                 .Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph()));

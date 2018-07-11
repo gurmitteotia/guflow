@@ -11,12 +11,12 @@ namespace Guflow.Tests.Decider
     {
         private WorkflowFailureFailedEvent _failedEvent;
 
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
 
             _failedEvent = new WorkflowFailureFailedEvent(_builder.WorkflowFailureFailedEvent("cause"));
         }

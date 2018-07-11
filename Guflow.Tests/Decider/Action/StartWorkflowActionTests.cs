@@ -10,12 +10,12 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class StartWorkflowActionTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
         [Test]
         public void Return_workflow_completed_decision_when_workflow_does_not_have_any_schedulable_items()

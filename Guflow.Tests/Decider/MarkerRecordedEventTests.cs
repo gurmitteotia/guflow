@@ -10,12 +10,12 @@ namespace Guflow.Tests.Decider
     public class MarkerRecordedEventTests
     {
         private MarkerRecordedEvent _markerRecordedEvent;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder(); 
+            _builder = new EventGraphBuilder(); 
             _markerRecordedEvent = new MarkerRecordedEvent(_builder.MarkerRecordedEvent("name1","detail1"));
         }
         [Test]

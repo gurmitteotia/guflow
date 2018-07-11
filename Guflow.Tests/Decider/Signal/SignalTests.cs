@@ -8,12 +8,12 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class SignalTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
         [Test]
         public void Invalid_arguments_test()

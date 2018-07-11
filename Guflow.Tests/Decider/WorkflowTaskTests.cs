@@ -17,12 +17,12 @@ namespace Guflow.Tests.Decider
     {
         private Mock<IAmazonSimpleWorkflow> _amazonWorkflowClient;
         private Domain _domain;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _amazonWorkflowClient = new Mock<IAmazonSimpleWorkflow>();
             _domain = new Domain("name", _amazonWorkflowClient.Object);
         }

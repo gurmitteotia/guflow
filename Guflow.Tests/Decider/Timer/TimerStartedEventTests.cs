@@ -12,12 +12,12 @@ namespace Guflow.Tests.Decider
     {
         private const string _timerName = "timer";
         private TimerStartedEvent _timerStartedEvent;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
 
             _timerStartedEvent = CreateTimerStartedEvent(Identity.Timer(_timerName), TimeSpan.FromSeconds(2));
         }

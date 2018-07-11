@@ -8,12 +8,12 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class CancelWorkflowActionTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
 
         [Test]

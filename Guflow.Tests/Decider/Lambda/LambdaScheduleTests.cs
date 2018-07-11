@@ -16,12 +16,12 @@ namespace Guflow.Tests.Decider
 
         private const string LambdaName = "LambdaName";
         private const string ParentLambdaName = "ParentLambda";
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
 
         [Test]

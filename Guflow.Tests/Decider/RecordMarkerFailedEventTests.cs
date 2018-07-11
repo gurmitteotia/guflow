@@ -10,11 +10,11 @@ namespace Guflow.Tests.Decider
     public class RecordMarkerFailedEventTests
     {
         private RecordMarkerFailedEvent _recordMarkerFailedEvent;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder(); 
+            _builder = new EventGraphBuilder(); 
             _recordMarkerFailedEvent = new RecordMarkerFailedEvent(_builder.RecordMarkerFailedEvent("marker1","cause"));
         }
         [Test]

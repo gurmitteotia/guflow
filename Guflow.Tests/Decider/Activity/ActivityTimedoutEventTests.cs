@@ -18,12 +18,12 @@ namespace Guflow.Tests.Decider
         private const string _timeoutType = "reason";
         private const string _detail = "detail";
 
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _activityTimedoutEvent = CreateActivityTimedoutEvent(_timeoutType, _detail);
         }
 

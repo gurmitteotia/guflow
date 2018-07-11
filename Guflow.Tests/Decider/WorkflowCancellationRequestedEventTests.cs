@@ -10,12 +10,12 @@ namespace Guflow.Tests.Decider
     public class WorkflowCancellationRequestedEventTests
     {
         private WorkflowCancellationRequestedEvent _cancellationRequestedEvent;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
 
             var cancellationRequestedEvent = _builder.WorkflowCancellationRequestedEvent("cause","runid","id");
             _cancellationRequestedEvent = new WorkflowCancellationRequestedEvent(cancellationRequestedEvent);

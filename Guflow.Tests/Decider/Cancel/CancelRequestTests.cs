@@ -11,12 +11,12 @@ namespace Guflow.Tests.Decider
     public class CancelRequestTests
     {
         private CancelRequest _cancelRequest;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _cancelRequest = new CancelRequest(null);
         }
         [Test]

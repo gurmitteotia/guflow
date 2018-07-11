@@ -19,12 +19,12 @@ namespace Guflow.Tests.Decider
         private const string _input = "input";
         private ActivityCompletedEvent _activityCompletedEvent;
 
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result,_input);
             _activityCompletedEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
         }

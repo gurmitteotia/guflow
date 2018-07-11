@@ -18,12 +18,12 @@ namespace Guflow.Tests.Decider
         private const string PositionalName = "pname";
         private const string SiblingActivityName = "BookHotelActivity";
         private const string Version = "1.0";
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
         [Test]
         public void Equality_tests()

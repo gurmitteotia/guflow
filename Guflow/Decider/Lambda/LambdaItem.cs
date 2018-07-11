@@ -23,11 +23,11 @@ namespace Guflow.Decider
             _input = (item) => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _timeout = item => null;
             _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
-            _completedAction = _ => WorkflowAction.ContinueWorkflow(this);
-            _failedAction = @event => WorkflowAction.FailWorkflow(@event.Reason, @event.Details);
-            _timedoutAction = @event => WorkflowAction.FailWorkflow("LAMBDA_FUNCTION_TIMED_OUT", @event.TimedoutType);
-            _schedulingFailedAction = @event => WorkflowAction.FailWorkflow("LAMBDA_FUNCTION_SCHEDULING_FAILED", @event.Cause);
-            _startFailedAction = @event => WorkflowAction.FailWorkflow(@event.Cause, @event.Message);
+            _completedAction = e => e.DefaultAction(workflow);
+            _failedAction = e => e.DefaultAction(workflow);
+            _timedoutAction = e => e.DefaultAction(workflow);
+            _schedulingFailedAction = e => e.DefaultAction(workflow);
+            _startFailedAction = e => e.DefaultAction(workflow);
         }
 
         public string PositionalName => Identity.PositionalName;

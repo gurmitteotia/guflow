@@ -11,12 +11,12 @@ namespace Guflow.Tests.Decider
     public class ActivityItemExtensionTests
     {
         private Mock<IActivityItem> _activityItem;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _activityItem = new Mock<IActivityItem>();
         }
 

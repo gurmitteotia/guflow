@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
-using Microsoft.Win32;
-using ThirdParty.BouncyCastle.Asn1;
 using ChildPolicy = Guflow.Decider.ChildPolicy;
 
 namespace Guflow.Tests.Decider
 {
-    internal class HistoryEventsBuilder
+    internal class EventGraphBuilder
     {
         private long _currentEventId = 0;
         public IEnumerable<HistoryEvent> ActivityCompletedGraph(Identity activityIdentity, string workerIdentity, string result, string input = "")

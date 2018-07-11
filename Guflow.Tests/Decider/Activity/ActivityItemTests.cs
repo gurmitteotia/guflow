@@ -15,12 +15,12 @@ namespace Guflow.Tests.Decider
         private readonly Identity _activityIdenity = Identity.New("somename", "1.0", "name");
         private Mock<IWorkflow> _workflow;
 
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _workflow = new Mock<IWorkflow>();
         }
         [Test]

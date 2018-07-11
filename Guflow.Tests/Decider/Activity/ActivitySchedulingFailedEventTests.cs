@@ -14,12 +14,12 @@ namespace Guflow.Tests.Decider
         private const string _activityVersion = "1.0";
         private const string _positionalName = "First";
         private const string _cause = "detail";
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var schedulingFailedEventGraph = _builder.ActivitySchedulingFailedGraph(Identity.New(_activityName, _activityVersion, _positionalName),_cause);
             _activitySchedulingFailedEvent = new ActivitySchedulingFailedEvent(schedulingFailedEventGraph.First());
         }

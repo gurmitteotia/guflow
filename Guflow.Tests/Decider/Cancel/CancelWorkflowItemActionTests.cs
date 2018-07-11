@@ -18,12 +18,12 @@ namespace Guflow.Tests.Decider
         private const string _timerName = "timer2";
 
         private Mock<IWorkflow> _workflow;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _workflow = new Mock<IWorkflow>();
             _workflow.SetupGet(w => w.WorkflowHistoryEvents)
                 .Returns(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));

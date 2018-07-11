@@ -26,5 +26,10 @@ namespace Guflow.Decider
         {
             return workflow.WorkflowAction(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return WorkflowAction.FailWorkflow("LAMBDA_FUNCTION_TIMED_OUT", TimedoutType);
+        }
     }
 }

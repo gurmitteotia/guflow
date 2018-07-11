@@ -8,13 +8,13 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class LambdaSchedulingFailedEventTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
         private LambdaSchedulingFailedEvent _event;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var eventGraph = _builder.LambdaSchedulingFailedEventGraph(Identity.Lambda("lambda_name"), "reason");
             _event = new LambdaSchedulingFailedEvent(eventGraph);
         }

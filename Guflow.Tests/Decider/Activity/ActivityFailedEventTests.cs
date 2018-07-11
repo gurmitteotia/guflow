@@ -17,12 +17,12 @@ namespace Guflow.Tests.Decider
         private const string _identity = "machine name";
         private const string _reason = "reason";
         private const string _detail = "detail";
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var failedActivityEventGraph = _builder.ActivityFailedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _reason, _detail);
             _activityFailedEvent = new ActivityFailedEvent(failedActivityEventGraph.First(), failedActivityEventGraph);
         }

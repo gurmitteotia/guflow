@@ -645,9 +645,5 @@ namespace Guflow.Decider
                 _currentWorkflowHistoryEvents = null;
             }
         }
-        internal void FinishExecution()
-        {
-            _currentWorkflowHistoryEvents = null;
-        }
     }
 }

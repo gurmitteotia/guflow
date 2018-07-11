@@ -14,11 +14,11 @@ namespace Guflow.Tests.Decider
         private TimerCancelledEvent _timerCancelledEvent;
         private const string _timerName ="timer name";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(2);
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder(); 
+            _builder = new EventGraphBuilder(); 
             _timerCancelledEvent = CreateTimerCancelledEvent(Identity.Timer(_timerName),_fireAfter);
         }
 

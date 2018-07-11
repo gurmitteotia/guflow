@@ -9,12 +9,12 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class SignalWorkflowActionTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
         [Test]
         public void Can_be_returned_as_custom_action_from_workflow()

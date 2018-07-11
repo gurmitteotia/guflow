@@ -12,13 +12,13 @@ namespace Guflow.Tests.Decider
     public class WorkflowTests
     {
         private Mock<IWorkflowHistoryEvents> _workflowEvents;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
         private Workflow _workflow;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _workflowEvents = new Mock<IWorkflowHistoryEvents>();
             _workflow = new StubWorkflow();
         }

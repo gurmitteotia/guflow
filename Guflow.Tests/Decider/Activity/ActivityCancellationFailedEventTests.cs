@@ -15,12 +15,12 @@ namespace Guflow.Tests.Decider
         private const string _cause = "unknown";
         private ActivityCancellationFailedEvent _activityCancellationFailedEvent;
 
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var historyEventGraph = _builder.ActivityCancellationFailedGraph(Identity.New(_activityName,_activityVersion),_cause);
             _activityCancellationFailedEvent = new ActivityCancellationFailedEvent(historyEventGraph.First());
         }

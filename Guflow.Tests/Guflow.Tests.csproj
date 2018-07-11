@@ -85,7 +85,7 @@
     <Compile Include="Decider\Action\CancelWorkflowActionTests.cs" />
     <Compile Include="Decider\Cancel\CancelWorkflowDecisionTests.cs" />
     <Compile Include="Decider\DeflowAlgorithmTests.cs" />
-    <Compile Include="Decider\HistoryEventsBuilder.cs" />
+    <Compile Include="Decider\EventGraphBuilder.cs" />
     <Compile Include="Decider\Action\JumpWorkflowActionTests.cs" />
     <Compile Include="Decider\Lambda\LambdaCompletedEventTests.cs" />
     <Compile Include="Decider\Lambda\LambdaScheduleTests.cs" />
@@ -108,6 +108,7 @@
     <Compile Include="Decider\Signal\SignalTests.cs" />
     <Compile Include="Decider\Signal\SignalWorkflowRequestTests.cs" />
     <Compile Include="Decider\StartWorkflowRequestTests.cs" />
+    <Compile Include="HistoryEventsBuilder.cs" />
     <Compile Include="TaskListTests.cs" />
     <Compile Include="Decider\WorkflowCancellationFailedEventTests.cs" />
     <Compile Include="Decider\Cancel\CancelWorkflowItemActionTests.cs" />
@@ -129,7 +130,7 @@
     <Compile Include="Decider\RecordMarkerFailedEventTests.cs" />
     <Compile Include="Decider\Action\RecordMarkerWorkflowActionTests.cs" />
     <Compile Include="Decider\Timer\ScheduleTimerDecisionTests.cs" />
-    <Compile Include="Decider\Action\ScheduleWorkflowItemActionTests.cs" />
+    <Compile Include="Decider\Action\RescheduleWorkflowActionTests.cs" />
     <Compile Include="Decider\Activity\ScheduleActivityDecisionTests.cs" />
     <Compile Include="Decider\Signal\SignalWorkflowActionTests.cs" />
     <Compile Include="Decider\Signal\SignalWorkflowDecisionTests.cs" />

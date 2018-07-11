@@ -18,12 +18,12 @@ namespace Guflow.Tests.Decider
         private const string ParentActivityName = "ParentActivity";
         private const string ParentActivityVersion = "2.0";
 
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
 
         [Test]

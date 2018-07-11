@@ -17,12 +17,12 @@ namespace Guflow.Tests.Decider
         private const string _activityVersion = "1.0";
         private const string _positionalName = "First";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(20);
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _timerFiredEvent = CreateTimerFiredEvent(Identity.Timer(_timerName), _fireAfter);
         }
 

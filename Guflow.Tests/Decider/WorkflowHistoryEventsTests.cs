@@ -13,7 +13,7 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class WorkflowHistoryEventsTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         private const string ActivityName = "Activity1";
         private const string ActivityVersion = "1.0";
@@ -22,7 +22,7 @@ namespace Guflow.Tests.Decider
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
 
 

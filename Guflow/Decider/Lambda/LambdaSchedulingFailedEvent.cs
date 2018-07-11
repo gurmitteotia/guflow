@@ -25,5 +25,10 @@ namespace Guflow.Decider
         {
             return workflow.WorkflowAction(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return WorkflowAction.FailWorkflow("LAMBDA_FUNCTION_SCHEDULING_FAILED", Cause);
+        }
     }
 }

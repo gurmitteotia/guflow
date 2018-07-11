@@ -12,12 +12,12 @@ namespace Guflow.Tests.Decider
     public class WorkflowItemExtensionsTests
     {
         private Mock<IWorkflowItem> _workflowItem;
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _workflowItem = new Mock<IWorkflowItem>();
         }
 

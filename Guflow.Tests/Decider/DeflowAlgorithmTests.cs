@@ -18,12 +18,12 @@ namespace Guflow.Tests.Decider
         private const string SendEmailActivity = "SendEmailActivity";
         private const string TimerName = "DelayTimer";
         private const string Version = "1.0";
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
 
         [Test]

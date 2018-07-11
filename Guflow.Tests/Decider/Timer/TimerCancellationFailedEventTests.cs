@@ -15,11 +15,11 @@ namespace Guflow.Tests.Decider
         private const string _cause = "cause";
         private const string _activityName = "activity";
         private const string _activityVersion = "1.0";
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             _timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.Timer(_timerName), _cause);
         }
 

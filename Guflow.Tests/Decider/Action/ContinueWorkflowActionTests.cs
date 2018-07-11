@@ -16,12 +16,12 @@ namespace Guflow.Tests.Decider
         private const string _positionalName = "First";
         private const string _siblingActivityName = "Sync";
         private const string _siblingActivityVersion = "2.0";
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
 
         [Test]

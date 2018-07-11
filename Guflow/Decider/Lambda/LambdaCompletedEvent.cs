@@ -24,5 +24,10 @@ namespace Guflow.Decider
         {
             return workflow.WorkflowAction(this);
         }
+
+        internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
+        {
+            return defaultActions.Continue(this);
+        }
     }
 }

@@ -15,12 +15,12 @@ namespace Guflow.Tests.Decider
         private const string _positionalName = "First";
         private ActivityScheduledEvent _activityScheduledEvent;
 
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var scheduledActivityEventGraph = _builder.ActivityScheduledGraph(Identity.New(_activityName, _activityVersion, _positionalName));
             _activityScheduledEvent = new ActivityScheduledEvent(scheduledActivityEventGraph.First(),scheduledActivityEventGraph);
         }

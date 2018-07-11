@@ -9,13 +9,13 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class LambdaTimedoutEventTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
         private LambdaTimedoutEvent _event;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var eventGraph = _builder.LamdbaTimedoutEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "cont");
             _event = new LambdaTimedoutEvent(eventGraph.First(), eventGraph);
         }

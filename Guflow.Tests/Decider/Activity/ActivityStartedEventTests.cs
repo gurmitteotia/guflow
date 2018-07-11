@@ -16,12 +16,12 @@ namespace Guflow.Tests.Decider
         private const string _workerId = "id";
         private ActivityStartedEvent _activityStartedEvent;
 
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var scheduledActivityEventGraph = _builder.ActivityStartedGraph(Identity.New(_activityName, _activityVersion, _positionalName),_workerId);
             _activityStartedEvent = new ActivityStartedEvent(scheduledActivityEventGraph.First(), scheduledActivityEventGraph);
         }

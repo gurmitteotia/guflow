@@ -13,12 +13,12 @@ namespace Guflow.Tests.Decider
     public class TimerItemTests
     {
         private readonly Identity _timerIdentity = Identity.Timer("timerName");
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
         }
 
         [Test]

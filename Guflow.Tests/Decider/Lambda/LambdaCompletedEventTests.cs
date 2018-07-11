@@ -11,13 +11,13 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class LambdaCompletedEventTests
     {
-        private HistoryEventsBuilder _builder;
+        private EventGraphBuilder _builder;
         private LambdaCompletedEvent _event;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new HistoryEventsBuilder();
+            _builder = new EventGraphBuilder();
             var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
             _event = new LambdaCompletedEvent(eventGraph.First(), eventGraph);
 
