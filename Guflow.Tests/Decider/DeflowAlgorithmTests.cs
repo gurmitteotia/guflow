@@ -1,5 +1,5 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
-using System.Collections.Generic;
+
 using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
@@ -19,23 +19,23 @@ namespace Guflow.Tests.Decider
         private const string TimerName = "DelayTimer";
         private const string Version = "1.0";
         private EventGraphBuilder _builder;
+        private HistoryEventsBuilder _eventsBuilder;
 
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
+            _eventsBuilder = new HistoryEventsBuilder();
         }
 
         [Test]
         public void Does_not_schedule_a_child_item_when_one_of_the_activity_in_its_parent_branch_is_active()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlightActivityStartedGraph = StartedActivityGraph(BookFlightActivity);
-            var allEvents = addDinnerActivity.Concat(bookHotelActivityCompletedGraph).Concat(bookFlightActivityStartedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(StartedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
 
-            var decisions =
-                new TestWorkflow().Decisions(new WorkflowHistoryEvents(allEvents,addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            var decisions = new TestWorkflow().Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.Empty);
 
@@ -44,30 +44,22 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Schedule_a_child_item_when_all_of_its_parent_branches_are_not_active()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var allEvents = addDinnerActivity.Concat(bookHotelActivityCompletedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
 
-            var decisions =
-                new TestWorkflow().Decisions(new WorkflowHistoryEvents(allEvents,
-                    addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            var decisions = new TestWorkflow().Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version))}));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
         }
-
-
 
         [Test]
         public void Does_not_schedule_a_child_item_when_one_of_the_activity_in_its_parent_branch_is_just_completed_and_about_to_schedule_its_child_activity()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlightActivityStartedGraph = CompletedActivityGraph(BookFlightActivity);
-            var allEvents = addDinnerActivity.Concat(bookHotelActivityCompletedGraph).Concat(bookFlightActivityStartedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
 
-            var decisions =
-                 new TestWorkflow().Decisions(new WorkflowHistoryEvents(allEvents,
-                    addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            var decisions = new TestWorkflow().Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.Empty);
 
@@ -76,19 +68,13 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Schedule_a_child_item_when_all_its_parent_branches_are_not_active_because_all_items_are_completed()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            
-            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
-            var allEvents =
-                addDinnerActivity.Concat(bookHotelActivityCompletedGraph)
-                    .Concat(bookFlightActivityCompletedGraph)
-                    .Concat(chooseSeatActivityCompletedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(ChooseSeatActivity));
 
-            var decisions =
-                new TestWorkflow().Decisions(new WorkflowHistoryEvents(allEvents,
-                    addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
+
+            var decisions = new TestWorkflow().Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
         }
@@ -96,18 +82,13 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_schedule_the_child_item_when_one_of_its_immediate_parents_last_action_is_ignore_action_with_flag_to_keep_branch_active()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
-            var allEvents =
-                addDinnerActivity.Concat(bookHotelActivityCompletedGraph)
-                    .Concat(bookFlightActivityCompletedGraph)
-                    .Concat(chooseSeatActivityCompletedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(ChooseSeatActivity));
 
-            var decisions =
-                new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchActive().Decisions(new WorkflowHistoryEvents(allEvents,
-                    addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
+
+            var decisions = new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchActive().Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.Empty);
         }
@@ -115,18 +96,14 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Schedule_the_child_item_when_one_of_its_immediate_parents_last_action_is_ignore_action_with_flag_to_keep_branch_inactive()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
-            var allEvents =
-                addDinnerActivity.Concat(bookHotelActivityCompletedGraph)
-                    .Concat(bookFlightActivityCompletedGraph)
-                    .Concat(chooseSeatActivityCompletedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(ChooseSeatActivity));
 
-            var decisions =
-                new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive().Decisions(new WorkflowHistoryEvents(allEvents,
-                    addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
+
+            var decisions = new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive()
+                    .Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
         }
@@ -134,16 +111,12 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_schedule_the_child_item_when_one_of_the_not_immediate_parents_last_action_is_ignore_action_with_flag_to_keep_branch_active()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var allEvents =
-                addDinnerActivity.Concat(bookHotelActivityCompletedGraph)
-                    .Concat(bookFlightActivityCompletedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
 
-            var decisions =
-                new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchActive().Decisions(new WorkflowHistoryEvents(allEvents,
-                    addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            var decisions = new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchActive().Decisions(
+                    _eventsBuilder.Result());
 
             Assert.That(decisions, Is.Empty);
         }
@@ -151,17 +124,12 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Schedule_the_child_item_when_one_of_the_not_immediate_parents_last_action_is_ignore_action_with_flag_to_keep_branch_inactive()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var allEvents =
-                addDinnerActivity.Concat(bookHotelActivityCompletedGraph)
-                    .Concat(bookFlightActivityCompletedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
 
-            var decisions =
-                new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchInactive().Decisions(new WorkflowHistoryEvents(allEvents,
-                    addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            var decisions = new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchInactive().Decisions(
+                    _eventsBuilder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
         }
@@ -169,21 +137,16 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_schedule_the_child_item_when_one_of_its_parent_branch_is_active_because_it_is_reexecuting()
         {
-            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
-            var reebokFlightActicityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-         
-            var allEvents =
-                addDinnerActivity.Concat(bookHotelActivityCompletedGraph)
-                    .Concat(reebokFlightActicityCompletedGraph)
-                    .Concat(chooseSeatActivityCompletedGraph)
-                    .Concat(bookFlightActivityCompletedGraph);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(ChooseSeatActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(AddDinnerActivity));
+
             var workflow = new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive();
 
-            var decisions = workflow.Decisions(new WorkflowHistoryEvents(allEvents,
-                    addDinnerActivity.Last().EventId, addDinnerActivity.First().EventId));
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.Empty);
         }
@@ -191,33 +154,30 @@ namespace Guflow.Tests.Decider
         [Test] // joint workflow item = item with multiple parents
         public void Jumping_down_in_branch_after_the_joint_item_triggers_scheduling_of_joint_item_when_its_all_parent_branches_are_inactive()
         {
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
-            var workflow = new WorkflowWithJumpToChildBranch();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
-            
-            var decisions = workflow.Decisions(historyEvents);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
 
-            Assert.That(decisions, Is.EquivalentTo(new []
+            var workflow = new WorkflowWithJumpToChildBranch();
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)), 
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
                 new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version))
             }));
         }
 
-        [Test] 
+        [Test]
         public void Does_not_trigger_scheduling_of_joint_item_when_jumping_without_trigger()
         {
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new WorkflowWithAJumpToChildBranchWithoutTrigger();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions =workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -228,90 +188,75 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Jumping_before_joint_item_does_not_trigger_scheduling_of_joint_item()
         {
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new WorkflowWithJumpToParentBranch();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChooseSeatActivity, Version)), 
+                new ScheduleActivityDecision(Identity.New(ChooseSeatActivity, Version)),
             }));
         }
 
         [Test]
         public void Jumping_on_to_joint_item_does_not_trigger_duplicate_scheduling_of_joint_item()
         {
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new WorkflowWithJumpToFirstMultiParentChild();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)), 
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
             }));
         }
 
         [Test]
         public void Jump_down_after_joint_item_does_not_trigger_scheduling_of_joint_item_when_other_branch_is_active()
         {
-            var bookHotel = StartedActivityGraph(BookHotelActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new WorkflowWithJumpToChildBranch();
-            var allEvents = bookFlight.Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version)), 
+                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version)),
             }));
-
         }
 
         [Test]
         public void By_default_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false_for_activity()
         {
-
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
-
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new WorkflowWithFalseSchedulableCondition();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)), 
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
             }));
         }
 
         [Test]
         public void Manually_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false()
         {
-
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
-
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new WorkflowManuallyTriggerJointOnFalseSchedulableCondition();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -322,36 +267,28 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Return_a_custom_action_when_scheduling_condition_is_evaluated_to_false()
         {
-
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
-
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new TriggerJointOnFalseSchedulableCondition();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new CompleteWorkflowDecision("result"), 
+                new CompleteWorkflowDecision("result"),
             }));
         }
 
         [Test]
         public void By_default_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false_for_timer()
         {
-
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
-
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new WorkflowWithFalseSchedulableConditionForTimer();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -362,16 +299,12 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Manually_trigger_first_joint_item_when_scheduling_condition_is_evaluated_to_false_for_timer()
         {
-
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
-
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new WorkflowManuallyTriggerJointOnFalseSchedulableConditionForTimer();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -382,16 +315,12 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Return_custom_action_when_scheduling_condition_is_evaluated_to_false_for_timer()
         {
-
-            var bookHotel = CompletedActivityGraph(BookHotelActivity);
-            var addDinner = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlight = CompletedActivityGraph(BookFlightActivity);
-
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(BookFlightActivity));
             var workflow = new ManuallyTriggerCustomActionOnFalseSchedulableConditionForTimer();
-            var allEvents = bookFlight.Concat(addDinner).Concat(bookHotel);
-            var historyEvents = new WorkflowHistoryEvents(allEvents, bookFlight.Last().EventId, bookFlight.First().EventId);
 
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
@@ -402,10 +331,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void No_workflow_item_is_scheduled_when_all_of_its_startup_activities_are_not_scheduled()
         {
-            var startedEvent = _builder.WorkflowStartedEvent();
+            _eventsBuilder.AddNewEvents(_builder.WorkflowStartedEvent());
             var workflow = new WorkflowWithNotSchedulableStartupActivities();
-            var historyEvents = new WorkflowHistoryEvents(new []{startedEvent});
-            var decisions = workflow.Decisions(historyEvents);
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.Empty);
         }
@@ -413,10 +342,9 @@ namespace Guflow.Tests.Decider
         [Test]
         public void No_workflow_item_is_scheduled_when_its_startup_activity_and_timer_are_not_scheduled()
         {
-            var startedEvent = _builder.WorkflowStartedEvent();
+            _eventsBuilder.AddNewEvents(_builder.WorkflowStartedEvent());
             var workflow = new WorkflowWithNotSchedulableStartupActivityAndTimer();
-            var historyEvents = new WorkflowHistoryEvents(new[] { startedEvent });
-            var decisions = workflow.Decisions(historyEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.Empty);
         }
@@ -424,17 +352,12 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Schedule_first_joint_item_when_the_branch_is_made_inactive_by_ignore_action()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
-            var allEvents = chooseSeatActivityCompletedGraph.Concat(bookFlightActivityCompletedGraph)
-                    .Concat(addDinnerActivity)
-                    .Concat(bookHotelActivityCompletedGraph);
-
-            var decisions =
-                new WorkflowWithBranchBecomingInActiveByIgnoreAction().Decisions(new WorkflowHistoryEvents(allEvents,
-                    chooseSeatActivityCompletedGraph.Last().EventId, chooseSeatActivityCompletedGraph.First().EventId));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(ChooseSeatActivity));
+          
+            var decisions = new WorkflowWithBranchBecomingInActiveByIgnoreAction().Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
         }
@@ -442,29 +365,24 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_override_the_trigger_action_when_a_branch_is_made_inactive_by_ignore_action()
         {
-            var bookHotelActivityCompletedGraph = CompletedActivityGraph(BookHotelActivity);
-            var addDinnerActivity = CompletedActivityGraph(AddDinnerActivity);
-            var bookFlightActivityCompletedGraph = CompletedActivityGraph(BookFlightActivity);
-            var chooseSeatActivityCompletedGraph = CompletedActivityGraph(ChooseSeatActivity);
-            var allEvents = chooseSeatActivityCompletedGraph.Concat(bookFlightActivityCompletedGraph)
-                .Concat(addDinnerActivity)
-                .Concat(bookHotelActivityCompletedGraph);
-
-            var decisions =
-                new WorkflowWithBranchBecomingInActiveAndOverridingTriggerAction().Decisions(new WorkflowHistoryEvents(allEvents,
-                    chooseSeatActivityCompletedGraph.Last().EventId, chooseSeatActivityCompletedGraph.First().EventId));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookHotelActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(AddDinnerActivity));
+            _eventsBuilder.AddProcessedEvents(CompletedActivityGraph(BookFlightActivity));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(ChooseSeatActivity));
+           
+            var decisions = new WorkflowWithBranchBecomingInActiveAndOverridingTriggerAction().Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.Empty);
         }
 
 
-        private IEnumerable<HistoryEvent> CompletedActivityGraph(string activityName)
+        private HistoryEvent[] CompletedActivityGraph(string activityName)
         {
-            return _builder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result");
+            return _builder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result").ToArray();
         }
-        private IEnumerable<HistoryEvent> StartedActivityGraph(string activityName)
+        private HistoryEvent[] StartedActivityGraph(string activityName)
         {
-            return _builder.ActivityStartedGraph(Identity.New(activityName, Version), "id");
+            return _builder.ActivityStartedGraph(Identity.New(activityName, Version), "id").ToArray();
         }
 
         [WorkflowDescription("1.0")]
@@ -635,7 +553,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version);
-                ScheduleActivity(ChooseSeatActivity, Version).When(a=>false, a=>Trigger(a).FirstJoint()).AfterActivity(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).When(a => false, a => Trigger(a).FirstJoint()).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
 
@@ -686,7 +604,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version);
-                ScheduleTimer(TimerName).When(a => false, a=>Trigger(a).FirstJoint()).AfterActivity(BookFlightActivity, Version);
+                ScheduleTimer(TimerName).When(a => false, a => Trigger(a).FirstJoint()).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterTimer(TimerName);
 
@@ -719,7 +637,7 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(BookHotelActivity, Version).When(_ => false);
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
-                ScheduleActivity(BookFlightActivity, Version).When(_=>false);
+                ScheduleActivity(BookFlightActivity, Version).When(_ => false);
                 ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
@@ -755,11 +673,11 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(AddDinnerActivity, Version).AfterActivity(BookHotelActivity, Version);
 
                 ScheduleActivity(BookFlightActivity, Version);
-                ScheduleActivity(ChooseSeatActivity,Version)
+                ScheduleActivity(ChooseSeatActivity, Version)
                     .AfterActivity(BookFlightActivity, Version)
                     .OnCompletion(a => Ignore.MakeBranchInactive());
 
-                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity,Version);
+                ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
 
                 ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
             }
