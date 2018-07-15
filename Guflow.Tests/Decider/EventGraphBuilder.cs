@@ -44,7 +44,7 @@ namespace Guflow.Tests.Decider
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
                     ActivityId = activityIdentity.Id,
                     Input = input
                 }
@@ -87,7 +87,7 @@ namespace Guflow.Tests.Decider
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
                     ActivityId = activityIdentity.Id
                 }
             });
@@ -129,7 +129,7 @@ namespace Guflow.Tests.Decider
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
                     ActivityId = activityIdentity.Id
                 }
             });
@@ -181,7 +181,7 @@ namespace Guflow.Tests.Decider
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
                     ActivityId = activityIdentity.Id
                 }
             });
@@ -330,7 +330,7 @@ namespace Guflow.Tests.Decider
                 {
                     ActivityType = new ActivityType() { Name = activityId.Name, Version = activityId.Version },
                     ActivityId = activityId.Id,
-                    Control = (new ActivityScheduleData() { PN = activityId.PositionalName }).ToJson(),
+                    Control = (new ScheduleData() { PN = activityId.PositionalName }).ToJson(),
                 }
             });
             return historyEvents;
@@ -417,7 +417,7 @@ namespace Guflow.Tests.Decider
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
                     ActivityId = activityIdentity.Id
                 }
             });
@@ -448,7 +448,7 @@ namespace Guflow.Tests.Decider
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
                     ActivityId = activityIdentity.Id
                 }
             });
@@ -488,7 +488,7 @@ namespace Guflow.Tests.Decider
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
                     ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ActivityScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
+                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
                     ActivityId = activityIdentity.Id
                 }
             });
@@ -669,7 +669,7 @@ namespace Guflow.Tests.Decider
             return result;
         }
 
-        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(Identity identity, object input, object result, string control, TimeSpan? startToClose = null)
+        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(Identity identity, object input, object result, TimeSpan? startToClose = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -702,7 +702,7 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.LambdaFunctionScheduled,
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
-                    Control = control,
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
                     Id = identity.Id,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
@@ -713,7 +713,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> LambdaFailedEventGraph(Identity identity, object input, string reason, string details, string control, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaFailedEventGraph(Identity identity, object input, string reason, string details, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.FailedIds(ref _currentEventId);
@@ -747,7 +747,7 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.LambdaFunctionScheduled,
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
-                    Control = control,
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
                     Id = identity.Id,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
@@ -758,7 +758,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> LamdbaTimedoutEventGraph(Identity identity, object input, string timedoutType, string control, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LamdbaTimedoutEventGraph(Identity identity, object input, string timedoutType, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimedoutIds(ref _currentEventId);
@@ -791,7 +791,7 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.LambdaFunctionScheduled,
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
-                    Control = control,
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
                     Id = identity.Id,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
@@ -818,7 +818,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaStartFailedEventGraph(Identity identity, string input, string cause, string message, string control, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaStartFailedEventGraph(Identity identity, string input, string cause, string message, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.LambdaStartFailedIds(ref _currentEventId);
@@ -840,7 +840,7 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.LambdaFunctionScheduled,
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
-                    Control = control,
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
                     Id = identity.Id,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
@@ -851,7 +851,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public HistoryEvent LambdaScheduledEventGraph(Identity identity, object input, string control, TimeSpan? timeout = null)
+        public HistoryEvent LambdaScheduledEventGraph(Identity identity, object input, TimeSpan? timeout = null)
         {
             var eventIds = EventIds.ScheduledIds(ref _currentEventId);
             return new HistoryEvent()
@@ -863,13 +863,13 @@ namespace Guflow.Tests.Decider
                     Id = identity.Id,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
-                    Control = control,
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
                     StartToCloseTimeout = timeout.Seconds()
                 }
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(Identity identity, object input, string control, TimeSpan? timeout=null)
+        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(Identity identity, object input, TimeSpan? timeout=null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
@@ -889,7 +889,7 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.LambdaFunctionScheduled,
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
-                    Control = control,
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
                     Id = identity.Id,
                     Name = identity.Name,
                     Input = input.ToAwsString(),

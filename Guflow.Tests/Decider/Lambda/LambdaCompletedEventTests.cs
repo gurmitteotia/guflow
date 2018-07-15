@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name", "pos_name"), "input", "result", TimeSpan.FromSeconds(10));
             _event = new LambdaCompletedEvent(eventGraph.First(), eventGraph);
 
         }
@@ -33,7 +33,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_lambda_scheduled_event_not_found()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", "", TimeSpan.FromSeconds(10));
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", TimeSpan.FromSeconds(10));
             Assert.Throws<IncompleteEventGraphException>(()=>_event = new LambdaCompletedEvent(eventGraph.First(), Enumerable.Empty<HistoryEvent>()));
         }
 

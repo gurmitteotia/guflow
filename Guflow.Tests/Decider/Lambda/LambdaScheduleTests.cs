@@ -69,7 +69,7 @@ namespace Guflow.Tests.Decider
         private WorkflowHistoryEvents LambdaCompletedEventGraph()
         {
             var startedEvent = _builder.WorkflowStartedEvent();
-            var completedEvent = _builder.LambdaCompletedEventGraph(Identity.Lambda(ParentLambdaName),"input", "result", "cont");
+            var completedEvent = _builder.LambdaCompletedEventGraph(Identity.Lambda(ParentLambdaName),"input", "result");
             return new WorkflowHistoryEvents(completedEvent.Concat(new[] { startedEvent }), completedEvent.Last().EventId, completedEvent.First().EventId);
         }
         private class LambdaAfterActivityWorkflow : Workflow

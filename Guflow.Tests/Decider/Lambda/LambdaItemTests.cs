@@ -110,7 +110,7 @@ namespace Guflow.Tests.Decider
         public void All_events_can_return_lamdba_completed_event()
         {
             var eventGraph =
-                _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result", "con", TimeSpan.FromSeconds(2));
+                _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result", TimeSpan.FromSeconds(2));
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
             var allEvents = lamdbaItem.AllEvents;
@@ -122,7 +122,7 @@ namespace Guflow.Tests.Decider
         public void All_events_can_return_lamdba_failed_event()
         {
             var eventGraph =
-                _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details" ,"con");
+                _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
             var allEvents = lamdbaItem.AllEvents;
@@ -133,7 +133,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_lamdba_timedout_event()
         {
-            var eventGraph = _builder.LamdbaTimedoutEventGraph(_lambdaIdentity, "input", "reason", "details");
+            var eventGraph = _builder.LamdbaTimedoutEventGraph(_lambdaIdentity, "input", "reason");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
             var allEvents = lamdbaItem.AllEvents;
@@ -144,7 +144,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_lamdba_started_event()
         {
-            var eventGraph = _builder.LambdaStartedEventGraph(_lambdaIdentity, "input", "reason");
+            var eventGraph = _builder.LambdaStartedEventGraph(_lambdaIdentity, "input");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
             var allEvents = lamdbaItem.AllEvents;
@@ -155,7 +155,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_lamdba_start_failed_event()
         {
-            var eventGraph = _builder.LambdaStartFailedEventGraph(_lambdaIdentity, "input", "reason", "msg", "ctl");
+            var eventGraph = _builder.LambdaStartFailedEventGraph(_lambdaIdentity, "input", "reason", "msg");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
             var allEvents = lamdbaItem.AllEvents;
@@ -166,7 +166,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_lamdba_scheduled_event()
         {
-            var eventGraph = _builder.LambdaScheduledEventGraph(_lambdaIdentity, "input", "ctl");
+            var eventGraph = _builder.LambdaScheduledEventGraph(_lambdaIdentity, "input");
             var lamdbaItem = CreateLambdaItem(new[]{eventGraph});
 
             var allEvents = lamdbaItem.AllEvents;
@@ -188,8 +188,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_does_not_return_events_for_other_lambda_item()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result", "control", TimeSpan.FromSeconds(1));
-            var otherLambdaEvent = _builder.LambdaCompletedEventGraph(Identity.Lambda("other"), "input", "result", "control", TimeSpan.FromSeconds(1));
+            var eventGraph = _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result", TimeSpan.FromSeconds(1));
+            var otherLambdaEvent = _builder.LambdaCompletedEventGraph(Identity.Lambda("other"), "input", "result", TimeSpan.FromSeconds(1));
             var lamdbaItem = CreateLambdaItem(eventGraph.Concat(otherLambdaEvent));
 
             var allEvents = lamdbaItem.AllEvents;
@@ -200,8 +200,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_multiple_independent_events_for_same_lambda_event()
         {
-            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details", "control");
-            var startedEventGraph = _builder.LambdaStartedEventGraph(_lambdaIdentity, "input", "control");
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
+            var startedEventGraph = _builder.LambdaStartedEventGraph(_lambdaIdentity, "input");
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
@@ -217,7 +217,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_reschedule_timer_events()
         {
-            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details", "control");
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
             var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity, TimeSpan.FromSeconds(1), true);
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
@@ -234,8 +234,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_returns_latest_event_of_lambda_item()
         {
-            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details", "control");
-            var completedEventGraph = _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result", "control");
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
+            var completedEventGraph = _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result");
             var allEvents = completedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
@@ -247,7 +247,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_return_event_for_rescheduled_timer()
         {
-            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details", "control");
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
             var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity, TimeSpan.FromSeconds(1), true);
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
@@ -260,7 +260,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_is_cached()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result", "control");
+            var eventGraph = _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
             Assert.IsTrue(ReferenceEquals(lamdbaItem.LastEvent, lamdbaItem.LastEvent));

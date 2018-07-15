@@ -17,7 +17,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "details", "cont");
+            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("lambda_name"), "input", "reason", "details");
             _event = new LambdaFailedEvent(eventGraph.First(), eventGraph);
         }
 
@@ -50,7 +50,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_lamdba_is_not_found_for_failed_event()
         {
-            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("differnt_name"), "input", "reason", "details", "cont");
+            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("differnt_name"), "input", "reason", "details");
             var @event = new LambdaFailedEvent(eventGraph.First(), eventGraph);
             Assert.Throws<IncompatibleWorkflowException>(()=> @event.Interpret(new WorkflowWithLambda()));
         }

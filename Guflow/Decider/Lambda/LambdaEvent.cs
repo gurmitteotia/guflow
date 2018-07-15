@@ -10,6 +10,8 @@ namespace Guflow.Decider
     public abstract class LambdaEvent : WorkflowItemEvent
     {
         private long _scheduledEventId;
+        private string _name;
+        private string _positionalName;
         protected LambdaEvent(long eventId) : base(eventId)
         {
         }
@@ -32,6 +34,8 @@ namespace Guflow.Decider
                 {
                     var attr = historyEvent.LambdaFunctionScheduledEventAttributes;
                     Input = attr.Input;
+                    _name = attr.Name;
+                    _positionalName = attr.Control.FromJson<ScheduleData>().PN;
                     AwsIdentity = AwsIdentity.Raw(historyEvent.LambdaFunctionScheduledEventAttributes.Id);
                     if (!string.IsNullOrEmpty(attr.StartToCloseTimeout))
                         Timeout = TimeSpan.FromSeconds(Double.Parse(attr.StartToCloseTimeout));
@@ -41,7 +45,6 @@ namespace Guflow.Decider
             if (AwsIdentity == null)
                 throw new IncompleteEventGraphException($"Can not find lambda scheduled event for id {scheduledEventId}.");
         }
-
         internal override bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)
         {
             var lambdaEvents = workflowItemEvents.OfType<LambdaEvent>();
@@ -56,6 +59,11 @@ namespace Guflow.Decider
         private bool IsInChain(LambdaEvent other)
         {
             return _scheduledEventId == other._scheduledEventId;
+        }
+
+        public override string ToString()
+        {
+            return $"{GetType().Name} for lambda name {_name} and positional name {_positionalName}";
         }
     }
 }

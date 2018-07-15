@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
-    public class ScheduleWorkflowItemActionTests
+    public class RescheduleWorkflowActionTests
     {
         private const string ActivityName = "Download";
         private const string ActivityVersion = "1.0";
@@ -139,7 +139,7 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] LambdaCompletedEventGraph()
         {
-            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "type", "con").ToArray();
+            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "type").ToArray();
         }
         private IEnumerable<HistoryEvent> ActivityCompletedEventGraph(string activityName, string activityVersion, string positionalName)
         {

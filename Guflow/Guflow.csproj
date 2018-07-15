@@ -210,7 +210,7 @@
     <Compile Include="Decider\WorkflowFailureFailedEvent.cs" />
     <Compile Include="Decider\WorkflowItem.cs" />
     <Compile Include="Decider\Activity\ScheduleActivityDecision.cs" />
-    <Compile Include="Decider\Activity\ActivityScheduleData.cs" />
+    <Compile Include="Decider\Activity\ScheduleData.cs" />
     <Compile Include="Decider\Workflow.cs" />
     <Compile Include="Decider\Action\WorkflowAction.cs" />
     <Compile Include="Decider\CompleteWorkflowDecision.cs" />

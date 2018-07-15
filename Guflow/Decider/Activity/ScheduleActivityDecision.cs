@@ -51,7 +51,7 @@ namespace Guflow.Decider
                 {
                     ActivityType = new ActivityType() { Name = _identity.Name, Version = _identity.Version },
                     ActivityId = _identity.Id,
-                    Control = (new ActivityScheduleData() { PN = _identity.PositionalName}).ToJson(),
+                    Control = (new ScheduleData() { PN = _identity.PositionalName}).ToJson(),
                     HeartbeatTimeout = ToAwsTimeout(Timeouts.HeartbeatTimeout),
                     ScheduleToCloseTimeout = ToAwsTimeout(Timeouts.ScheduleToCloseTimeout),
                     ScheduleToStartTimeout = ToAwsTimeout(Timeouts.ScheduleToStartTimeout),

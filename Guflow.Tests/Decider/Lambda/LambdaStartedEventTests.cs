@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var eventGraph = _builder.LambdaStartedEventGraph(Identity.Lambda("lambda_name"), "input", "control", TimeSpan.FromSeconds(10));
+            var eventGraph = _builder.LambdaStartedEventGraph(Identity.Lambda("lambda_name"), "input", TimeSpan.FromSeconds(10));
             _event = new LambdaStartedEvent(eventGraph.First(), eventGraph);
         }
 

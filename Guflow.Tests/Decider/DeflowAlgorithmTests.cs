@@ -18,6 +18,10 @@ namespace Guflow.Tests.Decider
         private const string SendEmailActivity = "SendEmailActivity";
         private const string TimerName = "DelayTimer";
         private const string Version = "1.0";
+        private const string BookHotelLambda = "BookHotel";
+        private const string AddDinnerLambda = "AddDinnerLambda";
+        private const string ChargeCustomerLambda = "ChargeCustomerLambda";
+
         private EventGraphBuilder _builder;
         private HistoryEventsBuilder _eventsBuilder;
 
@@ -376,6 +380,31 @@ namespace Guflow.Tests.Decider
         }
 
 
+        [Test]
+        public void Does_not_schedule_a_child_item_when_one_of_the_lambda_in_its_parent_branch_is_active()
+        {
+            _eventsBuilder.AddProcessedEvents(CompletedLambdaGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(StartedLambdaGraph(AddDinnerLambda));
+            _eventsBuilder.AddNewEvents(CompletedActivityGraph(ChooseSeatActivity));
+
+            var decisions = new LambdaWorkflow().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.Empty);
+
+        }
+
+        [Test]
+        public void Schedule_a_lambda_child_item_when_all_of_its_parent_branches_are_not_active()
+        {
+            _eventsBuilder.AddProcessedEvents(_builder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(CompletedLambdaGraph(BookHotelLambda));
+            _eventsBuilder.AddNewEvents(CompletedLambdaGraph(AddDinnerLambda));
+
+            var decisions = new LambdaWorkflow().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input") }));
+        }
+
         private HistoryEvent[] CompletedActivityGraph(string activityName)
         {
             return _builder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result").ToArray();
@@ -383,6 +412,14 @@ namespace Guflow.Tests.Decider
         private HistoryEvent[] StartedActivityGraph(string activityName)
         {
             return _builder.ActivityStartedGraph(Identity.New(activityName, Version), "id").ToArray();
+        }
+        private HistoryEvent[] CompletedLambdaGraph(string lambdaName)
+        {
+            return _builder.LambdaCompletedEventGraph(Identity.Lambda(lambdaName), "id", "result").ToArray();
+        }
+        private HistoryEvent[] StartedLambdaGraph(string lambdaName)
+        {
+            return _builder.LambdaStartedEventGraph(Identity.Lambda(lambdaName), "id").ToArray();
         }
 
         [WorkflowDescription("1.0")]
@@ -699,6 +736,21 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(ChargeCustomerActivity, Version).AfterActivity(AddDinnerActivity, Version).AfterActivity(ChooseSeatActivity, Version);
 
                 ScheduleActivity(SendEmailActivity, Version).AfterActivity(ChargeCustomerActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class LambdaWorkflow : Workflow
+        {
+            public LambdaWorkflow()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
             }
         }
     }
