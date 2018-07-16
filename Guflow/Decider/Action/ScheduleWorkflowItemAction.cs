@@ -39,21 +39,5 @@ namespace Guflow.Decider
         {
             return _scheduleWorkflowAction.Decisions();
         }
-        private bool Equals(ScheduleWorkflowItemAction other)
-        {
-            return _workflowItem.Equals(other._workflowItem);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return obj is ScheduleWorkflowItemAction && Equals((ScheduleWorkflowItemAction)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return _workflowItem.GetHashCode();
-        }
     }
 }

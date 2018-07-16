@@ -27,16 +27,25 @@ namespace Guflow.Decider
 
             if (workflowActivity == null)
                 throw new WorkflowItemNotFoundException(
-                    $"Can not find activity by name {identity.Name}, version {identity.Version} and positional markerName {identity.PositionalName} in workflow.");
+                    $"Can not find activity by {identity}.");
             return workflowActivity;
         }
         public TimerItem TimerItem(Identity identity)
         {
             var workflowTimer = TimerOf(identity);
             if (workflowTimer == null)
-                throw new WorkflowItemNotFoundException($"Can not find timer by name {identity.Name}.");
+                throw new WorkflowItemNotFoundException($"Can not find timer by {identity}.");
             return workflowTimer;
         }
+
+        public LambdaItem LambdaItem(Identity identity)
+        {
+            var lambdaItem = Lambda(identity);
+            if (lambdaItem == null)
+                throw new WorkflowItemNotFoundException($"Can not find lambda by {identity}.");
+            return lambdaItem;
+        }
+
         public ITimer Timer(WorkflowItemEvent workflowItemEvent)
         {
             var timer = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor) as ITimer;
@@ -101,6 +110,10 @@ namespace Guflow.Decider
         private ActivityItem Activity(Identity identity)
         {
             return _workflowItems.OfType<ActivityItem>().FirstOrDefault(a => a.Has(identity));
+        }
+        private LambdaItem Lambda(Identity identity)
+        {
+            return _workflowItems.OfType<LambdaItem>().FirstOrDefault(s => s.Has(identity));
         }
     }
 }

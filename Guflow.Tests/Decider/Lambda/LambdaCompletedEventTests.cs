@@ -57,9 +57,9 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithLambda()
             {
-                ScheduleLambda("lambda_name");
+                ScheduleLambda("lambda_name", "pos_name");
 
-                ScheduleTimer("timer_name").AfterLambda("lambda_name");
+                ScheduleTimer("timer_name").AfterLambda("lambda_name", "pos_name");
             }
         }
 
@@ -67,9 +67,9 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomAction(WorkflowAction action)
             {
-                ScheduleLambda("lambda_name").OnCompletion(e=>action);
+                ScheduleLambda("lambda_name", "pos_name").OnCompletion(e=>action);
 
-                ScheduleTimer("timer_name").AfterLambda("lambda_name");
+                ScheduleTimer("timer_name").AfterLambda("lambda_name", "pos_name");
             }
         }
     }

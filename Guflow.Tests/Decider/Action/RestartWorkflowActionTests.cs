@@ -9,24 +9,27 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class RestartWorkflowActionTests
     {
-        private EventGraphBuilder _builder;
+        private EventGraphBuilder _eventGraphBuilder;
+        private HistoryEventsBuilder _eventsBuilder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
+            _eventGraphBuilder = new EventGraphBuilder();
+            _eventsBuilder = new HistoryEventsBuilder();
         }
         [Test]
         public void Can_be_returned_as_custom_action()
         {
-            var workflowStartedEventGraph = _builder.WorkflowStartedEvent("input");
+            var workflowStartedEventGraph = _eventGraphBuilder.WorkflowStartedEvent("input");
             var workflowStartedEvent = new WorkflowStartedEvent(workflowStartedEventGraph);
-            var activityCompletedEvents = _builder.ActivityCompletedGraph(Identity.New("activityName", "1.0"), "id", "result");
-            var eventGraph = activityCompletedEvents.Concat(new[] {workflowStartedEventGraph});
-            var workflowEvents = new WorkflowHistoryEvents(eventGraph, activityCompletedEvents.Last().EventId, activityCompletedEvents.First().EventId);
+            _eventsBuilder.AddProcessedEvents(workflowStartedEventGraph);
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder
+                .ActivityCompletedGraph(Identity.New("activityName", "1.0"), "id", "result").ToArray());
+
             var workflow = new WorkflowToRestart();
 
-            var decisions = workflow.Decisions(workflowEvents);
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
             var decision = decisions.Single().SwfDecision();
             
             Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.ContinueAsNewWorkflowExecution));
@@ -38,7 +41,23 @@ namespace Guflow.Tests.Decider
             Assert.That(attr.TaskList.Name, Is.EqualTo(workflowStartedEvent.TaskList));
             Assert.That(attr.TaskPriority, Is.EqualTo(workflowStartedEvent.TaskPriority.ToString()));
             Assert.That(attr.TaskStartToCloseTimeout, Is.EqualTo(workflowStartedEvent.TaskStartToCloseTimeout.TotalSeconds.ToString()));
-        }                        
+        }
+
+        [Test]
+        public void Override_start_properties_when_restarting()
+        {
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent("input"));
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder
+                .ActivityCompletedGraph(Identity.New("activityName", "1.0"), "id", "result").ToArray());
+
+            var workflow = new WorkflowToRestartWithCustomProperties();
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decision = decisions.Single().SwfDecision();
+
+            Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.ContinueAsNewWorkflowExecution));
+            Assert.That(decision.ContinueAsNewWorkflowExecutionDecisionAttributes.LambdaRole, Is.EqualTo("new lambda role"));
+        }
 
         [WorkflowDescription("1.0")]
         private class WorkflowToRestart : Workflow
@@ -46,6 +65,20 @@ namespace Guflow.Tests.Decider
             public WorkflowToRestart()
             {
                 ScheduleActivity("activityName", "1.0").OnCompletion(e => RestartWorkflow());
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowToRestartWithCustomProperties : Workflow
+        {
+            public WorkflowToRestartWithCustomProperties()
+            {
+                ScheduleActivity("activityName", "1.0").OnCompletion(e =>
+                {
+                    var action = RestartWorkflow();
+                    action.DefaultLambdaRole = "new lambda role";
+                    return action;
+                });
             }
         }
     }

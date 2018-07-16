@@ -26,7 +26,7 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Jump to an activity. Exception is thrown if activity is already active or not found in workflow.
+        /// Jump to an activity. Cause the workflow to fail if target activity is already active.
         /// </summary>
         /// <param name="name"></param>
         /// <param name="version"></param>
@@ -41,7 +41,7 @@ namespace Guflow.Decider
             return WorkflowAction.JumpTo(activityItem).WithTriggerAction(_triggeringAction(activityItem));
         }
         /// <summary>
-        /// Jump to an activity. Exception is thrown if activity is already active or not found in workflow. It reads activity name and version
+        /// Jump to an activity. Cause the workflow to fail if target activity is already active. It reads activity name and version
         /// from <see cref="ActivityDescriptionAttribute"/> of TActivity.
         /// </summary>
         /// <param name="positionalName"></param>
@@ -52,7 +52,7 @@ namespace Guflow.Decider
             return ToActivity(description.Name, description.Version, positionalName);
         }
         /// <summary>
-        /// Jump to workflow timer. Exceptio is thrown if timer is already active or not found in workflow.
+        /// Jump to workflow timer. Cause the workflow to fail if target timer is already active.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -61,6 +61,19 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(name, "name");
             var timerItem = _workflowItems.TimerItem(Identity.Timer(name));
             return WorkflowAction.JumpTo(timerItem).WithTriggerAction(_triggeringAction(timerItem));
+        }
+
+        /// <summary>
+        /// Jump to lambda function. Cause the workflow to fail if target activity is already active
+        /// </summary>
+        /// <param name="name">Lambda name.</param>
+        /// <param name="postionalName">Lambda's postional name</param>
+        /// <returns></returns>
+        public WorkflowAction ToLambda(string name, string postionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            var lambdaItem = _workflowItems.LambdaItem(Identity.Lambda(name, postionalName));
+            return WorkflowAction.JumpTo(lambdaItem).WithTriggerAction(_triggeringAction(lambdaItem));
         }
     }
 }

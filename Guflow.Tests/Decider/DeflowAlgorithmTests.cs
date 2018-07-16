@@ -21,6 +21,7 @@ namespace Guflow.Tests.Decider
         private const string BookHotelLambda = "BookHotel";
         private const string AddDinnerLambda = "AddDinnerLambda";
         private const string ChargeCustomerLambda = "ChargeCustomerLambda";
+        private const string SendEmailLambda = "SendEmailLambda";
 
         private EventGraphBuilder _builder;
         private HistoryEventsBuilder _eventsBuilder;
@@ -405,6 +406,22 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input") }));
         }
 
+        [Test]
+        public void Schedule_first_joint_lambda_when_jumping_down_the_branch()
+        {
+            _eventsBuilder.AddProcessedEvents(_builder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(CompletedLambdaGraph(BookHotelLambda));
+            _eventsBuilder.AddNewEvents(CompletedLambdaGraph(AddDinnerLambda));
+
+            var decisions = new JumpToLambdaWorkflow().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(SendEmailLambda), "input"), 
+            }));
+        }
+
         private HistoryEvent[] CompletedActivityGraph(string activityName)
         {
             return _builder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result").ToArray();
@@ -751,6 +768,24 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
                 ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class JumpToLambdaWorkflow : Workflow
+        {
+            public JumpToLambdaWorkflow()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda)
+                    .OnCompletion(e => Jump.ToLambda(SendEmailLambda));
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
+
+                ScheduleLambda(SendEmailLambda).AfterLambda(ChargeCustomerLambda);
             }
         }
     }

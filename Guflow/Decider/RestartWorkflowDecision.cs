@@ -14,7 +14,7 @@ namespace Guflow.Decider
             _restartWorkflowAction = restartWorkflowAction;
             Priority = _medium;
         }
-     
+
         internal override Decision SwfDecision()
         {
             return new Decision
@@ -30,10 +30,11 @@ namespace Guflow.Decider
                             _restartWorkflowAction.ExecutionStartToCloseTimeout.HasValue
                                 ? _restartWorkflowAction.ExecutionStartToCloseTimeout.Value.TotalSeconds.ToString()
                                 : null,
-                       TagList =  _restartWorkflowAction.TagList.ToList(),
+                        TagList = _restartWorkflowAction.TagList.ToList(),
                         TaskPriority = _restartWorkflowAction.TaskPriority.HasValue ? _restartWorkflowAction.TaskPriority.Value.ToString() : null,
                         TaskStartToCloseTimeout = _restartWorkflowAction.TaskStartToCloseTimeout.HasValue ? _restartWorkflowAction.TaskStartToCloseTimeout.Value.TotalSeconds.ToString() : null,
-                        WorkflowTypeVersion = _restartWorkflowAction.WorkflowTypeVersion
+                        WorkflowTypeVersion = _restartWorkflowAction.WorkflowTypeVersion,
+                        LambdaRole = _restartWorkflowAction.DefaultLambdaRole
                     }
             };
         }
