@@ -25,8 +25,8 @@ namespace Guflow.Tests.Decider
         public void Null_argument_tests()
         {
             IWorkflowItem item = null;
-            Assert.Throws<ArgumentNullException>(() => item.AllEventsOf<ActivityCompletedEvent>());
-            Assert.Throws<ArgumentNullException>(() => item.AllEventsOf(typeof(ActivityCompletedEvent)) );
+            Assert.Throws<ArgumentNullException>(() => item.Events<ActivityCompletedEvent>());
+            Assert.Throws<ArgumentNullException>(() => item.Events(typeof(ActivityCompletedEvent)) );
         }
 
         [Test]
@@ -35,9 +35,9 @@ namespace Guflow.Tests.Decider
             var allEvents = new WorkflowItemEvent[] {CreateCompletedEvent(), CreateFailedEvent()};
             _workflowItem.SetupGet(w => w.AllEvents).Returns(allEvents);
 
-            Assert.That(_workflowItem.Object.AllEventsOf<ActivityCompletedEvent>(), 
+            Assert.That(_workflowItem.Object.Events<ActivityCompletedEvent>(), 
                 Is.EqualTo(new []{allEvents[0]}));
-            Assert.That(_workflowItem.Object.AllEventsOf(typeof(ActivityFailedEvent)),
+            Assert.That(_workflowItem.Object.Events(typeof(ActivityFailedEvent)),
                 Is.EqualTo(new[] { allEvents[1] }));
         }
 
@@ -92,6 +92,31 @@ namespace Guflow.Tests.Decider
             Assert.That(_workflowItem.Object.ParentTimer(), Is.EqualTo(parentTimers[0]));
         }
 
+        [Test]
+        public void Find_a_specific_parent_lambda()
+        {
+            var parentLambdas = new[]
+            {
+                new LambdaItem(Identity.Lambda("name1"), Mock.Of<IWorkflow>()), 
+                new LambdaItem(Identity.Lambda("name2"), Mock.Of<IWorkflow>()), 
+            };
+            _workflowItem.SetupGet(w => w.ParentLambdas).Returns(parentLambdas);
+
+            Assert.That(_workflowItem.Object.ParentLambda("name2"), Is.EqualTo(parentLambdas[1]));
+        }
+
+        [Test]
+        public void Single_parent_lambda()
+        {
+            var parentLambdas = new[]
+            {
+                new LambdaItem(Identity.Lambda("name1"), Mock.Of<IWorkflow>()),
+            };
+            _workflowItem.SetupGet(w => w.ParentLambdas).Returns(parentLambdas);
+
+            Assert.That(_workflowItem.Object.ParentLambda(), Is.EqualTo(parentLambdas[0]));
+        }
+
         private ActivityCompletedEvent CreateCompletedEvent()
         {
             var eventGraph = _builder.ActivityCompletedGraph(Identity.New("name", "1.0"), "id",
@@ -104,6 +129,8 @@ namespace Guflow.Tests.Decider
             var eventGraph = _builder.ActivityFailedGraph(Identity.New("name", "1.0"), "id","reason", "detail");
             return new ActivityFailedEvent(eventGraph.First(), eventGraph);
         }
+
+      
 
         [ActivityDescription("1.0", Name = "name2")]
         private class Activity2 : Activity

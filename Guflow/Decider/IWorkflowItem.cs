@@ -15,7 +15,13 @@ namespace Guflow.Decider
         /// <summary>
         /// Returns all parent timers.
         /// </summary>
-        IEnumerable<ITimerItem> ParentTimers{ get; }
+        IEnumerable<ITimerItem> ParentTimers { get; }
+
+
+        /// <summary>
+        /// Returns all parent lambda functions.
+        /// </summary>
+        IEnumerable<ILambdaItem> ParentLambdas { get; }
 
         /// <summary>
         /// Return latest event for workflow item. Returns null when no event is found.

@@ -258,4 +258,7 @@
   <data name="Can_not_reply_to_signal" xml:space="preserve">
     <value>Can't reply to a signal when not send by a workflow.</value>
   </data>
+  <data name="Lambda_result_can_not_be_accessed" xml:space="preserve">
+    <value>Can't access result. Last event of lambda function is not completed event.</value>
+  </data>
 </root>

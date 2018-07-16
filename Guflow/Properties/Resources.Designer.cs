@@ -331,6 +331,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t access result. Last event of lambda function is not completed event..
+        /// </summary>
+        internal static string Lambda_result_can_not_be_accessed {
+            get {
+                return ResourceManager.GetString("Lambda_result_can_not_be_accessed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Activity {0} has multiple execution method defined. Please provide only one execution method..
         /// </summary>
         internal static string Multiple_activity_execution_methods_defined {

@@ -17,7 +17,7 @@ namespace Guflow.Decider
         }
         internal bool IsExceeded(WorkflowItem workflowItem)
         {
-            var allEvents = workflowItem.AllEventsOf(workflowItem.LastEvent.GetType());
+            var allEvents = workflowItem.Events(workflowItem.LastEvent.GetType());
             return allEvents.Count() > _count;
         }
     }

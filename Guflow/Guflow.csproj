@@ -90,6 +90,7 @@
     <Compile Include="Decider\Lambda\LambdaEvent.cs" />
     <Compile Include="Decider\Lambda\LambdaFailedEvent.cs" />
     <Compile Include="Decider\Lambda\LambdaItem.cs" />
+    <Compile Include="Decider\Lambda\LambdaItemExtensions.cs" />
     <Compile Include="Decider\Lambda\LambdaScheduledEvent.cs" />
     <Compile Include="Decider\Lambda\LambdaSchedulingFailedEvent.cs" />
     <Compile Include="Decider\Lambda\LambdaStartedEvent.cs" />

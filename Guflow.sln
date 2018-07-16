@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow", "Guflow\Guflow.csproj", "{107F1FED-A272-4046-9DA0-360A657853AF}"
 EndProject
@@ -18,6 +18,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{EEC4D75D
 	ProjectSection(SolutionItems) = preProject
 		Builds\UpdateNuspec.ps1 = Builds\UpdateNuspec.ps1
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guflow.Lambda", "Guflow.Lambda\Guflow.Lambda.csproj", "{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{35785236-6678-4619-99B2-04AAB2AFC8A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,9 +41,18 @@ Global
 		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5D1215A6-932B-4335-A7AE-1885F91B7E68} = {35785236-6678-4619-99B2-04AAB2AFC8A6}
+		{FFF19166-CA47-4B4E-8531-3DF994E76AF9} = {35785236-6678-4619-99B2-04AAB2AFC8A6}
+		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20} = {35785236-6678-4619-99B2-04AAB2AFC8A6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ED633C45-7FFA-4AE2-A50C-51F598262101}

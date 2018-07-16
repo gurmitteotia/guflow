@@ -19,6 +19,7 @@ namespace Guflow.Decider
         public IEnumerable<IActivityItem> ParentActivities => _parentItems.OfType<IActivityItem>();
 
         public IEnumerable<ITimerItem> ParentTimers => _parentItems.OfType<ITimerItem>();
+        public IEnumerable<ILambdaItem> ParentLambdas => _parentItems.OfType<ILambdaItem>();
 
         public string Name => Identity.Name;
 
