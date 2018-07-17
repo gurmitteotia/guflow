@@ -22,7 +22,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Return_swf_decision_to_schedule_lambda()
         {
-            var identity = Identity.Lambda("lambda");
+            var identity = Identity.Lambda("lambda", "pos_name");
             var decision = new ScheduleLambdaDecision(identity, "input", TimeSpan.FromSeconds(2));
 
             var awsDecision = decision.SwfDecision();
@@ -32,6 +32,7 @@ namespace Guflow.Tests.Decider
             Assert.That(attr.Input, Is.EqualTo("input"));
             Assert.That(attr.StartToCloseTimeout, Is.EqualTo("2"));
             Assert.That(attr.Id, Is.EqualTo(identity.Id.ToString()));
+            Assert.That(attr.Control.FromJson<ScheduleData>().PN, Is.EqualTo("pos_name"));
         }
 
         [Test]

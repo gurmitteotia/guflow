@@ -29,7 +29,8 @@ namespace Guflow.Decider
                     Id = _identity.Id,
                     Name = _identity.Name,
                     Input = _input.ToAwsString(),
-                    StartToCloseTimeout = _timout.Seconds()
+                    StartToCloseTimeout = _timout.Seconds(),
+                    Control = new ScheduleData() { PN = _identity.PositionalName}.ToJson()
                 }
             };
         }

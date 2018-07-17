@@ -35,15 +35,15 @@ namespace Guflow.IntegrationTests
         {
             var @event = new ManualResetEvent(false);
             var workflow = new ScheduleLambdaWorkflow();
-            string result = "result";
+            string result = "";
             workflow.Closed += (s, e) => @event.Set();
             workflow.Completed += (s, e) => result = e.Result;
             _workflowHost = await HostAsync(workflow);
 
-            await _domain.StartWorkflow<ScheduleLambdaWorkflow>("hotel", _taskListName);
+            await _domain.StartWorkflow<ScheduleLambdaWorkflow>("hotel", _taskListName, "Lambda_role");
             @event.WaitOne();
 
-            Assert.That(result, Is.EqualTo("resultbooked"));
+            Assert.That(result, Is.EqualTo("hotelbooked"));
         }
 
         private async Task<WorkflowHost> HostAsync(params Workflow[] workflows)
@@ -61,7 +61,7 @@ namespace Guflow.IntegrationTests
             {
                 ScheduleLambda("BookHotelLambda");
 
-                ScheduleAction(i => CompleteWorkflow(i.ParentLambda().Result()));
+                ScheduleAction(i => CompleteWorkflow(i.ParentLambda().Result())).AfterLambda("BookHotelLambda");
             }
         }
     }

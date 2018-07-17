@@ -14,7 +14,7 @@ namespace Guflow.IntegrationTests
 
         public TestDomain()
         {
-            _domain = new Domain(DomainName, RegionEndpoint.EUWest1);
+            _domain = new Domain(DomainName, RegionEndpoint.EUWest2);
         }
 
         public async Task<WorkflowHost> Host(params Workflow[] workflows)
@@ -38,12 +38,13 @@ namespace Guflow.IntegrationTests
             return _domain.Host(activityTypes);
         }
 
-        public async Task<string> StartWorkflow<TWorkflow>(string input, string taskListName) where TWorkflow :Workflow
+        public async Task<string> StartWorkflow<TWorkflow>(string input, string taskListName, string lambdaRole = null) where TWorkflow :Workflow
         {
             var workflowId = Guid.NewGuid().ToString();
             var startRequest = StartWorkflowRequest.For<TWorkflow>(workflowId);
             startRequest.TaskListName = taskListName;
             startRequest.Input = input;
+            startRequest.LambdaRole = lambdaRole;
             await _domain.StartWorkflowAsync(startRequest);
             return workflowId;
         }

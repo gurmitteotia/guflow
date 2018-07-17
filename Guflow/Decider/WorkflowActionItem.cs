@@ -62,7 +62,8 @@ namespace Guflow.Decider
         {
             Ensure.NotNullAndEmpty(name, nameof(name));
 
-            throw new NotImplementedException();
+            AddParent(Identity.Lambda(name, positionalName));
+            return this;
         }
 
         public override IEnumerable<WorkflowItemEvent> AllEvents => Enumerable.Empty<WorkflowItemEvent>();

@@ -192,6 +192,56 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Lambda_function_completed_event_is_interpreted()
+        {
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("l"), "input", "result").ToArray();
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new []{new LambdaCompletedEvent(eventGraph.First(), eventGraph)}));
+        }
+
+        [Test]
+        public void Lambda_function_failed_event_is_interpreted()
+        {
+            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("l"), "input", "reason", "details").ToArray();
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new LambdaFailedEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
+        public void Lambda_function_timedout_event_is_interpreted()
+        {
+            var eventGraph = _builder.LamdbaTimedoutEventGraph(Identity.Lambda("l"), "input", "reason").ToArray();
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new LambdaTimedoutEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
+        public void Lambda_function_scheduling_failed_event_is_interpreted()
+        {
+            var eventGraph = new []{_builder.LambdaSchedulingFailedEventGraph(Identity.Lambda("l"), "reason")};
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new LambdaSchedulingFailedEvent(eventGraph.First()) }));
+        }
+
+        [Test]
+        public void Lambda_function_start_failed_event_is_interpreted()
+        {
+            var eventGraph =  _builder.LambdaStartFailedEventGraph(Identity.Lambda("l"), "input", "reason", "details");
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new LambdaStartFailedEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
         public void Non_interpretable_events_are_filtered_out()
         {
             var eventGraph = NotInterpretingEventGraph();
@@ -201,43 +251,6 @@ namespace Guflow.Tests.Decider
             Assert.That(newEvents, Is.Empty);
         }
 
-        //[Test]
-        //public void Should_accumulate_the_interpreted_actions()
-        //{
-        //    var timerFailedDecision = new Mock<WorkflowDecision>(false,false);
-        //    var timerFailedAction = WorkflowAction.Custom(timerFailedDecision.Object);
-        //    _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
-        //    _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerStartFailedEvent>())).Returns(timerFailedAction);
-        //    var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
-
-        //    var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEvents(_workflow.Object);
-
-        //    Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision, timerFailedDecision.Object }));
-        //}
-
-        //[Test]
-        //public void Should_filter_out_duplicate_workflow_decisions()
-        //{
-        //    _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerFiredEvent>())).Returns((WorkflowAction)null);
-        //    _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
-        //    var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
-
-        //    var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEvents(_workflow.Object);
-
-        //    Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision }));
-        //}
-
-        //[Test]
-        //public void Should_filter_out_null_workflow_decisions()
-        //{
-        //    _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerFiredEvent>())).Returns(_interpretedWorkflowAction);
-        //    _workflow.Setup(w => w.WorkflowAction(It.IsAny<TimerStartFailedEvent>())).Returns(_interpretedWorkflowAction);
-        //    var timerFiredAndFailedEvents = CreateTimerFireAndFailedEventGraph();
-
-        //    var workflowDecisions = timerFiredAndFailedEvents.InterpretNewEvents(_workflow.Object);
-
-        //    Assert.That(workflowDecisions, Is.EquivalentTo(new[] { _expectedWorkflowDecision }));
-        //}
 
         [Test]
         public void Should_be_active_when_activity_is_just_started()
@@ -410,16 +423,6 @@ namespace Guflow.Tests.Decider
             var activityScheduled = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion));
             var timerStarted = _builder.TimerStartedGraph(Identity.Timer(TimerName), TimeSpan.FromSeconds(1));
             return timerStarted.Concat(activityScheduled).Concat(activityStarted).Concat(nonInterpretEvent).ToArray();
-        }
-      
-        private HistoryEvent [] TimerFireAndFailedEventGraph()
-        {
-            var timerStartedEventFileGraph =
-                _builder.TimerStartFailedGraph(Identity.Timer(TimerName), "cause");
-            var timerFiredEventGraph = _builder.TimerFiredGraph(Identity.Timer(TimerName),
-                TimeSpan.FromSeconds(4));
-
-            return  timerFiredEventGraph.Concat(timerStartedEventFileGraph).ToArray();
         }
     }
 }
