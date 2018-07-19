@@ -637,7 +637,7 @@ namespace Guflow.Decider
                     result.Add(workflowEvent.Interpret(this));
                 }
                 var decisions = result.Where(w => w != null).SelectMany(a => a.Decisions()).Distinct();
-                return decisions.CompatibleDecisions(this).Where(d => d != WorkflowDecision.Empty); ;
+                return decisions.CompatibleDecisions(this).Where(d => d != WorkflowDecision.Empty).ToArray(); ;
             }
             finally
             {   

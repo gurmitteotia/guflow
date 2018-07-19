@@ -97,7 +97,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_set_the_optional_attributes_of_aws_activity_decision()
         {
-            _scheduleActivityDecision.UseInputFunc(()=>"input");
+            _scheduleActivityDecision.Input = "input";
             _scheduleActivityDecision.TaskList = "list";
             _scheduleActivityDecision.TaskPriority = 20;
             var swfDecision = _scheduleActivityDecision.SwfDecision();

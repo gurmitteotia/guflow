@@ -23,14 +23,15 @@ namespace Guflow.Tests.Decider
         private const string ChargeCustomerLambda = "ChargeCustomerLambda";
         private const string SendEmailLambda = "SendEmailLambda";
 
-        private EventGraphBuilder _builder;
+        private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
+            _eventGraphBuilder = new EventGraphBuilder();
             _eventsBuilder = new HistoryEventsBuilder();
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
         }
 
         [Test]
@@ -336,7 +337,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void No_workflow_item_is_scheduled_when_all_of_its_startup_activities_are_not_scheduled()
         {
-            _eventsBuilder.AddNewEvents(_builder.WorkflowStartedEvent());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowStartedEvent());
             var workflow = new WorkflowWithNotSchedulableStartupActivities();
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
@@ -347,7 +348,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void No_workflow_item_is_scheduled_when_its_startup_activity_and_timer_are_not_scheduled()
         {
-            _eventsBuilder.AddNewEvents(_builder.WorkflowStartedEvent());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowStartedEvent());
             var workflow = new WorkflowWithNotSchedulableStartupActivityAndTimer();
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
@@ -397,7 +398,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Schedule_a_lambda_child_item_when_all_of_its_parent_branches_are_not_active()
         {
-            _eventsBuilder.AddProcessedEvents(_builder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(CompletedLambdaGraph(BookHotelLambda));
             _eventsBuilder.AddNewEvents(CompletedLambdaGraph(AddDinnerLambda));
 
@@ -409,7 +410,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Schedule_first_joint_lambda_when_jumping_down_the_branch()
         {
-            _eventsBuilder.AddProcessedEvents(_builder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(CompletedLambdaGraph(BookHotelLambda));
             _eventsBuilder.AddNewEvents(CompletedLambdaGraph(AddDinnerLambda));
 
@@ -424,19 +425,19 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] CompletedActivityGraph(string activityName)
         {
-            return _builder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result").ToArray();
+            return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result").ToArray();
         }
         private HistoryEvent[] StartedActivityGraph(string activityName)
         {
-            return _builder.ActivityStartedGraph(Identity.New(activityName, Version), "id").ToArray();
+            return _eventGraphBuilder.ActivityStartedGraph(Identity.New(activityName, Version), "id").ToArray();
         }
         private HistoryEvent[] CompletedLambdaGraph(string lambdaName)
         {
-            return _builder.LambdaCompletedEventGraph(Identity.Lambda(lambdaName), "id", "result").ToArray();
+            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(lambdaName), "id", "result").ToArray();
         }
         private HistoryEvent[] StartedLambdaGraph(string lambdaName)
         {
-            return _builder.LambdaStartedEventGraph(Identity.Lambda(lambdaName), "id").ToArray();
+            return _eventGraphBuilder.LambdaStartedEventGraph(Identity.Lambda(lambdaName), "id").ToArray();
         }
 
         [WorkflowDescription("1.0")]

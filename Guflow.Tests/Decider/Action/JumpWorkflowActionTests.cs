@@ -25,6 +25,8 @@ namespace Guflow.Tests.Decider
         {
             _builder = new EventGraphBuilder();
             _eventsBuilder = new HistoryEventsBuilder();
+            _eventsBuilder.AddProcessedEvents(_builder.WorkflowStartedEvent());
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(new []{_builder.WorkflowStartedEvent()}));
         }
 
         [Test]
@@ -83,7 +85,6 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Jump_to_parent_lambda_item()
         {
-            _eventsBuilder.AddProcessedEvents(_builder.WorkflowStartedEvent());
             _eventsBuilder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion));
 
             var decisions = new WorkflowToJumpToParentLambda().Decisions(_eventsBuilder.Result());

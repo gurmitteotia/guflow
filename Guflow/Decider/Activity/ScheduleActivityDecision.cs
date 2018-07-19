@@ -8,15 +8,14 @@ namespace Guflow.Decider
     internal sealed class ScheduleActivityDecision : WorkflowDecision
     {
         private readonly Identity _identity;
-        private Func<string> _inputFunc;
         public ScheduleActivityDecision(Identity identity) : base(false)
         {
             _identity = identity;
-            _inputFunc = () => null;
         }
 
         public ActivityTimeouts Timeouts { get; internal set; }
-        public string Input => _inputFunc();
+        public string Input { get; set; }
+   
         public string TaskList { get; set; }
         public int? TaskPriority { get; set; }
 
@@ -24,11 +23,6 @@ namespace Guflow.Decider
         internal override bool IsFor(WorkflowItem workflowItem)
         {
             return workflowItem.Has(_identity);
-        }
-
-        internal void UseInputFunc(Func<string> inputFunc)
-        {
-            _inputFunc = inputFunc;
         }
         public override bool Equals(object other)
         {

@@ -10,12 +10,14 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class StartWorkflowActionTests
     {
-        private EventGraphBuilder _builder;
+        private EventGraphBuilder _eventGraphBuilder;
+        private HistoryEventsBuilder _eventsBuilder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
+            _eventGraphBuilder = new EventGraphBuilder();
+            _eventsBuilder = new HistoryEventsBuilder();
         }
         [Test]
         public void Return_workflow_completed_decision_when_workflow_does_not_have_any_schedulable_items()
@@ -31,10 +33,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Return_schedule_decisions_for_startup_items()
         {
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowStartedEvent());
             var workflow = new TestWorkflow();
-            var startWorkflowAction = workflow.StartupAction;
 
-            var workflowStartedDecisions = startWorkflowAction.Decisions();
+            var workflowStartedDecisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Download", "1.0")) }));
         }
@@ -70,7 +72,7 @@ namespace Guflow.Tests.Decider
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {
-            var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion), "id", "res");
+            var allHistoryEvents = _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class TestWorkflow : Workflow

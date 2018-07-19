@@ -228,12 +228,6 @@ namespace Guflow.Decider
         {
             return _onFailedSchedulingAction(activitySchedulingFailedEvent);
         }
-        private string GetActivityInput()
-        {
-            var inputObject = _inputFunc(this);
-            return inputObject.ToAwsString();
-        }
-
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
             if (!_whenFunc(this))
@@ -241,7 +235,7 @@ namespace Guflow.Decider
                     : _onFalseAction(this).Decisions();
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
-            scheduleActivityDecision.UseInputFunc(GetActivityInput);
+            scheduleActivityDecision.Input = _inputFunc(this).ToAwsString();
             scheduleActivityDecision.TaskList = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);
             scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
