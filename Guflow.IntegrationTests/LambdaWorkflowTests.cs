@@ -40,10 +40,10 @@ namespace Guflow.IntegrationTests
             workflow.Completed += (s, e) => result = e.Result;
             _workflowHost = await HostAsync(workflow);
 
-            await _domain.StartWorkflow<ScheduleLambdaWorkflow>("hotel", _taskListName, "put your role");
+            await _domain.StartWorkflow<ScheduleLambdaWorkflow>(new WorkflowInput(){Id = "10"}, _taskListName, "put your role here.");
             @event.WaitOne();
 
-            Assert.That(result, Is.EqualTo("hotelbooked"));
+            Assert.That(result, Is.EqualTo("\"hotelbooked\""));
         }
 
         private async Task<WorkflowHost> HostAsync(params Workflow[] workflows)
@@ -63,6 +63,11 @@ namespace Guflow.IntegrationTests
 
                 ScheduleAction(i => CompleteWorkflow(i.ParentLambda().Result())).AfterLambda("BookHotelLambda");
             }
+        }
+
+        private class WorkflowInput
+        {
+            public string Id;
         }
     }
 }

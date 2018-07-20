@@ -1,6 +1,8 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Guflow.Properties;
 
 namespace Guflow.Decider
@@ -78,6 +80,12 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(lambdaItem, nameof(lambdaItem));
             return lambdaItem.LastEvent is LambdaTimedoutEvent;
+        }
+
+        internal static ILambdaItem First(this IEnumerable<ILambdaItem> items, string name, string positionalName = "")
+        {
+            Ensure.NotNull(items, nameof(items));
+            return items.OfType<LambdaItem>().First(t => t.Has(Identity.Lambda(name, positionalName)));
         }
 
         

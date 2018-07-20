@@ -24,8 +24,8 @@ namespace Guflow
 
         internal static dynamic FromJson(this string jsonData)
         {
-            if (jsonData.IsValidJson())
-                return JObject.Parse(jsonData);
+            if (jsonData.TryToParse(out JObject result))
+                return result;
             return jsonData;
         }
         internal static bool IsValidJson(this object value)
@@ -35,7 +35,24 @@ namespace Guflow
                 return false;
             try
             {
-                JToken.Parse(strValue);
+                JObject.Parse(strValue);
+                return true;
+            }
+            catch (JsonReaderException)
+            {
+                return false;
+            }
+        }
+
+        private static bool TryToParse(this object value, out JObject result)
+        {
+            result = null;
+            var strValue = value as string;
+            if (string.IsNullOrWhiteSpace(strValue))
+                return false;
+            try
+            {
+                result = JObject.Parse(strValue);
                 return true;
             }
             catch (JsonReaderException)

@@ -267,6 +267,15 @@ namespace Guflow.Tests.Decider
             Assert.Throws<InvalidOperationException>(() => workflow.AccessEvents());
         }
 
+        [Test]
+        public void All_lambdas()
+        {
+            var workflow = new WorkflowWithLambda();
+
+            Assert.That(workflow.AllLambdaItems.Count(), Is.EqualTo(2));
+            Assert.That(workflow.LambdaItem("Lambda2").Name, Is.EqualTo("Lambda2"));
+        }
+
 
         private IEnumerable<WorkflowEvent> Events(params WorkflowDecision[] decisions)
             => decisions.Select(d => new TestEvent(d));
@@ -280,7 +289,21 @@ namespace Guflow.Tests.Decider
                 new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2)),
                 new CancelActivityDecision(Identity.New("newid", "1.0")),
                 new CancelTimerDecision(Identity.Timer("first")),
+                new ScheduleLambdaDecision(Identity.Lambda("name"),"input" ), 
             };
+        }
+
+        private class WorkflowWithLambda : Workflow
+        {
+            public WorkflowWithLambda()
+            {
+                ScheduleLambda("Lambda1");
+                ScheduleLambda("Lambda2");
+            }
+
+            public IEnumerable<ILambdaItem> AllLambdaItems => Lambdas;
+
+            public ILambdaItem LambdaItem(string name) => Lambda(name);
         }
 
         private class StubWorkflow : Workflow

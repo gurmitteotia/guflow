@@ -103,6 +103,8 @@ namespace Guflow.Decider
 
         public IEnumerable<ITimerItem> AllTimers => _workflowItems.OfType<TimerItem>();
 
+        public IEnumerable<ILambdaItem> AllLambdas => _workflowItems.OfType<LambdaItem>();
+
         private TimerItem TimerOf(Identity identity)
         {
             return _workflowItems.OfType<TimerItem>().FirstOrDefault(s => s.Has(identity));

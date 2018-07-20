@@ -14,9 +14,14 @@ namespace Guflow.Lambda
         /// <param name="input"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public string BookHotelLambda(string input, ILambdaContext context)
+        public string BookHotelLambda(Input input, ILambdaContext context)
         {
-            return input + "booked";
+            return "hotelbooked";
         }
+    }
+
+    public class Input
+    {
+        public string Id;
     }
 }

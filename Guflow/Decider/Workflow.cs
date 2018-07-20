@@ -452,7 +452,12 @@ namespace Guflow.Decider
         protected IEnumerable<ITimerItem> Timers => _allWorkflowItems.AllTimers;
 
         /// <summary>
-        /// Returns the child activity. Throws exception if activity is not child of this workflow.
+        /// Returns all lambda function configured in workflow.
+        /// </summary>
+        protected IEnumerable<ILambdaItem> Lambdas => _allWorkflowItems.AllLambdas;
+
+        /// <summary>
+        /// Returns the activity configured in this workflow. Throws exception if activity is not found
         /// </summary>
         /// <typeparam name="TType">Activity type</typeparam>
         /// <param name="positionalName"></param>
@@ -460,7 +465,7 @@ namespace Guflow.Decider
         protected IActivityItem Activity<TType>(string positionalName =null) where TType:Activity => Activities.First<TType>(positionalName);
 
         /// <summary>
-        /// Returns the child activity. Throws exception if activity is not child of this workflow.
+        /// Returns the activity configured in this workflow. Throws exception if activity is not found.
         /// </summary>
         /// <param name="name"></param>
         /// <param name="version"></param>
@@ -468,11 +473,18 @@ namespace Guflow.Decider
         /// <returns></returns>
         protected IActivityItem Activity(string name, string version, string positionalName = null) => Activities.First(name, version, positionalName);
         /// <summary>
-        /// Returns the child timer by given name. Throws exception when timer is not child of this workflow.
+        /// Returns the timer configured in this workflow.. Throws exception when timer is not child of this workflow.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
         protected ITimerItem Timer(string name) => Timers.First(name);
+
+        /// <summary>
+        /// Returns the lambda configured in workflow. Throws exception when lambda is not found.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        protected ILambdaItem Lambda(string name, string positionalName ="") => Lambdas.First(name, positionalName);
 
         /// <summary>
         /// Indicate if workflow history event has any active event. An active event indicates that a scheduling item (activity, timer...) is active. e.g. if an activity is just started but not finished/failed/cancelled

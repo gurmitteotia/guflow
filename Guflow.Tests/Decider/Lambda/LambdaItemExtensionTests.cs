@@ -20,6 +20,30 @@ namespace Guflow.Tests.Decider
             _builder = new EventGraphBuilder();
             _lambdaItem = new Mock<ILambdaItem>();
         }
+
+        [Test]
+        public void Result_can_return_string_as_dynamic_type()
+        {
+            var result = "result1";
+            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+
+            var lambdaResult = _lambdaItem.Object.Result();
+
+            Assert.That((string)lambdaResult, Is.EqualTo(result));
+
+        }
+
+        [Test]
+        public void Result_can_return_quoted_string_as_dynamic_type()
+        {
+            var result = "\"result1\"";
+            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+
+            var lambdaResult = _lambdaItem.Object.Result();
+
+            Assert.That((string)lambdaResult, Is.EqualTo(result));
+
+        }
         [Test]
         public void Result_can_return_complex_activity_result_as_dynamic_type()
         {

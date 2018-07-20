@@ -38,7 +38,7 @@ namespace Guflow.IntegrationTests
             return _domain.Host(activityTypes);
         }
 
-        public async Task<string> StartWorkflow<TWorkflow>(string input, string taskListName, string lambdaRole = null) where TWorkflow :Workflow
+        public async Task<string> StartWorkflow<TWorkflow>(object input, string taskListName, string lambdaRole = null) where TWorkflow :Workflow
         {
             var workflowId = Guid.NewGuid().ToString();
             var startRequest = StartWorkflowRequest.For<TWorkflow>(workflowId);
