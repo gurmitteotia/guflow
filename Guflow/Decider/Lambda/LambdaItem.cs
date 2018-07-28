@@ -32,26 +32,21 @@ namespace Guflow.Decider
 
         public string PositionalName => Identity.PositionalName;
 
-        public override WorkflowItemEvent LastEvent
+        public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
         {
-            get
-            {
-                var lambdaEvent = WorkflowHistoryEvents.LastLambdaEvent(this);
-                var timerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer);
-                if (lambdaEvent > timerEvent) return lambdaEvent;
-                return timerEvent;
-            }
+            var lambdaEvent = WorkflowHistoryEvents.LastLambdaEvent(this);
+            var timerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
+            if (lambdaEvent > timerEvent) return lambdaEvent;
+            return timerEvent;
         }
 
-        public override IEnumerable<WorkflowItemEvent> AllEvents
+        public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
         {
-            get
-            {
-                var lambdaEvents = WorkflowHistoryEvents.AllLambdaEvents(this);
-                var timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer);
-                return lambdaEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
-            }
+            var lambdaEvents = WorkflowHistoryEvents.AllLambdaEvents(this);
+            var timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer, true);
+            return lambdaEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
         }
+
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
             return new[] { new ScheduleLambdaDecision(Identity, _input(this), _timeout(this)) };

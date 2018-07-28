@@ -6,14 +6,13 @@ namespace Guflow.Decider
     internal interface IWorkflowHistoryEvents
     {
         WorkflowItemEvent LastActivityEvent(ActivityItem activityItem);
-        WorkflowItemEvent LastTimerEvent(TimerItem timerItem);
-        IEnumerable<WorkflowDecision> InterpretNewEvents(IWorkflow workflow);
+        WorkflowItemEvent LastTimerEvent(TimerItem timerItem, bool includeRescheduleTimerEvents);
         IEnumerable<WorkflowEvent> NewEvents();
         WorkflowStartedEvent WorkflowStartedEvent();
         bool HasActiveEvent();
         long LatestEventId { get; }
         IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem);
-        IEnumerable<WorkflowItemEvent> AllTimerEvents(TimerItem timerItem);
+        IEnumerable<WorkflowItemEvent> AllTimerEvents(TimerItem timerItem, bool includeRescheduleTimerEvents);
         IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents();
         IEnumerable<WorkflowSignaledEvent> AllSignalEvents();
         IEnumerable<WorkflowCancellationRequestedEvent> AllWorkflowCancellationRequestedEvents();

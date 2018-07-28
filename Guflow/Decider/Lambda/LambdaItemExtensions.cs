@@ -18,7 +18,7 @@ namespace Guflow.Decider
         public static dynamic Result(this ILambdaItem lambdaItem)
         {
             Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            var completedEvent = lambdaItem.LastEvent as LambdaCompletedEvent;
+            var completedEvent = lambdaItem.LastEvent() as LambdaCompletedEvent;
             if (completedEvent == null)
                 throw new InvalidOperationException(Resources.Lambda_result_can_not_be_accessed);
             return completedEvent.Result.FromJson();
@@ -33,7 +33,7 @@ namespace Guflow.Decider
         public static TType Result<TType>(this ILambdaItem lambdaItem)
         {
             Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            var completedEvent = lambdaItem.LastEvent as LambdaCompletedEvent;
+            var completedEvent = lambdaItem.LastEvent() as LambdaCompletedEvent;
             if (completedEvent == null)
                 throw new InvalidOperationException(Resources.Lambda_result_can_not_be_accessed);
             try
@@ -56,7 +56,7 @@ namespace Guflow.Decider
         public static bool HasCompleted(this ILambdaItem lambdaItem)
         {
             Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            return lambdaItem.LastEvent is LambdaCompletedEvent;
+            return lambdaItem.LastEvent() is LambdaCompletedEvent;
         }
 
 
@@ -68,7 +68,7 @@ namespace Guflow.Decider
         public static bool HasFailed(this ILambdaItem lambdaItem)
         {
             Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            return lambdaItem.LastEvent is LambdaFailedEvent;
+            return lambdaItem.LastEvent() is LambdaFailedEvent;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Guflow.Decider
         public static bool HasTimedout(this ILambdaItem lambdaItem)
         {
             Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            return lambdaItem.LastEvent is LambdaTimedoutEvent;
+            return lambdaItem.LastEvent() is LambdaTimedoutEvent;
         }
 
         internal static ILambdaItem First(this IEnumerable<ILambdaItem> items, string name, string positionalName = "")

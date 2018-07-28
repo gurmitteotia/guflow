@@ -44,9 +44,11 @@ namespace Guflow.Decider
             return timerItem;
         }
 
-        public override WorkflowItemEvent LastEvent => WorkflowHistoryEvents.LastTimerEvent(this);
+        public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
+            => WorkflowHistoryEvents.LastTimerEvent(this, includeRescheduleTimerEvents);
 
-        public override IEnumerable<WorkflowItemEvent> AllEvents => WorkflowHistoryEvents.AllTimerEvents(this);
+        public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false) 
+            => WorkflowHistoryEvents.AllTimerEvents(this, includeRescheduleTimerEvents);
 
         public IFluentTimerItem FireAfter(TimeSpan time)
         {

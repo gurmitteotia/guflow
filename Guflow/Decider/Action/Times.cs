@@ -11,13 +11,18 @@ namespace Guflow.Decider
         {
             _count = count;
         }
+        /// <summary>
+        /// Limit the rescheduling to giving number of counts.
+        /// </summary>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public static Limit Count(uint count)
         {
             return new Limit(count);
         }
         internal bool IsExceeded(WorkflowItem workflowItem)
         {
-            var allEvents = workflowItem.Events(workflowItem.LastEvent.GetType());
+            var allEvents = workflowItem.Events(workflowItem.LastEvent().GetType());
             return allEvents.Count() > _count;
         }
     }

@@ -25,7 +25,7 @@ namespace Guflow.Tests.Decider
         public void Result_can_return_string_as_dynamic_type()
         {
             var result = "result1";
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             var lambdaResult = _lambdaItem.Object.Result();
 
@@ -37,7 +37,7 @@ namespace Guflow.Tests.Decider
         public void Result_can_return_quoted_string_as_dynamic_type()
         {
             var result = "\"result1\"";
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             var lambdaResult = _lambdaItem.Object.Result();
 
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
         public void Result_can_return_complex_activity_result_as_dynamic_type()
         {
             var result = new { Id = 1, Name = "test" }.ToAwsString();
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             var lambdaResult = _lambdaItem.Object.Result();
 
@@ -59,7 +59,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_last_event_is_not_completed_event()
         {
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(FailedEvent("reason", "details"));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(FailedEvent("reason", "details"));
 
             Assert.Throws<InvalidOperationException>(() => _lambdaItem.Object.Result());
         }
@@ -68,7 +68,7 @@ namespace Guflow.Tests.Decider
         public void Result_can_return_complex_activity_result_as_complex_type()
         {
             var result = new { Id = 1, Name = "test" }.ToAwsString();
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             var lambdaResult = _lambdaItem.Object.Result<ResultType>();
 
@@ -80,7 +80,7 @@ namespace Guflow.Tests.Decider
         public void Result_throws_exception_when_casting_complex_type_to_primitive_type()
         {
             var result = new { Id = 1, Name = "test" }.ToAwsString();
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             Assert.Throws<InvalidCastException>(() => _lambdaItem.Object.Result<int>());
         }
@@ -88,30 +88,30 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Has_completed()
         {
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(""));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(""));
             Assert.IsTrue(_lambdaItem.Object.HasCompleted());
 
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(FailedEvent("",""));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(FailedEvent("",""));
             Assert.IsFalse(_lambdaItem.Object.HasCompleted());
         }
 
         [Test]
         public void Has_failed()
         {
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(FailedEvent("r", "d"));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(FailedEvent("r", "d"));
             Assert.IsTrue(_lambdaItem.Object.HasFailed());
 
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("d"));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("d"));
             Assert.IsFalse(_lambdaItem.Object.HasFailed());
         }
         
         [Test]
         public void Has_timedout()
         {
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(TimedoutEvent("d"));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(TimedoutEvent("d"));
             Assert.IsTrue(_lambdaItem.Object.HasTimedout());
 
-            _lambdaItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("d"));
+            _lambdaItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("d"));
             Assert.IsFalse(_lambdaItem.Object.HasTimedout());
         }
       

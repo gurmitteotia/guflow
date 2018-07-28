@@ -26,12 +26,14 @@ namespace Guflow.Decider
         /// <summary>
         /// Return latest event for workflow item. Returns null when no event is found.
         /// </summary>
-        WorkflowItemEvent LastEvent { get; }
+        /// <param name="includeRescheduleTimerEvents">Pass true if want to return reschedule timer event, if any, associated with this workflow item.</param>
+        WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false);
 
         /// <summary>
         /// Returns all events 
         /// </summary>
-        IEnumerable<WorkflowItemEvent> AllEvents { get; }
+        /// <param name="includeRescheduleTimerEvents">Pass true if want to return reschedule timer events, if any, associated with this workflow item.</param>
+        IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false);
 
         /// <summary>
         /// Returns true if workflow item is active otherwise false is return.

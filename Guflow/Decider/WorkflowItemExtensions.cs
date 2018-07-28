@@ -13,11 +13,12 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="workflowItem"></param>
         /// <param name="eventType"></param>
+        /// <param name="includeRescheduleTimerEvents"></param>
         /// <returns></returns>
-        public static IEnumerable<WorkflowItemEvent> Events(this IWorkflowItem workflowItem, Type eventType)
+        public static IEnumerable<WorkflowItemEvent> Events(this IWorkflowItem workflowItem, Type eventType, bool includeRescheduleTimerEvents=false)
         {
             Ensure.NotNull(workflowItem, "workflowItem");
-            return workflowItem.AllEvents.Where(e => e.GetType() == eventType);
+            return workflowItem.AllEvents(includeRescheduleTimerEvents).Where(e => e.GetType() == eventType);
         }
 
         /// <summary>
@@ -25,11 +26,12 @@ namespace Guflow.Decider
         /// </summary>
         /// <typeparam name="TEvent"></typeparam>
         /// <param name="workflowItem"></param>
+        /// <param name="includeRescheduleTimerEvents"></param>
         /// <returns></returns>
-        public static IEnumerable<TEvent> Events<TEvent>(this IWorkflowItem workflowItem) where TEvent : WorkflowItemEvent
+        public static IEnumerable<TEvent> Events<TEvent>(this IWorkflowItem workflowItem, bool includeRescheduleTimerEvents = false) where TEvent : WorkflowItemEvent
         {
             Ensure.NotNull(workflowItem, "workflowItem");
-            return workflowItem.AllEvents.OfType<TEvent>();
+            return workflowItem.AllEvents(includeRescheduleTimerEvents).OfType<TEvent>();
         }
 
         /// <summary>

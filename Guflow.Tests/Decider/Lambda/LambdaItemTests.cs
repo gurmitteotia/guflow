@@ -113,7 +113,7 @@ namespace Guflow.Tests.Decider
                 _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result", TimeSpan.FromSeconds(2));
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
-            var allEvents = lamdbaItem.AllEvents;
+            var allEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new []{new LambdaCompletedEvent(eventGraph.First(), eventGraph)}));
         }
@@ -125,7 +125,7 @@ namespace Guflow.Tests.Decider
                 _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
-            var allEvents = lamdbaItem.AllEvents;
+            var allEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new[] { new LambdaFailedEvent(eventGraph.First(), eventGraph) }));
         }
@@ -136,7 +136,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = _builder.LamdbaTimedoutEventGraph(_lambdaIdentity, "input", "reason");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
-            var allEvents = lamdbaItem.AllEvents;
+            var allEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new[] { new LambdaTimedoutEvent(eventGraph.First(), eventGraph) }));
         }
@@ -147,7 +147,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = _builder.LambdaStartedEventGraph(_lambdaIdentity, "input");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
-            var allEvents = lamdbaItem.AllEvents;
+            var allEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new[] { new LambdaStartedEvent(eventGraph.First(), eventGraph) }));
         }
@@ -158,7 +158,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = _builder.LambdaStartFailedEventGraph(_lambdaIdentity, "input", "reason", "msg");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
-            var allEvents = lamdbaItem.AllEvents;
+            var allEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new[] { new LambdaStartFailedEvent(eventGraph.First(), eventGraph) }));
         }
@@ -169,7 +169,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = _builder.LambdaScheduledEventGraph(_lambdaIdentity, "input");
             var lamdbaItem = CreateLambdaItem(new[]{eventGraph});
 
-            var allEvents = lamdbaItem.AllEvents;
+            var allEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new[] { new LambdaScheduledEvent(eventGraph) }));
         }
@@ -180,7 +180,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = _builder.LambdaSchedulingFailedEventGraph(_lambdaIdentity, "reason");
             var lamdbaItem = CreateLambdaItem(new[] { eventGraph });
 
-            var allEvents = lamdbaItem.AllEvents;
+            var allEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new[] { new LambdaSchedulingFailedEvent(eventGraph) }));
         }
@@ -192,7 +192,7 @@ namespace Guflow.Tests.Decider
             var otherLambdaEvent = _builder.LambdaCompletedEventGraph(Identity.Lambda("other"), "input", "result", TimeSpan.FromSeconds(1));
             var lamdbaItem = CreateLambdaItem(eventGraph.Concat(otherLambdaEvent));
 
-            var allEvents = lamdbaItem.AllEvents;
+            var allEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new[] { new LambdaCompletedEvent(eventGraph.First(), eventGraph) }));
         }
@@ -205,7 +205,7 @@ namespace Guflow.Tests.Decider
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
-            var lambdaEvents = lamdbaItem.AllEvents;
+            var lambdaEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(lambdaEvents, Is.EqualTo(new LambdaEvent[]
             {
@@ -222,7 +222,7 @@ namespace Guflow.Tests.Decider
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
-            var lambdaEvents = lamdbaItem.AllEvents;
+            var lambdaEvents = lamdbaItem.AllEvents(true);
 
             Assert.That(lambdaEvents, Is.EqualTo(new WorkflowItemEvent[]
             {
@@ -239,7 +239,7 @@ namespace Guflow.Tests.Decider
             var allEvents = completedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
-            var lastEvent = lamdbaItem.LastEvent;
+            var lastEvent = lamdbaItem.LastEvent(true);
 
             Assert.That(lastEvent, Is.EqualTo(new LambdaCompletedEvent(completedEventGraph.First(), allEvents)));
         }
@@ -252,7 +252,7 @@ namespace Guflow.Tests.Decider
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
-            var lastEvent = lamdbaItem.LastEvent;
+            var lastEvent = lamdbaItem.LastEvent(true);
 
             Assert.That(lastEvent, Is.EqualTo(new TimerStartedEvent(startedEventGraph.First(), allEvents)));
         }
@@ -263,7 +263,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = _builder.LambdaCompletedEventGraph(_lambdaIdentity, "input", "result");
             var lamdbaItem = CreateLambdaItem(eventGraph);
 
-            Assert.IsTrue(ReferenceEquals(lamdbaItem.LastEvent, lamdbaItem.LastEvent));
+            Assert.IsTrue(ReferenceEquals(lamdbaItem.LastEvent(true), lamdbaItem.LastEvent(true)));
         }
         private LambdaItem CreateLambdaItem(IEnumerable<HistoryEvent> allEvents)
         {

@@ -38,29 +38,15 @@ namespace Guflow.Decider
             return result;
         }
 
-        public WorkflowItemEvent LastTimerEvent(TimerItem timerItem)
+        public WorkflowItemEvent LastTimerEvent(TimerItem timerItem, bool includeRescheduleTimerEvents)
         {
             WorkflowItemEvent result = null;
             if (_cachedTimerEvents.TryGetValue(timerItem, out result)) return result;
 
-            result = AllTimerEvents(timerItem).FirstOrDefault();
+            result = AllTimerEvents(timerItem, includeRescheduleTimerEvents).FirstOrDefault();
             _cachedTimerEvents.Add(timerItem, result);
             return result;
         }
-
-        //TODO: Move this code outside of this class.
-        public IEnumerable<WorkflowDecision> InterpretNewEvents(IWorkflow workflow)
-        {
-            var result = new List<WorkflowAction>();
-            
-            foreach(var workflowEvent in NewEvents())
-            { 
-                workflow.SetCurrentExecutingEvent(workflowEvent);
-                result.Add(workflowEvent.Interpret(workflow));
-            }
-            return result.Where(w=>w!=null).SelectMany(a => a.Decisions()).Distinct();
-        }
-
         public IEnumerable<WorkflowEvent> NewEvents()
         {
             var events = new List<WorkflowEvent>();
@@ -113,7 +99,7 @@ namespace Guflow.Decider
             }
         }
 
-        public IEnumerable<WorkflowItemEvent> AllTimerEvents(TimerItem timerItem)
+        public IEnumerable<WorkflowItemEvent> AllTimerEvents(TimerItem timerItem, bool includeRescheduleTimerEvents)
         {
             var allEvents = new List<WorkflowItemEvent>();
             foreach (var historyEvent in _allHistoryEvents)
@@ -122,6 +108,8 @@ namespace Guflow.Decider
                 if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
+                    if(!includeRescheduleTimerEvents && IsRescheduleTimerEvent(workflowItemEvent))
+                        continue;
                     allEvents.Add(workflowItemEvent);
                     yield return workflowItemEvent;
                 }
@@ -181,6 +169,12 @@ namespace Guflow.Decider
         }
 
         public long LatestEventId => _allHistoryEvents.First().EventId;
+
+        private bool IsRescheduleTimerEvent(WorkflowItemEvent @event)
+        {
+            var timerEvent = @event as TimerEvent;
+            return timerEvent != null && timerEvent.IsARescheduledTimer;
+        }
 
     }
 }

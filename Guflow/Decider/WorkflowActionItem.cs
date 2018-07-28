@@ -15,7 +15,7 @@ namespace Guflow.Decider
             _workflowActionFunc = workflowActionFunc;
         }
 
-        public override WorkflowItemEvent LastEvent => null;
+        public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false) => null;
 
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
@@ -66,6 +66,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        public override IEnumerable<WorkflowItemEvent> AllEvents => Enumerable.Empty<WorkflowItemEvent>();
+        public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
+                                            => Enumerable.Empty<WorkflowItemEvent>();
     }
 }

@@ -39,27 +39,26 @@ namespace Guflow.Decider
             _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
         }
 
-        public override WorkflowItemEvent LastEvent
+        public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
         {
-            get
-            {
-                var latestActivityEvent = WorkflowHistoryEvents.LastActivityEvent(this);
-                var latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer);
-                if (latestActivityEvent > latestTimerEvent)
-                    return latestActivityEvent;
+            var latestActivityEvent = WorkflowHistoryEvents.LastActivityEvent(this);
+            var latestTimerEvent = WorkflowItemEvent.NotFound;
+            if (includeRescheduleTimerEvents)
+                latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
 
-                return latestTimerEvent;
-            }
+            if (latestActivityEvent > latestTimerEvent)
+                return latestActivityEvent;
+
+            return latestTimerEvent;
         }
 
-        public override IEnumerable<WorkflowItemEvent> AllEvents
+        public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
         {
-            get
-            {
-                var activityEvents = WorkflowHistoryEvents.AllActivityEvents(this);
-                var timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer);
-                return activityEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
-            }
+            var activityEvents = WorkflowHistoryEvents.AllActivityEvents(this);
+            var timerEvents = Enumerable.Empty<WorkflowItemEvent>();
+            if(includeRescheduleTimerEvents)
+                timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer, true);
+            return activityEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
         }
 
         public string Version => Identity.Version;
@@ -250,8 +249,8 @@ namespace Guflow.Decider
 
         public override WorkflowDecision GetCancelDecision()
         {
-            var lastEvent = LastEvent;
-            var latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer);
+            var lastEvent = LastEvent(true);
+            var latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
                 return _rescheduleTimer.GetCancelDecision();
 

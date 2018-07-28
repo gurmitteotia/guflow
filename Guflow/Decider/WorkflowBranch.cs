@@ -60,7 +60,7 @@ namespace Guflow.Decider
 
         public bool IsActive(IEnumerable<WorkflowBranch> parentBranches)
         {
-            var lastWorkflowEvents = _workflowItems.Select(w => w.LastEvent);
+            var lastWorkflowEvents = _workflowItems.Select(w => w.LastEvent(true));
             var sortedLastEvents = lastWorkflowEvents.OrderByDescending(e => e, WorkflowEvent.IdComparer);
             if (sortedLastEvents.Any(e => e!=null && e.IsActive))
                 return true;

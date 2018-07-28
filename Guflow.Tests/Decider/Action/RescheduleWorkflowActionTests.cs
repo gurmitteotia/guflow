@@ -14,6 +14,7 @@ namespace Guflow.Tests.Decider
         private const string ActivityVersion = "1.0";
         private const string PositionalName = "First";
         private const string LambdaName = "Lambda1";
+        private const string TimerName = "TimerName1";
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
 
@@ -68,7 +69,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Reschedule_timer_when_total_number_of_scheduling_is_less_than_allowed_limit()
+        public void Reschedule_timer_when_total_number_of_activity_scheduling_is_less_than_allowed_limit()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
@@ -81,7 +82,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Schedule_next_item_when_total_number_of_scheduling_events_exceeds_configured_limit()
+        public void Schedule_next_item_when_total_number_of_activity_scheduling_events_exceeds_configured_limit()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
@@ -89,6 +90,37 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddNewEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new WorkflowToRescheduleActivityWithTimerUpToLimit(2);
          
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("completed") }));
+        }
+
+        [Test]
+        public void Reschedule_timer_when_total_number_of_timer_scheduling_is_less_than_allowed_limit()
+        {
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, false));
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, true));
+            _eventsBuilder.AddNewEvents(TimerFiredEventGraph(TimerName, false));
+            var workflow = new WorkflowToRescheduleTimerWithTimerUpToLimit(2);
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.FromSeconds(2), true) }));
+        }
+
+
+        [Test]
+        public void Schedule_next_item_when_total_number_of_timer_scheduling_exceed_allowed_limit()
+        {
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, false));
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, true));
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, false));
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, true));
+            _eventsBuilder.AddNewEvents(TimerFiredEventGraph(TimerName, false));
+            var workflow = new WorkflowToRescheduleTimerWithTimerUpToLimit(2);
+
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("completed") }));
@@ -141,6 +173,11 @@ namespace Guflow.Tests.Decider
         {
             return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res").ToArray();
         }
+        private HistoryEvent[] TimerFiredEventGraph(string timerName, bool rescheduleTimer)
+        {
+            return _eventGraphBuilder.TimerFiredGraph(Identity.Timer(timerName), TimeSpan.Zero, rescheduleTimer).ToArray();
+        }
+
         private class WorkflowToRescheduleActivity : Workflow
         {
             public WorkflowToRescheduleActivity()
@@ -168,6 +205,17 @@ namespace Guflow.Tests.Decider
                     .OnCompletion(e => Reschedule(e).After(TimeSpan.FromSeconds(2)).UpTo(Limit.Count(limit)));
 
                 ScheduleAction((i)=>CompleteWorkflow("completed")).AfterActivity(ActivityName, ActivityVersion, PositionalName);
+            }
+        }
+
+        private class WorkflowToRescheduleTimerWithTimerUpToLimit : Workflow
+        {
+            public WorkflowToRescheduleTimerWithTimerUpToLimit(uint limit)
+            {
+                ScheduleTimer(TimerName).FireAfter(TimeSpan.FromSeconds(3))
+                    .OnFired(e => Reschedule(e).After(TimeSpan.FromSeconds(2)).UpTo(Limit.Count(limit)));
+
+                ScheduleAction((i) => CompleteWorkflow("completed")).AfterTimer(TimerName);
             }
         }
 

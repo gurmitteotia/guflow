@@ -33,11 +33,11 @@ namespace Guflow.Tests.Decider
         public void Can_filter_out_all_events()
         {
             var allEvents = new WorkflowItemEvent[] {CreateCompletedEvent(), CreateFailedEvent()};
-            _workflowItem.SetupGet(w => w.AllEvents).Returns(allEvents);
+            _workflowItem.Setup(w => w.AllEvents(true)).Returns(allEvents);
 
-            Assert.That(_workflowItem.Object.Events<ActivityCompletedEvent>(), 
+            Assert.That(_workflowItem.Object.Events<ActivityCompletedEvent>(true), 
                 Is.EqualTo(new []{allEvents[0]}));
-            Assert.That(_workflowItem.Object.Events(typeof(ActivityFailedEvent)),
+            Assert.That(_workflowItem.Object.Events(typeof(ActivityFailedEvent), true),
                 Is.EqualTo(new[] { allEvents[1] }));
         }
 

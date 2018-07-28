@@ -24,7 +24,7 @@ namespace Guflow.Tests.Decider
         public void Result_can_return_complex_activity_result_as_dynamic_type()
         {
             var result = new {Id = 1, Name = "test"}.ToAwsString();
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             var activityResult = _activityItem.Object.Result();
 
@@ -36,7 +36,7 @@ namespace Guflow.Tests.Decider
         public void Result_can_return_string_activity_result_as_dynamic_type()
         {
             var result = "test";
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             var activityResult = _activityItem.Object.Result();
 
@@ -46,7 +46,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Result_throws_exception_when_last_event_is_not_activity_completed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(FailedEvent("r","d"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(FailedEvent("r","d"));
 
             Assert.Throws<InvalidOperationException>(() => _activityItem.Object.Result());
         }
@@ -55,7 +55,7 @@ namespace Guflow.Tests.Decider
         public void Result_can_cast_complex_activity_result_to_complex_type()
         {
             var result = new { Id = 1, Name = "test" }.ToAwsString();
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             var activityResult = _activityItem.Object.Result<ResultType>();
 
@@ -66,7 +66,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Result_can_cast_int_activity_result_to_int_type()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("1"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("1"));
 
             var activityResult = _activityItem.Object.Result<int>();
 
@@ -77,7 +77,7 @@ namespace Guflow.Tests.Decider
         public void Result_throws_exception_when_casting_complex_type_to_primitive_type()
         {
             var result = new { Id = 1, Name = "test" }.ToAwsString();
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(result));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(result));
 
             Assert.Throws<InvalidCastException>(()=>_activityItem.Object.Result<int>());
         }
@@ -85,53 +85,53 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Has_completed_returns_true_when_last_event_is_activity_completed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent(""));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent(""));
             Assert.IsTrue(_activityItem.Object.HasCompleted());
         }
 
         [Test]
         public void Has_completed_returns_false_when_last_event_is_not_activity_completed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(StartedEvent());
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(StartedEvent());
             Assert.IsFalse(_activityItem.Object.HasCompleted());
         }
 
         [Test]
         public void Has_failed_returns_true_when_last_event_is_activity_failed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(FailedEvent("r", "d"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(FailedEvent("r", "d"));
             Assert.IsTrue(_activityItem.Object.HasFailed());
         }
         [Test]
         public void Has_failed_returns_false_when_last_event_is_not_activity_failed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("r"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("r"));
             Assert.IsFalse(_activityItem.Object.HasFailed());
         }
 
         [Test]
         public void Has_cancelled_returns_true_when_last_event_is_activity_cancelled_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CancelledEvent("d"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CancelledEvent("d"));
             Assert.IsTrue(_activityItem.Object.HasCancelled());
         }
         [Test]
         public void Has_cancelled_returns_false_when_last_event_is_not_activity_cancelled_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("r"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("r"));
             Assert.IsFalse(_activityItem.Object.HasCancelled());
         }
 
         [Test]
         public void Has_timedout_returns_true_when_last_event_is_activity_timedout_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(TimedoutEvent("d", "d1"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(TimedoutEvent("d", "d1"));
             Assert.IsTrue(_activityItem.Object.HasTimedout());
         }
         [Test]
         public void Has_timedout_returns_false_when_last_event_is_not_activity_timedout_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("r"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("r"));
             Assert.IsFalse(_activityItem.Object.HasTimedout());
         }
 
@@ -147,7 +147,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_failed_event_is_not_null_when_the_last_event_of_activity_is_failed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(FailedEvent("reason", "details"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(FailedEvent("reason", "details"));
             var lastFailedEvent = _activityItem.Object.LastFailedEvent();
 
             Assert.IsNotNull(lastFailedEvent);
@@ -157,7 +157,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_failed_event_is_null_when_the_latest_event_is_completed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("res"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("res"));
             var lastFailedEvent = _activityItem.Object.LastFailedEvent();
 
             Assert.IsNull(lastFailedEvent);
@@ -166,7 +166,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_timed_event_is_not_null_when_the_last_event_of_activity_is_timedout_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(TimedoutEvent("reason", "details"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(TimedoutEvent("reason", "details"));
             var lastTimedoutEvent = _activityItem.Object.LastTimedoutEvent();
 
             Assert.IsNotNull(lastTimedoutEvent);
@@ -176,7 +176,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_timedout_event_is_null_when_the_latest_event_is_completed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("res"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("res"));
             var lastTimedoutEvent = _activityItem.Object.LastTimedoutEvent();
 
             Assert.IsNull(lastTimedoutEvent);
@@ -185,7 +185,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_cancelled_event_is_not_null_when_the_last_event_of_activity_is_cancelled_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CancelledEvent("details"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CancelledEvent("details"));
             var lastCancelledEvent = _activityItem.Object.LastCancelledEvent();
 
             Assert.IsNotNull(lastCancelledEvent);
@@ -194,7 +194,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_cancelled_event_is_null_when_the_latest_event_is_completed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("res"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("res"));
             var lastCancelledEvent = _activityItem.Object.LastCancelledEvent();
 
             Assert.IsNull(lastCancelledEvent);
@@ -203,7 +203,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_completed_event_is_not_null_when_the_last_event_of_activity_is_completed_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CompletedEvent("details"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CompletedEvent("details"));
             var lastCompletedEvent = _activityItem.Object.LastCompletedEvent();
 
             Assert.IsNotNull(lastCompletedEvent);
@@ -212,7 +212,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_completed_event_is_null_when_the_latest_event_is_cancelled_event()
         {
-            _activityItem.SetupGet(a => a.LastEvent).Returns(CancelledEvent("res"));
+            _activityItem.Setup(a => a.LastEvent(false)).Returns(CancelledEvent("res"));
             var lastCompletedEvent = _activityItem.Object.LastCompletedEvent();
 
             Assert.IsNull(lastCompletedEvent);
