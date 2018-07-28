@@ -42,12 +42,12 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        IFluentTimerItem OnFailedCancellation(Func<TimerCancellationFailedEvent, WorkflowAction> action);
+        IFluentTimerItem OnCancellationFailed(Func<TimerCancellationFailedEvent, WorkflowAction> action);
         /// <summary>
         /// Provide a handler to be called back when timer has failed to start in Amazon SWF.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
-        IFluentTimerItem OnStartFailure(Func<TimerStartFailedEvent, WorkflowAction> action);
+        IFluentTimerItem OnStartFailed(Func<TimerStartFailedEvent, WorkflowAction> action);
     }
 }

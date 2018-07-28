@@ -89,7 +89,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleTimer(_timerName).OnFailedCancellation(c => workflowAction);
+                ScheduleTimer(_timerName).OnCancellationFailed(c => workflowAction);
             }
         }
 
@@ -104,7 +104,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomActionForActivity(WorkflowAction workflowAction)
             {
-                ScheduleActivity(_activityName, _activityVersion).RescheduleTimer.OnFailedCancellation(e=>workflowAction);
+                ScheduleActivity(_activityName, _activityVersion).RescheduleTimer.OnCancellationFailed(e=>workflowAction);
             }
         }
     }

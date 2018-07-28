@@ -27,9 +27,9 @@ namespace Guflow.Decider
         {
             var timerItem = new TimerItem(identity, workflow);
             timerItem._rescheduleTimer = timerItem;
-            timerItem.OnStartFailure(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
+            timerItem.OnStartFailed(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
             timerItem.OnCancelled(e => WorkflowAction.CancelWorkflow("RESCHEDULE_TIMER_CANCELLED"));
-            timerItem.OnFailedCancellation(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_CANCELLATION_FAILED", e.Cause));
+            timerItem.OnCancellationFailed(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_CANCELLATION_FAILED", e.Cause));
             timerItem.OnFired(e => WorkflowAction.Schedule(ownerItem));
             return timerItem;
         }
@@ -37,9 +37,9 @@ namespace Guflow.Decider
         {
             var timerItem = new TimerItem(identity, workflow);
             timerItem._rescheduleTimer = Reschedule(timerItem, identity, workflow);
-            timerItem.OnStartFailure(e => e.DefaultAction(workflow));
+            timerItem.OnStartFailed(e => e.DefaultAction(workflow));
             timerItem.OnCancelled(e => e.DefaultAction(workflow));
-            timerItem.OnFailedCancellation(e => e.DefaultAction(workflow));
+            timerItem.OnCancellationFailed(e => e.DefaultAction(workflow));
             timerItem.OnFired(e => e.DefaultAction(workflow));
             return timerItem;
         }
@@ -111,7 +111,7 @@ namespace Guflow.Decider
             _timerCancelledAction = action;
             return this;
         }
-        public IFluentTimerItem OnFailedCancellation(Func<TimerCancellationFailedEvent, WorkflowAction> action)
+        public IFluentTimerItem OnCancellationFailed(Func<TimerCancellationFailedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");
 
@@ -119,7 +119,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        public IFluentTimerItem OnStartFailure(Func<TimerStartFailedEvent, WorkflowAction> action)
+        public IFluentTimerItem OnStartFailed(Func<TimerStartFailedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");
             _startFailureAction = action;

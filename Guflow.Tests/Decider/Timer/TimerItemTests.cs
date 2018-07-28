@@ -135,9 +135,9 @@ namespace Guflow.Tests.Decider
             var timerItem = (IFluentTimerItem) TimerItem.New(_timerIdentity, null);
 
             Assert.Throws<ArgumentNullException>(() => timerItem.OnCancelled(null));
-            Assert.Throws<ArgumentNullException>(() => timerItem.OnFailedCancellation(null));
+            Assert.Throws<ArgumentNullException>(() => timerItem.OnCancellationFailed(null));
             Assert.Throws<ArgumentNullException>(() => timerItem.OnFired(null));
-            Assert.Throws<ArgumentNullException>(() => timerItem.OnStartFailure(null));
+            Assert.Throws<ArgumentNullException>(() => timerItem.OnStartFailed(null));
             Assert.Throws<ArgumentNullException>(() => timerItem.When(null));
 
             Assert.Throws<ArgumentException>(() => timerItem.AfterActivity(null,"1.0"));
