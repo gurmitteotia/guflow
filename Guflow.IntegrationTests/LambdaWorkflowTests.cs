@@ -1,6 +1,7 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
 using System;
+using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 using Guflow.Decider;
@@ -40,7 +41,7 @@ namespace Guflow.IntegrationTests
             workflow.Completed += (s, e) => result = e.Result;
             _workflowHost = await HostAsync(workflow);
 
-            await _domain.StartWorkflow<ScheduleLambdaWorkflow>(new WorkflowInput(){Id = "10"}, _taskListName, "put your role here.");
+            await _domain.StartWorkflow<ScheduleLambdaWorkflow>(new WorkflowInput(){Id = "10"}, _taskListName, ConfigurationManager.AppSettings["LambdaRole"]);
             @event.WaitOne();
 
             Assert.That(result, Is.EqualTo("\"hotelbooked\""));
