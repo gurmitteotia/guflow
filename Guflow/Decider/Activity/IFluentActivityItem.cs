@@ -66,7 +66,7 @@ namespace Guflow.Decider
         /// You also have the option to override triggering workflow action. Refer to Deflow algorithm for more details.
         /// </summary>
         /// <param name="true"></param>
-        /// <param name="falseAction">WorkflowAction when expression is evaluated to be false.</param>
+        /// <param name="falseAction">Provide WorkflowAction when scheduling condition is evaluated to false. By default it will try to schedule the first join item if this is a non startup item.</param>
         /// <returns></returns>
         IFluentActivityItem When(Func<IActivityItem, bool> @true, Func<IActivityItem, WorkflowAction> falseAction);
         /// <summary>

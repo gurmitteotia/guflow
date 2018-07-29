@@ -273,7 +273,7 @@ namespace Guflow.Tests.Decider
             return new[] { WorkflowStartedEvent(input) };
         }
 
-        public HistoryEvent WorkflowStartedEvent(string input = "some input")
+        public HistoryEvent WorkflowStartedEvent(object input = null)
         {
             return new HistoryEvent()
             {
@@ -283,7 +283,7 @@ namespace Guflow.Tests.Decider
                     ChildPolicy = ChildPolicy.Terminate,
                     ContinuedExecutionRunId = "continue run id",
                     ExecutionStartToCloseTimeout = "100",
-                    Input = input,
+                    Input = input.ToAwsString(),
                     LambdaRole = "some role",
                     ParentInitiatedEventId = 10,
                     ParentWorkflowExecution = new WorkflowExecution() { RunId = "parent runid", WorkflowId = "parent workflow id" },

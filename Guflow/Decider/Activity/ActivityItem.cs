@@ -33,7 +33,7 @@ namespace Guflow.Decider
             _inputFunc = a => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _taskListFunc = a => null;
             _whenFunc = a => true;
-            _onFalseAction = a=>new TriggerActions(this).FirstJoint();
+            _onFalseAction = _ =>IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
             _priorityFunc = a => null;
             _timeoutsFunc = a => new ActivityTimeouts();
             _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
@@ -42,7 +42,7 @@ namespace Guflow.Decider
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
         {
             var latestActivityEvent = WorkflowHistoryEvents.LastActivityEvent(this);
-            var latestTimerEvent = WorkflowItemEvent.NotFound;
+            WorkflowItemEvent latestTimerEvent = null;
             if (includeRescheduleTimerEvents)
                 latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
 
@@ -230,8 +230,7 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
             if (!_whenFunc(this))
-                return IsStartupItem()? Enumerable.Empty<WorkflowDecision>()
-                    : _onFalseAction(this).Decisions();
+                return _onFalseAction(this).Decisions();
 
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.Input = _inputFunc(this).ToAwsString();

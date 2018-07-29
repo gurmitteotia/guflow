@@ -21,6 +21,8 @@ namespace Guflow.Tests.Decider
         private const string Version = "1.0";
         private const string BookHotelLambda = "BookHotel";
         private const string AddDinnerLambda = "AddDinnerLambda";
+        private const string BookFlightLambda = "BookFlightLambda";
+        private const string ChooseSeatLambda = "ChooseSeatLambda";
         private const string ChargeCustomerLambda = "ChargeCustomerLambda";
         private const string SendEmailLambda = "SendEmailLambda";
 
@@ -437,6 +439,54 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+        [Test]
+        public void Schedule_the_first_join_lambda_when_schedule_condition_is_evalauated_to_false_for_not_startup_item()
+        {
+            _eventsBuilder = new HistoryEventsBuilder();
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent(new {ChooseSeat = false}));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(BookFlightLambda));
+
+            var decisions = new LambdaWithConditionWorkflow().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
+            }));
+        }
+
+        [Test]
+        public void Return_empty_decision_when_schedule_condition_is_evalauated_to_false_for_startup_item()
+        {
+            _eventsBuilder = new HistoryEventsBuilder();
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowStartedEvent(new { BookFlight=false }));
+
+            var decisions = new LambdaWithConditionWorkflow().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda), "input"),
+            }));
+        }
+
+        [Test]
+        public void Override_the_on_false_trigger_action_to_return_custom_action()
+        {
+            _eventsBuilder = new HistoryEventsBuilder();
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent(new { ChooseSeat = false }));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(BookFlightLambda));
+
+            var decisions = new WorkflowWithCustomTrigger().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                new CompleteWorkflowDecision("finished"), 
+            }));
+        }
+
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
         {
             return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result").ToArray();
@@ -806,6 +856,36 @@ namespace Guflow.Tests.Decider
                 ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
 
                 ScheduleLambda(SendEmailLambda).AfterLambda(ChargeCustomerLambda);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class LambdaWithConditionWorkflow : Workflow
+        {
+            public LambdaWithConditionWorkflow()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda).When(_ => Input.BookFlight);
+                ScheduleLambda(ChooseSeatLambda).When(_ => Input.ChooseSeat).AfterLambda(BookFlightLambda);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowWithCustomTrigger : Workflow
+        {
+            public WorkflowWithCustomTrigger()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda).When(_ => Input.BookFlight);
+                ScheduleLambda(ChooseSeatLambda).When(_ => Input.ChooseSeat, _=>CompleteWorkflow("finished")).AfterLambda(BookFlightLambda);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
     }

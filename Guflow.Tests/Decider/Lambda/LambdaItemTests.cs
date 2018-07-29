@@ -69,6 +69,10 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => lambdaItem.AfterActivity("name", null));
             Assert.Throws<ArgumentException>(() => lambdaItem.AfterTimer(null));
             Assert.Throws<ArgumentException>(() => lambdaItem.AfterLambda(null));
+            Assert.Throws<ArgumentNullException>(() => lambdaItem.When(null));
+            Assert.Throws<ArgumentNullException>(() => lambdaItem.When(null,_=>WorkflowAction.Empty));
+            Assert.Throws<ArgumentNullException>(() => lambdaItem.When(_=>true, null));
+
         }
 
         [Test]
@@ -232,6 +236,22 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void All_events_by_default_filters_out_reschedule_timer_events()
+        {
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
+            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity, TimeSpan.FromSeconds(1), true);
+            var allEvents = startedEventGraph.Concat(failedEventGraph);
+            var lamdbaItem = CreateLambdaItem(allEvents);
+
+            var lambdaEvents = lamdbaItem.AllEvents();
+
+            Assert.That(lambdaEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new LambdaFailedEvent(failedEventGraph.First(), allEvents),
+            }));
+        }
+
+        [Test]
         public void Last_event_returns_latest_event_of_lambda_item()
         {
             var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
@@ -255,6 +275,19 @@ namespace Guflow.Tests.Decider
             var lastEvent = lamdbaItem.LastEvent(true);
 
             Assert.That(lastEvent, Is.EqualTo(new TimerStartedEvent(startedEventGraph.First(), allEvents)));
+        }
+
+        [Test]
+        public void Last_event_by_default_filters_out_rescheduled_timer()
+        {
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
+            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity, TimeSpan.FromSeconds(1), true);
+            var allEvents = startedEventGraph.Concat(failedEventGraph);
+            var lamdbaItem = CreateLambdaItem(allEvents);
+
+            var lastEvent = lamdbaItem.LastEvent();
+
+            Assert.That(lastEvent, Is.EqualTo(new LambdaFailedEvent(failedEventGraph.First(), failedEventGraph)));
         }
 
         [Test]

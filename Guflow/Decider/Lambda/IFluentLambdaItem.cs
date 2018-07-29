@@ -56,5 +56,21 @@ namespace Guflow.Decider
         /// <param name="startFailedAction"></param>
         /// <returns></returns>
         IFluentLambdaItem OnStartFailed(Func<LambdaStartFailedEvent, WorkflowAction> startFailedAction);
+
+        /// <summary>
+        /// Provide an expression which workflow will evaulate before scheduling this lambda. If it is evaulated to false then lambda will not be scheduled.
+        /// </summary>
+        /// <param name="true">Provide functor to evaluate when scheduling the lambda.</param>
+        /// <returns></returns>
+        IFluentLambdaItem When(Func<ILambdaItem, bool> @true);
+
+        /// <summary>
+        /// Provide an expression which workflow will evaulate before scheduling this activity. If it is evaulated to false then activity will not be scheduled.
+        /// You also have the option to override triggering workflow action. Refer to Deflow algorithm for more details.
+        /// </summary>
+        /// <param name="true">Provide functor to evaluate when scheduling the lambda.</param>
+        /// <param name="onFalseAction">Provide WorkflowAction when scheduling condition is evaluated to false. By default it will try to schedule the first join item if this is a non startup item.</param>
+        /// <returns></returns>
+        IFluentLambdaItem When(Func<ILambdaItem, bool> @true, Func<ILambdaItem,WorkflowAction> onFalseAction);
     }
 }

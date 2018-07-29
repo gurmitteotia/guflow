@@ -16,7 +16,8 @@ namespace Guflow.Decider
         private Func<LambdaTimedoutEvent, WorkflowAction> _timedoutAction;
         private Func<LambdaSchedulingFailedEvent, WorkflowAction> _schedulingFailedAction;
         private Func<LambdaStartFailedEvent, WorkflowAction> _startFailedAction;
-
+        private Func<ILambdaItem, bool> _whenFunc = _ => true;
+        private Func<ILambdaItem, WorkflowAction> _onFalseTrigger;
         private readonly TimerItem _rescheduleTimer;
         public LambdaItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
         {
@@ -28,6 +29,7 @@ namespace Guflow.Decider
             _timedoutAction = e => e.DefaultAction(workflow);
             _schedulingFailedAction = e => e.DefaultAction(workflow);
             _startFailedAction = e => e.DefaultAction(workflow);
+            _onFalseTrigger = _=> IsStartupItem()? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
         }
 
         public string PositionalName => Identity.PositionalName;
@@ -35,7 +37,10 @@ namespace Guflow.Decider
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
         {
             var lambdaEvent = WorkflowHistoryEvents.LastLambdaEvent(this);
-            var timerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
+            WorkflowItemEvent timerEvent = null;
+            if(includeRescheduleTimerEvents)
+                timerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
+
             if (lambdaEvent > timerEvent) return lambdaEvent;
             return timerEvent;
         }
@@ -43,12 +48,18 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
         {
             var lambdaEvents = WorkflowHistoryEvents.AllLambdaEvents(this);
-            var timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer, true);
+            var timerEvents = Enumerable.Empty<WorkflowItemEvent>();
+            if(includeRescheduleTimerEvents)
+                timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer, true);
+
             return lambdaEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
         }
 
         public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
         {
+            if (!_whenFunc(this))
+                return _onFalseTrigger(this).Decisions();
+
             return new[] { new ScheduleLambdaDecision(Identity, _input(this), _timeout(this)) };
         }
 
@@ -138,6 +149,22 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(startFailedAction, nameof(startFailedAction));
             _startFailedAction = startFailedAction;
+            return this;
+        }
+
+        public IFluentLambdaItem When(Func<ILambdaItem, bool> @true)
+        {
+            Ensure.NotNull(@true, nameof(@true));
+            _whenFunc = @true;
+            return this;
+        }
+
+        public IFluentLambdaItem When(Func<ILambdaItem, bool> @true, Func<ILambdaItem, WorkflowAction> onFalseAction)
+        {
+            Ensure.NotNull(@true, nameof(@true));
+            Ensure.NotNull(onFalseAction, nameof(onFalseAction));
+            _whenFunc = @true;
+            _onFalseTrigger = onFalseAction;
             return this;
         }
 
