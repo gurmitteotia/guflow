@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
-    public class Limit
+    internal class Limit
     {
         private readonly uint _count;
 
@@ -20,7 +20,8 @@ namespace Guflow.Decider
         {
             return new Limit(count);
         }
-        internal bool IsExceeded(WorkflowItem workflowItem)
+
+        public bool IsExceeded(WorkflowItem workflowItem)
         {
             var allEvents = workflowItem.Events(workflowItem.LastEvent().GetType());
             return allEvents.Count() > _count;

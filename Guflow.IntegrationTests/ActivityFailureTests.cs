@@ -112,7 +112,7 @@ namespace Guflow.IntegrationTests
             public WorkflowToRetryActivityImmediately(uint retryAttempts)
             {
                 ScheduleActivity<FailingActivity>().OnTaskList((t) => _taskListName)
-                                                    .OnFailure(e => Reschedule(e).UpTo(Limit.Count(retryAttempts)));
+                                                    .OnFailure(e => Reschedule(e).UpTo(retryAttempts));
             }
         }
 
@@ -123,7 +123,7 @@ namespace Guflow.IntegrationTests
             public WorkflowToRetryActivityAfterTimeout(uint retryAttempts)
             {
               ScheduleActivity<FailingActivity>().OnTaskList((t) => _taskListName)
-                                                   .OnFailure(e => Reschedule(e).After(TimeSpan.FromSeconds(1)).UpTo(Limit.Count(retryAttempts)));
+                                                   .OnFailure(e => Reschedule(e).After(TimeSpan.FromSeconds(1)).UpTo(retryAttempts));
             }
         }
 

@@ -191,7 +191,7 @@ namespace Guflow.Tests.Decider
             public WorkflowToRescheduleActivityUpToLimit(uint limit)
             {
                 ScheduleActivity(ActivityName, ActivityVersion, PositionalName)
-                    .OnCompletion(e => Reschedule(e).UpTo(Limit.Count(limit)));
+                    .OnCompletion(e => Reschedule(e).UpTo(limit));
 
                 ScheduleAction((i)=>CompleteWorkflow("completed")).AfterActivity(ActivityName, ActivityVersion, PositionalName);
             }
@@ -202,7 +202,7 @@ namespace Guflow.Tests.Decider
             public WorkflowToRescheduleActivityWithTimerUpToLimit(uint limit)
             {
                 ScheduleActivity(ActivityName, ActivityVersion, PositionalName)
-                    .OnCompletion(e => Reschedule(e).After(TimeSpan.FromSeconds(2)).UpTo(Limit.Count(limit)));
+                    .OnCompletion(e => Reschedule(e).After(TimeSpan.FromSeconds(2)).UpTo(limit));
 
                 ScheduleAction((i)=>CompleteWorkflow("completed")).AfterActivity(ActivityName, ActivityVersion, PositionalName);
             }
@@ -213,7 +213,7 @@ namespace Guflow.Tests.Decider
             public WorkflowToRescheduleTimerWithTimerUpToLimit(uint limit)
             {
                 ScheduleTimer(TimerName).FireAfter(TimeSpan.FromSeconds(3))
-                    .OnFired(e => Reschedule(e).After(TimeSpan.FromSeconds(2)).UpTo(Limit.Count(limit)));
+                    .OnFired(e => Reschedule(e).After(TimeSpan.FromSeconds(2)).UpTo(limit));
 
                 ScheduleAction((i) => CompleteWorkflow("completed")).AfterTimer(TimerName);
             }
@@ -231,7 +231,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowToRescheduleLambdaUpToALimit(uint limit)
             {
-                ScheduleLambda(LambdaName).OnCompletion(e => Reschedule(e).UpTo(Limit.Count(limit)));
+                ScheduleLambda(LambdaName).OnCompletion(e => Reschedule(e).UpTo(limit));
                 ScheduleActivity(ActivityName, ActivityVersion).AfterLambda(LambdaName);
             }
         }

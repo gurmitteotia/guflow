@@ -113,7 +113,7 @@
     <Compile Include="Decider\RestartWorkflowDecision.cs" />
     <Compile Include="Decider\Action\StartWorkflowAction.cs" />
     <Compile Include="Decider\Timer\TimerItemsExtension.cs" />
-    <Compile Include="Decider\Action\Times.cs" />
+    <Compile Include="Decider\Action\Limit.cs" />
     <Compile Include="Decider\Action\TriggerActions.cs" />
     <Compile Include="Decider\Action\TriggerWorkflowAction.cs" />
     <Compile Include="Decider\WorkflowActionItem.cs" />

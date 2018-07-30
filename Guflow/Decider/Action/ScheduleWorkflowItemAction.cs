@@ -27,10 +27,11 @@ namespace Guflow.Decider
         /// <summary>
         /// Limit the rescheduling. Once the limit is reached, Guflow returns the default WorkflowAction for event.
         /// </summary>
-        /// <param name="limit"></param>
+        /// <param name="times"></param>
         /// <returns></returns>
-        public WorkflowAction UpTo(Limit limit)
+        public WorkflowAction UpTo(uint times)
         {
+            var limit = Limit.Count(times);
             if (limit.IsExceeded(_workflowItem))
                 _scheduleWorkflowAction = _workflowItem.DefaultActionOnLastEvent();
             return this;
