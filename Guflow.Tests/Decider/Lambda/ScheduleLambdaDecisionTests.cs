@@ -29,7 +29,7 @@ namespace Guflow.Tests.Decider
             Assert.That(awsDecision.DecisionType, Is.EqualTo(DecisionType.ScheduleLambdaFunction));
             var attr = awsDecision.ScheduleLambdaFunctionDecisionAttributes;
             Assert.That(attr.Name, Is.EqualTo("lambda"));
-            Assert.That(attr.Input, Is.EqualTo("input"));
+            Assert.That(attr.Input, Is.EqualTo("\"input\""));
             Assert.That(attr.StartToCloseTimeout, Is.EqualTo("2"));
             Assert.That(attr.Id, Is.EqualTo(identity.Id.ToString()));
             Assert.That(attr.Control.FromJson<ScheduleData>().PN, Is.EqualTo("pos_name"));

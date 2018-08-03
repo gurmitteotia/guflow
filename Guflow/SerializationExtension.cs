@@ -71,6 +71,18 @@ namespace Guflow
             return instance.ToJson();
         }
 
+        internal static string ToLambdaInput(this object instance)
+        {
+            if (instance == null)
+                return null;
+            if (instance is string strInput)
+                return EnsureEnclosedInQuotes(strInput);
+            if (Primitive(instance))
+                return instance.ToString();
+
+            return instance.ToJson();
+        }
+
         internal static bool Primitive(this object obj)
         {
             return Primitive(obj.GetType());
@@ -86,6 +98,12 @@ namespace Guflow
         internal static bool IsString(this object obj)
         {
             return IsString(obj.GetType());
+        }
+
+        private static string EnsureEnclosedInQuotes(string str)
+        {
+            var trimmedStr = str.Trim('"');
+            return $"\"{trimmedStr}\"";
         }
     }
 }

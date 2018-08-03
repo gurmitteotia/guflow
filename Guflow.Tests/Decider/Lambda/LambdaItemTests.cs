@@ -30,7 +30,7 @@ namespace Guflow.Tests.Decider
         public void By_default_lambda_function_is_scheduled_with_workflow_input()
         {
             var workflow = new Mock<IWorkflow>();
-            const string workflowInput = "actvity";
+            const string workflowInput = "\"actvity\"";
             workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
             var lambdaItem = new LambdaItem(_lambdaIdentity, workflow.Object);
 
@@ -51,8 +51,38 @@ namespace Guflow.Tests.Decider
             var decisions = lambdaItem.GetScheduleDecisions();
             var swfDecision = decisions.Single().SwfDecision();
 
-            Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo("CustomInput"));
+            Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo("\"CustomInput\""));
         }
+
+        [Test]
+        public void Enclose_the_lambda_input_string_if_it_is_already_not()
+        {
+            var workflow = new Mock<IWorkflow>();
+            const string workflowInput = "actvity";
+            workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
+            var lambdaItem = new LambdaItem(_lambdaIdentity, workflow.Object);
+
+            var decisions = lambdaItem.GetScheduleDecisions();
+            var swfDecision = decisions.Single().SwfDecision();
+
+            Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo("\""+workflowInput+"\""));
+        }
+
+
+        [Test]
+        public void Does_not_put_non_string_in_quotes()
+        {
+            var workflow = new Mock<IWorkflow>();
+            const string workflowInput = "actvity";
+            workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
+            var lambdaItem = new LambdaItem(_lambdaIdentity, workflow.Object);
+            lambdaItem.WithInput(i => 10);
+            var decisions = lambdaItem.GetScheduleDecisions();
+            var swfDecision = decisions.Single().SwfDecision();
+
+            Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo("10"));
+        }
+
 
         [Test]
         public void Invalid_argument_tests()
