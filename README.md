@@ -10,6 +10,7 @@ A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/), to lets yo
  Guflow provides high level and easy to use APIs to program [Amazon SWF](https://aws.amazon.com/swf/). In Guflow you write-
 * Workflows to orchestrate the scheduling of AWS lambda functions, activities and timers
 * Activities to carry out the task.
+
 While you can program Amazon SWF directly using REST api or Amazon .NET SDK, it will be very time consuming and error prone approach. Guflow will provide you high level and easy to use APIs to program the Amazon SWF.
 
 ### Example
