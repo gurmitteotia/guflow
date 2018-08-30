@@ -1,5 +1,5 @@
 ### Guflow
-A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/), to lets you coordinate the execution of serverless AWS Lambda functions and activities with ease.
+A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) (Simple Workflow Service), to lets you coordinate the execution of serverless AWS Lambda functions and activities with ease.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/gurmitteotia/guflow?svg=true)](https://ci.appveyor.com/project/gurmitteotia/guflow/branch/master)
 ### Installation
