@@ -1,5 +1,5 @@
 ### Guflow
-A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/), to lets you coordinate the executions of serverless AWS Lambda functions and activities with ease.
+A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/), to lets you coordinate the execution of serverless AWS Lambda functions and activities with ease.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/gurmitteotia/guflow?svg=true)](https://ci.appveyor.com/project/gurmitteotia/guflow/branch/master)
 ### Installation
@@ -59,12 +59,12 @@ Following example shows BookHolidays workflow using AwsLambda:
           
 ```
 Above workflow has four possible execution scenarios:
-* 1. User has choosen to book both flight and hotel: In this case ChargeCustomer lambda function will be scheduled only after completion of ChooseSeat and BookDinner lambda functions.
+* 1. User has choosen to book both flight and hotel: In this case two branches "BookFlight->ChoosSeat" and "BookHotel->BookDinner" will schedule in parallel and ChargeCustomer lambda function will be scheduled only after completion of ChooseSeat and BookDinner lambda functions.
 * 2. User has choosen to book the flight only: In this case ChargeCustomer lambda will be scheduled after ChooseSeat lambda.
 * 3. User has choosen to book the hotel only: In this case ChargeCustomer lambda will be scheduled after BookDinner lambda.
-* 4. User has choonen not to book flight or hotel: Workflow will be completed immediately.
+* 4. User has choosen not to book flight or hotel: Workflow will be completed immediately.
 
-You can implement the above workflow using SWF activities with same ease. You can also mix and match activities, lambdas or timers in a workflow. You have the flexibility to customize the workflow executions to deal with complex real life scenarios. Please look at [examples](https://github.com/gurmitteotia/guflow-samples) and [custom workflow actions](https://github.com/gurmitteotia/guflow/wiki/workflow-actions) for more ideas.
+You can implement the above workflow using SWF activities with same ease. You can also mix activities, lambdas or timers in a workflow. You have the flexibility to customize the workflow executions to deal with complex real life scenarios. Please look at [examples](https://github.com/gurmitteotia/guflow-samples) and [custom workflow actions](https://github.com/gurmitteotia/guflow/wiki/workflow-actions) for more ideas.
 
 ### Features:
 Guflow:
