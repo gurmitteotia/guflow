@@ -29,7 +29,7 @@ namespace Guflow.Tests.Worker
         public void Default_polling_identity_is_machine_name()
         {
             var host = new ActivityHost(_domain, new[] { typeof(TestActivity1)});
-            Assert.That(host.PollingIdentity, Is.EqualTo(Environment.MachineName));
+            Assert.That(host.PollingIdentity, Is.EqualTo(Environment.GetEnvironmentVariable("COMPUTERNAME")));
         }
         [Test]
         public void Return_the_new_instance_of_activity_type_by_name_and_version()
@@ -254,9 +254,11 @@ namespace Guflow.Tests.Worker
         {
             _simpleWorkflow.Setup(s => s.PollForActivityTaskAsync(It.IsAny<PollForActivityTaskRequest>(),
                     It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new Exception()).Callback<PollForActivityTaskRequest, CancellationToken>(async (t, c) =>
+                .Returns(() =>
                 {
-                    await Task.Delay(100, c);
+                    var tcs = new TaskCompletionSource<PollForActivityTaskResponse>();
+                    tcs.SetException(new Exception());
+                    return tcs.Task;
                 });
         }
         [ActivityDescription("1.0", DefaultTaskListName = DefaultPollingTask)]

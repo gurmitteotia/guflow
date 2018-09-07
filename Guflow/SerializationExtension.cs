@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
+using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -89,7 +90,7 @@ namespace Guflow
         }
         internal static bool Primitive(this Type type)
         {
-            return type.IsPrimitive || type == typeof(string) || type == typeof(DateTime)|| type==typeof(TimeSpan);
+            return type.GetTypeInfo().IsPrimitive || type == typeof(string) || type == typeof(DateTime)|| type==typeof(TimeSpan);
         }
         internal static bool IsString(this Type type)
         {

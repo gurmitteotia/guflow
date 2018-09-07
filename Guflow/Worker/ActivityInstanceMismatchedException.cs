@@ -18,11 +18,5 @@ namespace Guflow.Worker
         public ActivityInstanceMismatchedException(string message, Exception inner) : base(message, inner)
         {
         }
-
-        protected ActivityInstanceMismatchedException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

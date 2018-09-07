@@ -25,11 +25,5 @@ namespace Guflow.Decider
         public OutOfBranchJumpException(string message, Exception inner) : base(message, inner)
         {
         }
-
-        protected OutOfBranchJumpException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

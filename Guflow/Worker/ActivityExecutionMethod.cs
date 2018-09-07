@@ -72,7 +72,7 @@ namespace Guflow.Worker
                     return new ExecutionStrategy(TaskReturnType);
                 if (executeMethod.ReturnType == typeof(ActivityResponse))
                     return new ExecutionStrategy(ActivityResponseReturnType);
-                if (executeMethod.ReturnType.IsGenericType && executeMethod.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+                if (executeMethod.ReturnType.GetTypeInfo().IsGenericType && executeMethod.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
                     if (executeMethod.ReturnType.GetGenericArguments()[0] == typeof(ActivityResponse))
                         return new ExecutionStrategy(TaskOfActivityResponseReturnType);
                     else

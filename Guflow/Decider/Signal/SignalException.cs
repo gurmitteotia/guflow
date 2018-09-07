@@ -25,11 +25,5 @@ namespace Guflow.Decider
         public SignalException(string message, Exception inner) : base(message, inner)
         {
         }
-
-        protected SignalException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

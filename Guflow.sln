@@ -1,27 +1,27 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow", "Guflow\Guflow.csproj", "{107F1FED-A272-4046-9DA0-360A657853AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guflow", "Guflow\Guflow.csproj", "{A4083259-6F3C-4199-B69B-E1010DF82462}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow.Tests", "Guflow.Tests\Guflow.Tests.csproj", "{5D1215A6-932B-4335-A7AE-1885F91B7E68}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80621396-EE32-492A-8727-89CB7420FFC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Guflow.IntegrationTests", "Guflow.IntegrationTests\Guflow.IntegrationTests.csproj", "{FFF19166-CA47-4B4E-8531-3DF994E76AF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guflow.IntegrationTests", "Guflow.IntegrationTests\Guflow.IntegrationTests.csproj", "{000EEEC7-6C28-41DA-898C-B963C6AF7F41}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90525C23-4849-4A9C-B0B2-8871A3596140}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guflow.Lambda", "Guflow.Lambda\Guflow.Lambda.csproj", "{339CDFC4-DCC5-467E-A2F0-457C36AA115D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guflow.Tests", "Guflow.Tests\Guflow.Tests.csproj", "{E5B6F451-82BA-4A30-88AE-B0E14C4A38D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E8AF4EA6-14CA-4E6A-8802-1D0C2F49D38F}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{EEC4D75D-691D-4D55-9BB5-39B46C554185}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{DF72CFE0-1369-4AB5-8E2B-C24FFC766449}"
 	ProjectSection(SolutionItems) = preProject
 		Builds\UpdateNuspec.ps1 = Builds\UpdateNuspec.ps1
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guflow.Lambda", "Guflow.Lambda\Guflow.Lambda.csproj", "{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{35785236-6678-4619-99B2-04AAB2AFC8A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,32 +29,32 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{107F1FED-A272-4046-9DA0-360A657853AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{107F1FED-A272-4046-9DA0-360A657853AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{107F1FED-A272-4046-9DA0-360A657853AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{107F1FED-A272-4046-9DA0-360A657853AF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D1215A6-932B-4335-A7AE-1885F91B7E68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5D1215A6-932B-4335-A7AE-1885F91B7E68}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D1215A6-932B-4335-A7AE-1885F91B7E68}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5D1215A6-932B-4335-A7AE-1885F91B7E68}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FFF19166-CA47-4B4E-8531-3DF994E76AF9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4083259-6F3C-4199-B69B-E1010DF82462}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4083259-6F3C-4199-B69B-E1010DF82462}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4083259-6F3C-4199-B69B-E1010DF82462}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4083259-6F3C-4199-B69B-E1010DF82462}.Release|Any CPU.Build.0 = Release|Any CPU
+		{000EEEC7-6C28-41DA-898C-B963C6AF7F41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{000EEEC7-6C28-41DA-898C-B963C6AF7F41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{000EEEC7-6C28-41DA-898C-B963C6AF7F41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{000EEEC7-6C28-41DA-898C-B963C6AF7F41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{339CDFC4-DCC5-467E-A2F0-457C36AA115D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{339CDFC4-DCC5-467E-A2F0-457C36AA115D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{339CDFC4-DCC5-467E-A2F0-457C36AA115D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{339CDFC4-DCC5-467E-A2F0-457C36AA115D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5B6F451-82BA-4A30-88AE-B0E14C4A38D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5B6F451-82BA-4A30-88AE-B0E14C4A38D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5B6F451-82BA-4A30-88AE-B0E14C4A38D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5B6F451-82BA-4A30-88AE-B0E14C4A38D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{5D1215A6-932B-4335-A7AE-1885F91B7E68} = {35785236-6678-4619-99B2-04AAB2AFC8A6}
-		{FFF19166-CA47-4B4E-8531-3DF994E76AF9} = {35785236-6678-4619-99B2-04AAB2AFC8A6}
-		{D1490EA8-BCDC-48C4-A9D1-60BE75DFEF20} = {35785236-6678-4619-99B2-04AAB2AFC8A6}
+		{000EEEC7-6C28-41DA-898C-B963C6AF7F41} = {80621396-EE32-492A-8727-89CB7420FFC9}
+		{339CDFC4-DCC5-467E-A2F0-457C36AA115D} = {80621396-EE32-492A-8727-89CB7420FFC9}
+		{E5B6F451-82BA-4A30-88AE-B0E14C4A38D7} = {80621396-EE32-492A-8727-89CB7420FFC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {ED633C45-7FFA-4AE2-A50C-51F598262101}
+		SolutionGuid = {D76585F9-C4A8-4A78-A94A-6E035C57587C}
 	EndGlobalSection
 EndGlobal

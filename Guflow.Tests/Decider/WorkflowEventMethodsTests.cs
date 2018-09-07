@@ -214,10 +214,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_actual_exception_thrown_by_target_method()
         {
-            var targetWorkflow = new MethodThrowsException(new ApplicationException(""));
+            var targetWorkflow = new MethodThrowsException(new Exception(""));
             var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
 
-            Assert.Throws<ApplicationException>(()=>workflowMethod.Invoke(_argument));
+            Assert.Throws<Exception>(()=>workflowMethod.Invoke(_argument));
         }
 
         [Test]

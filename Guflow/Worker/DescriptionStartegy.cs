@@ -35,7 +35,7 @@ namespace Guflow.Worker
     internal class DescriptionStrategy : IDescriptionStrategy
     {
         public static DescriptionStrategy FromAttribute = new DescriptionStrategy(
-                    t=>t.GetCustomAttribute<ActivityDescriptionAttribute>()?.ActivityDescription());
+                    t=>t.GetTypeInfo().GetCustomAttribute<ActivityDescriptionAttribute>()?.ActivityDescription());
         public static DescriptionStrategy FactoryMethod = new DescriptionStrategy(BuildFromFactoryMethod);
 
         private readonly Func<Type, ActivityDescription> _strategyFunc;
@@ -53,7 +53,7 @@ namespace Guflow.Worker
         private static ActivityDescription BuildFromFactoryMethod(Type activityType)
         {
             
-            var method = activityType.GetMethods(BindingFlags.Static | BindingFlags.GetField|BindingFlags.NonPublic| BindingFlags.Public)
+            var method = activityType.GetMethods(BindingFlags.Static | BindingFlags.NonPublic| BindingFlags.Public)
                             .FirstOrDefault(IsFactoryMethod);
             return (ActivityDescription)method?.Invoke(null, null);
         }

@@ -32,7 +32,7 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(domain, "domain");
             Ensure.NotNull(workflows, "workflows");
-            PollingIdentity = Environment.MachineName;
+            PollingIdentity = Environment.GetEnvironmentVariable("COMPUTERNAME") ?? Environment.GetEnvironmentVariable("HOSTNAME");
             workflows = workflows.Where(w => w != null).ToArray();
             if (!workflows.Any())
                 throw new ArgumentException(Resources.No_workflow_to_host, nameof(workflows));

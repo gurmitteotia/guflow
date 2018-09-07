@@ -36,7 +36,7 @@ namespace Guflow.Decider
     internal class DescriptionStrategy : IDescriptionStrategy
     {
         public static readonly DescriptionStrategy FromAttribute = new DescriptionStrategy(
-            t => t.GetCustomAttribute<WorkflowDescriptionAttribute>()?.WorkflowDescription());
+            t => t.GetTypeInfo().GetCustomAttribute<WorkflowDescriptionAttribute>()?.WorkflowDescription());
         public static readonly DescriptionStrategy FactoryMethod = new DescriptionStrategy(BuildFromFactoryMethod);
 
         private readonly Func<Type, WorkflowDescription> _strategyFunc;
@@ -54,7 +54,7 @@ namespace Guflow.Decider
         private static WorkflowDescription BuildFromFactoryMethod(Type workflowType)
         {
 
-            var method = workflowType.GetMethods(BindingFlags.Static | BindingFlags.GetField | BindingFlags.NonPublic| BindingFlags.Public)
+            var method = workflowType.GetMethods(BindingFlags.Static | BindingFlags.NonPublic| BindingFlags.Public)
                 .FirstOrDefault(IsFactoryMethod);
             return (WorkflowDescription)method?.Invoke(null, null);
         }

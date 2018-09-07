@@ -3,6 +3,7 @@ using System.Linq;
 using Guflow.Decider;
 using NUnit.Framework;
 
+
 namespace Guflow.Tests.Decider
 {
     [TestFixture]

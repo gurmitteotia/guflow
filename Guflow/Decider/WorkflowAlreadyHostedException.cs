@@ -18,11 +18,5 @@ namespace Guflow.Decider
         public WorkflowAlreadyHostedException(string message, Exception inner) : base(message, inner)
         {
         }
-
-        protected WorkflowAlreadyHostedException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

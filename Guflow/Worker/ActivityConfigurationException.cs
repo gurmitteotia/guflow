@@ -25,11 +25,5 @@ namespace Guflow.Worker
         public ActivityConfigurationException(string message, Exception inner) : base(message, inner)
         {
         }
-
-        protected ActivityConfigurationException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

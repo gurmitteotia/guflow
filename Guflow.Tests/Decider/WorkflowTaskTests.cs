@@ -225,16 +225,16 @@ namespace Guflow.Tests.Decider
         public void By_default_execution_exceptions_are_unhandled()
         {
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
-            var hostedWorkflows = new WorkflowHost(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new ApplicationException("")) });
+            var hostedWorkflows = new WorkflowHost(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new Exception("")) });
             
-            Assert.ThrowsAsync<ApplicationException>(async ()=>await workflowTasks.ExecuteForAsync(hostedWorkflows));
+            Assert.ThrowsAsync<Exception>(async ()=>await workflowTasks.ExecuteForAsync(hostedWorkflows));
         }
 
         [Test]
         public async Task Execution_exception_can_handled_to_retry()
         {
             var workflowTasks = WorkflowTask.CreateFor(DecisionTasksWithSignalEvents("token"), _domain);
-            var hostedWorkflows = new WorkflowHost(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new ApplicationException("")) });
+            var hostedWorkflows = new WorkflowHost(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new Exception("")) });
             workflowTasks.OnExecutionError(ErrorHandler.Default(e=>ErrorAction.Retry));
 
             await workflowTasks.ExecuteForAsync(hostedWorkflows);

@@ -29,9 +29,9 @@ namespace Guflow.IntegrationTests
 
         [TearDown]
         public void TearDown()
-        {
-            _workflowHost.StopExecution();
-            _activityHost.StopExecution();
+        { 
+            _workflowHost?.StopExecution();
+            _activityHost?.StopExecution();
         }
 
         [Test]

@@ -1,7 +1,6 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
 using System;
-using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
 using Guflow.Decider;
@@ -15,13 +14,14 @@ namespace Guflow.IntegrationTests
         private WorkflowHost _workflowHost;
         private TestDomain _domain;
         private static string _taskListName;
-
+        private Configuration _configuration;
         [SetUp]
         public async Task Setup()
         {
             Log.Register(Log.ConsoleLogger);
             _domain = new TestDomain();
             _taskListName = Guid.NewGuid().ToString();
+            _configuration = Configuration.Build();
         }
 
         [TearDown]
@@ -40,8 +40,8 @@ namespace Guflow.IntegrationTests
             workflow.Closed += (s, e) => @event.Set();
             workflow.Completed += (s, e) => result = e.Result;
             _workflowHost = await HostAsync(workflow);
-
-            await _domain.StartWorkflow<ScheduleLambdaWorkflow>("input", _taskListName, ConfigurationManager.AppSettings["LambdaRole"]);
+            
+            await _domain.StartWorkflow<ScheduleLambdaWorkflow>("input", _taskListName, _configuration["LambdaRole"]);
             @event.WaitOne();
 
             Assert.That(result, Is.EqualTo("\"hotelbooked\""));

@@ -49,7 +49,7 @@ namespace Guflow.Worker
             OnPollingError(e => ErrorAction.Unhandled);
             OnResponseError(e => ErrorAction.Unhandled);
             _domain = domain;
-            PollingIdentity = Environment.MachineName;
+            PollingIdentity = Environment.GetEnvironmentVariable("COMPUTERNAME") ?? Environment.GetEnvironmentVariable("HOSTNAME");
             _activities = new Activities(activitiesTypes, instanceCreator);
             _activityExecution = ActivityExecution.Concurrent((uint)Environment.ProcessorCount);
         }

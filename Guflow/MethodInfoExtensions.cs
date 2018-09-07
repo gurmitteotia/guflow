@@ -56,7 +56,7 @@ namespace Guflow
             var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             var argumentType = argument.GetType();
-            var sourceProperties = argumentType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty);
+            var sourceProperties = argumentType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             foreach (var sourceProperty in sourceProperties)
             {
                 var propertyValue = sourceProperty.GetValue(argument);
@@ -68,7 +68,7 @@ namespace Guflow
 
         private static object DefaultValueFor(Type type)
         {
-            return type.IsValueType ? Activator.CreateInstance(type) : null;
+            return type.GetTypeInfo().IsValueType ? Activator.CreateInstance(type) : null;
         }
 
         private static object ChangeType(string value, Type targetType, string targetName)

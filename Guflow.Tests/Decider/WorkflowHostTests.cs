@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
         public void Default_polling_identity_is_machine_name()
         {
             var host = new WorkflowHost(_domain, new []{new TestWorkflow1()});
-            Assert.That(host.PollingIdentity, Is.EqualTo(Environment.MachineName));
+            Assert.That(host.PollingIdentity, Is.EqualTo(Environment.GetEnvironmentVariable("COMPUTERNAME")));
         }
 
         [Test]

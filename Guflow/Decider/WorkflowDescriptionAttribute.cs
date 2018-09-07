@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
-using System.Configuration;
-using System.Reflection;
-using Amazon.SimpleWorkflow.Model;
-using Guflow.Properties;
 
 namespace Guflow.Decider
 {

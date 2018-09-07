@@ -108,7 +108,7 @@ namespace Guflow.Worker
 
         private void ConfigureHeartbeat()
         {
-            var heartbeatAttribute = GetType().GetCustomAttribute<EnableHeartbeatAttribute>();
+            var heartbeatAttribute = GetType().GetTypeInfo().GetCustomAttribute<EnableHeartbeatAttribute>();
             if(heartbeatAttribute ==null)
                 return;
           

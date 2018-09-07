@@ -2,6 +2,8 @@
 using System;
 using System.Threading.Tasks;
 using Amazon;
+using Amazon.Runtime;
+using Amazon.SimpleWorkflow;
 using Guflow.Decider;
 using Guflow.Worker;
 
@@ -11,10 +13,11 @@ namespace Guflow.IntegrationTests
     {
         private const string DomainName = "GuflowTestDomain";
         private readonly Domain _domain;
-
         public TestDomain()
         {
-            _domain = new Domain(DomainName, RegionEndpoint.EUWest2);
+            var configuration = Configuration.Build();
+            //_domain = new Domain(DomainName, RegionEndpoint.EUWest2);
+            _domain = new Domain(DomainName, new AmazonSimpleWorkflowClient(new BasicAWSCredentials(configuration["AWSAccessKey"], configuration["AWSSecretKey"]), RegionEndpoint.EUWest2));
         }
 
         public async Task<WorkflowHost> Host(params Workflow[] workflows)
