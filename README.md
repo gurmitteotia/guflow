@@ -90,7 +90,7 @@ Guflow:
 Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tutorial), [documentation](https://github.com/gurmitteotia/guflow/wiki) and [samples](https://github.com/gurmitteotia/guflow-samples) to get you started easily.
 
 ### Supported .NET frameworks:
-dotnet-core 1.0 and .NET 4.5 onwards.
+dotnet standard 1.3 onwards
 
 ### Getting help
 Please post your messages to [google group](https://groups.google.com/forum/#!forum/guflow)
