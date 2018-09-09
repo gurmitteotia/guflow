@@ -5,6 +5,8 @@ A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Wo
 ### Installation
 ```
  Install-Package Guflow
+     OR
+ dotnet add package Guflow
  ```
  ### Description
  Guflow provides high level and easy to use APIs to program [Amazon SWF](https://aws.amazon.com/swf/). In Guflow you write-
