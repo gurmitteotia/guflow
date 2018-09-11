@@ -12,12 +12,15 @@
     <Description>A fluent API based C#.NET library to program Amazon SWF (Simple Workflow Service).</Description>
     <Copyright>Gurmit Teotia, Copyright ©  2018</Copyright>
     <IsPackable>true</IsPackable>
+    <PackageReleaseNotes>https://github.com/gurmitteotia/guflow/wiki/Release-notes</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>.\bin\Debug</OutputPath>
+    <DocumentationFile>.\bin\Debug\Guflow.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>.\bin\Release</OutputPath>
+    <DocumentationFile>.\bin\Release\Guflow.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.SimpleWorkflow" Version="3.3.0.39" />
