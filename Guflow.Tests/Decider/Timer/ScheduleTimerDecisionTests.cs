@@ -30,8 +30,8 @@ namespace Guflow.Tests.Decider
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.StartTimer));
             Assert.That(swfDecision.StartTimerDecisionAttributes.TimerId,Is.EqualTo(timerIdentity.Id.ToString()));
             Assert.That(swfDecision.StartTimerDecisionAttributes.StartToFireTimeout,Is.EqualTo("2"));
-            Assert.That(swfDecision.StartTimerDecisionAttributes.Control.FromJson<TimerScheduleData>().IsARescheduleTimer, Is.EqualTo(true));
-            Assert.That(swfDecision.StartTimerDecisionAttributes.Control.FromJson<TimerScheduleData>().TimerName, Is.EqualTo("timer"));
+            Assert.That(swfDecision.StartTimerDecisionAttributes.Control.As<TimerScheduleData>().IsARescheduleTimer, Is.EqualTo(true));
+            Assert.That(swfDecision.StartTimerDecisionAttributes.Control.As<TimerScheduleData>().TimerName, Is.EqualTo("timer"));
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace Guflow.Tests.Decider
 
             var swfDecision = scheduleTimerDecision.SwfDecision();
 
-            Assert.That(swfDecision.StartTimerDecisionAttributes.Control.FromJson<TimerScheduleData>().IsARescheduleTimer, Is.EqualTo(false));
+            Assert.That(swfDecision.StartTimerDecisionAttributes.Control.As<TimerScheduleData>().IsARescheduleTimer, Is.EqualTo(false));
         }
     }
 }

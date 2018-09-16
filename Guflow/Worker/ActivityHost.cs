@@ -191,7 +191,7 @@ namespace Guflow.Worker
         internal async Task SendAsync(ActivityResponse response)
         {
             var retryableFunc = new RetryableFunc(_responseErrorHandler);
-            await retryableFunc.ExecuteAsync(() => response.SendAsync(_domain.Client, _cancellationTokenSource.Token));
+            await retryableFunc.ExecuteAsync(() => _domain.SendActivityResponseAsync(response, _cancellationTokenSource.Token));
         }
         internal void Fault(Exception exception)
         {

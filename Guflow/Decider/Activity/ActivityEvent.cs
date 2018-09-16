@@ -49,7 +49,7 @@ namespace Guflow.Decider
                 {
                     _activityName = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
                     _activityVersion = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
-                    _activityPositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.FromJson<ScheduleData>().PN;
+                    _activityPositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.As<ScheduleData>().PN;
                     AwsIdentity = AwsIdentity.Raw(historyEvent.ActivityTaskScheduledEventAttributes.ActivityId);
                     Input = historyEvent.ActivityTaskScheduledEventAttributes.Input;
                     foundActivityScheduledEvent = true;

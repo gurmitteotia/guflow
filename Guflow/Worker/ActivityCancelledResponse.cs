@@ -9,12 +9,12 @@ namespace Guflow.Worker
     /// <summary>
     /// Represents activity cancelled response.
     /// </summary>
-    public class ActivityCancelResponse : ActivityResponse
+    public class ActivityCancelledResponse : ActivityResponse
     {
         private readonly string _taskToken;
         private readonly string _details;
 
-        public ActivityCancelResponse(string taskToken, string details)
+        public ActivityCancelledResponse(string taskToken, string details)
         {
             Ensure.NotNullAndEmpty(taskToken, "taskToken");
 
@@ -22,13 +22,13 @@ namespace Guflow.Worker
             _details = details;
         }
 
-        public override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
+        internal override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
         {
             var request = new RespondActivityTaskCanceledRequest() {TaskToken = _taskToken, Details = _details};
             await simpleWorkflow.RespondActivityTaskCanceledAsync(request, cancellationToken);
         }
 
-        private bool Equals(ActivityCancelResponse other)
+        private bool Equals(ActivityCancelledResponse other)
         {
             return string.Equals(_taskToken, other._taskToken) && string.Equals(_details, other._details);
         }
@@ -38,7 +38,7 @@ namespace Guflow.Worker
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((ActivityCancelResponse)obj);
+            return Equals((ActivityCancelledResponse)obj);
         }
 
         public override int GetHashCode()

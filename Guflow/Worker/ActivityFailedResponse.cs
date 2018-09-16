@@ -9,13 +9,13 @@ namespace Guflow.Worker
     /// <summary>
     /// Represent a failed activity response.
     /// </summary>
-    public sealed class ActivityFailResponse : ActivityResponse
+    public sealed class ActivityFailedResponse : ActivityResponse
     {
         private readonly string _reason;
         private readonly string _details;
         private readonly string _taskToken;
 
-        public ActivityFailResponse(string taskToken, string reason, string details)
+        public ActivityFailedResponse(string taskToken, string reason, string details)
         {
             Ensure.NotNullAndEmpty(taskToken, "taskToken");
             _reason = reason;
@@ -23,7 +23,7 @@ namespace Guflow.Worker
             _taskToken = taskToken;
         }
 
-        public override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
+        internal override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
         {
             var request = new RespondActivityTaskFailedRequest()
             {
@@ -35,7 +35,7 @@ namespace Guflow.Worker
             await simpleWorkflow.RespondActivityTaskFailedAsync(request, cancellationToken);
         }
 
-        private bool Equals(ActivityFailResponse other)
+        private bool Equals(ActivityFailedResponse other)
         {
             return string.Equals(_taskToken, other._taskToken) && string.Equals(_reason, other._reason) && string.Equals(_details, other._details);
         }
@@ -44,7 +44,7 @@ namespace Guflow.Worker
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is ActivityFailResponse && Equals((ActivityFailResponse)obj);
+            return obj is ActivityFailedResponse && Equals((ActivityFailedResponse)obj);
         }
 
         public override int GetHashCode()

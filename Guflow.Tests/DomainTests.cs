@@ -270,6 +270,23 @@ namespace Guflow.Tests
             Assert.That(activityTask, Is.EqualTo(Domain.EmptyActivityTask));
         }
 
+        [Test]
+        public async Task Send_activity_response_on_amazon_client()
+        {
+            var activityResponse = new ActivityCompletedResponse("token", "result");
+            await _domain.SendActivityResponseAsync(activityResponse, CancellationToken.None);
+
+            Func<RespondActivityTaskCompletedRequest, bool> req = r =>
+            {
+                Assert.That(r.Result, Is.EqualTo("result"));
+                Assert.That(r.TaskToken, Is.EqualTo("token"));
+                return true;
+            };
+            _amazonWorkflowClient.Verify(c=>c.RespondActivityTaskCompletedAsync(It.Is<RespondActivityTaskCompletedRequest>(r=>req(r)),
+                It.IsAny<CancellationToken>()),Times.Once);
+        }
+
+
         private static WorkflowDescription WorkflowDescription()
         {
             return new WorkflowDescription("1.0")

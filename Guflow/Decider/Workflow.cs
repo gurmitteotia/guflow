@@ -539,7 +539,7 @@ namespace Guflow.Decider
         /// <summary>
         /// Return workflow input as dynamic object. If workflow input is JSON data then you can directly access the properties like: Input.Session.
         /// </summary>
-        protected dynamic Input => StartedEvent.Input.FromJson();
+        protected dynamic Input => StartedEvent.Input.AsDynamic();
 
         /// <summary>
         /// Return workflow input as TType object.
@@ -548,7 +548,7 @@ namespace Guflow.Decider
         /// <returns></returns>
         protected TType InputAs<TType>()
         {
-            return StartedEvent.Input.FromJson<TType>();
+            return StartedEvent.Input.As<TType>();
         }
 
         /// <summary>

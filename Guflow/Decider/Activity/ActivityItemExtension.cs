@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
 using Guflow.Properties;
-using Newtonsoft.Json.Linq;
 
 namespace Guflow.Decider
 {
@@ -21,7 +20,7 @@ namespace Guflow.Decider
             if(activityCompletedEvent == null)
                 throw new InvalidOperationException(string.Format(Resources.Activity_result_can_not_accessed,
                                                     typeof(ActivityCompletedEvent), completedEvent!=null? completedEvent.GetType().ToString(): "Unkown"));
-            return activityCompletedEvent.Result.FromJson();
+            return activityCompletedEvent.Result();
         }
 
         /// <summary>
@@ -38,16 +37,7 @@ namespace Guflow.Decider
             if (activityCompletedEvent == null)
                 throw new InvalidOperationException(string.Format(Resources.Activity_result_can_not_accessed,
                                                     typeof(ActivityCompletedEvent), completedEvent != null ? completedEvent.GetType().ToString() : "Unkown"));
-            try
-            {
-                if (typeof(TType).Primitive())
-                    return (TType)Convert.ChangeType(activityCompletedEvent.Result, typeof(TType));
-            }
-            catch (FormatException exception)
-            {
-                throw new InvalidCastException(string.Format(Resources.Can_not_deserialize_json_data_into_type, activityCompletedEvent.Result, typeof(TType)), exception);
-            }
-            return activityCompletedEvent.Result.FromJson<TType>();
+            return activityCompletedEvent.Result<TType>();
         }
 
         /// <summary>

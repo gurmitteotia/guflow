@@ -8,12 +8,24 @@ namespace Guflow
 {
     public static class SerializationExtension
     {
+        /// <summary>
+        /// Serialize the instance in to JSON format.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instance"></param>
+        /// <returns></returns>
         public static string ToJson<T>(this T instance)
         {
             return JsonConvert.SerializeObject(instance);
         }
 
-        public static T FromJson<T>(this string jsonData)
+        /// <summary>
+        /// Deserialize a instance of type T from JSON string.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="jsonData"></param>
+        /// <returns></returns>
+        public static T As<T>(this string jsonData)
         {
             return JsonConvert.DeserializeObject<T>(jsonData);
         }
@@ -23,7 +35,12 @@ namespace Guflow
             return JsonConvert.DeserializeObject(jsonData, targetType);
         }
 
-        internal static dynamic FromJson(this string jsonData)
+        /// <summary>
+        /// Deserialize a JSON string in to dynamic object.
+        /// </summary>
+        /// <param name="jsonData"></param>
+        /// <returns></returns>
+        public static dynamic AsDynamic(this string jsonData)
         {
             if (jsonData.TryToParse(out JObject result))
                 return result;

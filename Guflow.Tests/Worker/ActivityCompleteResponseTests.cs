@@ -16,26 +16,26 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Equality_tests()
         {
-            Assert.IsTrue(new ActivityCompleteResponse("token", "result").Equals(new ActivityCompleteResponse("token", "result")));
-            Assert.IsTrue(new ActivityCompleteResponse("token", null).Equals(new ActivityCompleteResponse("token", null)));
+            Assert.IsTrue(new ActivityCompletedResponse("token", "result").Equals(new ActivityCompletedResponse("token", "result")));
+            Assert.IsTrue(new ActivityCompletedResponse("token", null).Equals(new ActivityCompletedResponse("token", null)));
 
 
-            Assert.IsFalse(new ActivityCompleteResponse("token", "result").Equals(new ActivityCompleteResponse("token", "result1")));
-            Assert.IsFalse(new ActivityCompleteResponse("token", "result").Equals(new ActivityCompleteResponse("token1", "result")));
-            Assert.IsFalse(new ActivityCompleteResponse("token", null).Equals(new ActivityCompleteResponse("token1", "result")));
+            Assert.IsFalse(new ActivityCompletedResponse("token", "result").Equals(new ActivityCompletedResponse("token", "result1")));
+            Assert.IsFalse(new ActivityCompletedResponse("token", "result").Equals(new ActivityCompletedResponse("token1", "result")));
+            Assert.IsFalse(new ActivityCompletedResponse("token", null).Equals(new ActivityCompletedResponse("token1", "result")));
         }
 
         [Test]
         public void Invalid_argument_tests()
         {
-            Assert.Throws<ArgumentException>(() => new ActivityCompleteResponse(null, "result"));
+            Assert.Throws<ArgumentException>(() => new ActivityCompletedResponse(null, "result"));
         }
 
         [Test]
         public async Task Send_activity_completed_response_to_amazon_swf()
         {
             var simpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
-            var response = new ActivityCompleteResponse("token", "result");
+            var response = new ActivityCompletedResponse("token", "result");
             var cancellationTokenSource = new CancellationTokenSource();
 
             await response.SendAsync(simpleWorkflow.Object, cancellationTokenSource.Token);

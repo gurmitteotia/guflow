@@ -27,7 +27,7 @@ namespace Guflow.Decider
                 {
                     _firedAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
                     AwsIdentity = AwsIdentity.Raw(historyEvent.TimerStartedEventAttributes.TimerId);
-                    var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.FromJson<TimerScheduleData>();
+                    var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.As<TimerScheduleData>();
                     IsARescheduledTimer = timerScheduleData.IsARescheduleTimer;
                     _timerName = timerScheduleData.TimerName;
                     foundTimerStartedEvent = true;

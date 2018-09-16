@@ -43,7 +43,7 @@ namespace Guflow.Tests.Worker
 
             var response = await workerTask.ExecuteFor(_activityHost);
 
-            Assert.That(response, Is.EqualTo(new ActivityCompleteResponse("token" ,"result")));
+            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse("token" ,"result")));
         }
 
         [Test]
@@ -84,7 +84,7 @@ namespace Guflow.Tests.Worker
             
             var response = await workerTask.ExecuteFor(hostedActivities);
 
-            Assert.That(response, Is.EqualTo(new ActivityCompleteResponse("token", "result")));
+            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse("token", "result")));
 
         }
 

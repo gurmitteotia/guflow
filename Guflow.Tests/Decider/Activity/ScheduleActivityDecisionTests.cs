@@ -34,7 +34,7 @@ namespace Guflow.Tests.Decider
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ActivityId,Is.EqualTo(_activityIdentity.Id.ToString()));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ActivityType.Name,Is.EqualTo("Download"));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ActivityType.Version, Is.EqualTo("1.0"));
-            Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.Control.FromJson<ScheduleData>().PN, Is.EqualTo("First"));
+            Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.Control.As<ScheduleData>().PN, Is.EqualTo("First"));
         }
 
         [Test]

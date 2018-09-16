@@ -229,6 +229,19 @@ namespace Guflow
 
             await _simpleWorkflowClient.SignalWorkflowExecutionAsync(signalRequest.SwfFormat(_name));
         }
+
+        /// <summary>
+        /// Send the activity response to Amazon SWF.
+        /// </summary>
+        /// <param name="response">Activity response</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task SendActivityResponseAsync(ActivityResponse response, CancellationToken cancellationToken)
+        {
+            Ensure.NotNull(response, "response");
+            await response.SendAsync(_simpleWorkflowClient, cancellationToken);
+        }
+
         private async Task RegisterDomainAsync(uint retentionPeriodInDays, string description)
         {
             var request = new RegisterDomainRequest()

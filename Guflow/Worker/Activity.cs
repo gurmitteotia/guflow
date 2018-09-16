@@ -79,7 +79,7 @@ namespace Guflow.Worker
         /// <returns></returns>
         protected ActivityResponse Complete(string result)
         {
-            return new ActivityCompleteResponse(_currentTaskToken, result);
+            return new ActivityCompletedResponse(_currentTaskToken, result);
         }
         /// <summary>
         /// Cancel the activity with given details.
@@ -88,7 +88,7 @@ namespace Guflow.Worker
         /// <returns></returns>
         protected ActivityResponse Cancel(string details)
         {
-            return new ActivityCancelResponse(_currentTaskToken, details);
+            return new ActivityCancelledResponse(_currentTaskToken, details);
         }
         /// <summary>
         /// Fails the activity with given reason and details.
@@ -98,7 +98,7 @@ namespace Guflow.Worker
         /// <returns></returns>
         protected ActivityResponse Fail(string reason,string details)
         {
-            return new ActivityFailResponse(_currentTaskToken, reason, details);
+            return new ActivityFailedResponse(_currentTaskToken, reason, details);
         }
         /// <summary>
         /// Do not send any response to Amazon SWF.It is useful when you do not have response to return Amazon SWF and possibly a human intervention is need to send the response

@@ -35,7 +35,7 @@ namespace Guflow.Decider
                     var attr = historyEvent.LambdaFunctionScheduledEventAttributes;
                     Input = attr.Input;
                     _name = attr.Name;
-                    _positionalName = attr.Control.FromJson<ScheduleData>().PN;
+                    _positionalName = attr.Control.As<ScheduleData>().PN;
                     AwsIdentity = AwsIdentity.Raw(historyEvent.LambdaFunctionScheduledEventAttributes.Id);
                     if (!string.IsNullOrEmpty(attr.StartToCloseTimeout))
                         Timeout = TimeSpan.FromSeconds(Double.Parse(attr.StartToCloseTimeout));

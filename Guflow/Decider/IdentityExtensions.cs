@@ -20,7 +20,7 @@ namespace Guflow.Decider
 
         private static Identity FromJson(string data)
         {
-            var jsonObject = data.FromJson<JsonFormat>();
+            var jsonObject = data.As<JsonFormat>();
             return Identity.New(jsonObject.Name, jsonObject.Ver, jsonObject.PName);
         }
 

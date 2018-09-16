@@ -21,7 +21,7 @@ namespace Guflow.Decider
             var completedEvent = lambdaItem.LastEvent() as LambdaCompletedEvent;
             if (completedEvent == null)
                 throw new InvalidOperationException(Resources.Lambda_result_can_not_be_accessed);
-            return completedEvent.Result.FromJson();
+            return completedEvent.Result();
         }
 
         /// <summary>
@@ -36,16 +36,8 @@ namespace Guflow.Decider
             var completedEvent = lambdaItem.LastEvent() as LambdaCompletedEvent;
             if (completedEvent == null)
                 throw new InvalidOperationException(Resources.Lambda_result_can_not_be_accessed);
-            try
-            {
-                if (typeof(TType).Primitive())
-                    return (TType)Convert.ChangeType(completedEvent.Result, typeof(TType));
-            }
-            catch (FormatException exception)
-            {
-                throw new InvalidCastException(string.Format(Resources.Can_not_deserialize_json_data_into_type, completedEvent.Result, typeof(TType)), exception);
-            }
-            return completedEvent.Result.FromJson<TType>();
+
+            return completedEvent.Result<TType>();
         }
 
         /// <summary>
