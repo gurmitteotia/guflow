@@ -15,11 +15,11 @@ namespace Guflow.Worker
         private readonly string _details;
         private readonly string _taskToken;
 
-        public ActivityFailedResponse(string taskToken, string reason, string details)
+        public ActivityFailedResponse(string taskToken, string reason, object details)
         {
             Ensure.NotNullAndEmpty(taskToken, "taskToken");
             _reason = reason;
-            _details = details;
+            _details = details.ToAwsString();
             _taskToken = taskToken;
         }
 

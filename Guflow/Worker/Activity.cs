@@ -77,7 +77,7 @@ namespace Guflow.Worker
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
-        protected ActivityResponse Complete(string result)
+        protected ActivityResponse Complete(object result)
         {
             return new ActivityCompletedResponse(_currentTaskToken, result);
         }
@@ -86,7 +86,7 @@ namespace Guflow.Worker
         /// </summary>
         /// <param name="details"></param>
         /// <returns></returns>
-        protected ActivityResponse Cancel(string details)
+        protected ActivityResponse Cancel(object details)
         {
             return new ActivityCancelledResponse(_currentTaskToken, details);
         }
@@ -96,7 +96,7 @@ namespace Guflow.Worker
         /// <param name="reason"></param>
         /// <param name="details"></param>
         /// <returns></returns>
-        protected ActivityResponse Fail(string reason,string details)
+        protected ActivityResponse Fail(string reason,object details)
         {
             return new ActivityFailedResponse(_currentTaskToken, reason, details);
         }

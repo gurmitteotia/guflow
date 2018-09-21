@@ -13,10 +13,15 @@ namespace Guflow.Worker
     {
         private readonly string _result;
         private readonly string _taskToken;
-        public ActivityCompletedResponse(string taskToken, string result)
+        /// <summary>
+        /// Create complete response.
+        /// </summary>
+        /// <param name="taskToken">Task token for activity this response belongs to.</param>
+        /// <param name="result">Result, it is serialized to JSON if it is complex object.</param>
+        public ActivityCompletedResponse(string taskToken, object result)
         {
             Ensure.NotNullAndEmpty(taskToken, "taskToken");
-            _result = result;
+            _result = result.ToAwsString();
             _taskToken = taskToken;
         }
 

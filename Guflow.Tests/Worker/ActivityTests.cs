@@ -205,31 +205,31 @@ namespace Guflow.Tests.Worker
         [Test]
         public async Task Activity_can_return_complete_response()
         {
-            var activity = new ActivityReturningCompleteResponse("result");
+            var activity = new ActivityReturningCompleteResponse(new{id=1});
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse(_taskToken, "result")));
+            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse(_taskToken, new{id=1})));
         }
 
         [Test]
         public async Task Activity_can_return_cancel_response()
         {
-            var activity = new ActivityReturningCancelResponse("details");
+            var activity = new ActivityReturningCancelResponse(new{detail ="details"});
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(new ActivityCancelledResponse(_taskToken, "details")));
+            Assert.That(response, Is.EqualTo(new ActivityCancelledResponse(_taskToken, new { detail = "details" })));
         }
 
         [Test]
         public async Task Activity_can_return_fail_response()
         {
-            var activity = new ActivityReturningFailResponse("details", "reason");
+            var activity = new ActivityReturningFailResponse(new{detail ="detail"}, "reason");
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(new ActivityFailedResponse(_taskToken, "reason", "details")));
+            Assert.That(response, Is.EqualTo(new ActivityFailedResponse(_taskToken, "reason", new { detail = "detail" })));
         }
 
         [Test]
@@ -483,9 +483,9 @@ namespace Guflow.Tests.Worker
 
         private class ActivityReturningCompleteResponse : Activity
         {
-            private readonly string _result;
+            private readonly object _result;
 
-            public ActivityReturningCompleteResponse(string result)
+            public ActivityReturningCompleteResponse(object result)
             {
                 _result = result;
             }
@@ -499,9 +499,9 @@ namespace Guflow.Tests.Worker
 
         private class ActivityReturningCancelResponse : Activity
         {
-            private readonly string _details;
+            private readonly object _details;
 
-            public ActivityReturningCancelResponse(string details)
+            public ActivityReturningCancelResponse(object details)
             {
                 _details = details;
             }
@@ -516,9 +516,9 @@ namespace Guflow.Tests.Worker
         private class ActivityReturningFailResponse : Activity
         {
             private readonly string _reason;
-            private readonly string _details;
+            private readonly object _details;
 
-            public ActivityReturningFailResponse(string details, string reason)
+            public ActivityReturningFailResponse(object details, string reason)
             {
                 _details = details;
                 _reason = reason;

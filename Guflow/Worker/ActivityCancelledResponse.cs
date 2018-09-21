@@ -14,12 +14,12 @@ namespace Guflow.Worker
         private readonly string _taskToken;
         private readonly string _details;
 
-        public ActivityCancelledResponse(string taskToken, string details)
+        public ActivityCancelledResponse(string taskToken, object details)
         {
             Ensure.NotNullAndEmpty(taskToken, "taskToken");
 
             _taskToken = taskToken;
-            _details = details;
+            _details = details.ToAwsString();
         }
 
         internal override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
