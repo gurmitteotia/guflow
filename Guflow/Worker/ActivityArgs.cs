@@ -6,9 +6,21 @@ namespace Guflow.Worker
     /// </summary>
     public class ActivityArgs
     {
-
+        /// <summary>
+        /// Create activity args.
+        /// </summary>
+        /// <param name="input">Activity input, optional </param>
+        /// <param name="activityId">Activity id, required.</param>
+        /// <param name="workflowId">Workflow id, required.</param>
+        /// <param name="workflowRunId">Running workflow id, required.</param>
+        /// <param name="taskToken">Task token, required.</param>
         public ActivityArgs(string input, string activityId, string workflowId, string workflowRunId, string taskToken)
         {
+            Ensure.NotNullAndEmpty(activityId, nameof(activityId));
+            Ensure.NotNullAndEmpty(workflowId, nameof(workflowId));
+            Ensure.NotNullAndEmpty(workflowRunId, nameof(workflowRunId));
+            Ensure.NotNullAndEmpty(taskToken, nameof(taskToken));
+
             Input = input;
             ActivityId = activityId;
             WorkflowId = workflowId;

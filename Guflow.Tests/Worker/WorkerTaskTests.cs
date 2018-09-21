@@ -38,7 +38,8 @@ namespace Guflow.Tests.Worker
             {
                 ActivityType = new ActivityType() { Name = "TestActivity", Version = "1.0" },
                 WorkflowExecution = new WorkflowExecution(){ RunId = "runid", WorkflowId = "wid"},
-                TaskToken = "token"
+                TaskToken = "token",
+                ActivityId = "id"
             }, Mock.Of<IHeartbeatSwfApi>());
 
             var response = await workerTask.ExecuteFor(_activityHost);
@@ -77,7 +78,8 @@ namespace Guflow.Tests.Worker
             {
                 ActivityType = new ActivityType() { Name = "ActivityThrowsException", Version = "1.0" },
                 WorkflowExecution = new WorkflowExecution() { RunId = "runid", WorkflowId = "wid" },
-                TaskToken = "token"
+                TaskToken = "token",
+                ActivityId = "id"
             }, Mock.Of<IHeartbeatSwfApi>());
             var hostedActivities = new ActivityHost(_domain, new [] { typeof(ActivityThrowsException) });
             workerTask.SetErrorHandler(ErrorHandler.Default(e => ErrorAction.Retry));
@@ -95,7 +97,8 @@ namespace Guflow.Tests.Worker
             {
                 ActivityType = new ActivityType() { Name = "ActivityThrowsException", Version = "1.0" },
                 WorkflowExecution = new WorkflowExecution() { RunId = "runid", WorkflowId = "wid" },
-                TaskToken = "token"
+                TaskToken = "token",
+                ActivityId = "id"
             }, Mock.Of<IHeartbeatSwfApi>());
             var hostedActivities = new ActivityHost(_domain, new[] { typeof(ActivityThrowsException) });
 

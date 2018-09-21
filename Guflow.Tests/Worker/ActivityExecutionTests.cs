@@ -101,7 +101,8 @@ namespace Guflow.Tests.Worker
                 ActivityType = new ActivityType() { Name = "TestActivity", Version = "1.0" },
                 TaskToken = "token",
                 WorkflowExecution = new WorkflowExecution(){ RunId = "rid", WorkflowId = "wid"},
-                Input = "input"
+                Input = "input",
+                ActivityId = "id"
             }, Mock.Of<IHeartbeatSwfApi>());
         }
         [ActivityDescription("1.0")]
