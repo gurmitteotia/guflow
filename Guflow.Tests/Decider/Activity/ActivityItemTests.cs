@@ -111,7 +111,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
             activityItem.When(a => false);
 
-            var decisions = activityItem.GetScheduleDecisions();
+            var decisions = activityItem.ScheduleDecisions();
 
             Assert.That(decisions, Is.Empty);
         }
@@ -534,7 +534,7 @@ namespace Guflow.Tests.Decider
 
         private ScheduleActivityDecision ScheduleDecision(ActivityItem activityItem)
         {
-            return (ScheduleActivityDecision) activityItem.GetScheduleDecisions().Single();
+            return (ScheduleActivityDecision) activityItem.ScheduleDecisions().Single();
         }
         private ActivityItem CreateActivityItemWith(IEnumerable<HistoryEvent> eventGraph)
         {

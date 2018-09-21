@@ -76,7 +76,7 @@ namespace Guflow.Decider
         }
         internal static ScheduleWorkflowItemAction Schedule(WorkflowItem workflowItem)
         {
-            return new ScheduleWorkflowItemAction(workflowItem);
+            return ScheduleWorkflowItemAction.ScheduleByConsideringWhen(workflowItem);
         }
         internal static JumpWorkflowAction JumpTo(WorkflowItem workflowItem)
         {
@@ -95,11 +95,11 @@ namespace Guflow.Decider
 
         internal static WorkflowAction Cancel(WorkflowItem workflowItem)
         {
-            return new WorkflowAction(workflowItem.GetCancelDecisions());
+            return new WorkflowAction(workflowItem.CancelDecisions());
         }
         internal static WorkflowAction Cancel(IEnumerable<WorkflowItem> workflowItems)
         {
-            return new WorkflowAction(workflowItems.SelectMany(w=>w.GetCancelDecisions()));
+            return new WorkflowAction(workflowItems.SelectMany(w=>w.CancelDecisions()));
         }
         internal static WorkflowAction Signal(string signalName, string input,string workflowId, string runId)
         {

@@ -17,17 +17,22 @@ namespace Guflow.Decider
 
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false) => null;
 
-        public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
+        public override IEnumerable<WorkflowDecision> ScheduleDecisions()
+        {
+            return ScheduleDecisionsByIgnoringWhen();
+        }
+
+        public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
             return _workflowActionFunc(this).Decisions();
         }
 
-        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout)
+        public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
         {
-            return GetScheduleDecisions();
+            return ScheduleDecisions();
         }
 
-        public override IEnumerable<WorkflowDecision> GetCancelDecisions()
+        public override IEnumerable<WorkflowDecision> CancelDecisions()
         {
             return Enumerable.Empty<WorkflowDecision>();
         }

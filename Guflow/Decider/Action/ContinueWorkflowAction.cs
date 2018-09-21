@@ -31,7 +31,7 @@ namespace Guflow.Decider
                 return new[] { new CompleteWorkflowDecision(DefaultWorkflowCompletedResult, true) };
 
             var schedulableChildItems = childItems.Where(s => s.AreAllParentBranchesInactive(exceptBranchOf: _completedWorkflowItem));
-            return schedulableChildItems.SelectMany(f => f.GetScheduleDecisions());
+            return schedulableChildItems.SelectMany(f => f.ScheduleDecisions());
         }
 
         internal override bool ReadyToScheduleChildren

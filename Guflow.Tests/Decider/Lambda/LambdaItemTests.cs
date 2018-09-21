@@ -34,7 +34,7 @@ namespace Guflow.Tests.Decider
             workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
             var lambdaItem = new LambdaItem(_lambdaIdentity, workflow.Object);
 
-            var decisions = lambdaItem.GetScheduleDecisions();
+            var decisions = lambdaItem.ScheduleDecisions();
             var swfDecision = decisions.Single().SwfDecision();
 
             Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo(workflowInput));
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
             workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
             var lambdaItem = new LambdaItem(_lambdaIdentity, workflow.Object);
             lambdaItem.WithInput(i => "CustomInput");
-            var decisions = lambdaItem.GetScheduleDecisions();
+            var decisions = lambdaItem.ScheduleDecisions();
             var swfDecision = decisions.Single().SwfDecision();
 
             Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo("\"CustomInput\""));
@@ -62,7 +62,7 @@ namespace Guflow.Tests.Decider
             workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
             var lambdaItem = new LambdaItem(_lambdaIdentity, workflow.Object);
 
-            var decisions = lambdaItem.GetScheduleDecisions();
+            var decisions = lambdaItem.ScheduleDecisions();
             var swfDecision = decisions.Single().SwfDecision();
 
             Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo("\""+workflowInput+"\""));
@@ -77,7 +77,7 @@ namespace Guflow.Tests.Decider
             workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
             var lambdaItem = new LambdaItem(_lambdaIdentity, workflow.Object);
             lambdaItem.WithInput(i => 10);
-            var decisions = lambdaItem.GetScheduleDecisions();
+            var decisions = lambdaItem.ScheduleDecisions();
             var swfDecision = decisions.Single().SwfDecision();
 
             Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo("10"));
@@ -109,7 +109,7 @@ namespace Guflow.Tests.Decider
         public void Cancel_decision_is_empty()
         {
             var lambdaItem = new LambdaItem(_lambdaIdentity, Mock.Of<IWorkflow>());
-            Assert.That(lambdaItem.GetCancelDecisions(), Is.Empty);
+            Assert.That(lambdaItem.CancelDecisions(), Is.Empty);
         }
 
         [Test]
@@ -117,7 +117,7 @@ namespace Guflow.Tests.Decider
         {
             var lambdaItem = new LambdaItem(_lambdaIdentity, _workflow.Object);
 
-            var swfDecision = lambdaItem.GetScheduleDecisions().Single().SwfDecision();
+            var swfDecision = lambdaItem.ScheduleDecisions().Single().SwfDecision();
 
             Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout, Is.Null);
         }
@@ -127,7 +127,7 @@ namespace Guflow.Tests.Decider
         {
             var lambdaItem = new LambdaItem(_lambdaIdentity, _workflow.Object);
             lambdaItem.WithTimeout(i => TimeSpan.FromSeconds(10));
-            var swfDecision = lambdaItem.GetScheduleDecisions().Single().SwfDecision();
+            var swfDecision = lambdaItem.ScheduleDecisions().Single().SwfDecision();
 
             Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.StartToCloseTimeout, Is.EqualTo("10"));
         }
@@ -136,7 +136,7 @@ namespace Guflow.Tests.Decider
         public void Reschedule_decision_is_a_timer_decision_for_lambda_item()
         {
             var lambdaItem = new LambdaItem(_lambdaIdentity, _workflow.Object);
-            var decision = lambdaItem.GetRescheduleDecisions(TimeSpan.FromSeconds(10));
+            var decision = lambdaItem.RescheduleDecisions(TimeSpan.FromSeconds(10));
             Assert.That(decision, Is.EqualTo(new []{new ScheduleTimerDecision(_lambdaIdentity, TimeSpan.FromSeconds(10), true)}));
         }
 

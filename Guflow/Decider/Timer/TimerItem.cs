@@ -154,23 +154,28 @@ namespace Guflow.Decider
             return _cancellationFailedAction(timerCancellationFailedEvent);
         }
 
-        public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
+        public override IEnumerable<WorkflowDecision> ScheduleDecisions()
         {
             if (!_canSchedule(this))
                 return IsStartupItem()
                     ? Enumerable.Empty<WorkflowDecision>() 
                     : _falseAction(this).Decisions();
 
-            return new []{new ScheduleTimerDecision(Identity, _fireAfterFunc(this), this == _rescheduleTimer)};
+            return ScheduleDecisionsByIgnoringWhen();
         }
 
-        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout)
+        public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
+        {
+            return new[] { new ScheduleTimerDecision(Identity, _fireAfterFunc(this), this == _rescheduleTimer) };
+        }
+
+        public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
         {
             _rescheduleTimer.FireAfter(timeout);
-            return _rescheduleTimer.GetScheduleDecisions();
+            return _rescheduleTimer.ScheduleDecisions();
         }
 
-        public override IEnumerable<WorkflowDecision> GetCancelDecisions()
+        public override IEnumerable<WorkflowDecision> CancelDecisions()
         {
             var cancelDecisions = Enumerable.Empty<WorkflowDecision>();
             if (IsActive)

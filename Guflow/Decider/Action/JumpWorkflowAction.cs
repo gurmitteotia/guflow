@@ -14,7 +14,7 @@ namespace Guflow.Decider
         private readonly ScheduleWorkflowItemAction _scheduleAction;
         internal JumpWorkflowAction(WorkflowItem jumpToItem)
         {
-            _scheduleAction = new ScheduleWorkflowItemAction(jumpToItem);
+            _scheduleAction = ScheduleWorkflowItemAction.ScheduleByIgnoringWhen(jumpToItem);
         }
         internal override IEnumerable<WorkflowDecision> Decisions()
         {

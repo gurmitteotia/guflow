@@ -28,7 +28,7 @@ namespace Guflow.Decider
             {
                 var joinWorkflowItem = _findFirstJointItem(childBranch);
                 if (joinWorkflowItem != null && joinWorkflowItem.AreAllParentBranchesInactive(_triggeringItem))
-                    triggeredDecisions.AddRange(joinWorkflowItem.GetScheduleDecisions());
+                    triggeredDecisions.AddRange(joinWorkflowItem.ScheduleDecisions());
             }
             return triggeredDecisions;
         }

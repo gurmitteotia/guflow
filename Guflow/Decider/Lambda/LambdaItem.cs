@@ -55,21 +55,26 @@ namespace Guflow.Decider
             return lambdaEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
         }
 
-        public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
+        public override IEnumerable<WorkflowDecision> ScheduleDecisions()
         {
             if (!_whenFunc(this))
                 return _onFalseTrigger(this).Decisions();
 
+            return ScheduleDecisionsByIgnoringWhen();
+        }
+
+        public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
+        {
             return new[] { new ScheduleLambdaDecision(Identity, _input(this), _timeout(this)) };
         }
 
-        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout)
+        public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
         {
             _rescheduleTimer.FireAfter(timeout);
-            return _rescheduleTimer.GetScheduleDecisions();
+            return _rescheduleTimer.ScheduleDecisions();
         }
 
-        public override IEnumerable<WorkflowDecision> GetCancelDecisions()
+        public override IEnumerable<WorkflowDecision> CancelDecisions()
         {
             return Enumerable.Empty<WorkflowDecision>();
         }

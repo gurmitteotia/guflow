@@ -9,11 +9,23 @@ namespace Guflow.Decider
     {
         private readonly WorkflowItem _workflowItem;
         private WorkflowAction _scheduleWorkflowAction;
-        internal ScheduleWorkflowItemAction(WorkflowItem workflowItem)
+
+        private ScheduleWorkflowItemAction(WorkflowItem workflowItem, WorkflowAction workflowAction)
         {
             _workflowItem = workflowItem;
-            _scheduleWorkflowAction = Custom(workflowItem.GetScheduleDecisions().ToArray());
+            _scheduleWorkflowAction = workflowAction;
         }
+
+        internal static ScheduleWorkflowItemAction ScheduleByConsideringWhen(WorkflowItem workflowItem)
+        {
+            return new ScheduleWorkflowItemAction(workflowItem, Custom(workflowItem.ScheduleDecisions().ToArray()));
+        }
+
+        internal static ScheduleWorkflowItemAction ScheduleByIgnoringWhen(WorkflowItem workflowItem)
+        {
+            return new ScheduleWorkflowItemAction(workflowItem, Custom(workflowItem.ScheduleDecisionsByIgnoringWhen().ToArray()));
+        }
+
         /// <summary>
         /// Cause the item to reschedule after a given timeout.
         /// </summary>
@@ -21,7 +33,7 @@ namespace Guflow.Decider
         /// <returns></returns>
         public ScheduleWorkflowItemAction After(TimeSpan timeout)
         {
-           _scheduleWorkflowAction = Custom(_workflowItem.GetRescheduleDecisions(timeout).ToArray());
+           _scheduleWorkflowAction = Custom(_workflowItem.RescheduleDecisions(timeout).ToArray());
             return this;
         }
         /// <summary>

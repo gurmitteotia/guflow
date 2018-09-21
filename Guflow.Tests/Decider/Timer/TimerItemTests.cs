@@ -26,7 +26,7 @@ namespace Guflow.Tests.Decider
         {
             var timerItem = TimerItem.New(_timerIdentity,null);
 
-            var decision = timerItem.GetScheduleDecisions();
+            var decision = timerItem.ScheduleDecisions();
 
             Assert.That(decision,Is.EqualTo(new []{new ScheduleTimerDecision(_timerIdentity,new TimeSpan())}));
         }
@@ -36,7 +36,7 @@ namespace Guflow.Tests.Decider
         {
             var timerItem = TimerItem.New(_timerIdentity, null);
             timerItem.FireAfter(TimeSpan.FromSeconds(3));
-            var decision = timerItem.GetScheduleDecisions();
+            var decision = timerItem.ScheduleDecisions();
 
             Assert.That(decision, Is.EqualTo(new []{new ScheduleTimerDecision(_timerIdentity, TimeSpan.FromSeconds(3))}));
         }
@@ -46,7 +46,7 @@ namespace Guflow.Tests.Decider
         {
             var timerItem = TimerItem.New(_timerIdentity, null);
             timerItem.FireAfter(_=>TimeSpan.FromSeconds(4));
-            var decision = timerItem.GetScheduleDecisions();
+            var decision = timerItem.ScheduleDecisions();
 
             Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity, TimeSpan.FromSeconds(4)) }));
         }
@@ -56,7 +56,7 @@ namespace Guflow.Tests.Decider
         {
             var timerItem = TimerItem.New(_timerIdentity, null);
             timerItem.FireAfter(_ => TimeSpan.FromSeconds(3)).FireAfter(TimeSpan.FromSeconds(4));
-            var decision = timerItem.GetScheduleDecisions();
+            var decision = timerItem.ScheduleDecisions();
 
             Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity, TimeSpan.FromSeconds(3)) }));
         }
@@ -67,7 +67,7 @@ namespace Guflow.Tests.Decider
             var timerItem = TimerItem.New(_timerIdentity, Mock.Of<IWorkflow>());
             timerItem.When(t => false);
 
-            var decisions = timerItem.GetScheduleDecisions();
+            var decisions = timerItem.ScheduleDecisions();
 
             Assert.That(decisions,Is.Empty);
         }

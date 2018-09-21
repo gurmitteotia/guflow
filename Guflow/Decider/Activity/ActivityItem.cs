@@ -222,31 +222,36 @@ namespace Guflow.Decider
         {
             return _onFailedSchedulingAction(activitySchedulingFailedEvent);
         }
-        public override IEnumerable<WorkflowDecision> GetScheduleDecisions()
+        public override IEnumerable<WorkflowDecision> ScheduleDecisions()
         {
             if (!_whenFunc(this))
                 return _onFalseAction(this).Decisions();
 
+            return ScheduleDecisionsByIgnoringWhen();
+        }
+
+        public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
+        {
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.Input = _inputFunc(this).ToAwsString();
             scheduleActivityDecision.TaskList = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);
             scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
-            return new []{scheduleActivityDecision};
+            return new[] { scheduleActivityDecision };
         }
 
-        public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout)
+        public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
         {
             _rescheduleTimer.FireAfter(timeout);
-            return _rescheduleTimer.GetScheduleDecisions();
+            return _rescheduleTimer.ScheduleDecisions();
         }
 
-        public override IEnumerable<WorkflowDecision> GetCancelDecisions()
+        public override IEnumerable<WorkflowDecision> CancelDecisions()
         {
             var lastEvent = LastEvent(true);
             var latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
-                return _rescheduleTimer.GetCancelDecisions();
+                return _rescheduleTimer.CancelDecisions();
 
             return new []{new CancelActivityDecision(Identity)};
         }
