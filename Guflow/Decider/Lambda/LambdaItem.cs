@@ -69,9 +69,9 @@ namespace Guflow.Decider
             return _rescheduleTimer.GetScheduleDecisions();
         }
 
-        public override WorkflowDecision GetCancelDecision()
+        public override IEnumerable<WorkflowDecision> GetCancelDecisions()
         {
-            return WorkflowDecision.Empty;
+            return Enumerable.Empty<WorkflowDecision>();
         }
 
         public IFluentLambdaItem AfterTimer(string name)

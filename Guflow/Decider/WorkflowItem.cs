@@ -56,7 +56,7 @@ namespace Guflow.Decider
 
         public abstract IEnumerable<WorkflowDecision> GetScheduleDecisions();
         public abstract IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout);
-        public abstract WorkflowDecision GetCancelDecision();
+        public abstract IEnumerable<WorkflowDecision> GetCancelDecisions();
         public bool Has(AwsIdentity identity)
         {
             return Identity.Id == identity;

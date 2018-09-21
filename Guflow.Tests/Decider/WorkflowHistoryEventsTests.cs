@@ -104,17 +104,6 @@ namespace Guflow.Tests.Decider
 
             Assert.That(newEvents, Is.EqualTo(new[] { new TimerStartFailedEvent(eventGraph.First()) }));
         }
-
-        [Test]
-        public void Timer_cancelled_event_is_interpreted()
-        {
-            var eventGraph = TimerCancelledEventGraph();
-            var events = new WorkflowHistoryEvents(eventGraph);
-            var newEvents = events.NewEvents();
-
-            Assert.That(newEvents, Is.EqualTo(new[] { new TimerCancelledEvent(eventGraph.First(), eventGraph) }));
-        }
-
         [Test]
         public void Timer_cancellation_failed_event_is_interpreted()
         {

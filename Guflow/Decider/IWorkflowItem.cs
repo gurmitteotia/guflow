@@ -44,7 +44,6 @@ namespace Guflow.Decider
     internal interface ITimer
     {
         WorkflowAction Fired(TimerFiredEvent timerFiredEvent);
-        WorkflowAction Cancelled(TimerCancelledEvent timerCancelledEvent);
         WorkflowAction StartFailed(TimerStartFailedEvent timerStartFailedEvent);
         WorkflowAction CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent);
     }

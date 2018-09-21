@@ -95,11 +95,11 @@ namespace Guflow.Decider
 
         internal static WorkflowAction Cancel(WorkflowItem workflowItem)
         {
-            return new WorkflowAction(workflowItem.GetCancelDecision());
+            return new WorkflowAction(workflowItem.GetCancelDecisions());
         }
         internal static WorkflowAction Cancel(IEnumerable<WorkflowItem> workflowItems)
         {
-            return new WorkflowAction(workflowItems.Select(w=>w.GetCancelDecision()));
+            return new WorkflowAction(workflowItems.SelectMany(w=>w.GetCancelDecisions()));
         }
         internal static WorkflowAction Signal(string signalName, string input,string workflowId, string runId)
         {

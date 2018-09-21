@@ -31,12 +31,7 @@ namespace Guflow.Decider
         /// <param name="action"></param>
         /// <returns></returns>
         IFluentTimerItem OnFired(Func<TimerFiredEvent, WorkflowAction> action);
-        /// <summary>
-        /// Provide a handler to be called when timer is cancelled.
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> action);
+       
         /// <summary>
         /// Provide a handler to be called back when cancellation requestion to timer is failed.
         /// </summary>
@@ -49,5 +44,11 @@ namespace Guflow.Decider
         /// <param name="action"></param>
         /// <returns></returns>
         IFluentTimerItem OnStartFailed(Func<TimerStartFailedEvent, WorkflowAction> action);
+        /// <summary>
+        /// Provide a handler to be called back when the cancel request for timer is sent to Amazon SWF. This handler is only invoked if the timer is active.
+        /// </summary>
+        /// <param name="action">WorkflowAction to be executed when timer is cancelled.</param>
+        /// <returns></returns>
+        IFluentTimerItem OnCancel(Func<ITimerItem, WorkflowAction> action);
     }
 }

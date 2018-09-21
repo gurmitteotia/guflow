@@ -12,15 +12,16 @@ namespace Guflow.Decider
         private Func<TimerFiredEvent, WorkflowAction> _firedAction;
         private Func<TimerCancellationFailedEvent, WorkflowAction> _cancellationFailedAction;
         private Func<TimerStartFailedEvent, WorkflowAction> _startFailureAction;
-        private Func<TimerCancelledEvent, WorkflowAction> _timerCancelledAction; 
         private Func<TimerItem, bool> _canSchedule;
         private Func<ITimerItem, WorkflowAction> _falseAction;
+        private Func<ITimerItem, WorkflowAction> _timerCancelAction;
         private TimerItem _rescheduleTimer;
         private TimerItem(Identity identity, IWorkflow workflow)
                      : base(identity, workflow)
         {
             _canSchedule = t => true;
             _falseAction = t=>new TriggerActions(this).FirstJoint();
+            _timerCancelAction =_=>WorkflowAction.Empty;
         }
 
         public static TimerItem Reschedule(WorkflowItem ownerItem, Identity identity, IWorkflow workflow)
@@ -28,7 +29,6 @@ namespace Guflow.Decider
             var timerItem = new TimerItem(identity, workflow);
             timerItem._rescheduleTimer = timerItem;
             timerItem.OnStartFailed(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
-            timerItem.OnCancelled(e => WorkflowAction.CancelWorkflow("RESCHEDULE_TIMER_CANCELLED"));
             timerItem.OnCancellationFailed(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_CANCELLATION_FAILED", e.Cause));
             timerItem.OnFired(e => WorkflowAction.Schedule(ownerItem));
             return timerItem;
@@ -38,7 +38,6 @@ namespace Guflow.Decider
             var timerItem = new TimerItem(identity, workflow);
             timerItem._rescheduleTimer = Reschedule(timerItem, identity, workflow);
             timerItem.OnStartFailed(e => e.DefaultAction(workflow));
-            timerItem.OnCancelled(e => e.DefaultAction(workflow));
             timerItem.OnCancellationFailed(e => e.DefaultAction(workflow));
             timerItem.OnFired(e => e.DefaultAction(workflow));
             return timerItem;
@@ -105,14 +104,6 @@ namespace Guflow.Decider
             AddParent(Identity.Lambda(name, positionalName));
             return this;
         }
-
-        public IFluentTimerItem OnCancelled(Func<TimerCancelledEvent, WorkflowAction> action)
-        {
-            Ensure.NotNull(action, "action");
-
-            _timerCancelledAction = action;
-            return this;
-        }
         public IFluentTimerItem OnCancellationFailed(Func<TimerCancellationFailedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");
@@ -127,17 +118,20 @@ namespace Guflow.Decider
             _startFailureAction = action;
             return this;
         }
+
+        public IFluentTimerItem OnCancel(Func<ITimerItem, WorkflowAction> action)
+        {
+            Ensure.NotNull(action, "action");
+            _timerCancelAction = action;
+            return this;
+        }
+
         WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
             if (timerFiredEvent.IsARescheduledTimer)
                 return _rescheduleTimer._firedAction(timerFiredEvent);
 
             return _firedAction(timerFiredEvent);
-        }
-
-        WorkflowAction ITimer.Cancelled(TimerCancelledEvent timerCancelledEvent)
-        {
-            return _timerCancelledAction(timerCancelledEvent);
         }
 
         WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
@@ -166,9 +160,13 @@ namespace Guflow.Decider
             return _rescheduleTimer.GetScheduleDecisions();
         }
 
-        public override WorkflowDecision GetCancelDecision()
+        public override IEnumerable<WorkflowDecision> GetCancelDecisions()
         {
-            return new CancelTimerDecision(Identity);
+            var cancelDecisions = Enumerable.Empty<WorkflowDecision>();
+            if (IsActive)
+                cancelDecisions = _timerCancelAction(this).Decisions();
+
+            return new []{new CancelTimerDecision(Identity)}.Concat(cancelDecisions);
         }
 
     }

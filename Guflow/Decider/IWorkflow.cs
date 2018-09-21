@@ -16,7 +16,6 @@ namespace Guflow.Decider
         WorkflowAction WorkflowAction(ActivityCancelledEvent activityCancelledEvent);
         WorkflowAction WorkflowAction(TimerFiredEvent timerFiredEvent);
         WorkflowAction WorkflowAction(TimerStartFailedEvent timerStartFailedEvent);
-        WorkflowAction WorkflowAction(TimerCancelledEvent timerCancelledEvent);
         WorkflowAction WorkflowAction(ActivityCancellationFailedEvent activityCancellationFailedEvent);
         WorkflowAction WorkflowAction(TimerCancellationFailedEvent timerCancellationFailedEvent);
         WorkflowAction WorkflowAction(ActivitySchedulingFailedEvent activitySchedulingFailedEvent);

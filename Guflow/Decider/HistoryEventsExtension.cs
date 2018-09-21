@@ -184,8 +184,6 @@ namespace Guflow.Decider
                 return new TimerFiredEvent(historyEvent,allHistoryEvents);
             if(historyEvent.IsTimerFailedEvent())
                 return new TimerStartFailedEvent(historyEvent);
-            if (historyEvent.IsTimerCancelledEvent())
-                return new TimerCancelledEvent(historyEvent,allHistoryEvents);
             if (historyEvent.IsTimerCancellationFailedEvent())
                 return new TimerCancellationFailedEvent(historyEvent);
             if(historyEvent.IsWorkflowSignaledEvent())

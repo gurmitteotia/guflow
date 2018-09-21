@@ -182,11 +182,6 @@ namespace Guflow.Decider
             ITimer timer = _rescheduleTimer;
             return timer.Fired(timerFiredEvent);
         }
-        WorkflowAction ITimer.Cancelled(TimerCancelledEvent timerCancelledEvent)
-        {
-            ITimer timer = _rescheduleTimer;
-            return timer.Cancelled(timerCancelledEvent);
-        }
         WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
         {
             ITimer timer = _rescheduleTimer;
@@ -246,14 +241,14 @@ namespace Guflow.Decider
             return _rescheduleTimer.GetScheduleDecisions();
         }
 
-        public override WorkflowDecision GetCancelDecision()
+        public override IEnumerable<WorkflowDecision> GetCancelDecisions()
         {
             var lastEvent = LastEvent(true);
             var latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
-                return _rescheduleTimer.GetCancelDecision();
+                return _rescheduleTimer.GetCancelDecisions();
 
-            return new CancelActivityDecision(Identity);
+            return new []{new CancelActivityDecision(Identity)};
         }
 
     }

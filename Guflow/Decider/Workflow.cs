@@ -87,11 +87,6 @@ namespace Guflow.Decider
             ITimer timer = _allWorkflowItems.Timer(timerStartFailedEvent);
             return timer.StartFailed(timerStartFailedEvent);
         }
-        WorkflowAction IWorkflow.WorkflowAction(TimerCancelledEvent timerCancelledEvent)
-        {
-            ITimer timer = _allWorkflowItems.Timer(timerCancelledEvent);
-            return timer.Cancelled(timerCancelledEvent);
-        }
         WorkflowAction IWorkflow.WorkflowAction(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
             ITimer timer = _allWorkflowItems.Timer(timerCancellationFailedEvent);

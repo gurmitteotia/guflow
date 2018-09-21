@@ -109,7 +109,7 @@ namespace Guflow.Tests.Decider
         public void Cancel_decision_is_empty()
         {
             var lambdaItem = new LambdaItem(_lambdaIdentity, Mock.Of<IWorkflow>());
-            Assert.That(lambdaItem.GetCancelDecision(), Is.EqualTo(WorkflowDecision.Empty));
+            Assert.That(lambdaItem.GetCancelDecisions(), Is.Empty);
         }
 
         [Test]
