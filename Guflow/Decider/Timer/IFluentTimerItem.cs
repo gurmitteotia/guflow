@@ -11,15 +11,23 @@ namespace Guflow.Decider
         /// <param name="time">Timespan, after which timer will be fired.</param>
         /// <returns></returns>
         IFluentTimerItem FireAfter(TimeSpan time);
+
         /// <summary>
-        /// Provide an expression which workflow will evaulate before scheduling this timer. If it is evaulated to false then timer will not be scheduled.
+        /// Configure the timer to fire after given timespan. It will take priority over other FireAfter overload.
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        IFluentTimerItem FireAfter(Func<ITimerItem, TimeSpan> time);
+
+        /// <summary>
+        /// Provide an expression which workflow will evaluate before scheduling this timer. If it is evaluated to false then timer will not be scheduled.
         /// </summary>
         /// <param name="true"></param>
         /// <returns></returns>
         IFluentTimerItem When(Func<ITimerItem, bool> @true);
         /// <summary>
-        /// Provide an expression which workflow will evaulate before scheduling this timer. If it is evaulated to false then timer will not be scheduled.
-        /// You also have the option to what happen when condition is evaulated to false. Refer to Deflow algorithm for more details.
+        /// Provide an expression which workflow will evaluate before scheduling this timer. If it is evaluated to false then timer will not be scheduled.
+        /// You also have the option to what happen when condition is evaluated to false. Refer to Deflow algorithm for more details.
         /// </summary>
         /// <param name="true"></param>
         /// <param name="falseAction">WorkflowAction when expression is evaluated to be false.</param>
@@ -33,7 +41,7 @@ namespace Guflow.Decider
         IFluentTimerItem OnFired(Func<TimerFiredEvent, WorkflowAction> action);
        
         /// <summary>
-        /// Provide a handler to be called back when cancellation requestion to timer is failed.
+        /// Provide a handler to be called back when cancellation request to timer is failed.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>

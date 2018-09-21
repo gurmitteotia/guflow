@@ -9,6 +9,7 @@ namespace Guflow.Decider
     internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer
     {
         private TimeSpan _fireAfter= new TimeSpan();
+        private Func<ITimerItem, TimeSpan> _fireAfterFunc;
         private Func<TimerFiredEvent, WorkflowAction> _firedAction;
         private Func<TimerCancellationFailedEvent, WorkflowAction> _cancellationFailedAction;
         private Func<TimerStartFailedEvent, WorkflowAction> _startFailureAction;
@@ -22,6 +23,7 @@ namespace Guflow.Decider
             _canSchedule = t => true;
             _falseAction = t=>new TriggerActions(this).FirstJoint();
             _timerCancelAction =_=>WorkflowAction.Empty;
+            _fireAfterFunc = _ => _fireAfter;
         }
 
         public static TimerItem Reschedule(WorkflowItem ownerItem, Identity identity, IWorkflow workflow)
@@ -54,6 +56,14 @@ namespace Guflow.Decider
             _fireAfter = time;
             return this;
         }
+
+        public IFluentTimerItem FireAfter(Func<ITimerItem, TimeSpan> time)
+        {
+            Ensure.NotNull(time, "time");
+            _fireAfterFunc = time;
+            return this;
+        }
+
         public IFluentTimerItem When(Func<ITimerItem, bool> @true)
         {
             Ensure.NotNull(@true,"@true");
@@ -151,7 +161,7 @@ namespace Guflow.Decider
                     ? Enumerable.Empty<WorkflowDecision>() 
                     : _falseAction(this).Decisions();
 
-            return new []{new ScheduleTimerDecision(Identity, _fireAfter, this == _rescheduleTimer)};
+            return new []{new ScheduleTimerDecision(Identity, _fireAfterFunc(this), this == _rescheduleTimer)};
         }
 
         public override IEnumerable<WorkflowDecision> GetRescheduleDecisions(TimeSpan timeout)

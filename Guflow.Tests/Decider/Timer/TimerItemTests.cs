@@ -42,6 +42,26 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Can_be_configured_to_schedule_timer_to_fire_after_timeout_using_lambda()
+        {
+            var timerItem = TimerItem.New(_timerIdentity, null);
+            timerItem.FireAfter(_=>TimeSpan.FromSeconds(4));
+            var decision = timerItem.GetScheduleDecisions();
+
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity, TimeSpan.FromSeconds(4)) }));
+        }
+
+        [Test]
+        public void Fire_after_lambda_handler_override_the_fire_after_timeout()
+        {
+            var timerItem = TimerItem.New(_timerIdentity, null);
+            timerItem.FireAfter(_ => TimeSpan.FromSeconds(3)).FireAfter(TimeSpan.FromSeconds(4));
+            var decision = timerItem.GetScheduleDecisions();
+
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity, TimeSpan.FromSeconds(3)) }));
+        }
+
+        [Test]
         public void Return_empty_when_when_condition_is_evaluated_to_false()
         {
             var timerItem = TimerItem.New(_timerIdentity, Mock.Of<IWorkflow>());
@@ -135,6 +155,7 @@ namespace Guflow.Tests.Decider
             var timerItem = (IFluentTimerItem) TimerItem.New(_timerIdentity, null);
 
             Assert.Throws<ArgumentNullException>(() => timerItem.OnCancellationFailed(null));
+            Assert.Throws<ArgumentNullException>(() => timerItem.OnCancel(null));
             Assert.Throws<ArgumentNullException>(() => timerItem.OnFired(null));
             Assert.Throws<ArgumentNullException>(() => timerItem.OnStartFailed(null));
             Assert.Throws<ArgumentNullException>(() => timerItem.When(null));

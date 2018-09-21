@@ -6,7 +6,8 @@ namespace Guflow.Worker
     /// </summary>
     public class ActivityArgs
     {
-        internal ActivityArgs(string input, string activityId, string workflowId, string workflowRunId, string taskToken)
+
+        public ActivityArgs(string input, string activityId, string workflowId, string workflowRunId, string taskToken)
         {
             Input = input;
             ActivityId = activityId;
@@ -32,7 +33,7 @@ namespace Guflow.Worker
         /// </summary>
         public string WorkflowRunId { get; }
         /// <summary>
-        /// Represents the activity task and used by Guflow when sending hearbeat or returning any reponse back to Amazon SWF.
+        /// Represents the activity task and used by Guflow when sending heartbeat or returning any response back to Amazon SWF.
         /// </summary>
         public string TaskToken { get; }
         /// <summary>
