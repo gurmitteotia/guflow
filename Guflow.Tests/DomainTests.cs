@@ -118,6 +118,9 @@ namespace Guflow.Tests
             Assert.Throws<ArgumentNullException>(() => new Domain("name", (IAmazonSimpleWorkflow)null));
             Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.SignalWorkflowAsync(null));
             Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.CancelWorkflowAsync(null));
+            Assert.ThrowsAsync<ArgumentException>(async () => await _domain.SendActivityResponseAsync(null, new ActivityCompletedResponse("res"), CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentException>(async () => await _domain.SendActivityResponseAsync("", new ActivityCompletedResponse("res"), CancellationToken.None));
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await _domain.SendActivityResponseAsync("token", null, CancellationToken.None));
         }
 
         [Test]
@@ -273,8 +276,8 @@ namespace Guflow.Tests
         [Test]
         public async Task Send_activity_response_on_amazon_client()
         {
-            var activityResponse = new ActivityCompletedResponse("token", "result");
-            await _domain.SendActivityResponseAsync(activityResponse, CancellationToken.None);
+            var activityResponse = new ActivityCompletedResponse("result");
+            await _domain.SendActivityResponseAsync("token", activityResponse, CancellationToken.None);
 
             Func<RespondActivityTaskCompletedRequest, bool> req = r =>
             {

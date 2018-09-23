@@ -23,7 +23,7 @@ namespace Guflow.Worker
             if (maximumLimit > 1)
                 _executeFunc = ExecuteConcurrentlyAsync;
             else
-                _executeFunc = ExecuteInSequenceSync;
+                _executeFunc = ExecuteInSequenceAsync;
 
             _maximumLimit = maximumLimit;
         }
@@ -59,7 +59,7 @@ namespace Guflow.Worker
             _reachedLimit = false;
             var task = Task.Run(async () =>
             {
-                await ExecuteInSequenceSync(workerTask);
+                await ExecuteInSequenceAsync(workerTask);
                 ExecutionCompleted();
             });
             await WaitIfLimitHasReached();
@@ -89,12 +89,13 @@ namespace Guflow.Worker
             }
         }
 
-        private async Task ExecuteInSequenceSync(WorkerTask workerTask)
+        private async Task ExecuteInSequenceAsync(WorkerTask workerTask)
         {
             try
             {
-                var response = await workerTask.ExecuteFor(_activityHost);
-                await _activityHost.SendAsync(response);
+                IHostedActivities hostedActivities = _activityHost;
+                var response = await workerTask.ExecuteFor(hostedActivities);
+                await _activityHost.SendAsync(workerTask.Token, response);
             }
             catch (Exception exception)
             {

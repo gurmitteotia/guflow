@@ -12,10 +12,10 @@ namespace Guflow.Worker
     /// <summary>
     /// A host to execute the activities.
     /// </summary>
-    public class ActivityHost : IDisposable, IHost
+    public class ActivityHost : IDisposable, IHost, IHostedActivities
     {
         private readonly Domain _domain;
-        private readonly Activities _activities;
+        private readonly HostedActivities _hostedActivities;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private ErrorHandler _genericErrorHandler = ErrorHandler.Continue;
         private ErrorHandler _pollingErrorHandler = ErrorHandler.NotHandled;
@@ -50,7 +50,7 @@ namespace Guflow.Worker
             OnResponseError(e => ErrorAction.Unhandled);
             _domain = domain;
             PollingIdentity = Environment.GetEnvironmentVariable("COMPUTERNAME") ?? Environment.GetEnvironmentVariable("HOSTNAME");
-            _activities = new Activities(activitiesTypes, instanceCreator);
+            _hostedActivities = new HostedActivities(activitiesTypes, instanceCreator);
             _activityExecution = ActivityExecution.Concurrent((uint)Environment.ProcessorCount);
         }
         /// <summary>
@@ -185,13 +185,13 @@ namespace Guflow.Worker
         }
         internal Activity FindBy(string activityName, string activityVersion)
         {
-            return _activities.FindBy(activityName, activityVersion);
+            return _hostedActivities.FindBy(activityName, activityVersion);
         }
 
-        internal async Task SendAsync(ActivityResponse response)
+        internal async Task SendAsync(string taskToken, ActivityResponse response)
         {
             var retryableFunc = new RetryableFunc(_responseErrorHandler);
-            await retryableFunc.ExecuteAsync(() => _domain.SendActivityResponseAsync(response, _cancellationTokenSource.Token));
+            await retryableFunc.ExecuteAsync(() => _domain.SendActivityResponseAsync(taskToken, response, _cancellationTokenSource.Token));
         }
         internal void Fault(Exception exception)
         {
@@ -204,7 +204,7 @@ namespace Guflow.Worker
 
         private string DetectTaskList()
         {
-            var taskLists = _activities.ActivityDescriptions.Select(d => d.DefaultTaskListName).ToArray();
+            var taskLists = _hostedActivities.ActivityDescriptions.Select(d => d.DefaultTaskListName).ToArray();
             var defaultTaskList = taskLists.FirstOrDefault(f => !string.IsNullOrEmpty(f));
             if (string.IsNullOrEmpty(defaultTaskList))
                 throw new InvalidOperationException(Resources.Can_not_determine_the_task_list_to_poll_for_activity_task);
@@ -214,5 +214,9 @@ namespace Guflow.Worker
 
             return defaultTaskList;
         }
+
+        Activity IHostedActivities.FindBy(string activityName, string activityVersion) =>
+            _hostedActivities.FindBy(activityName, activityVersion);
+
     }
 }

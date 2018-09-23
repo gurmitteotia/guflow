@@ -233,13 +233,15 @@ namespace Guflow
         /// <summary>
         /// Send the activity response to Amazon SWF.
         /// </summary>
+        /// <param name="taskToken"></param>
         /// <param name="response">Activity response</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task SendActivityResponseAsync(ActivityResponse response, CancellationToken cancellationToken)
+        public async Task SendActivityResponseAsync(string taskToken, ActivityResponse response, CancellationToken cancellationToken)
         {
-            Ensure.NotNull(response, "response");
-            await response.SendAsync(_simpleWorkflowClient, cancellationToken);
+            Ensure.NotNull(response, nameof(response));
+            Ensure.NotNullAndEmpty(taskToken, nameof(taskToken));
+            await response.SendAsync(taskToken, _simpleWorkflowClient, cancellationToken);
         }
 
         private async Task RegisterDomainAsync(uint retentionPeriodInDays, string description)

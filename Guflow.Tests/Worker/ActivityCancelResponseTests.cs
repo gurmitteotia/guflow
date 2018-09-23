@@ -17,27 +17,21 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Equality_tests()
         {
-            Assert.IsTrue(new ActivityCancelledResponse("token", "details").Equals(new ActivityCancelledResponse("token", "details")));
-            Assert.IsTrue(new ActivityCancelledResponse("token", null).Equals(new ActivityCancelledResponse("token", null)));
+            Assert.IsTrue(new ActivityCancelledResponse("details").Equals(new ActivityCancelledResponse("details")));
+            Assert.IsTrue(new ActivityCancelledResponse(null).Equals(new ActivityCancelledResponse(null)));
 
-            Assert.IsFalse(new ActivityCancelledResponse("token", "details").Equals(new ActivityCancelledResponse("token", "details1")));
-            Assert.IsFalse(new ActivityCancelledResponse("token", "details").Equals(new ActivityCancelledResponse("token", null)));
-        }
-
-        [Test]
-        public void Invalid_argument_test()
-        {
-            Assert.Throws<ArgumentException>(() => new ActivityCancelledResponse(null, "detail"));
+            Assert.IsFalse(new ActivityCancelledResponse("details").Equals(new ActivityCancelledResponse("details1")));
+            Assert.IsFalse(new ActivityCancelledResponse("details").Equals(new ActivityCancelledResponse(null)));
         }
 
         [Test]
         public async Task Send_cancel_response_to_amazon_swf()
         {
             var simpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
-            var response = new ActivityCancelledResponse("token", "details");
+            var response = new ActivityCancelledResponse("details");
             var cancellationTokenSource = new CancellationTokenSource();
 
-            await response.SendAsync(simpleWorkflow.Object, cancellationTokenSource.Token);
+            await response.SendAsync("token", simpleWorkflow.Object, cancellationTokenSource.Token);
 
             Func<RespondActivityTaskCanceledRequest, bool> request = r =>
             {

@@ -6,12 +6,12 @@ using Guflow.Properties;
 
 namespace Guflow.Worker
 {
-    internal class Activities
+    internal class HostedActivities : IHostedActivities
     {
         private readonly Dictionary<string, Type> _hostedActivities = new Dictionary<string, Type>();
         private readonly Func<Type, Activity> _instanceCreator;
         
-        public Activities(IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
+        public HostedActivities(IEnumerable<Type> activitiesTypes, Func<Type, Activity> instanceCreator)
         {
             _instanceCreator = instanceCreator;
             activitiesTypes = activitiesTypes.Where(w => w != null).ToArray();

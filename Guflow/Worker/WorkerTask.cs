@@ -10,7 +10,7 @@ namespace Guflow.Worker
     {
         private readonly ActivityTask _activityTask;
         private readonly IHeartbeatSwfApi _heartbeatSwfApi;
-        private readonly Func<ActivityHost, Task<ActivityResponse>> _execute;
+        private readonly Func<IHostedActivities, Task<ActivityResponse>> _execute;
         private IErrorHandler _errorHandler;
         public static readonly WorkerTask Empty = new WorkerTask();
 
@@ -23,22 +23,25 @@ namespace Guflow.Worker
             _activityTask = activityTask;
             _heartbeatSwfApi = heartbeatSwfApi;
             _errorHandler = errorHandler;
-            _execute = ExecuteActivityTask;
+            _execute = ExecuteActivityTaskAsync;
+            Token = activityTask.TaskToken;
         }
+
+        public string Token { get;}
 
         public static WorkerTask CreateFor(ActivityTask activityTask, IHeartbeatSwfApi heartbeatSwfApi)
         {
             return new WorkerTask(activityTask,heartbeatSwfApi , ErrorHandler.Default(e=>ErrorAction.Unhandled));
         }
 
-        public async Task<ActivityResponse> ExecuteFor(ActivityHost activityHost)
+        public async Task<ActivityResponse> ExecuteFor(IHostedActivities hostedActivities)
         {
-            return await _execute(activityHost);
+            return await _execute(hostedActivities);
         }
 
-        private async Task<ActivityResponse> ExecuteActivityTask(ActivityHost activityHost)
+        private async Task<ActivityResponse> ExecuteActivityTaskAsync(IHostedActivities hostedActivities)
         {
-            var activity = activityHost.FindBy(_activityTask.ActivityType.Name, _activityTask.ActivityType.Version);
+            var activity = hostedActivities.FindBy(_activityTask.ActivityType.Name, _activityTask.ActivityType.Version);
             var activityArgs = new ActivityArgs(_activityTask.Input,
                                                 _activityTask.ActivityId,
                                                 _activityTask.WorkflowExecution.WorkflowId,

@@ -12,27 +12,24 @@ namespace Guflow.Worker
     public sealed class ActivityCompletedResponse : ActivityResponse
     {
         private readonly string _result;
-        private readonly string _taskToken;
         /// <summary>
         /// Create complete response.
         /// </summary>
-        /// <param name="taskToken">Task token for activity this response belongs to.</param>
         /// <param name="result">Result, it is serialized to JSON if it is complex object.</param>
-        public ActivityCompletedResponse(string taskToken, object result)
+        public ActivityCompletedResponse(object result)
         {
-            Ensure.NotNullAndEmpty(taskToken, "taskToken");
             _result = result.ToAwsString();
-            _taskToken = taskToken;
         }
 
-        internal override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
+        internal override async Task SendAsync(string taskToken, IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
         {
-            var request = new RespondActivityTaskCompletedRequest() {Result = _result, TaskToken = _taskToken};
+            var request = new RespondActivityTaskCompletedRequest() {Result = _result, TaskToken = taskToken};
             await simpleWorkflow.RespondActivityTaskCompletedAsync(request, cancellationToken);
         }
+
         private bool Equals(ActivityCompletedResponse other)
         {
-            return string.Equals(_result, other._result) && string.Equals(_taskToken, other._taskToken);
+            return string.Equals(_result, other._result);
         }
 
         public override bool Equals(object obj)
@@ -46,7 +43,7 @@ namespace Guflow.Worker
         {
             unchecked
             {
-                return ((_result != null ? _result.GetHashCode() : 0) * 397) ^ _taskToken.GetHashCode();
+                return ((_result != null ? _result.GetHashCode() : 0) * 397);
             }
         }
     }

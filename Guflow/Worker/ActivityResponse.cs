@@ -9,11 +9,12 @@ namespace Guflow.Worker
     {
         public static readonly ActivityResponse Defer = new DeferredResponse();
 
-        internal abstract Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken);
+        internal abstract Task SendAsync(string taskToken, IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken);
 
         private class DeferredResponse : ActivityResponse
         {
-            internal override Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
+            internal override Task SendAsync(string taskToken, IAmazonSimpleWorkflow simpleWorkflow,
+                CancellationToken cancellationToken)
             {
                 return Task.FromResult(false);
             }

@@ -16,29 +16,22 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Equality_tests()
         {
-            Assert.IsTrue(new ActivityCompletedResponse("token", "result").Equals(new ActivityCompletedResponse("token", "result")));
-            Assert.IsTrue(new ActivityCompletedResponse("token", null).Equals(new ActivityCompletedResponse("token", null)));
+            Assert.IsTrue(new ActivityCompletedResponse("result").Equals(new ActivityCompletedResponse("result")));
+            Assert.IsTrue(new ActivityCompletedResponse(null).Equals(new ActivityCompletedResponse(null)));
 
 
-            Assert.IsFalse(new ActivityCompletedResponse("token", "result").Equals(new ActivityCompletedResponse("token", "result1")));
-            Assert.IsFalse(new ActivityCompletedResponse("token", "result").Equals(new ActivityCompletedResponse("token1", "result")));
-            Assert.IsFalse(new ActivityCompletedResponse("token", null).Equals(new ActivityCompletedResponse("token1", "result")));
-        }
-
-        [Test]
-        public void Invalid_argument_tests()
-        {
-            Assert.Throws<ArgumentException>(() => new ActivityCompletedResponse(null, "result"));
+            Assert.IsFalse(new ActivityCompletedResponse("result").Equals(new ActivityCompletedResponse("result1")));
+            Assert.IsFalse(new ActivityCompletedResponse(null).Equals(new ActivityCompletedResponse("result")));
         }
 
         [Test]
         public async Task Send_activity_completed_response_to_amazon_swf()
         {
             var simpleWorkflow = new Mock<IAmazonSimpleWorkflow>();
-            var response = new ActivityCompletedResponse("token", "result");
+            var response = new ActivityCompletedResponse("result");
             var cancellationTokenSource = new CancellationTokenSource();
 
-            await response.SendAsync(simpleWorkflow.Object, cancellationTokenSource.Token);
+            await response.SendAsync("token", simpleWorkflow.Object, cancellationTokenSource.Token);
 
             Func<RespondActivityTaskCompletedRequest, bool> request = r =>
             {

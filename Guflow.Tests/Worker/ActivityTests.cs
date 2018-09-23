@@ -83,7 +83,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(_taskToken, "10")));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse("10")));
         }
 
         [Test]
@@ -94,7 +94,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(_taskToken, customData.ToJson())));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(customData.ToJson())));
         }
 
         [Test]
@@ -104,7 +104,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(_taskToken, "10")));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse("10")));
         }
         [Test]
         public async Task Execution_method_can_return_custom_data_type_in_activity_response_synchronously()
@@ -114,7 +114,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(_taskToken, customData.ToJson())));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityCompletedResponse(customData.ToJson())));
         }
         [Test]
         public async Task By_default_execution_method_convert_exception_to_failed_response()
@@ -123,7 +123,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityFailedResponse(_taskToken, "IndexOutOfRangeException", "blah")));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityFailedResponse("IndexOutOfRangeException", "blah")));
         }
 
         [Test]
@@ -142,7 +142,7 @@ namespace Guflow.Tests.Worker
 
             var actualResponse = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(actualResponse, Is.EqualTo(new ActivityFailedResponse(_taskToken, "IndexOutOfRangeException", "blah")));
+            Assert.That(actualResponse, Is.EqualTo(new ActivityFailedResponse("IndexOutOfRangeException", "blah")));
         }
 
         [Test]
@@ -209,7 +209,7 @@ namespace Guflow.Tests.Worker
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse(_taskToken, new{id=1})));
+            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse(new{id=1})));
         }
 
         [Test]
@@ -219,7 +219,7 @@ namespace Guflow.Tests.Worker
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(new ActivityCancelledResponse(_taskToken, new { detail = "details" })));
+            Assert.That(response, Is.EqualTo(new ActivityCancelledResponse(new { detail = "details" })));
         }
 
         [Test]
@@ -229,7 +229,7 @@ namespace Guflow.Tests.Worker
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(new ActivityFailedResponse(_taskToken, "reason", new { detail = "detail" })));
+            Assert.That(response, Is.EqualTo(new ActivityFailedResponse("reason", new { detail = "detail" })));
         }
 
         [Test]
@@ -239,7 +239,7 @@ namespace Guflow.Tests.Worker
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(new ActivityCancelledResponse(_taskToken, "The operation was canceled.")));
+            Assert.That(response, Is.EqualTo(new ActivityCancelledResponse("The operation was canceled.")));
         }
 
         [Test]

@@ -13,21 +13,19 @@ namespace Guflow.Worker
     {
         private readonly string _reason;
         private readonly string _details;
-        private readonly string _taskToken;
 
-        public ActivityFailedResponse(string taskToken, string reason, object details)
+        public ActivityFailedResponse(string reason, object details)
         {
-            Ensure.NotNullAndEmpty(taskToken, "taskToken");
             _reason = reason;
             _details = details.ToAwsString();
-            _taskToken = taskToken;
         }
 
-        internal override async Task SendAsync(IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
+        internal override async Task SendAsync(string taskToken, IAmazonSimpleWorkflow simpleWorkflow,
+            CancellationToken cancellationToken)
         {
             var request = new RespondActivityTaskFailedRequest()
             {
-                TaskToken = _taskToken,
+                TaskToken = taskToken,
                 Reason = _reason,
                 Details = _details
             };
@@ -37,7 +35,7 @@ namespace Guflow.Worker
 
         private bool Equals(ActivityFailedResponse other)
         {
-            return string.Equals(_taskToken, other._taskToken) && string.Equals(_reason, other._reason) && string.Equals(_details, other._details);
+            return string.Equals(_reason, other._reason) && string.Equals(_details, other._details);
         }
 
         public override bool Equals(object obj)
@@ -51,7 +49,8 @@ namespace Guflow.Worker
         {
             unchecked
             {
-                return ((_reason != null ? _reason.GetHashCode() : 0) * 397) ^ (_details != null ? _details.GetHashCode() : 0) ^ _taskToken.GetHashCode() ;
+                return ((_reason != null ? _reason.GetHashCode() : 0) * 397) ^
+                       (_details != null ? _details.GetHashCode() : 0);
             }
         }
 

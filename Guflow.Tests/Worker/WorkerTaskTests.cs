@@ -19,7 +19,7 @@ namespace Guflow.Tests.Worker
         public void Setup()
         {
             _domain = new Domain("name", new Mock<IAmazonSimpleWorkflow>().Object);
-            _activityHost = new ActivityHost(_domain, new Type[] { typeof(TestActivity) });
+            _activityHost = new ActivityHost(_domain, new[] { typeof(TestActivity) });
         }
         [Test]
         public async Task On_execution_Empty_worker_task_return_deferred_activity_response()
@@ -44,7 +44,7 @@ namespace Guflow.Tests.Worker
 
             var response = await workerTask.ExecuteFor(_activityHost);
 
-            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse("token" ,"result")));
+            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse("result")));
         }
 
         [Test]
@@ -86,7 +86,7 @@ namespace Guflow.Tests.Worker
             
             var response = await workerTask.ExecuteFor(hostedActivities);
 
-            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse("token", "result")));
+            Assert.That(response, Is.EqualTo(new ActivityCompletedResponse("result")));
 
         }
 

@@ -18,10 +18,11 @@ namespace Guflow.Worker
         private IHeartbeatSwfApi _heartbeatApi;
         private IErrorHandler _errorHandler = ErrorHandler.NotHandled;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-
+        /// <summary>
+        /// Cause the activity to fail on unhandled exception.
+        /// </summary>
         protected bool FailOnException;
         protected readonly ActivityHeartbeat Hearbeat = new ActivityHeartbeat();
-        private string _currentTaskToken = string.Empty;
         protected Activity()
         {
             _executionMethod = new ActivityExecutionMethod(GetType());
@@ -42,7 +43,6 @@ namespace Guflow.Worker
         {
             try
             {
-                _currentTaskToken = activityArgs.TaskToken;
                 Hearbeat.SetFallbackErrorHandler(_errorHandler);
                 Hearbeat.StartHeartbeatIfEnabled(_heartbeatApi, activityArgs.TaskToken);
                 var retryableFunc = new RetryableFunc(_errorHandler);
@@ -79,7 +79,7 @@ namespace Guflow.Worker
         /// <returns></returns>
         protected ActivityResponse Complete(object result)
         {
-            return new ActivityCompletedResponse(_currentTaskToken, result);
+            return new ActivityCompletedResponse(result);
         }
         /// <summary>
         /// Cancel the activity with given details.
@@ -88,7 +88,7 @@ namespace Guflow.Worker
         /// <returns></returns>
         protected ActivityResponse Cancel(object details)
         {
-            return new ActivityCancelledResponse(_currentTaskToken, details);
+            return new ActivityCancelledResponse(details);
         }
         /// <summary>
         /// Fails the activity with given reason and details.
@@ -98,7 +98,7 @@ namespace Guflow.Worker
         /// <returns></returns>
         protected ActivityResponse Fail(string reason,object details)
         {
-            return new ActivityFailedResponse(_currentTaskToken, reason, details);
+            return new ActivityFailedResponse(reason, details);
         }
         /// <summary>
         /// Do not send any response to Amazon SWF.It is useful when you do not have response to return Amazon SWF and possibly a human intervention is need to send the response

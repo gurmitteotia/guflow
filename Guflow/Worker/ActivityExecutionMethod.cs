@@ -106,16 +106,16 @@ namespace Guflow.Worker
                 await task;
                 var result = task.GetType().GetProperty("Result").GetValue(task);
                 if(result.Primitive())
-                    return new ActivityCompletedResponse(taskToken, result.ToString());
-                return new ActivityCompletedResponse(taskToken, result.ToJson());
+                    return new ActivityCompletedResponse(result.ToString());
+                return new ActivityCompletedResponse(result.ToJson());
             }
             private static Task<ActivityResponse> GenericTypeReturnType(ActivityExecutionMethod targetMethod, object targetInstance, object[] parameters, string taskToken)
             {
                 var result = targetMethod.Execute(targetInstance, parameters);
                 if (result.Primitive())
-                    return Task.FromResult((ActivityResponse)new ActivityCompletedResponse(taskToken, result.ToString()));
+                    return Task.FromResult((ActivityResponse)new ActivityCompletedResponse(result.ToString()));
 
-                return Task.FromResult((ActivityResponse)new ActivityCompletedResponse(taskToken, result.ToJson()));
+                return Task.FromResult((ActivityResponse)new ActivityCompletedResponse(result.ToJson()));
             }
         }
     }

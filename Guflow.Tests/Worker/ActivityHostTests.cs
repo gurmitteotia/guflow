@@ -149,7 +149,7 @@ namespace Guflow.Tests.Worker
                             .Returns(Task.FromResult(new RespondActivityTaskCompletedResponse()));
             hostedActivities.OnResponseError(e => ErrorAction.Retry);
 
-            await hostedActivities.SendAsync(new ActivityCompletedResponse("token", "result"));
+            await hostedActivities.SendAsync("token", new ActivityCompletedResponse("result"));
 
             _simpleWorkflow.Verify(w=>w.RespondActivityTaskCompletedAsync(It.IsAny<RespondActivityTaskCompletedRequest>(), It.IsAny<CancellationToken>()),Times.Exactly(2));
         }
@@ -163,7 +163,7 @@ namespace Guflow.Tests.Worker
                             .Returns(Task.FromResult(new RespondActivityTaskCompletedResponse()));
             hostedActivities.OnError(e => ErrorAction.Retry);
 
-            await hostedActivities.SendAsync(new ActivityCompletedResponse("token", "result"));
+            await hostedActivities.SendAsync("token", new ActivityCompletedResponse("result"));
 
             _simpleWorkflow.Verify(w => w.RespondActivityTaskCompletedAsync(It.IsAny<RespondActivityTaskCompletedRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         }

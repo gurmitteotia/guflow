@@ -99,7 +99,7 @@ namespace Guflow.Tests.Worker
             return WorkerTask.CreateFor(new ActivityTask()
             {
                 ActivityType = new ActivityType() { Name = "TestActivity", Version = "1.0" },
-                TaskToken = "token",
+                TaskToken = TaskToken,
                 WorkflowExecution = new WorkflowExecution(){ RunId = "rid", WorkflowId = "wid"},
                 Input = "input",
                 ActivityId = "id"
