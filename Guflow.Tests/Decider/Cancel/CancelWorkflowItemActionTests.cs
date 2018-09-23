@@ -160,6 +160,22 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+        [Test]
+        public void Can_invoke_cancel_request_for_timer_in_timer_oncancel_api()
+        {
+            var workflow = new InvokedCancelRequestForTimerInOnCancelMethod();
+            _historyBuilder.AddNewEvents(TimerStartedEventGraph(_timerName));
+            _historyBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion,
+                _positionalName));
+
+            var decisions = workflow.Decisions(_historyBuilder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new CancelTimerDecision(Identity.Timer(_timerName)),
+            }));
+        }
+
         private IWorkflowHistoryEvents CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
             var allHistoryEvents = _eventGraph.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
@@ -218,6 +234,15 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelRequest.ForTimer(_timerName));
                 ScheduleTimer(_timerName).OnCancel(_ => action);
+            }
+        }
+
+        private class InvokedCancelRequestForTimerInOnCancelMethod : Workflow
+        {
+            public InvokedCancelRequestForTimerInOnCancelMethod()
+            {
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelRequest.ForTimer(_timerName));
+                ScheduleTimer(_timerName).OnCancel(_ => CancelRequest.ForTimer(_timerName));
             }
         }
     }

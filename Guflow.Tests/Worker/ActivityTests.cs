@@ -245,7 +245,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public async Task Cancellation_token_is_set_when_heartbeat_returns_cancellation_request()
         {
-            var hearbeatApi = new TestHeartbeatSwfApi(()=>true, setEventOnCalledTimes:2);
+            var hearbeatApi = new TestHeartbeatSwfApi(()=>true, setEventOnCalledTimes:4);
             var activity = new ActivityWithCancellationToken(executionTime: TimeSpan.FromSeconds(1));
             activity.SetSwfApi(hearbeatApi);
            

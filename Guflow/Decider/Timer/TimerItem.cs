@@ -17,6 +17,9 @@ namespace Guflow.Decider
         private Func<ITimerItem, WorkflowAction> _falseAction;
         private Func<ITimerItem, WorkflowAction> _timerCancelAction;
         private TimerItem _rescheduleTimer;
+
+        private bool _invokedTimerCancelAction = false;// to avoid recurssion.
+
         private TimerItem(Identity identity, IWorkflow workflow)
                      : base(identity, workflow)
         {
@@ -177,11 +180,21 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> CancelDecisions()
         {
-            var cancelDecisions = Enumerable.Empty<WorkflowDecision>();
-            if (IsActive)
-                cancelDecisions = _timerCancelAction(this).Decisions();
+            try
+            {
+                var cancelDecisions = Enumerable.Empty<WorkflowDecision>();
+                if (!_invokedTimerCancelAction && IsActive)
+                {
+                    _invokedTimerCancelAction = true;
+                    cancelDecisions = _timerCancelAction(this).Decisions();
+                }
 
-            return new []{new CancelTimerDecision(Identity)}.Concat(cancelDecisions);
+                return new []{new CancelTimerDecision(Identity)}.Concat(cancelDecisions);
+            }
+            finally
+            {
+                _invokedTimerCancelAction = false;
+            }
         }
 
     }
