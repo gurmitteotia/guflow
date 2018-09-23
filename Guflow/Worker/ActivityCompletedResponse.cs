@@ -19,7 +19,13 @@ namespace Guflow.Worker
         public ActivityCompletedResponse(object result)
         {
             _result = result.ToAwsString();
+            Result = result;
         }
+
+        /// <summary>
+        /// Completed result.
+        /// </summary>
+        public readonly object Result;
 
         internal override async Task SendAsync(string taskToken, IAmazonSimpleWorkflow simpleWorkflow, CancellationToken cancellationToken)
         {

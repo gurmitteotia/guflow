@@ -43,6 +43,15 @@ namespace Guflow.Tests.Worker
             };
             simpleWorkflow.Verify(s=> s.RespondActivityTaskFailedAsync(It.Is<RespondActivityTaskFailedRequest>(r=>request(r)), cancellationTokenSource.Token),Times.Once);
         }
-        
+
+        [Test]
+        public void Reason_and_detail()
+        {
+            var response = new ActivityFailedResponse("reason", "details");
+            Assert.That(response.Details, Is.EqualTo("details"));
+            Assert.That(response.Reason, Is.EqualTo("reason"));
+
+        }
+
     }
 }

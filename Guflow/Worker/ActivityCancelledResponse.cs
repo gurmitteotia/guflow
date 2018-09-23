@@ -16,7 +16,13 @@ namespace Guflow.Worker
         public ActivityCancelledResponse(object details)
         {
             _details = details.ToAwsString();
+            Details = details;
         }
+
+        /// <summary>
+        /// Cancellation details.
+        /// </summary>
+        public readonly object Details;
 
         internal override async Task SendAsync(string taskToken, IAmazonSimpleWorkflow simpleWorkflow,
             CancellationToken cancellationToken)

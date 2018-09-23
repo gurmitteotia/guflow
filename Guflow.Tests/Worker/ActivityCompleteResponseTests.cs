@@ -41,5 +41,11 @@ namespace Guflow.Tests.Worker
             };
             simpleWorkflow.Verify(s => s.RespondActivityTaskCompletedAsync(It.Is<RespondActivityTaskCompletedRequest>(r => request(r)), cancellationTokenSource.Token), Times.Once);
         }
+
+        [Test]
+        public void Result()
+        {
+            Assert.That(new ActivityCompletedResponse("result").Result, Is.EqualTo("result"));
+        }
     }
 }

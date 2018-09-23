@@ -11,14 +11,23 @@ namespace Guflow.Worker
     /// </summary>
     public sealed class ActivityFailedResponse : ActivityResponse
     {
-        private readonly string _reason;
         private readonly string _details;
 
         public ActivityFailedResponse(string reason, object details)
         {
-            _reason = reason;
+            Reason = reason;
             _details = details.ToAwsString();
+            Details = details;
         }
+        /// <summary>
+        /// Failed reason.
+        /// </summary>
+        public readonly string Reason;
+
+        /// <summary>
+        /// Failed details.
+        /// </summary>
+        public readonly object Details;
 
         internal override async Task SendAsync(string taskToken, IAmazonSimpleWorkflow simpleWorkflow,
             CancellationToken cancellationToken)
@@ -26,7 +35,7 @@ namespace Guflow.Worker
             var request = new RespondActivityTaskFailedRequest()
             {
                 TaskToken = taskToken,
-                Reason = _reason,
+                Reason = Reason,
                 Details = _details
             };
 
@@ -35,7 +44,7 @@ namespace Guflow.Worker
 
         private bool Equals(ActivityFailedResponse other)
         {
-            return string.Equals(_reason, other._reason) && string.Equals(_details, other._details);
+            return string.Equals(Reason, other.Reason) && string.Equals(_details, other._details);
         }
 
         public override bool Equals(object obj)
@@ -49,7 +58,7 @@ namespace Guflow.Worker
         {
             unchecked
             {
-                return ((_reason != null ? _reason.GetHashCode() : 0) * 397) ^
+                return ((Reason != null ? Reason.GetHashCode() : 0) * 397) ^
                        (_details != null ? _details.GetHashCode() : 0);
             }
         }
