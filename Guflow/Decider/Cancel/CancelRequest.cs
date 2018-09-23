@@ -74,5 +74,15 @@ namespace Guflow.Decider
             Ensure.NotNull(workflowItems, "workflowItems");
             return WorkflowAction.Cancel(workflowItems.OfType<WorkflowItem>());
         }
+        /// <summary>
+        /// Return the workflow to cancel all given workflow items.
+        /// </summary>
+        /// <param name="workflowItems"></param>
+        /// <returns></returns>
+        public WorkflowAction For(params IWorkflowItem[] workflowItems)
+        {
+            Ensure.NotNull(workflowItems, "workflowItems");
+            return For(workflowItems.AsEnumerable());
+        }
     }
 }

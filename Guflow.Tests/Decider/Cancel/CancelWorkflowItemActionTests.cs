@@ -232,7 +232,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowToReturnCustomActionDuringCancel(WorkflowAction action)
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelRequest.ForTimer(_timerName));
+                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => CancelRequest.For(Timer(_timerName)));
                 ScheduleTimer(_timerName).OnCancel(_ => action);
             }
         }
