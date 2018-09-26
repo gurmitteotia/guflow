@@ -224,6 +224,15 @@ namespace Guflow.Tests.Decider
 
             Assert.That(latestEvent, Is.EqualTo(new ActivityFailedEvent(activityFailedEventGraph.First(), activityFailedEventGraph)));
         }
+
+        [Test]
+        public void By_default_last_similar_events_is_empty()
+        {
+            var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
+
+            Assert.That(activityItem.LastSimilarEvents(), Is.Empty);
+        }
+
         [Test]
         public void All_events_can_return_completed_event()
         {

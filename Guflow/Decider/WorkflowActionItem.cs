@@ -14,7 +14,6 @@ namespace Guflow.Decider
         {
             _workflowActionFunc = workflowActionFunc;
         }
-
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false) => null;
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisions()

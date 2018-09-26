@@ -47,7 +47,6 @@ namespace Guflow.Decider
             timerItem.OnFired(e => e.DefaultAction(workflow));
             return timerItem;
         }
-
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
             => WorkflowHistoryEvents.LastTimerEvent(this, includeRescheduleTimerEvents);
 

@@ -39,6 +39,13 @@ namespace Guflow.Decider
         /// Returns true if workflow item is active otherwise false is return.
         /// </summary>
         bool IsActive { get; }
+
+        /// <summary>
+        /// Returns the last similar events for this item. e.g. if an activity has following events (starting with latest): ActivityCompletedEvent, ActivityCompletedEvent
+        /// ActivityFailedEvent and ActivityFailedEvent. Then this api will return the last two ActivityCompletedEvents.
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<WorkflowItemEvent> LastSimilarEvents();
     }
 
     internal interface ITimer

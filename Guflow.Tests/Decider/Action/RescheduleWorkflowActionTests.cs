@@ -53,7 +53,23 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Schedule_next_item_when_total_number_of_scheduling_events_exceeds_allowed_limit()
+        public void Consider_only_last_similar_events_for_activity_when_counting_the_rescheduled_events()
+        {
+            var workflow = new WorkflowToRescheduleActivityUpToLimit(3);
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
+            _eventsBuilder.AddProcessedEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
+            _eventsBuilder.AddProcessedEvents(ActivityFailedEventGraph(ActivityName, ActivityVersion, PositionalName));
+            _eventsBuilder.AddProcessedEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
+            _eventsBuilder.AddNewEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName)) }));
+        }
+
+        [Test]
+        public void Schedule_next_item_when_total_number_of_scheduling_activity_events_exceeds_allowed_limit()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
@@ -109,6 +125,22 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.FromSeconds(2), true) }));
         }
 
+        [Test]
+        public void Consider_only_last_similar_events_for_timer_when_counting_the_rescheduled_events()
+        {
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, false));
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, true));
+            _eventsBuilder.AddProcessedEvents(TimerFiredEventGraph(TimerName, true));
+            _eventsBuilder.AddProcessedEvents(TimerFailedEventGraph(TimerName));
+            _eventsBuilder.AddNewEvents(TimerFiredEventGraph(TimerName, false));
+            var workflow = new WorkflowToRescheduleTimerWithTimerUpToLimit(2);
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.FromSeconds(2), true) }));
+        }
+
 
         [Test]
         public void Schedule_next_item_when_total_number_of_timer_scheduling_exceed_allowed_limit()
@@ -152,6 +184,21 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Consider_only_last_similar_events_for_lambda_when_counting_the_rescheduled_events()
+        {
+            var workflow = new WorkflowToRescheduleLambdaUpToALimit(2);
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent("input"));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedEventGraph());
+            _eventsBuilder.AddProcessedEvents(LambdaFailedEventGraph());
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedEventGraph());
+            _eventsBuilder.AddNewEvents(LambdaCompletedEventGraph());
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+        }
+
+        [Test]
         public void Schedule_next_item_when_total_number_of_lambda_scheduled_events_exceeds_allowed_limit()
         {
             var workflow = new WorkflowToRescheduleLambdaUpToALimit(2);
@@ -169,13 +216,27 @@ namespace Guflow.Tests.Decider
         {
             return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "type").ToArray();
         }
+        private HistoryEvent[] LambdaFailedEventGraph()
+        {
+            return _eventGraphBuilder.LambdaFailedEventGraph(Identity.Lambda(LambdaName), "input", "type","details").ToArray();
+        }
         private HistoryEvent[] ActivityCompletedEventGraph(string activityName, string activityVersion, string positionalName)
         {
             return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res").ToArray();
         }
+
+        private HistoryEvent[] ActivityFailedEventGraph(string activityName, string activityVersion, string positionalName)
+        {
+            return _eventGraphBuilder.ActivityFailedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res", "details").ToArray();
+        }
         private HistoryEvent[] TimerFiredEventGraph(string timerName, bool rescheduleTimer)
         {
             return _eventGraphBuilder.TimerFiredGraph(Identity.Timer(timerName), TimeSpan.Zero, rescheduleTimer).ToArray();
+        }
+
+        private HistoryEvent[] TimerFailedEventGraph(string timerName)
+        {
+            return _eventGraphBuilder.TimerStartFailedGraph(Identity.Timer(timerName), "blah").ToArray();
         }
 
         private class WorkflowToRescheduleActivity : Workflow

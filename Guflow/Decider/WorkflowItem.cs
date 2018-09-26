@@ -32,6 +32,19 @@ namespace Guflow.Decider
             }
         }
 
+        public IEnumerable<WorkflowItemEvent> LastSimilarEvents()
+        {
+            WorkflowItemEvent lastEvent = null;
+            foreach (var @event in AllEvents())
+            {
+                lastEvent = lastEvent ?? @event;
+                if (lastEvent.GetType() == @event.GetType())
+                    yield return @event;
+                else
+                    yield break;
+            }
+        }
+
         public abstract WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false);
         public abstract IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false);
 

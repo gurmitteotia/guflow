@@ -23,7 +23,7 @@ namespace Guflow.Decider
 
         public bool IsExceeded(WorkflowItem workflowItem)
         {
-            var allEvents = workflowItem.Events(workflowItem.LastEvent().GetType());
+            var allEvents = workflowItem.LastSimilarEvents();
             return allEvents.Count() > _count;
         }
     }
