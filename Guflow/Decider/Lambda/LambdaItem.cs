@@ -7,7 +7,7 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
-    internal class LambdaItem : WorkflowItem, IFluentLambdaItem, ILambdaItem
+    internal class LambdaItem : WorkflowItem, IFluentLambdaItem, ILambdaItem, ITimer
     {
         private Func<ILambdaItem, object> _input;
         private Func<ILambdaItem, TimeSpan?> _timeout;
@@ -196,6 +196,24 @@ namespace Guflow.Decider
         public WorkflowAction StartFailedWorkflowAction(LambdaStartFailedEvent @event)
         {
             return _startFailedAction(@event);
+        }
+
+        WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.Fired(timerFiredEvent);
+        }
+
+        WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.StartFailed(timerStartFailedEvent);
+        }
+
+        WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.CancellationFailed(timerCancellationFailedEvent);
         }
     }
 }

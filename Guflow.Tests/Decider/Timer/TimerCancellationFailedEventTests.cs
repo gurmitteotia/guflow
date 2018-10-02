@@ -11,22 +11,23 @@ namespace Guflow.Tests.Decider
     public class TimerCancellationFailedEventTests
     {
         private TimerCancellationFailedEvent _timerCancellationFailedEvent;
-        private const string _timerName = "timer";
-        private const string _cause = "cause";
-        private const string _activityName = "activity";
-        private const string _activityVersion = "1.0";
+        private const string TimerName = "timer";
+        private const string Cause = "cause";
+        private const string ActivityName = "activity";
+        private const string ActivityVersion = "1.0";
+        private const string LambdaName = "Lambda";
         private EventGraphBuilder _builder;
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            _timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.Timer(_timerName), _cause);
+            _timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.Timer(TimerName), Cause);
         }
 
         [Test]
         public void Should_populate_properties_from_event_attributes()
         {
-            Assert.That(_timerCancellationFailedEvent.Cause,Is.EqualTo(_cause));
+            Assert.That(_timerCancellationFailedEvent.Cause,Is.EqualTo(Cause));
             Assert.IsFalse(_timerCancellationFailedEvent.IsActive);
         }
 
@@ -40,17 +41,27 @@ namespace Guflow.Tests.Decider
         public void By_default_return_workflow_failed_action()
         {
             var decisions = _timerCancellationFailedEvent.Interpret(new TestWorkflow()).Decisions();
-            Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("TIMER_CANCELLATION_FAILED",_cause)}));
+            Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("TIMER_CANCELLATION_FAILED",Cause)}));
         }
 
         [Test]
-        public void By_default_return_workflow_failed_action_for_reschedule_timer()
+        public void Fail_workflow_for_activity_reschedule_timer()
         {
             var workflow = new WorkflowWithActivity();
-            var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.New(_activityName, _activityVersion), _cause);
+            var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.New(ActivityName, ActivityVersion), Cause);
             var decisions = timerCancellationFailedEvent.Interpret(workflow).Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("RESCHEDULE_TIMER_CANCELLATION_FAILED", _cause)}));
+            Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("RESCHEDULE_TIMER_CANCELLATION_FAILED", Cause)}));
+        }
+
+        [Test]
+        public void Fail_workflow_for_lambda_reschedule_timer()
+        {
+            var workflow = new WorkflowWithLambda();
+            var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.Lambda(LambdaName), Cause);
+            var decisions = timerCancellationFailedEvent.Interpret(workflow).Decisions();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new FailWorkflowDecision("RESCHEDULE_TIMER_CANCELLATION_FAILED", Cause) }));
         }
 
         [Test]
@@ -67,7 +78,7 @@ namespace Guflow.Tests.Decider
         {
             var expectedWorkflowAction = new Mock<WorkflowAction>().Object;
             var workflow = new WorkflowWithCustomActionForActivity(expectedWorkflowAction);
-            var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.New(_activityName, _activityVersion), _cause);
+            var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.New(ActivityName, ActivityVersion), Cause);
             var workflowAction = timerCancellationFailedEvent.Interpret(workflow);
 
             Assert.That(workflowAction, Is.EqualTo(expectedWorkflowAction));
@@ -75,21 +86,21 @@ namespace Guflow.Tests.Decider
 
         private TimerCancellationFailedEvent CreateTimerCancellationFailedEvent(Identity identity, string cause)
         {
-            var timerCancellationFailedEventGraph = _builder.TimerCancellationFailedGraph(identity, _cause);
+            var timerCancellationFailedEventGraph = _builder.TimerCancellationFailedGraph(identity, Cause);
             return new TimerCancellationFailedEvent(timerCancellationFailedEventGraph.First());
         }
         private class TestWorkflow : Workflow
         {
             public TestWorkflow()
             {
-                ScheduleTimer(_timerName);
+                ScheduleTimer(TimerName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleTimer(_timerName).OnCancellationFailed(c => workflowAction);
+                ScheduleTimer(TimerName).OnCancellationFailed(c => workflowAction);
             }
         }
 
@@ -97,14 +108,22 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithActivity()
             {
-                ScheduleActivity(_activityName, _activityVersion);
+                ScheduleActivity(ActivityName, ActivityVersion);
+            }
+        }
+
+        private class WorkflowWithLambda : Workflow
+        {
+            public WorkflowWithLambda()
+            {
+                ScheduleLambda(LambdaName);
             }
         }
         private class WorkflowWithCustomActionForActivity : Workflow
         {
             public WorkflowWithCustomActionForActivity(WorkflowAction workflowAction)
             {
-                ScheduleActivity(_activityName, _activityVersion).RescheduleTimer.OnCancellationFailed(e=>workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion).RescheduleTimer.OnCancellationFailed(e=>workflowAction);
             }
         }
     }

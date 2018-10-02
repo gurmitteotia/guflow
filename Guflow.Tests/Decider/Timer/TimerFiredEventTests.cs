@@ -12,10 +12,11 @@ namespace Guflow.Tests.Decider
     public class TimerFiredEventTests
     {
         private TimerFiredEvent _timerFiredEvent;
-        private const string _timerName = "timer1";
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
-        private const string _positionalName = "First";
+        private const string TimerName = "timer1";
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
+        private const string LambdaName = "Lambda";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(20);
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
@@ -24,7 +25,7 @@ namespace Guflow.Tests.Decider
         {
             _eventGraphBuilder = new EventGraphBuilder();
             _eventsBuilder = new HistoryEventsBuilder();
-            _timerFiredEvent = CreateTimerFiredEvent(Identity.Timer(_timerName), _fireAfter);
+            _timerFiredEvent = CreateTimerFiredEvent(Identity.Timer(TimerName), _fireAfter);
         }
 
         [Test]
@@ -43,7 +44,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_timer_start_event_is_missing()
         {
-            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(Identity.Timer(_timerName), _fireAfter);
+            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), _fireAfter);
             Assert.Throws<IncompleteEventGraphException>(()=> new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph.Where(h=>h.EventType!=EventType.TimerStarted)));
         }
 
@@ -54,7 +55,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = _timerFiredEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(TimerItem.New(Identity.Timer(_timerName),null))));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(TimerItem.New(Identity.Timer(TimerName),null))));
         }
 
         [Test]
@@ -73,22 +74,34 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.New(_activityName, _activityVersion, _positionalName), _fireAfter, true).ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.New(ActivityName, ActivityVersion, PositionalName), _fireAfter, true).ToArray());
 
             var workflowAction = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleActivityDecision(Identity.New(_activityName, _activityVersion, _positionalName)) }));
+            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName)) }));
         }
 
         [Test]
         public void Should_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_timer_item()
         {
             var workflow = new WorkflowWithTimer();
-            var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.Timer(_timerName), _fireAfter);
+            var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.Timer(TimerName), _fireAfter);
 
             var workflowAction = rescheduleTimer.Interpret(workflow).Decisions();
 
-            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer(_timerName), TimeSpan.Zero) }));
+            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.Zero) }));
+        }
+
+        [Test]
+        public void Should_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_an_lambda_item()
+        {
+            var workflow = new SingleLambdaWorkflow();
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Lambda(LambdaName), _fireAfter, true).ToArray());
+
+            var workflowAction = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
         }
 
         [Test]
@@ -120,22 +133,30 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithTimer()
             {
-                ScheduleTimer(_timerName);
+                ScheduleTimer(TimerName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleTimer(_timerName).OnFired(e => workflowAction);
+                ScheduleTimer(TimerName).OnFired(e => workflowAction);
             }
         }
         private class SingleActivityWorkflow : Workflow
         {
             public SingleActivityWorkflow()
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName);
             }
        }
+
+        private class SingleLambdaWorkflow : Workflow
+        {
+            public SingleLambdaWorkflow()
+            {
+                ScheduleLambda(LambdaName);
+            }
+        }
     }
 }
