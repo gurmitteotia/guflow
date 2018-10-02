@@ -58,5 +58,6 @@ namespace Guflow.Decider
         /// <param name="action">WorkflowAction to be executed when timer is cancelled.</param>
         /// <returns></returns>
         IFluentTimerItem OnCancel(Func<ITimerItem, WorkflowAction> action);
+        
     }
 }

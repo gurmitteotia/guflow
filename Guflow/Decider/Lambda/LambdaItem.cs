@@ -108,6 +108,11 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentLambdaItem AfterChildWorkflow(string name, string version, string positionalName = "")
+        {
+            throw new NotImplementedException();
+        }
+
         public IFluentLambdaItem WithInput(Func<ILambdaItem, object> input)
         {
             Ensure.NotNull(input, nameof(input));

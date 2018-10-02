@@ -116,6 +116,12 @@ namespace Guflow.Decider
             AddParent(Identity.Lambda(name, positionalName));
             return this;
         }
+
+        public IFluentTimerItem AfterChildWorkflow(string name, string version, string positionalName = "")
+        {
+            throw new NotImplementedException();
+        }
+
         public IFluentTimerItem OnCancellationFailed(Func<TimerCancellationFailedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");

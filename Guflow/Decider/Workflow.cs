@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Guflow.Decider.ChildWorkflow;
 using Guflow.Properties;
 using Guflow.Worker;
 
@@ -288,6 +289,16 @@ namespace Guflow.Decider
             _allWorkflowItems.Add(lamdbaItem);
             return lamdbaItem;
 
+        }
+
+        protected IFluentChildWorkflowItem ScheduleChildWorkflow(string name, string version,
+            string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            var childWorkflowItem = new ChildWorkflowItem(Identity.New(name, version, positionalName), this);
+            _allWorkflowItems.Add(childWorkflowItem);
+            return childWorkflowItem;
         }
 
         /// <summary>

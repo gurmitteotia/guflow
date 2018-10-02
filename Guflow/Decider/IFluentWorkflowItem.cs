@@ -34,5 +34,14 @@ namespace Guflow.Decider
         /// <param name="positionalName">Positional name</param>
         /// <returns></returns>
         T AfterLambda(string name, string positionalName = "");
+
+        /// <summary>
+        /// Schedule this item after the child workflow.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="version"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        T AfterChildWorkflow(string name, string version, string positionalName = "");
     }
 }

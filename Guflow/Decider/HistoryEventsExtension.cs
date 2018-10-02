@@ -99,6 +99,12 @@ namespace Guflow.Decider
             return historyEvent.EventType == EventType.WorkflowExecutionStarted;
         }
 
+        public static bool IsChildWorkflowInitiatedEvent(this HistoryEvent historyEvent, long initiatedEventId)
+        {
+            return historyEvent.EventType == EventType.StartChildWorkflowExecutionInitiated &&
+                   historyEvent.EventId == initiatedEventId;
+        }
+
         private static bool IsWorkflowCancelRequestFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.RequestCancelExternalWorkflowExecutionFailed;

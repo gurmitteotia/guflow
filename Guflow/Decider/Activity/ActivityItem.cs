@@ -94,6 +94,11 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentActivityItem AfterChildWorkflow(string name, string version, string positionalName = "")
+        {
+            throw new NotImplementedException();
+        }
+
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");

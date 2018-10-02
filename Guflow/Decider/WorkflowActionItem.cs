@@ -70,6 +70,11 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentWorkflowActionItem AfterChildWorkflow(string name, string version, string positionalName = "")
+        {
+            throw new NotImplementedException();
+        }
+
         public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
                                             => Enumerable.Empty<WorkflowItemEvent>();
     }
