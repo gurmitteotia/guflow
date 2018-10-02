@@ -73,17 +73,6 @@ namespace Guflow.Tests.Decider
             Assert.That(workflowAction, Is.EqualTo(customAction));
         }
         
-        [Test]
-        public void Can_return_custom_workflow_action_from_workflow_for_reschedule_timer()
-        {
-            var expectedWorkflowAction = new Mock<WorkflowAction>().Object;
-            var workflow = new WorkflowWithCustomActionForActivity(expectedWorkflowAction);
-            var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.New(ActivityName, ActivityVersion), Cause);
-            var workflowAction = timerCancellationFailedEvent.Interpret(workflow);
-
-            Assert.That(workflowAction, Is.EqualTo(expectedWorkflowAction));
-        }
-
         private TimerCancellationFailedEvent CreateTimerCancellationFailedEvent(Identity identity, string cause)
         {
             var timerCancellationFailedEventGraph = _builder.TimerCancellationFailedGraph(identity, Cause);
@@ -117,13 +106,6 @@ namespace Guflow.Tests.Decider
             public WorkflowWithLambda()
             {
                 ScheduleLambda(LambdaName);
-            }
-        }
-        private class WorkflowWithCustomActionForActivity : Workflow
-        {
-            public WorkflowWithCustomActionForActivity(WorkflowAction workflowAction)
-            {
-                ScheduleActivity(ActivityName, ActivityVersion).RescheduleTimer.OnCancellationFailed(e=>workflowAction);
             }
         }
     }

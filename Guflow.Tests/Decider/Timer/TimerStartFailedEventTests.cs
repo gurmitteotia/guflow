@@ -74,19 +74,6 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new[] { new FailWorkflowDecision("RESCHEDULE_TIMER_START_FAILED", TimerFailureCause) }));
         }
-
-        [Test]
-        public void Can_return_custom_action_for_reshedule_timer()
-        {
-            var expectedWorkflowAction = new Mock<WorkflowAction>();
-            var workflow = new WorkflowWithCustomRescheduleAction(expectedWorkflowAction.Object);
-            var rescheduleTimerStartFailed = CreateTimerStartFailedEvent(Identity.New(ActivityName, ActivityVersion), TimerFailureCause);
-
-            var workflowAction = rescheduleTimerStartFailed.Interpret(workflow);
-
-            Assert.That(workflowAction, Is.EqualTo(expectedWorkflowAction.Object));
-        }
-
         private TimerStartFailedEvent CreateTimerStartFailedEvent(Identity timerIdentity, string cause)
         {
             var timerFailedEventGraph = _builder.TimerStartFailedGraph(timerIdentity, cause);
@@ -98,13 +85,6 @@ namespace Guflow.Tests.Decider
             public WorkflowWithActivity()
             {
                 ScheduleActivity(ActivityName, ActivityVersion);
-            }
-        }
-        private class WorkflowWithCustomRescheduleAction : Workflow
-        {
-            public WorkflowWithCustomRescheduleAction(WorkflowAction workflowAction)
-            {
-                ScheduleActivity(ActivityName, ActivityVersion).RescheduleTimer.OnStartFailed(e => workflowAction);
             }
         }
         private class WorkflowWithTimer : Workflow

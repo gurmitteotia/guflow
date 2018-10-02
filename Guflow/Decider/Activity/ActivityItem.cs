@@ -174,9 +174,6 @@ namespace Guflow.Decider
             _timeoutsFunc = timeouts;
             return this;
         }
-
-        public IFluentTimerItem RescheduleTimer => _rescheduleTimer;
-
         WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
             ITimer timer = _rescheduleTimer;
