@@ -47,11 +47,12 @@ namespace Guflow.Decider
                 }
                 else if (historyEvent.IsActivityScheduledEvent(scheduledEventId))
                 {
-                    _activityName = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
-                    _activityVersion = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
-                    _activityPositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.As<ScheduleData>().PN;
-                    AwsIdentity = AwsIdentity.Raw(historyEvent.ActivityTaskScheduledEventAttributes.ActivityId);
-                    Input = historyEvent.ActivityTaskScheduledEventAttributes.Input;
+                    var attr = historyEvent.ActivityTaskScheduledEventAttributes;
+                    _activityName = attr.ActivityType.Name;
+                    _activityVersion = attr.ActivityType.Version;
+                    _activityPositionalName = attr.Control.As<ScheduleData>().PN;
+                    AwsIdentity = AwsIdentity.Raw(attr.ActivityId);
+                    Input = attr.Input;
                     foundActivityScheduledEvent = true;
                 }
             }

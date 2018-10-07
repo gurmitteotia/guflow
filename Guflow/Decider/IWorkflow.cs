@@ -34,7 +34,9 @@ namespace Guflow.Decider
         WorkflowAction WorkflowAction(LambdaStartFailedEvent lambdaStartFailedEvent);
         WorkflowAction WorkflowAction(ChildWorkflowCompletedEvent completedEvent);
         WorkflowAction WorkflowAction(ChildWorkflowFailedEvent failedEvent);
-
         WorkflowAction WorkflowAction(ChildWorkflowCancelledEvent cancelledEvent);
+        WorkflowAction WorkflowAction(ChildWorkflowTerminatedEvent terminatedEvent);
+        WorkflowAction WorkflowAction(ChildWorkflowTimedoutEvent timedoutEvent);
+        WorkflowAction WorkflowAction(ChildWorkflowStartFailedEvent startFailed);
     }
 }

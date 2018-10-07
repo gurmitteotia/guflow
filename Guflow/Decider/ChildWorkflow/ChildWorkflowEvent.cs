@@ -7,6 +7,9 @@ namespace Guflow.Decider
 {
     public abstract class ChildWorkflowEvent : WorkflowItemEvent
     {
+        protected string WorkflowName;
+        protected string WorkflowVersion;
+        protected string PositionalName;
         protected ChildWorkflowEvent(long eventId) : base(eventId)
         {
         }
@@ -38,6 +41,9 @@ namespace Guflow.Decider
                     var attr = historyEvent.StartChildWorkflowExecutionInitiatedEventAttributes;
                     Input = attr.Input;
                     AwsIdentity = AwsIdentity.Raw(attr.WorkflowId);
+                    WorkflowName = attr.WorkflowType.Name;
+                    WorkflowVersion = attr.WorkflowType.Version;
+                    PositionalName = attr.Control.As<ScheduleData>().PN;
                     foundEvent = true;
                     break;
                 }
@@ -45,6 +51,12 @@ namespace Guflow.Decider
 
             if (!foundEvent)
                 throw new IncompleteEventGraphException($"Can not find Child Workflow InitiatedEvent for id {initiatedEventId}");
+        }
+
+        public override string ToString()
+        {
+            return
+                $"Event: {GetType().Name}, WorkflowName={WorkflowName}, Version={WorkflowVersion}, PositionalName={PositionalName}";
         }
     }
 }

@@ -6,22 +6,23 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Raised when child workflow is cancelled.
+    /// Raised when child workflow is timedout.
     /// </summary>
-    public sealed class ChildWorkflowCancelledEvent : ChildWorkflowEvent
+    public sealed class ChildWorkflowTimedoutEvent : ChildWorkflowEvent
     {
-        private ChildWorkflowExecutionCanceledEventAttributes _attr;
-        internal ChildWorkflowCancelledEvent(HistoryEvent cancelledEvent, IEnumerable<HistoryEvent> allEvents)
-            : base(cancelledEvent.EventId)
+        private readonly ChildWorkflowExecutionTimedOutEventAttributes _attr;
+
+        internal ChildWorkflowTimedoutEvent(HistoryEvent timedoutEvent, IEnumerable<HistoryEvent> allEvents)
+            : base(timedoutEvent.EventId)
         {
-            _attr = cancelledEvent.ChildWorkflowExecutionCanceledEventAttributes;
+            _attr = timedoutEvent.ChildWorkflowExecutionTimedOutEventAttributes;
             PopulateProperties(_attr.WorkflowExecution.RunId, _attr.InitiatedEventId, allEvents);
         }
 
         /// <summary>
-        /// Returns cancellation details.
+        /// Returns the reason for timout.
         /// </summary>
-        public string Details => _attr.Details;
+        public string TimedoutType => _attr.TimeoutType;
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
@@ -30,7 +31,7 @@ namespace Guflow.Decider
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
         {
-            return defaultActions.CancelWorkflow(Details);
+            return defaultActions.FailWorkflow("CHILD_WORKFLOW_TIMEDOUT", TimedoutType);
         }
     }
 }

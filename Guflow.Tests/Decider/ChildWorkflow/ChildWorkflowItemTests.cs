@@ -25,6 +25,9 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnCompletion(null));
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnFailure(null));
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnCancelled(null));
+            Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnTerminated(null));
+            Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnTimedout(null));
+            Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnStartFailed(null));
         }
     }
 }

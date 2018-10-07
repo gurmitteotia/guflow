@@ -8,7 +8,7 @@ namespace Guflow.Decider
     /// <summary>
     /// Raised when child workflow is failed.
     /// </summary>
-    public class ChildWorkflowFailedEvent : ChildWorkflowEvent
+    public sealed class ChildWorkflowFailedEvent : ChildWorkflowEvent
     {
         private readonly ChildWorkflowExecutionFailedEventAttributes _attr;
         internal ChildWorkflowFailedEvent(HistoryEvent failedEvent, IEnumerable<HistoryEvent> allEvents) : base(failedEvent.EventId)

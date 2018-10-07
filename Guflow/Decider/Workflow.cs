@@ -188,6 +188,24 @@ namespace Guflow.Decider
             return childWorkflowItem.CancelledAction(cancelledEvent);
         }
 
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowTerminatedEvent terminatedEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(terminatedEvent);
+            return childWorkflowItem.TerminatedAction(terminatedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowTimedoutEvent timedoutEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(timedoutEvent);
+            return childWorkflowItem.TimedoutAction(timedoutEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowStartFailedEvent startFailed)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(startFailed);
+            return childWorkflowItem.StartFailed(startFailed);
+        }
+
         private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)
         {
             var workflowEventMethod = _workflowEventMethods.FindFor(eventName);

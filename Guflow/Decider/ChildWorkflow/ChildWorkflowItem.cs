@@ -11,12 +11,18 @@ namespace Guflow.Decider
         private Func<ChildWorkflowCompletedEvent, WorkflowAction> _completedAction;
         private Func<ChildWorkflowFailedEvent, WorkflowAction> _failedAction;
         private Func<ChildWorkflowCancelledEvent, WorkflowAction> _cancelledAction;
+        private Func<ChildWorkflowTerminatedEvent, WorkflowAction> _terminatedAction;
+        private Func<ChildWorkflowTimedoutEvent, WorkflowAction> _timedoutAction;
+        private Func<ChildWorkflowStartFailedEvent, WorkflowAction> _startFailedAction;
 
-        public ChildWorkflowItem(Identity identity, IWorkflow workflow):base(identity, workflow)
+        public ChildWorkflowItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
         {
             _completedAction = w => w.DefaultAction(workflow);
             _failedAction = w => w.DefaultAction(workflow);
             _cancelledAction = w => w.DefaultAction(workflow);
+            _terminatedAction = w => w.DefaultAction(workflow);
+            _timedoutAction = w => w.DefaultAction(workflow);
+            _startFailedAction = w => w.DefaultAction(workflow);
         }
 
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
@@ -95,6 +101,27 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentChildWorkflowItem OnTerminated(Func<ChildWorkflowTerminatedEvent, WorkflowAction> workflowAction)
+        {
+            Ensure.NotNull(workflowAction, nameof(workflowAction));
+            _terminatedAction = workflowAction;
+            return this;
+        }
+
+        public IFluentChildWorkflowItem OnTimedout(Func<ChildWorkflowTimedoutEvent, WorkflowAction> workflowAction)
+        {
+            Ensure.NotNull(workflowAction, nameof(workflowAction));
+            _timedoutAction = workflowAction;
+            return this;
+        }
+
+        public IFluentChildWorkflowItem OnStartFailed(Func<ChildWorkflowStartFailedEvent, WorkflowAction> workflowAction)
+        {
+            Ensure.NotNull(workflowAction, nameof(workflowAction));
+            _startFailedAction = workflowAction;
+            return this;
+        }
+
         public WorkflowAction CompletedAction(ChildWorkflowCompletedEvent completedEvent)
         {
             return _completedAction(completedEvent);
@@ -108,6 +135,21 @@ namespace Guflow.Decider
         public WorkflowAction CancelledAction(ChildWorkflowCancelledEvent cancelledEvent)
         {
             return _cancelledAction(cancelledEvent);
+        }
+
+        public WorkflowAction TerminatedAction(ChildWorkflowTerminatedEvent terminatedEvent)
+        {
+            return _terminatedAction(terminatedEvent);
+        }
+
+        public WorkflowAction TimedoutAction(ChildWorkflowTimedoutEvent timedoutEvent)
+        {
+            return _timedoutAction(timedoutEvent);
+        }
+
+        public WorkflowAction StartFailed(ChildWorkflowStartFailedEvent startFailed)
+        {
+            return _startFailedAction(startFailed);
         }
     }
 }

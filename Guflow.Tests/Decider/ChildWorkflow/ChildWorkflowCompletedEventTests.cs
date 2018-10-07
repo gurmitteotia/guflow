@@ -13,7 +13,7 @@ namespace Guflow.Tests.Decider
     public class ChildWorkflowCompletedEventTests
     {
         private EventGraphBuilder _eventGraphBuilder;
-        private ChildWorkflowCompletedEvent _completedEvent;
+        private ChildWorkflowCompletedEvent _event;
 
         private const string WorkflowName = "workflow";
         private const string WorkflowVersion = "1.0";
@@ -25,16 +25,16 @@ namespace Guflow.Tests.Decider
             _eventGraphBuilder = new EventGraphBuilder();
              _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName);
             var eventGraph = _eventGraphBuilder.ChildWorkflowCompletedGraph(_workflowIdentity, "runid", "input", "result");
-            _completedEvent = new ChildWorkflowCompletedEvent(eventGraph.First() , eventGraph);
+            _event = new ChildWorkflowCompletedEvent(eventGraph.First() , eventGraph);
         }
 
         [Test]
         public void Populate_the_properties_from_history_event_graph()
         {
-            Assert.That(_completedEvent.Result, Is.EqualTo("result"));
-            Assert.That(_completedEvent.Input, Is.EqualTo("input"));
-            Assert.That(_completedEvent.IsActive, Is.False);
-            Assert.That(_completedEvent.RunId, Is.EqualTo("runid"));
+            Assert.That(_event.Result, Is.EqualTo("result"));
+            Assert.That(_event.Input, Is.EqualTo("input"));
+            Assert.That(_event.IsActive, Is.False);
+            Assert.That(_event.RunId, Is.EqualTo("runid"));
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_schedule_children()
         {
-            var decisions = _completedEvent.Interpret(new ChildWorkflow()).Decisions();
+            var decisions = _event.Interpret(new ChildWorkflow()).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer("TimerName"), TimeSpan.Zero)}));
         }
@@ -56,13 +56,13 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_child_workflow_item_is_not_found_in_workflow()
         {
-           Assert.Throws<IncompatibleWorkflowException>(()=> _completedEvent.Interpret(new EmptyWorkflow()).Decisions());
+           Assert.Throws<IncompatibleWorkflowException>(()=> _event.Interpret(new EmptyWorkflow()).Decisions());
         }
 
         [Test]
         public void Can_return_a_custom_workflow_action()
         {
-            var decisions = _completedEvent.Interpret(new ChildWorkflowWithCustomAction("result")).Decisions();
+            var decisions = _event.Interpret(new ChildWorkflowWithCustomAction("result")).Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result")}));
         }

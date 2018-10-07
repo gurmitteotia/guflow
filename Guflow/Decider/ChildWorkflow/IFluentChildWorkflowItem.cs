@@ -26,5 +26,26 @@ namespace Guflow.Decider
         /// <param name="workflowAction"></param>
         /// <returns></returns>
         IFluentChildWorkflowItem OnCancelled(Func<ChildWorkflowCancelledEvent, WorkflowAction> workflowAction);
+
+        /// <summary>
+        /// Configure the handler to return the workflow on <see cref="ChildWorkflowTerminatedEvent"/>.
+        /// </summary>
+        /// <param name="workflowAction"></param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem OnTerminated(Func<ChildWorkflowTerminatedEvent, WorkflowAction> workflowAction);
+
+        /// <summary>
+        /// Configure the handler to return the workflow on <see cref="ChildWorkflowTimedoutEvent"/>.
+        /// </summary>
+        /// <param name="workflowAction"></param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem OnTimedout(Func<ChildWorkflowTimedoutEvent, WorkflowAction> workflowAction);
+
+        /// <summary>
+        /// Configure the handler to return the workflow on <see cref="ChildWorkflowStartFailedEvent"/>.
+        /// </summary>
+        /// <param name="workflowAction"></param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem OnStartFailed(Func<ChildWorkflowStartFailedEvent, WorkflowAction> workflowAction);
     }
 }
