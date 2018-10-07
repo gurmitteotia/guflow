@@ -1,9 +1,30 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 
-namespace Guflow.Decider.ChildWorkflow
+using System;
+
+namespace Guflow.Decider
 {
     public interface IFluentChildWorkflowItem : IFluentWorkflowItem<IFluentChildWorkflowItem>
     {
-        
+        /// <summary>
+        /// Configure the handler to return the workflow action on <see cref="ChildWorkflowCompletedEvent"/>.
+        /// </summary>
+        /// <param name="workflowAction">Handler</param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem OnCompletion(Func<ChildWorkflowCompletedEvent, WorkflowAction> workflowAction);
+
+        /// <summary>
+        /// Configure the handler to return the workflow action on <see cref="ChildWorkflowFailedEvent"/>.
+        /// </summary>
+        /// <param name="workflowAction"></param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem OnFailure(Func<ChildWorkflowFailedEvent, WorkflowAction> workflowAction);
+
+        /// <summary>
+        /// Configure the handler to return the workflow action on <see cref="ChildWorkflowCancelledEvent"/>.
+        /// </summary>
+        /// <param name="workflowAction"></param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem OnCancelled(Func<ChildWorkflowCancelledEvent, WorkflowAction> workflowAction);
     }
 }

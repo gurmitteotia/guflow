@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Guflow.Decider.ChildWorkflow;
 using Guflow.Properties;
 using Guflow.Worker;
 
@@ -171,6 +170,24 @@ namespace Guflow.Decider
             return lambda.StartFailedWorkflowAction(lambdaStartFailedEvent);
         }
 
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowCompletedEvent completedEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(completedEvent);
+            return childWorkflowItem.CompletedAction(completedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowFailedEvent failedEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(failedEvent);
+            return childWorkflowItem.FailedAction(failedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowCancelledEvent cancelledEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(cancelledEvent);
+            return childWorkflowItem.CancelledAction(cancelledEvent);
+        }
+
         private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)
         {
             var workflowEventMethod = _workflowEventMethods.FindFor(eventName);
@@ -291,6 +308,13 @@ namespace Guflow.Decider
 
         }
 
+        /// <summary>
+        /// Schdule the child workflow.
+        /// </summary>
+        /// <param name="name">Child workflow name.</param>
+        /// <param name="version">Child workflow version.</param>
+        /// <param name="positionalName">Positional parameter, if any, useful in scheduling same workflow multiple times.</param>
+        /// <returns></returns>
         protected IFluentChildWorkflowItem ScheduleChildWorkflow(string name, string version,
             string positionalName = "")
         {

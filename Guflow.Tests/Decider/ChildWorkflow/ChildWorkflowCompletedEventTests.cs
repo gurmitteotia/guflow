@@ -2,8 +2,9 @@
 
 using System;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using Guflow.Decider;
-using Guflow.Decider.ChildWorkflow;
+using Guflow.Tests.TestWorkflows;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -52,6 +53,20 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer("TimerName"), TimeSpan.Zero)}));
         }
 
+        [Test]
+        public void Throws_exception_when_child_workflow_item_is_not_found_in_workflow()
+        {
+           Assert.Throws<IncompatibleWorkflowException>(()=> _completedEvent.Interpret(new EmptyWorkflow()).Decisions());
+        }
+
+        [Test]
+        public void Can_return_a_custom_workflow_action()
+        {
+            var decisions = _completedEvent.Interpret(new ChildWorkflowWithCustomAction("result")).Decisions();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result")}));
+        }
+
         private class ChildWorkflow : Workflow
         {
             public ChildWorkflow()
@@ -59,6 +74,15 @@ namespace Guflow.Tests.Decider
                 ScheduleChildWorkflow(WorkflowName, WorkflowVersion, PositionalName);
 
                 ScheduleTimer("TimerName").AfterChildWorkflow(WorkflowName, WorkflowVersion, PositionalName);
+            }
+        }
+
+        private class ChildWorkflowWithCustomAction : Workflow
+        {
+            public ChildWorkflowWithCustomAction(string completeResult)
+            {
+                ScheduleChildWorkflow(WorkflowName, WorkflowVersion, PositionalName)
+                    .OnCompletion(_ => CompleteWorkflow(completeResult));
             }
         }
     }

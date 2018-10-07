@@ -164,6 +164,9 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => timerItem.AfterActivity("1.0", null));
             Assert.Throws<ArgumentException>(() => timerItem.AfterTimer(null));
             Assert.Throws<ArgumentException>(() => timerItem.AfterLambda(null));
+            Assert.Throws<ArgumentException>(() => timerItem.AfterChildWorkflow(null, "1.0"));
+            Assert.Throws<ArgumentException>(() => timerItem.AfterChildWorkflow("v", null));
+
         }
 
         private TimerItem CreateTimerItemFor(IEnumerable<HistoryEvent> eventGraph)

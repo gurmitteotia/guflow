@@ -26,7 +26,7 @@ namespace Guflow.Decider
         /// <summary>
         /// Provides the workflow action when lambda function is completed. By default on completion it will schedule it children as per Deflow algorithm.
         /// </summary>
-        /// <param name="completedAction">Functtor, which will return the workflow action.</param>
+        /// <param name="completedAction">Functor, which will return the workflow action.</param>
         /// <returns></returns>
         IFluentLambdaItem OnCompletion(Func<LambdaCompletedEvent, WorkflowAction> completedAction);
 

@@ -119,7 +119,10 @@ namespace Guflow.Decider
 
         public IFluentTimerItem AfterChildWorkflow(string name, string version, string positionalName = "")
         {
-            throw new NotImplementedException();
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name,version, positionalName));
+            return this;
         }
 
         public IFluentTimerItem OnCancellationFailed(Func<TimerCancellationFailedEvent, WorkflowAction> action)

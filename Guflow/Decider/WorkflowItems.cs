@@ -117,5 +117,13 @@ namespace Guflow.Decider
         {
             return _workflowItems.OfType<LambdaItem>().FirstOrDefault(s => s.Has(identity));
         }
+
+        public ChildWorkflowItem ChildWorkflowItem(WorkflowItemEvent @event)
+        {
+            var item = _workflowItems.OfType<ChildWorkflowItem>().FirstOrDefault(@event.IsFor);
+            if(item == null) throw new IncompatibleWorkflowException($"Can not find workflow item for event {@event}");
+
+            return item;
+        }
     }
 }
