@@ -18,7 +18,11 @@ namespace Guflow.Decider
         }
         public static string Seconds(this TimeSpan? value)
         {
-            return value?.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+            if (!value.HasValue)
+                return null;
+            if (value.Value == TimeSpan.MaxValue)
+                return "NONE";
+            return value.Value.TotalSeconds.ToString();
         }
 
         public static Amazon.SimpleWorkflow.Model.TaskList TaskList(this string taskListName)

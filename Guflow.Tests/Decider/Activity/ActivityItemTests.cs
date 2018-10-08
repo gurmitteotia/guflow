@@ -90,7 +90,7 @@ namespace Guflow.Tests.Decider
 
             var decision = ScheduleDecision(activityItem);
 
-            Assert.That(decision.TaskList, Is.Null);
+            Assert.That(decision.TaskListName, Is.Null);
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace Guflow.Tests.Decider
 
             var decision = ScheduleDecision(activityItem);
 
-            Assert.That(decision.TaskList, Is.EqualTo(taskList));
+            Assert.That(decision.TaskListName, Is.EqualTo(taskList));
         }
 
         [Test]

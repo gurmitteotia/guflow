@@ -239,7 +239,7 @@ namespace Guflow.Decider
         {
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.Input = _inputFunc(this).ToAwsString();
-            scheduleActivityDecision.TaskList = _taskListFunc(this);
+            scheduleActivityDecision.TaskListName = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);
             scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
             return new[] { scheduleActivityDecision };
