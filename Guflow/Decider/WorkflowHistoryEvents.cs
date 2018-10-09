@@ -168,6 +168,21 @@ namespace Guflow.Decider
             return @event;
         }
 
+        public IEnumerable<WorkflowItemEvent> AllChildWorkflowEvents(ChildWorkflowItem childWorkflowItem)
+        {
+            var allEvents = new List<WorkflowItemEvent>();
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                var childWorkflowEvent = historyEvent.ChildWorkflowEvent(_allHistoryEvents);
+                if (childWorkflowEvent == null) continue;
+                if (childWorkflowEvent.IsFor(childWorkflowItem) && !childWorkflowEvent.InChainOf(allEvents))
+                {
+                    allEvents.Add(childWorkflowEvent);
+                    yield return childWorkflowEvent;
+                }
+            }
+        }
+
         public long LatestEventId => _allHistoryEvents.First().EventId;
 
         private bool IsRescheduleTimerEvent(WorkflowItemEvent @event)

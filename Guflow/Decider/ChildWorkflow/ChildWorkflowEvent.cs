@@ -1,6 +1,7 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
@@ -10,6 +11,7 @@ namespace Guflow.Decider
         protected string WorkflowName;
         protected string WorkflowVersion;
         protected string PositionalName;
+        private long _initiatedEventId;
         protected ChildWorkflowEvent(long eventId) : base(eventId)
         {
         }
@@ -33,6 +35,7 @@ namespace Guflow.Decider
             IEnumerable<HistoryEvent> allEvents)
         {
             RunId = runid;
+            _initiatedEventId = initiatedEventId;
             bool foundEvent = false;
             foreach (var historyEvent in allEvents)
             {
@@ -57,6 +60,22 @@ namespace Guflow.Decider
         {
             return
                 $"Event: {GetType().Name}, WorkflowName={WorkflowName}, Version={WorkflowVersion}, PositionalName={PositionalName}";
+        }
+
+        internal override bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)
+        {
+            var childWorkflowEvents = workflowItemEvents.OfType<ChildWorkflowEvent>();
+            foreach (var childWorkflowEvent in childWorkflowEvents)
+            {
+                if (IsInChain(childWorkflowEvent))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool IsInChain(ChildWorkflowEvent other)
+        {
+            return _initiatedEventId == other._initiatedEventId;
         }
     }
 }
