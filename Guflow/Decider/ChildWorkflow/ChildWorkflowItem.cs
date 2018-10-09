@@ -22,6 +22,7 @@ namespace Guflow.Decider
         private Func<IChildWorkflowItem, string> _taskListName;
         private Func<IChildWorkflowItem, WorkflowTimeouts> _timeouts;
         private Func<IChildWorkflowItem, IEnumerable<string>> _tags;
+        private TimerItem _rescheduleTimer;
 
         public ChildWorkflowItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
         {
@@ -57,6 +58,7 @@ namespace Guflow.Decider
             _startFailedAction = w => w.DefaultAction(workflow);
             _input = w => workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _tags = _=> Enumerable.Empty<string>();
+            _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
         }
 
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
@@ -66,7 +68,11 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
         {
-            throw new NotImplementedException();
+            var childWorkflowItems= WorkflowHistoryEvents.AllChildWorkflowEvents(this);
+            var timerEvents = Enumerable.Empty<WorkflowItemEvent>();
+            if (includeRescheduleTimerEvents)
+                timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer, true);
+            return childWorkflowItems.Concat(timerEvents).OrderByDescending(i=>i, WorkflowEvent.IdComparer);
         }
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisions()

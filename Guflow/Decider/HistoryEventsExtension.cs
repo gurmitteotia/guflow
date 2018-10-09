@@ -277,6 +277,55 @@ namespace Guflow.Decider
             return null;
         }
 
+        public static WorkflowItemEvent ChildWorkflowEvent(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allEvents)
+        {
+            if(historyEvent.IsChildWorkflowCompletedEvent())
+                return new ChildWorkflowCompletedEvent(historyEvent, allEvents);
+            if (historyEvent.IsChildWorkflowFailedEvent())
+                return new ChildWorkflowFailedEvent(historyEvent, allEvents);
+            if (historyEvent.IsChildWorkflowCancelledEvent())
+                return new ChildWorkflowCancelledEvent(historyEvent, allEvents);
+            if (historyEvent.IsChildWorkflowTimedoutEvent())
+                return new ChildWorkflowTimedoutEvent(historyEvent, allEvents);
+            if (historyEvent.IsChildWorkflowTerminatedEvent())
+                return new ChildWorkflowTerminatedEvent(historyEvent, allEvents);
+            if (historyEvent.IsChildWorkflowStartedEvent())
+                return new ChildWorkflowStartedEvent(historyEvent, allEvents);
+            if (historyEvent.IsChildWorkflowStartFailedEvent())
+                return new ChildWorkflowStartFailedEvent(historyEvent, allEvents);
+
+            return null;
+        }
+
+        private static bool IsChildWorkflowCompletedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ChildWorkflowExecutionCompleted;
+        }
+        private static bool IsChildWorkflowFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ChildWorkflowExecutionFailed;
+        }
+        private static bool IsChildWorkflowCancelledEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ChildWorkflowExecutionCanceled;
+        }
+        private static bool IsChildWorkflowTimedoutEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ChildWorkflowExecutionTimedOut;
+        }
+        private static bool IsChildWorkflowTerminatedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ChildWorkflowExecutionTerminated;
+        }
+        private static bool IsChildWorkflowStartedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ChildWorkflowExecutionStarted;
+        }
+        private static bool IsChildWorkflowStartFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.StartChildWorkflowExecutionFailed;
+        }
+
         public static WorkflowItemEvent CreateWorkflowItemEventFor(this HistoryEvent historyEvent,IEnumerable<HistoryEvent> allHistoryEvents)
         {
             var activityEvent = historyEvent.CreateActivityEventFor(allHistoryEvents);

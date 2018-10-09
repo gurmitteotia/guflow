@@ -1,8 +1,10 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -171,6 +173,157 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void All_events_can_return_child_workflow_completed_event()
+        {
+            var eventGraph = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input", "result").ToArray();
+            var childWorkflow = ChildWorkflow(eventGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new []
+            {
+                new ChildWorkflowCompletedEvent(eventGraph.First(), eventGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_child_workflow_failed_event()
+        {
+            var eventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "details").ToArray();
+            var childWorkflow = ChildWorkflow(eventGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new[]
+            {
+                new ChildWorkflowFailedEvent(eventGraph.First(), eventGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_child_workflow_cancelled_event()
+        {
+            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(_identity, "runid", "input", "details").ToArray();
+            var childWorkflow = ChildWorkflow(eventGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new[]
+            {
+                new ChildWorkflowCancelledEvent(eventGraph.First(), eventGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_child_workflow_timedout_event()
+        {
+            var eventGraph = _builder.ChildWorkflowTimedoutEventGraph(_identity, "runid", "input", "details").ToArray();
+            var childWorkflow = ChildWorkflow(eventGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new[]
+            {
+                new ChildWorkflowTimedoutEvent(eventGraph.First(), eventGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_child_workflow_started_event()
+        {
+            var eventGraph = _builder.ChildWorkflowStartedEventGraph(_identity, "runid", "input").ToArray();
+            var childWorkflow = ChildWorkflow(eventGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new[]
+            {
+                new ChildWorkflowStartedEvent(eventGraph.First(), eventGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_child_workflow_start_failed_event()
+        {
+            var eventGraph = _builder.ChildWorkflowStartFailedEventGraph(_identity, "runid", "input").ToArray();
+            var childWorkflow = ChildWorkflow(eventGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new[]
+            {
+                new ChildWorkflowStartFailedEvent(eventGraph.First(), eventGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_child_workflow_failed_and_completed_event()
+        {
+            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input","reason","detail").ToArray();
+            var completedEventGraph = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input","result").ToArray();
+            var allEventsGraph = completedEventGraph.Concat(failedEventGraph);
+            var childWorkflow = ChildWorkflow(allEventsGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new ChildWorkflowEvent[]
+            {
+                new ChildWorkflowCompletedEvent(completedEventGraph.First(), allEventsGraph),
+                new ChildWorkflowFailedEvent(failedEventGraph.First(), allEventsGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_child_workflow_failed_and_started_event()
+        {
+            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
+            var startedEventGraph = _builder.ChildWorkflowStartedEventGraph(_identity, "runid", "input").ToArray();
+            var allEventsGraph = startedEventGraph.Concat(failedEventGraph);
+            var childWorkflow = ChildWorkflow(allEventsGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new ChildWorkflowEvent[]
+            {
+                new ChildWorkflowStartedEvent(startedEventGraph.First(), allEventsGraph),
+                new ChildWorkflowFailedEvent(failedEventGraph.First(), allEventsGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_reschedule_timer_events()
+        {
+            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
+            var timerStartedGraph = _builder.TimerStartedGraph(_identity, TimeSpan.FromSeconds(20), true).ToArray();
+            var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
+            var childWorkflow = ChildWorkflow(allEventsGraph);
+
+            var allEvents = childWorkflow.AllEvents(true);
+
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new TimerStartedEvent(timerStartedGraph.First(), allEventsGraph),
+                new ChildWorkflowFailedEvent(failedEventGraph.First(), allEventsGraph)
+            }));
+        }
+
+        [Test]
+        public void All_events_can_filter_out_reschedule_timer_events()
+        {
+            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
+            var timerStartedGraph = _builder.TimerStartedGraph(_identity, TimeSpan.FromSeconds(20), true).ToArray();
+            var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
+            var childWorkflow = ChildWorkflow(allEventsGraph);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ChildWorkflowFailedEvent(failedEventGraph.First(), allEventsGraph)
+            }));
+        }
+
+        [Test]
         public void Invalid_arguments()
         {
             var childWorkflowItem = new ChildWorkflowItem(_identity, Mock.Of<IWorkflow>());
@@ -187,6 +340,12 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.WithPriority(null));
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.WithTimeouts(null));
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.WithTags(null));
+        }
+
+        private ChildWorkflowItem ChildWorkflow(IEnumerable<HistoryEvent> events)
+        {
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(events));
+            return new ChildWorkflowItem(_identity, _workflow.Object);
         }
     }
 }

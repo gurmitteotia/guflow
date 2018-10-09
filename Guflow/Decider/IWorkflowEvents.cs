@@ -18,5 +18,6 @@ namespace Guflow.Decider
         IEnumerable<WorkflowCancellationRequestedEvent> AllWorkflowCancellationRequestedEvents();
         IEnumerable<WorkflowItemEvent> AllLambdaEvents(LambdaItem lambdaItem);
         WorkflowItemEvent LastLambdaEvent(LambdaItem lambdaItem);
+        IEnumerable<WorkflowItemEvent> AllChildWorkflowEvents(ChildWorkflowItem childWorkflowItem);
     }
 }
