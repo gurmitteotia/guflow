@@ -21,6 +21,13 @@ namespace Guflow.Tests.Worker
             _domain = new Domain("name", new Mock<IAmazonSimpleWorkflow>().Object);
             _activityHost = new ActivityHost(_domain, new[] { typeof(TestActivity) });
         }
+
+        [Test]
+        public void Empty_task_has_non_empty_token()
+        {
+            Assert.That(WorkerTask.Empty.Token, Is.Not.Empty.And.Not.Null);
+        }
+
         [Test]
         public async Task On_execution_Empty_worker_task_return_deferred_activity_response()
         {

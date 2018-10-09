@@ -17,6 +17,7 @@ namespace Guflow.Worker
         private WorkerTask()
         {
             _execute = (a) => Task.FromResult(ActivityResponse.Defer);
+            Token = "INVALID_TOKEN";
         }
         private WorkerTask(ActivityTask activityTask, IHeartbeatSwfApi heartbeatSwfApi, IErrorHandler errorHandler)
         {
