@@ -19,5 +19,6 @@ namespace Guflow.Decider
         IEnumerable<WorkflowItemEvent> AllLambdaEvents(LambdaItem lambdaItem);
         WorkflowItemEvent LastLambdaEvent(LambdaItem lambdaItem);
         IEnumerable<WorkflowItemEvent> AllChildWorkflowEvents(ChildWorkflowItem childWorkflowItem);
+        WorkflowItemEvent LastChildWorkflowEvent(ChildWorkflowItem childWorkflowItem);
     }
 }

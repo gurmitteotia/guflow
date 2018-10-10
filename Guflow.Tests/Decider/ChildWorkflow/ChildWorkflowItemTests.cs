@@ -323,6 +323,70 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+
+        [Test]
+        public void Last_event_can_return_child_workflow_completed_event()
+        {
+            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
+            var completedEvent = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input", "result").ToArray();
+            var allEventsGraph = completedEvent.Concat(failedEventGraph);
+            var childWorkflow = ChildWorkflow(allEventsGraph);
+
+            var lastEvent = childWorkflow.LastEvent();
+
+            Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowCompletedEvent(completedEvent.First(), allEventsGraph)));
+        }
+
+        [Test]
+        public void Last_event_is_cached()
+        {
+            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
+            var completedEvent = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input", "result").ToArray();
+            var allEventsGraph = completedEvent.Concat(failedEventGraph);
+            var childWorkflow = ChildWorkflow(allEventsGraph);
+
+            var lastEvent1 = childWorkflow.LastEvent();
+            var lastEvent2 = childWorkflow.LastEvent();
+
+            Assert.That(ReferenceEquals(lastEvent1, lastEvent2));
+        }
+
+
+        [Test]
+        public void Last_event_can_return_reschedule_timer_event()
+        {
+            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
+            var timerStartedGraph = _builder.TimerStartedGraph(_identity, TimeSpan.FromSeconds(20), true).ToArray();
+            var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
+            var childWorkflow = ChildWorkflow(allEventsGraph);
+
+            var lastEvent = childWorkflow.LastEvent(true);
+
+            Assert.That(lastEvent, Is.EqualTo(new TimerStartedEvent(timerStartedGraph.First(), allEventsGraph)));
+        }
+
+        [Test]
+        public void Last_event_can_filter_out_reschedule_timer_event()
+        {
+            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
+            var timerStartedGraph = _builder.TimerStartedGraph(_identity, TimeSpan.FromSeconds(20), true).ToArray();
+            var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
+            var childWorkflow = ChildWorkflow(allEventsGraph);
+
+            var lastEvent = childWorkflow.LastEvent();
+
+            Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowFailedEvent(failedEventGraph.First(), allEventsGraph)));
+        }
+
+        [Test]
+        public void Reschedule_decision_is_timer_schedule_decision_for_child_workflow_item()
+        {
+            var item = new ChildWorkflowItem(_identity, _workflow.Object);
+            var decisions = item.RescheduleDecisions(TimeSpan.FromSeconds(20));
+
+            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(_identity, TimeSpan.FromSeconds(20), true)}));
+        }
+
         [Test]
         public void Invalid_arguments()
         {

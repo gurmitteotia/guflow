@@ -15,6 +15,7 @@ namespace Guflow.Decider
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedActivityEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedTimerEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedLambdaEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
+        private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedChildWorkflowEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
 
         public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long newEventsStartId, long newEventsEndId)
         {
@@ -181,6 +182,16 @@ namespace Guflow.Decider
                     yield return childWorkflowEvent;
                 }
             }
+        }
+
+        public WorkflowItemEvent LastChildWorkflowEvent(ChildWorkflowItem childWorkflowItem)
+        {
+            WorkflowItemEvent @event = null;
+            if (_cachedChildWorkflowEvents.TryGetValue(childWorkflowItem, out @event))
+                return @event;
+            @event = AllChildWorkflowEvents(childWorkflowItem).FirstOrDefault();
+            _cachedChildWorkflowEvents.Add(childWorkflowItem, @event);
+            return @event;
         }
 
         public long LatestEventId => _allHistoryEvents.First().EventId;

@@ -63,7 +63,13 @@ namespace Guflow.Decider
 
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
         {
-            throw new NotImplementedException();
+            var lastEvent = WorkflowHistoryEvents.LastChildWorkflowEvent(this);
+            WorkflowItemEvent timerEvent = null;
+            if (includeRescheduleTimerEvents)
+                timerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
+
+            if (lastEvent > timerEvent) return lastEvent;
+            return timerEvent;
         }
 
         public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
@@ -95,12 +101,18 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
         {
-            throw new NotImplementedException();
+            _rescheduleTimer.FireAfter(timeout);
+            return _rescheduleTimer.ScheduleDecisions();
         }
 
         public override IEnumerable<WorkflowDecision> CancelDecisions()
         {
-            throw new NotImplementedException();
+            var lastEvent = LastEvent(true);
+            var latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
+            if (latestTimerEvent != null && lastEvent == latestTimerEvent)
+                return _rescheduleTimer.CancelDecisions();
+
+            return new[] { new CancelRequestWorkflowDecision(Identity.Id, (lastEvent as ChildWorkflowEvent)?.RunId),  };
         }
 
         public IFluentChildWorkflowItem AfterTimer(string name)

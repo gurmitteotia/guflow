@@ -79,6 +79,44 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Returns_cancel_child_workflow_decision_for_child_workflow_item_when_reschedule_timer_is_not_active()
+        {
+            var identity = Identity.New("workflow", "ver");
+            SetupWorkflowToReturns(_eventGraph.ChildWorkflowStartedEventGraph(identity, "id", "input"));
+            var childWorkflowItem = new ChildWorkflowItem(identity, _workflow.Object);
+            var workflowAction = WorkflowAction.Cancel(childWorkflowItem);
+
+            var decisions = workflowAction.Decisions();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(identity.Id, "id")}));
+        }
+
+        [Test]
+        public void Returns_cancel_child_workflow_decision_for_child_workflow_item_when_neither_child_workflow_not_reschedule_timer_are_active()
+        {
+            var identity = Identity.New("workflow", "ver");
+            var item = new ChildWorkflowItem(identity, _workflow.Object);
+            var workflowAction = WorkflowAction.Cancel(item);
+
+            var decisions = workflowAction.Decisions();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(identity.Id, null) }));
+        }
+
+        [Test]
+        public void Returns_cancel_timer_decision_for_child_workflow_item_when_reschedule_timer_is_active()
+        {
+            var identity = Identity.New("workflow", "ver");
+            SetupWorkflowToReturns(_eventGraph.TimerStartedGraph(identity, TimeSpan.FromSeconds(2), true));
+            var item = new ChildWorkflowItem(identity, _workflow.Object);
+            var workflowAction = WorkflowAction.Cancel(item);
+
+            var decisions = workflowAction.Decisions();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(identity) }));
+        }
+
+        [Test]
         public void Cancel_request_for_activity_can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnCancelActivityAction();
