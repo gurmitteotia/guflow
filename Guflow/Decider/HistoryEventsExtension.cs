@@ -216,6 +216,18 @@ namespace Guflow.Decider
                 return new LambdaSchedulingFailedEvent(historyEvent);
             if(historyEvent.IsLambdaStartFailedEvent())
                 return new LambdaStartFailedEvent(historyEvent, allHistoryEvents);
+            if(historyEvent.IsChildWorkflowCompletedEvent())
+                return new ChildWorkflowCompletedEvent(historyEvent, allHistoryEvents);
+            if(historyEvent.IsChildWorkflowFailedEvent())
+                return new ChildWorkflowFailedEvent(historyEvent, allHistoryEvents);
+            if(historyEvent.IsChildWorkflowCancelledEvent())
+                return new ChildWorkflowCancelledEvent(historyEvent, allHistoryEvents);
+            if(historyEvent.IsChildWorkflowTimedoutEvent())
+                return new ChildWorkflowTimedoutEvent(historyEvent, allHistoryEvents);
+            if(historyEvent.IsChildWorkflowTerminatedEvent())
+                return new ChildWorkflowTerminatedEvent(historyEvent, allHistoryEvents);
+            if(historyEvent.IsChildWorkflowStartFailedEvent())
+                return new ChildWorkflowStartFailedEvent(historyEvent, allHistoryEvents);
             return null;
         }
 

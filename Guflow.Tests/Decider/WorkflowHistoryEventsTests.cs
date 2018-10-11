@@ -18,11 +18,13 @@ namespace Guflow.Tests.Decider
         private const string ActivityName = "Activity1";
         private const string ActivityVersion = "1.0";
         private const string TimerName = "timer1";
+        private Identity _childWorkflow;
 
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
+            _childWorkflow = Identity.New("childWorkflow", "ver");
         }
 
 
@@ -231,6 +233,66 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Child_workflow_completed_event_is_interpreted()
+        {
+            var eventGraph = _builder.ChildWorkflowCompletedGraph(_childWorkflow, "rid","i","result");
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowCompletedEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
+        public void Child_workflow_failed_event_is_interpreted()
+        {
+            var eventGraph = _builder.ChildWorkflowFailedEventGraph(_childWorkflow, "rid", "i", "reason", "details");
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowFailedEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
+        public void Child_workflow_cancelled_event_is_interpreted()
+        {
+            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(_childWorkflow, "rid", "i", "details");
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowCancelledEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
+        public void Child_workflow_timedout_event_is_interpreted()
+        {
+            var eventGraph = _builder.ChildWorkflowTimedoutEventGraph(_childWorkflow, "rid", "i", "details");
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowTimedoutEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
+        public void Child_workflow_terminated_event_is_interpreted()
+        {
+            var eventGraph = _builder.ChildWorkflowTerminatedEventGraph(_childWorkflow, "rid", "i");
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new  ChildWorkflowTerminatedEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
+        public void Child_workflow_start_failed_event_is_interpreted()
+        {
+            var eventGraph = _builder.ChildWorkflowStartFailedEventGraph(_childWorkflow, "rid", "i");
+            var events = new WorkflowHistoryEvents(eventGraph);
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowStartFailedEvent(eventGraph.First(), eventGraph) }));
+        }
+
+        [Test]
         public void Non_interpretable_events_are_filtered_out()
         {
             var eventGraph = NotInterpretingEventGraph();
@@ -411,7 +473,9 @@ namespace Guflow.Tests.Decider
             var activityStarted = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion), "id");
             var activityScheduled = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion));
             var timerStarted = _builder.TimerStartedGraph(Identity.Timer(TimerName), TimeSpan.FromSeconds(1));
-            return timerStarted.Concat(activityScheduled).Concat(activityStarted).Concat(nonInterpretEvent).ToArray();
+            var childWorfklowStarted = _builder.ChildWorkflowStartedEventGraph(_childWorkflow, "rid", "input");
+            return timerStarted.Concat(activityScheduled)
+                .Concat(activityStarted).Concat(nonInterpretEvent).Concat(childWorfklowStarted).ToArray();
         }
     }
 }
