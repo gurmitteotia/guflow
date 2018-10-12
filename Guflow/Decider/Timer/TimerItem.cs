@@ -125,6 +125,12 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentTimerItem AfterChildWorkflow<TWorkflow>(string positionalName) where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return AfterChildWorkflow(desc.Name, desc.Version, positionalName);
+        }
+
         public IFluentTimerItem OnCancellationFailed(Func<TimerCancellationFailedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");

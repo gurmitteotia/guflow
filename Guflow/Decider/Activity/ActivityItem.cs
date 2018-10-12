@@ -83,8 +83,8 @@ namespace Guflow.Decider
         }
         public IFluentActivityItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
-            var description = ActivityDescription.FindOn<TActivity>();
-            return AfterActivity(description.Name, description.Version, positionalName);
+            var desc = ActivityDescription.FindOn<TActivity>();
+            return AfterActivity(desc.Name, desc.Version, positionalName);
         }
 
         public IFluentActivityItem AfterLambda(string name, string positionalName = "")
@@ -100,6 +100,12 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(version, nameof(version));
             AddParent(Identity.New(name, version, positionalName));
             return this;
+        }
+
+        public IFluentActivityItem AfterChildWorkflow<TWorkflow>(string positionalName="") where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return AfterChildWorkflow(desc.Name, desc.Version, positionalName);
         }
 
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> action)

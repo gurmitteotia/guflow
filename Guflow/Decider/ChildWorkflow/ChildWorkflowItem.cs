@@ -117,27 +117,44 @@ namespace Guflow.Decider
 
         public IFluentChildWorkflowItem AfterTimer(string name)
         {
-            throw new NotImplementedException();
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            AddParent(Identity.Timer(name));
+            return this;
         }
 
         public IFluentChildWorkflowItem AfterActivity(string name, string version, string positionalName = "")
         {
-            throw new NotImplementedException();
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name, version, positionalName));
+            return this;
         }
 
         public IFluentChildWorkflowItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
-            throw new NotImplementedException();
+            var desc = ActivityDescription.FindOn<TActivity>();
+            return AfterActivity(desc.Name, desc.Version, positionalName);
         }
 
         public IFluentChildWorkflowItem AfterLambda(string name, string positionalName = "")
         {
-            throw new NotImplementedException();
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            AddParent(Identity.Lambda(name, positionalName));
+            return this;
         }
 
         public IFluentChildWorkflowItem AfterChildWorkflow(string name, string version, string positionalName = "")
         {
-            throw new NotImplementedException();
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name, version, positionalName));
+            return this;
+        }
+
+        public IFluentChildWorkflowItem AfterChildWorkflow<TWorkflow>(string positionalName) where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return AfterChildWorkflow(desc.Name, desc.Version, positionalName);
         }
 
         public IFluentChildWorkflowItem WithInput(Func<IChildWorkflowItem, object> input)

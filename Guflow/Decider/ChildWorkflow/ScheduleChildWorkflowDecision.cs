@@ -1,5 +1,6 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
@@ -44,6 +45,18 @@ namespace Guflow.Decider
                     TaskList = TaskListName.TaskList()
                 }
             };
+        }
+
+        public override bool Equals(object obj)
+        {
+            var decision = obj as ScheduleChildWorkflowDecision;
+            return decision != null &&
+                   EqualityComparer<Identity>.Default.Equals(_identity, decision._identity);
+        }
+
+        public override int GetHashCode()
+        {
+            return -1493283476 + EqualityComparer<Identity>.Default.GetHashCode(_identity);
         }
     }
 }

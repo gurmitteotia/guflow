@@ -99,6 +99,8 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => lambdaItem.AfterActivity("name", null));
             Assert.Throws<ArgumentException>(() => lambdaItem.AfterTimer(null));
             Assert.Throws<ArgumentException>(() => lambdaItem.AfterLambda(null));
+            Assert.Throws<ArgumentException>(() => lambdaItem.AfterChildWorkflow(null,"ver"));
+            Assert.Throws<ArgumentException>(() => lambdaItem.AfterChildWorkflow("name", null));
             Assert.Throws<ArgumentNullException>(() => lambdaItem.When(null));
             Assert.Throws<ArgumentNullException>(() => lambdaItem.When(null,_=>WorkflowAction.Empty));
             Assert.Throws<ArgumentNullException>(() => lambdaItem.When(_=>true, null));

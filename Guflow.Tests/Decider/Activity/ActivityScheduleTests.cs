@@ -20,7 +20,7 @@ namespace Guflow.Tests.Decider
 
         private const string ChildWorkflowName = "Name";
         private const string ChildWorkflowVersion = "1.0";
-
+        private const string ChildWorkflowPosName = "pos";
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
         [SetUp]
@@ -66,6 +66,15 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
         }
 
+        [Test]
+        public void Activity_can_be_scheduled_after_child_workflow_using_generic_type_api()
+        {
+            var eventGraph = ChildWorkflowCompletedEventGraph();
+            var decision = new ActivityAfterChildWorkflowGenericType().Decisions(eventGraph);
+
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+        }
+
         private WorkflowHistoryEvents ActivityEventGraph()
         {
             var startedEvent = _eventGraphBuilder.WorkflowStartedEvent();
@@ -92,7 +101,7 @@ namespace Guflow.Tests.Decider
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .ChildWorkflowCompletedGraph(Identity.New(ChildWorkflowName, ChildWorkflowVersion), "rid", "input",
+                .ChildWorkflowCompletedGraph(Identity.New(ChildWorkflowName, ChildWorkflowVersion,ChildWorkflowPosName), "rid", "input",
                     "result")
                 .ToArray());
             return _eventsBuilder.Result();
@@ -128,9 +137,28 @@ namespace Guflow.Tests.Decider
         {
             public ActivityAfterChildWorkflow()
             {
-                ScheduleChildWorkflow(ChildWorkflowName, ChildWorkflowVersion);
+                ScheduleChildWorkflow(ChildWorkflowName, ChildWorkflowVersion,ChildWorkflowPosName);
                 ScheduleActivity(ActivityName, ActivityVersion)
-                    .AfterChildWorkflow(ChildWorkflowName, ChildWorkflowVersion);
+                    .AfterChildWorkflow(ChildWorkflowName, ChildWorkflowVersion,ChildWorkflowPosName);
+            }
+        }
+
+        private class ActivityAfterChildWorkflowGenericType : Workflow
+        {
+            public ActivityAfterChildWorkflowGenericType()
+            {
+                ScheduleChildWorkflow<ChildWorkflow>(ChildWorkflowPosName);
+                ScheduleActivity(ActivityName, ActivityVersion)
+                    .AfterChildWorkflow<ChildWorkflow>(ChildWorkflowPosName);
+            }
+        }
+
+        [WorkflowDescription(ChildWorkflowVersion, Name = ChildWorkflowName)]
+        private class ChildWorkflow : Workflow
+        {
+            public ChildWorkflow()
+            {
+                
             }
         }
     }

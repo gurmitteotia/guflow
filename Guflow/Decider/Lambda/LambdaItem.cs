@@ -110,7 +110,16 @@ namespace Guflow.Decider
 
         public IFluentLambdaItem AfterChildWorkflow(string name, string version, string positionalName = "")
         {
-            throw new NotImplementedException();
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name, version, positionalName));
+            return this;
+        }
+
+        public IFluentLambdaItem AfterChildWorkflow<TWorkflow>(string positionalName) where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return AfterChildWorkflow(desc.Name, desc.Version, positionalName);
         }
 
         public IFluentLambdaItem WithInput(Func<ILambdaItem, object> input)

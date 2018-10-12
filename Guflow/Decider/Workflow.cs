@@ -327,7 +327,7 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Schdule the child workflow.
+        /// Schedule the child workflow.
         /// </summary>
         /// <param name="name">Child workflow name.</param>
         /// <param name="version">Child workflow version.</param>
@@ -341,6 +341,18 @@ namespace Guflow.Decider
             var childWorkflowItem = new ChildWorkflowItem(Identity.New(name, version, positionalName), this);
             _allWorkflowItems.Add(childWorkflowItem);
             return childWorkflowItem;
+        }
+
+        /// <summary>
+        /// Schedule the child workflow.
+        /// </summary>
+        /// <typeparam name="T">Type of child workflow.</typeparam>
+        /// <param name="positionalName">Positional parameter, if any, useful in scheduling same workflow multiple times.</param>
+        /// <returns></returns>
+        protected IFluentChildWorkflowItem ScheduleChildWorkflow<T>(string positionalName = "") where T : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<T>();
+            return ScheduleChildWorkflow(desc.Name, desc.Version, positionalName);
         }
 
         /// <summary>

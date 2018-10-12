@@ -539,6 +539,8 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => activityItem.AfterActivity("34", null));
             Assert.Throws<ArgumentException>(() => activityItem.AfterTimer(null));
             Assert.Throws<ArgumentException>(() => activityItem.AfterLambda(null));
+            Assert.Throws<ArgumentException>(() => activityItem.AfterChildWorkflow(null,"ver"));
+            Assert.Throws<ArgumentException>(() => activityItem.AfterChildWorkflow("name", null));
         }
 
         private ScheduleActivityDecision ScheduleDecision(ActivityItem activityItem)
