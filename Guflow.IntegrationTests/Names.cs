@@ -71,6 +71,12 @@ namespace Guflow.IntegrationTests
                 public const string Name = "TestWorkflow";
                 public const string Version = "1.0";
             }
+
+            public static class Child
+            {
+                public const string Name = "TestChildWorkflow";
+                public const string Version = "1.0";
+            }
         }
 
         

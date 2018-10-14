@@ -117,6 +117,44 @@ namespace Guflow.Tests.Decider
             Assert.That(_workflowItem.Object.ParentLambda(), Is.EqualTo(parentLambdas[0]));
         }
 
+        [Test]
+        public void Find_a_specific_parent_child_workflow()
+        {
+            var parentChildWorkflows = new[]
+            {
+                new ChildWorkflowItem(Identity.New("n1", "v"), Mock.Of<IWorkflow>()), 
+                new ChildWorkflowItem(Identity.New("n2", "v"), Mock.Of<IWorkflow>()),
+            };
+            _workflowItem.SetupGet(w => w.ParentChildWorkflows).Returns(parentChildWorkflows);
+
+            Assert.That(_workflowItem.Object.ParentChildWorkflow("n2", "v"), Is.EqualTo(parentChildWorkflows[1]));
+        }
+
+        [Test]
+        public void Single_parent_child_workflow()
+        {
+            var parentChildWorkflows = new[]
+            {
+                new ChildWorkflowItem(Identity.New("n1", "v"), Mock.Of<IWorkflow>()),
+            };
+            _workflowItem.SetupGet(w => w.ParentChildWorkflows).Returns(parentChildWorkflows);
+
+            Assert.That(_workflowItem.Object.ParentChildWorkflow(), Is.EqualTo(parentChildWorkflows[0]));
+        }
+
+        [Test]
+        public void Find_a_specific_parent_child_workflow_by_generic_type_api()
+        {
+            var parentChildWorkflows = new[]
+            {
+                new ChildWorkflowItem(Identity.New("n1", "v"), Mock.Of<IWorkflow>()),
+                new ChildWorkflowItem(Identity.New("n2", "v"), Mock.Of<IWorkflow>()),
+            };
+            _workflowItem.SetupGet(w => w.ParentChildWorkflows).Returns(parentChildWorkflows);
+
+            Assert.That(_workflowItem.Object.ParentChildWorkflow<Workflow2>(), Is.EqualTo(parentChildWorkflows[1]));
+        }
+
         private ActivityCompletedEvent CreateCompletedEvent()
         {
             var eventGraph = _builder.ActivityCompletedGraph(Identity.New("name", "1.0"), "id",
@@ -136,6 +174,12 @@ namespace Guflow.Tests.Decider
         private class Activity2 : Activity
         {
             
+        }
+
+        [WorkflowDescription("v", Name = "n2")]
+        private class Workflow2 : Workflow
+        {
+
         }
     }
 }

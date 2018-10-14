@@ -24,6 +24,11 @@ namespace Guflow.Decider
         IEnumerable<ILambdaItem> ParentLambdas { get; }
 
         /// <summary>
+        /// Returns all the parent child workflows.
+        /// </summary>
+        IEnumerable<IChildWorkflowItem> ParentChildWorkflows { get; }
+
+            /// <summary>
         /// Return latest event for workflow item. Returns null when no event is found.
         /// </summary>
         /// <param name="includeRescheduleTimerEvents">Pass true if want to return reschedule timer event, if any, associated with this workflow item.</param>

@@ -21,6 +21,7 @@ namespace Guflow.Decider
         public IEnumerable<ITimerItem> ParentTimers => _parentItems.OfType<ITimerItem>();
         public IEnumerable<ILambdaItem> ParentLambdas => _parentItems.OfType<ILambdaItem>();
 
+        public IEnumerable<IChildWorkflowItem> ParentChildWorkflows => _parentItems.OfType<IChildWorkflowItem>();
         public string Name => Identity.Name;
 
         public bool IsActive

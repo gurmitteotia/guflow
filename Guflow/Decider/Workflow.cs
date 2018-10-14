@@ -523,20 +523,20 @@ namespace Guflow.Decider
         /// </summary>
         protected IEnumerable<IWorkflowItem> WorkflowItems => _allWorkflowItems.AllItems;
         /// <summary>
-        /// Returns all activities of workflows.
+        /// Returns all activities of the workflow.
         /// </summary>
         protected IEnumerable<IActivityItem> Activities => _allWorkflowItems.AllActivities;
         /// <summary>
-        /// All schedulable timers of workflows.
+        /// Returns all schedulable timers of the workflow.
         /// </summary>
         protected IEnumerable<ITimerItem> Timers => _allWorkflowItems.AllTimers;
 
         /// <summary>
-        /// Returns all lambda functions configured in workflow.
+        /// Returns all lambda functions configured in the workflow.
         /// </summary>
         protected IEnumerable<ILambdaItem> Lambdas => _allWorkflowItems.AllLambdas;
         /// <summary>
-        /// Returns all child workflows configured in this workflow.
+        /// Returns all child workflows configured in the workflow.
         /// </summary>
         protected IEnumerable<IChildWorkflowItem> ChildWorkflows => _allWorkflowItems.AllChildWorkflows;
 
@@ -567,6 +567,7 @@ namespace Guflow.Decider
         /// Returns the lambda configured in workflow. Throws exception when lambda is not found.
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="positionalName"></param>
         /// <returns></returns>
         protected ILambdaItem Lambda(string name, string positionalName ="") => Lambdas.First(name, positionalName);
 
@@ -623,7 +624,7 @@ namespace Guflow.Decider
                                     => ((IWorkflow)this).WorkflowHistoryEvents.AllWorkflowCancellationRequestedEvents();
 
         /// <summary>
-        /// Get event id of latest history event.
+        /// Returns the event id of latest history event.
         /// </summary>
         protected long LatestEventId
             => ((IWorkflow) this).WorkflowHistoryEvents.LatestEventId;

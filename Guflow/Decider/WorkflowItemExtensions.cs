@@ -15,7 +15,7 @@ namespace Guflow.Decider
         /// <param name="eventType"></param>
         /// <param name="includeRescheduleTimerEvents"></param>
         /// <returns></returns>
-        public static IEnumerable<WorkflowItemEvent> Events(this IWorkflowItem workflowItem, Type eventType, bool includeRescheduleTimerEvents=false)
+        public static IEnumerable<WorkflowItemEvent> Events(this IWorkflowItem workflowItem, Type eventType, bool includeRescheduleTimerEvents = false)
         {
             Ensure.NotNull(workflowItem, "workflowItem");
             return workflowItem.AllEvents(includeRescheduleTimerEvents).Where(e => e.GetType() == eventType);
@@ -45,6 +45,8 @@ namespace Guflow.Decider
         public static IActivityItem ParentActivity(this IWorkflowItem workflowItem, string name, string version, string positionalName = "")
         {
             Ensure.NotNull(workflowItem, "workflowItem");
+            Ensure.NotNull(name, nameof(name));
+            Ensure.NotNull(version, nameof(version));
             return workflowItem.ParentActivities.OfType<ActivityItem>()
                     .FirstOrDefault(a => a.Has(Identity.New(name, version, positionalName)));
         }
@@ -55,7 +57,7 @@ namespace Guflow.Decider
         /// <param name="workflowItem"></param>
         /// <param name="positionalName"></param>
         /// <returns></returns>
-        public static IActivityItem ParentActivity<TActivity>(this IWorkflowItem workflowItem, string positionalName = "") where TActivity: Activity
+        public static IActivityItem ParentActivity<TActivity>(this IWorkflowItem workflowItem, string positionalName = "") where TActivity : Activity
         {
             Ensure.NotNull(workflowItem, "workflowItem");
             var description = ActivityDescription.FindOn<TActivity>();
@@ -71,7 +73,7 @@ namespace Guflow.Decider
             Ensure.NotNull(workflowItem, "workflowItem");
             return workflowItem.ParentActivities.Single();
         }
-       
+
         /// <summary>
         /// Returns the parent timer by given name. Returns null if not exists.
         /// </summary>
@@ -119,6 +121,50 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(workflowItem, "workflowItem");
             return workflowItem.ParentLambdas.Single();
+        }
+
+        /// <summary>
+        /// Returns the parent child-workflow by given parameter. Returns null if it can find the parent child workflow for given parameters.
+        /// </summary>
+        /// <param name="workflowItem"></param>
+        /// <param name="name"></param>
+        /// <param name="version"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        public static IChildWorkflowItem ParentChildWorkflow(this IWorkflowItem workflowItem, string name, string version,
+            string positionalName = "")
+        {
+            Ensure.NotNull(workflowItem, nameof(workflowItem));
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            return workflowItem.ParentChildWorkflows.OfType<ChildWorkflowItem>()
+                .FirstOrDefault(a => a.Has(Identity.New(name, version, positionalName)));
+        }
+
+        /// <summary>
+        /// Returns the parent child-workflow of item. Throws exception if none or more than one parent child-workflows are found.
+        /// </summary>
+        /// <param name="workflowItem"></param>
+        /// <returns></returns>
+        public static IChildWorkflowItem ParentChildWorkflow(this IWorkflowItem workflowItem)
+        {
+            Ensure.NotNull(workflowItem, nameof(workflowItem));
+            return workflowItem.ParentChildWorkflows.OfType<ChildWorkflowItem>().Single();
+
+        }
+        /// <summary>
+        /// Returns the parent child-workflow for <see cref="TWorkflow"/> and positional name. Returns null if not
+        /// </summary>
+        /// <typeparam name="TWorkflow"></typeparam>
+        /// <param name="workflowItem"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        public static IChildWorkflowItem ParentChildWorkflow<TWorkflow>(this IWorkflowItem workflowItem, string positionalName = "")
+        where TWorkflow : Workflow
+        {
+            Ensure.NotNull(workflowItem, nameof(workflowItem));
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return workflowItem.ParentChildWorkflow(desc.Name, desc.Version, positionalName);
         }
     }
 }
