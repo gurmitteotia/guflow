@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Guflow.Worker;
@@ -83,6 +84,33 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(workflowItems, "workflowItems");
             return For(workflowItems.AsEnumerable());
+        }
+
+        /// <summary>
+        /// Returns workflow action to cancel the child workflow.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="version"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        public WorkflowAction ForChildWorkflow(string name, string version, string positionalName="")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            var item = _workflowItems.ChildWorkflowItem(Identity.New(name, version, positionalName));
+            return WorkflowAction.Cancel(item);
+        }
+
+        /// <summary>
+        /// Returns workflow action to cancel the child workflow.
+        /// </summary>
+        /// <typeparam name="TWorkflow"></typeparam>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        public WorkflowAction ForChildWorkflow<TWorkflow>(string positionalName="") where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return ForChildWorkflow(desc.Name, desc.Version, positionalName);
         }
     }
 }
