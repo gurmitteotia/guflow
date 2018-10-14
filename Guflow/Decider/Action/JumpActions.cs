@@ -75,5 +75,26 @@ namespace Guflow.Decider
             var lambdaItem = _workflowItems.LambdaItem(Identity.Lambda(name, postionalName));
             return WorkflowAction.JumpTo(lambdaItem).WithTriggerAction(_triggeringAction(lambdaItem));
         }
+
+        /// <summary>
+        /// Jump to child workflow. It will cause the workflow the fail if target child workflow is already active.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="version"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        public WorkflowAction ToChildWorkflow(string name, string version, string positionalName ="")
+        {
+            Ensure.NotNull(name, nameof(name));
+            Ensure.NotNull(version, nameof(version));
+            var item = _workflowItems.ChildWorkflowItem(Identity.New(name, version, positionalName));
+            return WorkflowAction.JumpTo(item).WithTriggerAction(_triggeringAction(item));
+        }
+
+        internal WorkflowAction ToChildWorkflow<TWorkflow>(string positionalName = "") where TWorkflow :Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return ToChildWorkflow(desc.Name, desc.Version, positionalName);
+        }
     }
 }

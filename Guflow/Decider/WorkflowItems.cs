@@ -46,6 +46,13 @@ namespace Guflow.Decider
             return lambdaItem;
         }
 
+        public ChildWorkflowItem ChildWorkflowItem(Identity identity)
+        {
+            var item = ChildWorkflow(identity);
+            if(item == null)
+                throw new WorkflowItemNotFoundException($"Can not find the child workflow by {identity}");
+            return item;
+        }
         public ITimer Timer(WorkflowItemEvent workflowItemEvent)
         {
             var timer = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor) as ITimer;
@@ -118,6 +125,10 @@ namespace Guflow.Decider
             return _workflowItems.OfType<LambdaItem>().FirstOrDefault(s => s.Has(identity));
         }
 
+        private ChildWorkflowItem ChildWorkflow(Identity identity)
+        {
+            return _workflowItems.OfType<ChildWorkflowItem>().FirstOrDefault(w => w.Has(identity));
+        }
         public ChildWorkflowItem ChildWorkflowItem(WorkflowItemEvent @event)
         {
             var item = _workflowItems.OfType<ChildWorkflowItem>().FirstOrDefault(@event.IsFor);

@@ -99,5 +99,22 @@ namespace Guflow.Decider
         /// <param name="workflowAction"></param>
         /// <returns></returns>
         IFluentChildWorkflowItem OnStartFailed(Func<ChildWorkflowStartFailedEvent, WorkflowAction> workflowAction);
+
+        /// <summary>
+        /// Schedule child workflow only when provided expression is evaluated to true. If it is evaluated to false the it will trigger the scheduling of first joint item,
+        /// however you can change this behaviour by other overloaded "When" method.
+        /// </summary>
+        /// <param name="true"></param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem When(Func<IChildWorkflowItem, bool> @true);
+
+        /// <summary>
+        /// Schedule child workflow only when provided express is evaluated to true. You can also provide custom workflow action when this condition is evaulated to false.
+        /// Please refer to Deflow algorithm for more details.
+        /// </summary>
+        /// <param name="true"></param>
+        /// <param name="falseAction">Provide WorkflowAction when scheduling condition is evaluated to false. By default it will try to schedule the first join item if this is a non startup item.</param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem When(Func<IChildWorkflowItem, bool> @true, Func<IChildWorkflowItem, WorkflowAction> falseAction);
     }
 }

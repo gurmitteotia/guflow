@@ -22,16 +22,19 @@ namespace Guflow.Decider
         private Func<IChildWorkflowItem, string> _taskListName;
         private Func<IChildWorkflowItem, WorkflowTimeouts> _timeouts;
         private Func<IChildWorkflowItem, IEnumerable<string>> _tags;
+        private Func<IChildWorkflowItem, bool> _when;
+        private Func<IChildWorkflowItem, WorkflowAction> _onWhenFalseAction;
+
         private TimerItem _rescheduleTimer;
 
         public ChildWorkflowItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
         {
-           Initialize(workflow);
+            Initialize(workflow);
             _childPolicy = _ => null;
             _taskPriority = _ => null;
             _lambdaRole = _ => null;
             _taskListName = _ => null;
-            _timeouts = _=> new WorkflowTimeouts();
+            _timeouts = _ => new WorkflowTimeouts();
 
         }
         public ChildWorkflowItem(Identity identity, IWorkflow workflow, WorkflowDescription desc) : base(identity, workflow)
@@ -57,8 +60,10 @@ namespace Guflow.Decider
             _timedoutAction = w => w.DefaultAction(workflow);
             _startFailedAction = w => w.DefaultAction(workflow);
             _input = w => workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input;
-            _tags = _=> Enumerable.Empty<string>();
+            _tags = _ => Enumerable.Empty<string>();
             _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
+            _when = _ => true;
+            _onWhenFalseAction = _ => IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
         }
 
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
@@ -74,14 +79,22 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
         {
-            var childWorkflowItems= WorkflowHistoryEvents.AllChildWorkflowEvents(this);
+            var childWorkflowItems = WorkflowHistoryEvents.AllChildWorkflowEvents(this);
             var timerEvents = Enumerable.Empty<WorkflowItemEvent>();
             if (includeRescheduleTimerEvents)
                 timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer, true);
-            return childWorkflowItems.Concat(timerEvents).OrderByDescending(i=>i, WorkflowEvent.IdComparer);
+            return childWorkflowItems.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
         }
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisions()
+        {
+            if (!_when(this))
+                return _onWhenFalseAction(this).Decisions();
+
+            return ScheduleDecisionsByIgnoringWhen();
+        }
+
+        public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
             return new[] {new ScheduleChildWorkflowDecision(Identity, _input(this))
             {
@@ -92,11 +105,6 @@ namespace Guflow.Decider
                 ExecutionTimeouts = _timeouts(this),
                 Tags = _tags(this).ToArray()
             }};
-        }
-
-        public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
-        {
-            throw new NotImplementedException();
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
@@ -112,7 +120,7 @@ namespace Guflow.Decider
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
                 return _rescheduleTimer.CancelDecisions();
 
-            return new[] { new CancelRequestWorkflowDecision(Identity.Id, (lastEvent as ChildWorkflowEvent)?.RunId),  };
+            return new[] { new CancelRequestWorkflowDecision(Identity.Id, (lastEvent as ChildWorkflowEvent)?.RunId), };
         }
 
         public IFluentChildWorkflowItem AfterTimer(string name)
@@ -173,21 +181,21 @@ namespace Guflow.Decider
 
         public IFluentChildWorkflowItem WithPriority(Func<IChildWorkflowItem, int?> priority)
         {
-           Ensure.NotNull(priority, nameof(priority));
+            Ensure.NotNull(priority, nameof(priority));
             _taskPriority = priority;
             return this;
         }
 
         public IFluentChildWorkflowItem OnTaskList(Func<IChildWorkflowItem, string> name)
         {
-           Ensure.NotNull(name, nameof(name));
+            Ensure.NotNull(name, nameof(name));
             _taskListName = name;
             return this;
         }
 
         public IFluentChildWorkflowItem WithLambdaRole(Func<IChildWorkflowItem, string> lambdaRole)
         {
-           Ensure.NotNull(lambdaRole, nameof(lambdaRole));
+            Ensure.NotNull(lambdaRole, nameof(lambdaRole));
             _lambdaRole = lambdaRole;
             return this;
         }
@@ -245,6 +253,22 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(workflowAction, nameof(workflowAction));
             _startFailedAction = workflowAction;
+            return this;
+        }
+
+        public IFluentChildWorkflowItem When(Func<IChildWorkflowItem, bool> @true)
+        {
+            Ensure.NotNull(@true, nameof(@true));
+            _when = @true;
+            return this;
+        }
+
+        public IFluentChildWorkflowItem When(Func<IChildWorkflowItem, bool> @true, Func<IChildWorkflowItem, WorkflowAction> falseAction)
+        {
+            Ensure.NotNull(@true, nameof(@true));
+            Ensure.NotNull(falseAction, nameof(falseAction));
+            _when = @true;
+            _onWhenFalseAction = falseAction;
             return this;
         }
 

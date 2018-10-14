@@ -404,6 +404,9 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.WithPriority(null));
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.WithTimeouts(null));
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.WithTags(null));
+            Assert.Throws<ArgumentNullException>(() => childWorkflowItem.When(null));
+            Assert.Throws<ArgumentNullException>(() => childWorkflowItem.When(null,_=>WorkflowAction.Empty));
+            Assert.Throws<ArgumentNullException>(() => childWorkflowItem.When(_=>true, null));
 
             Assert.Throws<ArgumentException>(() => childWorkflowItem.AfterTimer(null));
             Assert.Throws<ArgumentException>(() => childWorkflowItem.AfterActivity(null, "v"));
@@ -411,6 +414,7 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => childWorkflowItem.AfterLambda(null));
             Assert.Throws<ArgumentException>(() => childWorkflowItem.AfterChildWorkflow(null,"1.0"));
             Assert.Throws<ArgumentException>(() => childWorkflowItem.AfterChildWorkflow("n", null));
+
         }
 
         private ChildWorkflowItem ChildWorkflow(IEnumerable<HistoryEvent> events)
