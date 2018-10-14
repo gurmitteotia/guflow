@@ -66,6 +66,9 @@ namespace Guflow.Decider
             _onWhenFalseAction = _ => IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
         }
 
+        public string Version => Identity.Version;
+        public string PositionalName => Identity.PositionalName;
+
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
         {
             var lastEvent = WorkflowHistoryEvents.LastChildWorkflowEvent(this);
@@ -318,6 +321,12 @@ namespace Guflow.Decider
         {
             ITimer timer = _rescheduleTimer;
             return timer.CancellationFailed(timerCancellationFailedEvent);
+        }
+
+        public WorkflowAction SignalAction(string signalName, string input)
+        {
+            var lastEvent = LastEvent() as ChildWorkflowEvent;
+            return WorkflowAction.Signal(signalName, input, Identity.Id, lastEvent?.RunId);
         }
     }
 }

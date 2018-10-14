@@ -36,7 +36,8 @@ namespace Guflow.Decider
         }
         private bool Equals(SignalWorkflowDecision other)
         {
-            return string.Equals(_signalName, other._signalName) && string.Equals(_input, other._input) && string.Equals(_workflowId, other._workflowId) && string.Equals(_runId, other._runId);
+            return string.Equals(_signalName, other._signalName) && string.Equals(_input, other._input) 
+                                                                 && string.Equals(_workflowId, other._workflowId) && string.Equals(_runId, other._runId);
         }
 
         public override bool Equals(object obj)
@@ -60,8 +61,7 @@ namespace Guflow.Decider
 
         public override string ToString()
         {
-            return string.Format("Signal name {0}, input {1}, workflowId {2} and runid {3}", _signalName, _input,
-                _workflowId, _runId);
+            return $"Signal name {_signalName}, input {_input}, workflowId {_workflowId} and runid {_runId}";
         }
     }
 }

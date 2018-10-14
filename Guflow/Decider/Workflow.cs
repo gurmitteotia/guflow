@@ -512,9 +512,13 @@ namespace Guflow.Decider
         protected IEnumerable<ITimerItem> Timers => _allWorkflowItems.AllTimers;
 
         /// <summary>
-        /// Returns all lambda function configured in workflow.
+        /// Returns all lambda functions configured in workflow.
         /// </summary>
         protected IEnumerable<ILambdaItem> Lambdas => _allWorkflowItems.AllLambdas;
+        /// <summary>
+        /// Returns all child workflows configured in this workflow.
+        /// </summary>
+        protected IEnumerable<IChildWorkflowItem> ChildWorkflows => _allWorkflowItems.AllChildWorkflows;
 
         /// <summary>
         /// Returns the activity configured in this workflow. Throws exception if activity is not found
@@ -545,6 +549,24 @@ namespace Guflow.Decider
         /// <param name="name"></param>
         /// <returns></returns>
         protected ILambdaItem Lambda(string name, string positionalName ="") => Lambdas.First(name, positionalName);
+
+        /// <summary>
+        /// Returns the child workflow. Throws exception when child workflow is not found.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="version"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        protected IChildWorkflowItem ChildWorkflow(string name, string version, string positionalName="") => ChildWorkflows.First(name, version, positionalName);
+
+        /// <summary>
+        /// Returns the child workflow. Throws exception when child workflow is not found.
+        /// </summary>
+        /// <typeparam name="TWorkflow"></typeparam>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        protected IChildWorkflowItem ChildWorkflow<TWorkflow>(string positionalName = "") where TWorkflow : Workflow
+            => ChildWorkflows.First<TWorkflow>(positionalName);
 
         /// <summary>
         /// Indicate if workflow history event has any active event. An active event indicates that a scheduling item (activity, timer...) is active. e.g. if an activity is just started but not finished/failed/cancelled
@@ -591,10 +613,10 @@ namespace Guflow.Decider
         /// <param name="signalName"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        protected static Signal Signal(string signalName, object input)
+        protected Signal Signal(string signalName, object input)
         {
             Ensure.NotNullAndEmpty(signalName, "signalName");
-            return new Signal(signalName, input);
+            return new Signal(signalName, input, _allWorkflowItems);
         }
         /// <summary>
         /// Return workflow input as dynamic object. If workflow input is JSON data then you can directly access the properties like: Input.Session.

@@ -7,6 +7,20 @@ namespace Guflow.Decider
     /// </summary>
     public interface IChildWorkflowItem : IWorkflowItem
     {
-        
+        /// <summary>
+        /// Returns name of child workflow.
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Returns version of child workflow.
+        /// </summary>
+        string Version { get; }
+
+
+        /// <summary>
+        /// Returns positional name of child workflow.
+        /// </summary>
+        string PositionalName { get; }
     }
 }

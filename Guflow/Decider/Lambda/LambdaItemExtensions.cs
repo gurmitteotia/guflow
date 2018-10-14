@@ -79,7 +79,6 @@ namespace Guflow.Decider
             Ensure.NotNull(items, nameof(items));
             return items.OfType<LambdaItem>().First(t => t.Has(Identity.Lambda(name, positionalName)));
         }
-
         
     }
 }
