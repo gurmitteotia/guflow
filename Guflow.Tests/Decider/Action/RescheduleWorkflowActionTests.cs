@@ -15,6 +15,8 @@ namespace Guflow.Tests.Decider
         private const string PositionalName = "First";
         private const string LambdaName = "Lambda1";
         private const string TimerName = "TimerName1";
+        private const string WorkflowName = "Workflow";
+        private const string WorkflowVersion = "1.0";
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
 
@@ -212,6 +214,51 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
         }
 
+        [Test]
+        public void Reschedule_child_workflow_immediately()
+        {
+            var workflow = new WorkflowToRescheduleChildWorkflowImmediately();
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent("input"));
+            _eventsBuilder.AddNewEvents(ChildWorkflowCompletedEventGraph());
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(WorkflowName,WorkflowVersion), "input") }));
+        }
+
+        [Test]
+        public void Reschedule_child_workflow_after_timeout()
+        {
+            var workflow = new WorkflowToRescheduleChildWorkflowAfterTimeout(seconds:2);
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent("input"));
+            _eventsBuilder.AddNewEvents(ChildWorkflowCompletedEventGraph());
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.New(WorkflowName, WorkflowVersion), TimeSpan.FromSeconds(2), true) }));
+        }
+
+        [Test]
+        public void Schedule_next_item_when_total_number_of_child_workflow_events_exceeds_allowed_limit()
+        {
+            var workflow = new WorkflowToRescheduleChildWorkflowUpToALimit(2);
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent("input"));
+            _eventsBuilder.AddProcessedEvents(ChildWorkflowCompletedEventGraph());
+            _eventsBuilder.AddProcessedEvents(ChildWorkflowCompletedEventGraph());
+            _eventsBuilder.AddNewEvents(ChildWorkflowCompletedEventGraph());
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+        }
+
+        private HistoryEvent[] ChildWorkflowCompletedEventGraph()
+        {
+            return _eventGraphBuilder
+                .ChildWorkflowCompletedGraph(Identity.New(WorkflowName, WorkflowVersion), "rid", "input", "result")
+                .ToArray();
+        }
+
         private HistoryEvent[] LambdaCompletedEventGraph()
         {
             return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "type").ToArray();
@@ -294,6 +341,30 @@ namespace Guflow.Tests.Decider
             {
                 ScheduleLambda(LambdaName).OnCompletion(e => Reschedule(e).UpTo(limit));
                 ScheduleActivity(ActivityName, ActivityVersion).AfterLambda(LambdaName);
+            }
+        }
+
+        private class WorkflowToRescheduleChildWorkflowImmediately : Workflow
+        {
+            public WorkflowToRescheduleChildWorkflowImmediately()
+            {
+                ScheduleChildWorkflow(WorkflowName, WorkflowVersion).OnCompletion(Reschedule);
+            }
+        }
+        private class WorkflowToRescheduleChildWorkflowAfterTimeout : Workflow
+        {
+            public WorkflowToRescheduleChildWorkflowAfterTimeout(int seconds)
+            {
+                ScheduleChildWorkflow(WorkflowName, WorkflowVersion).OnCompletion(e=>Reschedule(e).After(TimeSpan.FromSeconds(seconds)));
+            }
+        }
+        private class WorkflowToRescheduleChildWorkflowUpToALimit : Workflow
+        {
+            public WorkflowToRescheduleChildWorkflowUpToALimit(uint limit)
+            {
+                ScheduleChildWorkflow(WorkflowName, WorkflowVersion).OnCompletion(e => Reschedule(e).UpTo(limit));
+
+                ScheduleActivity(ActivityName, ActivityVersion).AfterChildWorkflow(WorkflowName, WorkflowVersion);
             }
         }
 

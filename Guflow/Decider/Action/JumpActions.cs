@@ -77,7 +77,7 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Jump to child workflow. It will cause the workflow the fail if target child workflow is already active.
+        /// Jump to child workflow. It will cause the workflow to fail if target child workflow is already active.
         /// </summary>
         /// <param name="name"></param>
         /// <param name="version"></param>
@@ -91,6 +91,12 @@ namespace Guflow.Decider
             return WorkflowAction.JumpTo(item).WithTriggerAction(_triggeringAction(item));
         }
 
+        /// <summary>
+        /// Jump to child workflow. It will cause the workflow to fail if target child workflow is already active.
+        /// </summary>
+        /// <typeparam name="TWorkflow"></typeparam>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
         internal WorkflowAction ToChildWorkflow<TWorkflow>(string positionalName = "") where TWorkflow :Workflow
         {
             var desc = WorkflowDescription.FindOn<TWorkflow>();
