@@ -25,7 +25,7 @@ namespace Guflow.Tests.Worker
         [Test]
         public void Empty_task_has_non_empty_token()
         {
-            Assert.That(WorkerTask.Empty.Token, Is.Not.Empty.And.Not.Null);
+            Assert.That(WorkerTask.Empty.Token, Is.Not.Null.And.Not.Empty);
         }
 
         [Test]

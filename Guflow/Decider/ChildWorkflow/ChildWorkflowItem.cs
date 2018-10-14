@@ -7,7 +7,7 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
-    internal class ChildWorkflowItem : WorkflowItem, IFluentChildWorkflowItem, IChildWorkflowItem
+    internal class ChildWorkflowItem : WorkflowItem, IFluentChildWorkflowItem, IChildWorkflowItem, ITimer
     {
         private Func<ChildWorkflowCompletedEvent, WorkflowAction> _completedAction;
         private Func<ChildWorkflowFailedEvent, WorkflowAction> _failedAction;
@@ -300,6 +300,24 @@ namespace Guflow.Decider
         public WorkflowAction StartFailed(ChildWorkflowStartFailedEvent startFailed)
         {
             return _startFailedAction(startFailed);
+        }
+
+        WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.Fired(timerFiredEvent);
+        }
+
+        WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.StartFailed(timerStartFailedEvent);
+        }
+
+        WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        {
+            ITimer timer = _rescheduleTimer;
+            return timer.CancellationFailed(timerCancellationFailedEvent);
         }
     }
 }

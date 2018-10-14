@@ -10,10 +10,14 @@ namespace Guflow.Tests.Decider
     public class TimerStartFailedEventTests
     {
         private TimerStartFailedEvent _timerStartFailedEvent;
-        private const string _timerFailureCause = "something fancy";
-        private const string _timerName = "timername";
-        private const string _activityName = "activity";
-        private const string _activityVersion = "1.0";
+        private const string TimerFailureCause = "something fancy";
+        private const string TimerName = "timername";
+        private const string ActivityName = "activity";
+        private const string ActivityVersion = "1.0";
+        private const string LambdaName = "Lambda";
+        private const string WorkflowName = "Workflow";
+        private const string WorkflowVersion = "1.0";
+
         private EventGraphBuilder _builder;
 
         [SetUp]
@@ -21,13 +25,13 @@ namespace Guflow.Tests.Decider
         {
             _builder = new EventGraphBuilder();
 
-            _timerStartFailedEvent = CreateTimerStartFailedEvent(Identity.Timer(_timerName), _timerFailureCause);
+            _timerStartFailedEvent = CreateTimerStartFailedEvent(Identity.Timer(TimerName), TimerFailureCause);
         }
 
         [Test]
         public void Should_populate_the_properties_from_history_event_attributes()
         {
-            Assert.That(_timerStartFailedEvent.Cause,Is.EqualTo(_timerFailureCause));
+            Assert.That(_timerStartFailedEvent.Cause,Is.EqualTo(TimerFailureCause));
             Assert.That(_timerStartFailedEvent.IsActive,Is.False);
         }
 
@@ -38,7 +42,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = _timerStartFailedEvent.Interpret(workflow).Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("TIMER_START_FAILED", _timerFailureCause)}));
+            Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("TIMER_START_FAILED", TimerFailureCause)}));
         }
 
         [Test]
@@ -53,28 +57,37 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void By_default_fail_workflow_for_reshedule_timer()
+        public void Fail_workflow_for_activity_reshedule_timer()
         {
             var workflow = new WorkflowWithActivity();
-            var rescheduleTimerStartFailed = CreateTimerStartFailedEvent(Identity.New(_activityName,_activityVersion),_timerFailureCause);
+            var rescheduleTimerStartFailed = CreateTimerStartFailedEvent(Identity.New(ActivityName,ActivityVersion),TimerFailureCause);
 
             var decisions = rescheduleTimerStartFailed.Interpret(workflow).Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("RESCHEDULE_TIMER_START_FAILED", _timerFailureCause)}));
+            Assert.That(decisions, Is.EqualTo(new []{new FailWorkflowDecision("RESCHEDULE_TIMER_START_FAILED", TimerFailureCause)}));
         }
 
         [Test]
-        public void Can_return_custom_action_for_reshedule_timer()
+        public void Fail_workflow_for_lambda_reshedule_timer()
         {
-            var expectedWorkflowAction = new Mock<WorkflowAction>();
-            var workflow = new WorkflowWithCustomRescheduleAction(expectedWorkflowAction.Object);
-            var rescheduleTimerStartFailed = CreateTimerStartFailedEvent(Identity.New(_activityName, _activityVersion), _timerFailureCause);
+            var workflow = new WorkflowWithLambda();
+            var rescheduleTimerStartFailed = CreateTimerStartFailedEvent(Identity.Lambda(LambdaName), TimerFailureCause);
 
-            var workflowAction = rescheduleTimerStartFailed.Interpret(workflow);
+            var decisions = rescheduleTimerStartFailed.Interpret(workflow).Decisions();
 
-            Assert.That(workflowAction, Is.EqualTo(expectedWorkflowAction.Object));
+            Assert.That(decisions, Is.EqualTo(new[] { new FailWorkflowDecision("RESCHEDULE_TIMER_START_FAILED", TimerFailureCause) }));
         }
 
+        [Test]
+        public void Fail_workflow_for_child_workflow_reshedule_timer()
+        {
+            var workflow = new WorkflowWithChildWorkflow();
+            var rescheduleTimerStartFailed = CreateTimerStartFailedEvent(Identity.New(WorkflowName, WorkflowVersion), TimerFailureCause);
+
+            var decisions = rescheduleTimerStartFailed.Interpret(workflow).Decisions();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new FailWorkflowDecision("RESCHEDULE_TIMER_START_FAILED", TimerFailureCause) }));
+        }
         private TimerStartFailedEvent CreateTimerStartFailedEvent(Identity timerIdentity, string cause)
         {
             var timerFailedEventGraph = _builder.TimerStartFailedGraph(timerIdentity, cause);
@@ -85,28 +98,37 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithActivity()
             {
-                ScheduleActivity(_activityName, _activityVersion);
-            }
-        }
-        private class WorkflowWithCustomRescheduleAction : Workflow
-        {
-            public WorkflowWithCustomRescheduleAction(WorkflowAction workflowAction)
-            {
-                ScheduleActivity(_activityName, _activityVersion).RescheduleTimer.OnStartFailed(e => workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion);
             }
         }
         private class WorkflowWithTimer : Workflow
         {
             public WorkflowWithTimer()
             {
-                ScheduleTimer(_timerName);
+                ScheduleTimer(TimerName);
+            }
+        }
+
+        private class WorkflowWithLambda : Workflow
+        {
+            public WorkflowWithLambda()
+            {
+                ScheduleLambda(LambdaName);
+            }
+        }
+
+        private class WorkflowWithChildWorkflow : Workflow
+        {
+            public WorkflowWithChildWorkflow()
+            {
+                ScheduleChildWorkflow(WorkflowName, WorkflowVersion);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleTimer(_timerName).OnStartFailed(e => workflowAction);
+                ScheduleTimer(TimerName).OnStartFailed(e => workflowAction);
             }
         }
     }
