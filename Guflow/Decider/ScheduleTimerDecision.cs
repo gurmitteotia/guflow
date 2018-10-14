@@ -17,6 +17,11 @@ namespace Guflow.Decider
             _isRescheduleTimer = isRescheduleTimer;
         }
 
+        internal override bool IsFor(WorkflowItem workflowItem)
+        {
+            return workflowItem.Has(_timerIdentity);
+        }
+
         public override bool Equals(object other)
         {
             var otherTimer = other as ScheduleTimerDecision;

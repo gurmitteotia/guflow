@@ -25,6 +25,11 @@ namespace Guflow.Decider
         public WorkflowTimeouts ExecutionTimeouts { get; set; }
         public string[] Tags { get; set; }
 
+        internal override bool IsFor(WorkflowItem workflowItem)
+        {
+            return workflowItem.Has(_identity);
+        }
+
         internal override Decision SwfDecision()
         {
             return new Decision()

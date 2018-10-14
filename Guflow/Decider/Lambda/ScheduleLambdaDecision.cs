@@ -19,6 +19,11 @@ namespace Guflow.Decider
             _timout = timout;
         }
 
+        internal override bool IsFor(WorkflowItem workflowItem)
+        {
+            return workflowItem.Has(_identity);
+        }
+
         internal override Decision SwfDecision()
         {
             return new Decision

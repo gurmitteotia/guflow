@@ -556,6 +556,69 @@ namespace Guflow.Tests.Decider
 
         }
 
+        [Test]
+        public void Does_not_schedule_joint_item_when_one_of_the_branch_remains_active_by_jumping_to_parent_lamdba()
+        {
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
+
+            var decisions = new JumpToParentLambdaToKeepBranchActive().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(BookFlightLambda), "input"),
+            }));
+        }
+
+        [Test]
+        public void Does_not_schedule_joint_item_when_one_of_the_branch_remains_active_by_jumping_to_parent_timer()
+        {
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
+
+            var decisions = new JumpToParentTimerToKeepBranchActive().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+            {
+                new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.Zero),
+            }));
+        }
+
+        [Test]
+        public void Does_not_schedule_joint_item_when_one_of_the_branch_remains_active_by_jumping_to_parent_child_workflow()
+        {
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(ChildWorkflowCompletedGraph(BookFlightWorkflow, Version));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
+
+            var decisions = new JumpToParentChildWorkflowToKeepBranchActive().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+            {
+                new ScheduleChildWorkflowDecision(Identity.New(BookFlightWorkflow, Version), "input"), 
+            }));
+        }
+
+        [Test]
+        public void Does_not_schedule_joint_item_when_one_of_the_branch_remains_active_by_jumping_to_parent_activity()
+        {
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(ActivityCompletedGraph(BookFlightActivity));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
+
+            var decisions = new JumpToParentActivityToKeepBranchActive().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new []
+            {
+                new ScheduleActivityDecision(Identity.New(BookFlightActivity, Version)),
+            }));
+        }
 
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
         {
@@ -577,6 +640,11 @@ namespace Guflow.Tests.Decider
         private HistoryEvent[] TimerStartedGraph(Identity identity, bool isARescheduleTimer)
         {
             return _eventGraphBuilder.TimerStartedGraph(identity, TimeSpan.Zero, isARescheduleTimer).ToArray();
+        }
+
+        private HistoryEvent[] ChildWorkflowCompletedGraph(string name, string version)
+        {
+            return _eventGraphBuilder.ChildWorkflowCompletedGraph(Identity.New(name, version), "id","input" ,"result").ToArray();
         }
 
         [WorkflowDescription("1.0")]
@@ -1022,6 +1090,72 @@ namespace Guflow.Tests.Decider
 
                 ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda)
                     .AfterChildWorkflow(ChooseSeatWorkflow, Version);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class JumpToParentLambdaToKeepBranchActive : Workflow
+        {
+            public JumpToParentLambdaToKeepBranchActive()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda)
+                    .OnCompletion(_ => Jump.ToLambda(BookFlightLambda));
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class JumpToParentTimerToKeepBranchActive : Workflow
+        {
+            public JumpToParentTimerToKeepBranchActive()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleTimer(TimerName).AfterLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterTimer(TimerName)
+                    .OnCompletion(_ => Jump.ToTimer(TimerName));
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class JumpToParentChildWorkflowToKeepBranchActive : Workflow
+        {
+            public JumpToParentChildWorkflowToKeepBranchActive()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleChildWorkflow(BookFlightWorkflow, Version);
+                ScheduleLambda(ChooseSeatLambda).AfterChildWorkflow(BookFlightWorkflow, Version)
+                    .OnCompletion(_ => Jump.ToChildWorkflow(BookFlightWorkflow, Version));
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+            }
+        }
+
+
+        [WorkflowDescription("1.0")]
+        private class JumpToParentActivityToKeepBranchActive : Workflow
+        {
+            public JumpToParentActivityToKeepBranchActive()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleActivity(BookFlightActivity, Version);
+                ScheduleLambda(ChooseSeatLambda).AfterActivity(BookFlightActivity, Version)
+                    .OnCompletion(_ => Jump.ToActivity(BookFlightActivity, Version));
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
