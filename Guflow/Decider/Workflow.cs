@@ -478,7 +478,7 @@ namespace Guflow.Decider
         protected CancelRequest CancelRequest => new CancelRequest(_allWorkflowItems);
 
         /// <summary>
-        /// Returns the child activity for given event.
+        /// Returns the activity for given event.
         /// </summary>
         /// <param name="activityEvent"></param>
         /// <returns></returns>
@@ -489,7 +489,7 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Returns child timer for given <see cref="WorkflowItemEvent"/>.
+        /// Returns the timer for given event.
         /// </summary>
         /// <param name="event"></param>
         /// <returns></returns>
@@ -497,6 +497,26 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(@event, "@event");
             return _allWorkflowItems.TimerItem(@event);
+        }
+        /// <summary>
+        /// Returns the lambda for given event.
+        /// </summary>
+        /// <param name="event"></param>
+        /// <returns></returns>
+        protected ILambdaItem Lambda(WorkflowItemEvent @event)
+        {
+            Ensure.NotNull(@event, "@event");
+            return _allWorkflowItems.LambdaItem(@event);
+        }
+        /// <summary>
+        /// Returns child workflow for given event.
+        /// </summary>
+        /// <param name="event"></param>
+        /// <returns></returns>
+        protected IChildWorkflowItem ChildWorkflow(WorkflowItemEvent @event)
+        {
+            Ensure.NotNull(@event, nameof(@event));
+            return _allWorkflowItems.ChildWorkflowItem(@event);
         }
         /// <summary>
         /// All child items of workflow.
