@@ -12,11 +12,11 @@ namespace Guflow.IntegrationTests
     [TestFixture]
     public class ChildWorkflowTests
     {
-       /* private WorkflowHost _workflowHost;
+        private WorkflowHost _workflowHost;
         private ActivityHost _activityHost;
         private TestDomain _domain;
         private static string _taskListName;
-
+        private static string ActivityResult = "some result";
         [SetUp]
         public async Task Setup()
         {
@@ -33,47 +33,25 @@ namespace Guflow.IntegrationTests
         }
 
         [Test]
-        public async Task By_default_schedule_the_activity_with_workflow_input()
+        public async Task Schedule_child_workflow()
         {
             var @event = new ManualResetEvent(false);
-            var workflow = new WorkflowToScheduleActivityWithDefaultInput();
-            workflow.Closed += (s, e) => @event.Set();
-            _workflowHost = await HostAsync(workflow);
+            string result = null;
+            var workflow = new ParentWorkflow();
+            workflow.Completed += (s, e) =>
+            {
+                result = e.Result;
+                @event.Set();
+            };
+            _workflowHost = await HostAsync(workflow, new ChildWorkflow());
 
-            await _domain.StartWorkflow<WorkflowToScheduleActivityWithDefaultInput>("input", _taskListName);
+            await _domain.StartWorkflow<ParentWorkflow>("input", _taskListName);
             @event.WaitOne();
 
-            Assert.That(TestActivity.Input, Is.EqualTo("input"));
+            Assert.That(result, Is.EqualTo(ActivityResult));
         }
 
-        [Test]
-        public async Task Can_schedule_the_activity_with_custom_input()
-        {
-            var @event = new ManualResetEvent(false);
-            var workflow = new WorkflowToScheduleActivityWithCustomInput("activity input");
-            workflow.Closed += (s, e) => @event.Set();
-            _workflowHost = await HostAsync(workflow);
-
-            await _domain.StartWorkflow<WorkflowToScheduleActivityWithCustomInput>("input", _taskListName);
-            @event.WaitOne();
-
-            Assert.That(TestActivity.Input, Is.EqualTo("activity input"));
-        }
-
-        [Test]
-        public async Task Can_schedule_the_activity_with_custom_input_built_from_workflow_input()
-        {
-            var @event = new ManualResetEvent(false);
-            var workflow = new WorkflowToAccessDynamicInput();
-            workflow.Closed += (s, e) => @event.Set();
-            _workflowHost = await HostAsync(workflow);
-            var input = new { Name = "name", Age = 10 }.ToJson();
-
-            await _domain.StartWorkflow<WorkflowToScheduleActivityWithCustomInput>(input, _taskListName);
-            @event.WaitOne();
-
-            Assert.That(TestActivity.Input, Is.EqualTo(input));
-        }
+       
 
         private async Task<WorkflowHost> HostAsync(params Workflow[] workflows)
         {
@@ -91,21 +69,13 @@ namespace Guflow.IntegrationTests
 
         [WorkflowDescription(Names.Workflow.Test.Version, Name = Names.Workflow.Test.Name, DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
            DefaultTaskPriority = 10, DefaultTaskStartToCloseTimeoutInSeconds = 900, Description = "Empty workflow")]
-        private class WorkflowToScheduleActivityWithDefaultInput : Workflow
+        private class ParentWorkflow : Workflow
         {
-            public WorkflowToScheduleActivityWithDefaultInput()
+            public ParentWorkflow()
             {
-                ScheduleActivity("TestActivity", "1.0").OnTaskList((t) => _taskListName);
-            }
-        }
+                ScheduleChildWorkflow<ChildWorkflow>().OnTaskList(_ => _taskListName);
 
-        [WorkflowDescription(Names.Workflow.Test.Version, Name = Names.Workflow.Test.Name, DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
-          DefaultTaskPriority = 10, DefaultTaskStartToCloseTimeoutInSeconds = 900, Description = "Empty workflow")]
-        private class WorkflowToScheduleActivityWithCustomInput : Workflow
-        {
-            public WorkflowToScheduleActivityWithCustomInput(string activityInput)
-            {
-                ScheduleActivity("TestActivity", "1.0").OnTaskList((t) => _taskListName).WithInput(t => activityInput);
+                ScheduleAction(i => CompleteWorkflow(i.ParentChildWorkflow().Result())).AfterChildWorkflow<ChildWorkflow>();
             }
         }
 
@@ -116,8 +86,8 @@ namespace Guflow.IntegrationTests
             public ChildWorkflow()
             {
                 ScheduleActivity<TestActivity>().OnTaskList((t) => _taskListName);
-                ScheduleAction(i => CompleteWorkflow(i.ParentActivity<TestActivity>().Result()));
-
+                ScheduleAction(i => CompleteWorkflow(i.ParentActivity<TestActivity>().Result()))
+                    .AfterActivity<TestActivity>();
             }
         }
 
@@ -130,8 +100,8 @@ namespace Guflow.IntegrationTests
             public async Task<string> Execute()
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
-                return input;
+                return ActivityResult;
             }
-        }*/
+        }
     }
 }
