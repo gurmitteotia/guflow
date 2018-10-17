@@ -163,13 +163,13 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Workflow_cancel_request_failed_event_is_interpreted()
+        public void External_workflow_cancel_request_failed_event_is_interpreted()
         {
-            var eventGraph = _builder.WorkflowCancelRequestFailedEvent("cause");
-            var events = new WorkflowHistoryEvents(new[] { eventGraph });
+            var eventGraph = _builder.ExternalWorkflowCancelRequestFailedEvent(Identity.New("w","v"),"rid","cause");
+            var events = new WorkflowHistoryEvents(eventGraph );
             var newEvents = events.NewEvents();
 
-            Assert.That(newEvents, Is.EqualTo(new[] { new WorkflowCancelRequestFailedEvent(eventGraph) }));
+            Assert.That(newEvents, Is.EqualTo(new[] { new ExternalWorkflowCancelRequestFailedEvent(eventGraph.First()) }));
         }
 
         [Test]

@@ -291,6 +291,38 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void All_events_can_return_external_workflow_cancellation_requested_event_and_workflow_started_event()
+        {
+            var cancellationRequested = _builder.ChildWorkflowCancellationRequestedEventGraph(_identity, "runid", "input").ToArray();
+            
+            var childWorkflow = ChildWorkflow(cancellationRequested);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ExternalWorkflowCancellationRequestedEvent(cancellationRequested.First()), 
+                new ChildWorkflowStartedEvent(cancellationRequested.Skip(2).First(), cancellationRequested), 
+            }));
+        }
+
+        [Test]
+        public void All_events_can_return_child_workflow_cancelled_event__and_external_workflow_cancellation_requested_event()
+        {
+            var cancelledEvent = _builder.ChildWorkflowCancelledEventGraph(_identity, "runid", "input", "details").ToArray();
+
+            var childWorkflow = ChildWorkflow(cancelledEvent);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ChildWorkflowCancelledEvent(cancelledEvent.First(), cancelledEvent),
+                new ExternalWorkflowCancellationRequestedEvent(cancelledEvent.Skip(1).First()),
+            }));
+        }
+
+        [Test]
         public void All_events_can_return_reschedule_timer_events()
         {
             var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();

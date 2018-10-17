@@ -203,7 +203,7 @@ namespace Guflow.Decider
             if (historyEvent.IsWorkflowSignalFailedEvent())
                 return new WorkflowSignalFailedEvent(historyEvent);
             if (historyEvent.IsWorkflowCancelRequestFailedEvent())
-                return new WorkflowCancelRequestFailedEvent(historyEvent);
+                return new ExternalWorkflowCancelRequestFailedEvent(historyEvent);
             if (historyEvent.IsWorkflowCancellationFailedEvent())
                 return new WorkflowCancellationFailedEvent(historyEvent);
             if (historyEvent.IsLambdaCompletedEvent())
@@ -305,6 +305,8 @@ namespace Guflow.Decider
                 return new ChildWorkflowStartedEvent(historyEvent, allEvents);
             if (historyEvent.IsChildWorkflowStartFailedEvent())
                 return new ChildWorkflowStartFailedEvent(historyEvent, allEvents);
+            if (historyEvent.IsExternalWorkflowCancelRequestedEvent())
+                return new ExternalWorkflowCancellationRequestedEvent(historyEvent);
 
             return null;
         }
@@ -336,6 +338,10 @@ namespace Guflow.Decider
         private static bool IsChildWorkflowStartFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.StartChildWorkflowExecutionFailed;
+        }
+        private static bool IsExternalWorkflowCancelRequestedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.ExternalWorkflowExecutionCancelRequested;
         }
 
         public static WorkflowItemEvent CreateWorkflowItemEventFor(this HistoryEvent historyEvent,IEnumerable<HistoryEvent> allHistoryEvents)

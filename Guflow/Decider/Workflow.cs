@@ -130,9 +130,9 @@ namespace Guflow.Decider
             return Handle(EventName.FailureFailed, workflowFailureFailedEvent);
         }
 
-        WorkflowAction IWorkflow.WorkflowAction(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
+        WorkflowAction IWorkflow.WorkflowAction(ExternalWorkflowCancelRequestFailedEvent externalWorkflowCancelRequestFailedEvent)
         {
-            return Handle(EventName.CancelRequestFailed, workflowCancelRequestFailedEvent);
+            return Handle(EventName.CancelRequestFailed, externalWorkflowCancelRequestFailedEvent);
         }
 
         WorkflowAction IWorkflow.WorkflowAction(WorkflowCancellationFailedEvent workflowCancellationFailedEvent)

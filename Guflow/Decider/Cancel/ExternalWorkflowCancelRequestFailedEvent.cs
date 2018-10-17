@@ -3,11 +3,14 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
-    public class WorkflowCancelRequestFailedEvent :WorkflowEvent
+    /// <summary>
+    /// Raised when SWF fails to deliver the workflow cancel request to external/child workflow.
+    /// </summary>
+    public class ExternalWorkflowCancelRequestFailedEvent :WorkflowEvent
     {
         private readonly RequestCancelExternalWorkflowExecutionFailedEventAttributes _eventAttributes;
 
-        internal WorkflowCancelRequestFailedEvent(HistoryEvent cancelRequestFailedEvent):base(cancelRequestFailedEvent.EventId)
+        internal ExternalWorkflowCancelRequestFailedEvent(HistoryEvent cancelRequestFailedEvent):base(cancelRequestFailedEvent.EventId)
         {
             _eventAttributes = cancelRequestFailedEvent.RequestCancelExternalWorkflowExecutionFailedEventAttributes;
         }

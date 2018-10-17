@@ -72,17 +72,6 @@ namespace Guflow.Decider
                 if (IsInChainOf(itemEvent))
                     return true;
             }
-            //swf does not link cancel requested/failed event with scheduled id or start id
-            foreach (var itemEvent in workflowItemEvents.OfType<ActivityCancelRequestedEvent>())
-            {
-                if (itemEvent.IsForSameWorkflowItemAs(this))
-                    return true;
-            }
-            foreach (var itemEvent in workflowItemEvents.OfType<ActivityCancellationFailedEvent>())
-            {
-                if (itemEvent.IsForSameWorkflowItemAs(this))
-                    return true;
-            }
             return false;
         }
         private bool IsInChainOf(ActivityEvent otherActivityEvent)

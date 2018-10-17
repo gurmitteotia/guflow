@@ -291,49 +291,69 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void All_events_can_return_cancelled_event()
+        public void All_events_can_return_cancelled_event_and_cancel_requested_event()
         {
             var eventGraph = _eventGraphBuilder.ActivityCancelledGraph(_activityIdenity, "workerid", "detail");
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents(true);
 
-            Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivityCancelledEvent(eventGraph.First(), eventGraph), }));
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ActivityCancelledEvent(eventGraph.First(), eventGraph),
+                new ActivityCancelRequestedEvent(eventGraph.Skip(1).First()), 
+            }));
         }
 
         [Test]
-        public void All_events_can_return_cancelled_event_and_cancel_requested_event()
+        public void All_events_can_return_multiple_cancel_requested_event_from_different_graph()
         {
-            var cancelledEventGraph = _eventGraphBuilder.ActivityCancelledGraph(_activityIdenity, "workerid", "detail");
-            var cancelRequestedEventGraph = _eventGraphBuilder.ActivityCancelRequestedGraph(_activityIdenity,"id");
-            var activityItem = CreateActivityItemWith(cancelledEventGraph.Concat(cancelRequestedEventGraph));
+            var cancelledEventGraph = _eventGraphBuilder.ActivityCancelledGraph(_activityIdenity, "workerid", "detail").ToArray();
+            var cancelRequestedEventGraph = _eventGraphBuilder.ActivityCancelRequestedGraph(_activityIdenity,"id").ToArray();
+            var activityItem = CreateActivityItemWith(cancelRequestedEventGraph.Concat(cancelledEventGraph));
 
             var allEvents = activityItem.AllEvents(true);
 
-            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new ActivityCancelledEvent(cancelledEventGraph.First(), cancelledEventGraph), new ActivityCancelRequestedEvent(cancelRequestedEventGraph.First()),  }));
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ActivityCancelRequestedEvent(cancelRequestedEventGraph.First()),
+                new ActivityStartedEvent(cancelRequestedEventGraph.Skip(1).First(), cancelRequestedEventGraph),
+                new ActivityCancelledEvent(cancelledEventGraph.First(), cancelledEventGraph),
+                new ActivityCancelRequestedEvent(cancelledEventGraph.Skip(1).First()), 
+            }));
         }
 
         [Test]
-        public void All_events_can_return_cancellation_failed_event()
+        public void All_events_can_return_cancellation_failed_event_and_activity_started_event()
         {
-            var eventGraph = _eventGraphBuilder.ActivityCancellationFailedGraph(_activityIdenity, "cause");
+            var eventGraph = _eventGraphBuilder.ActivityCancellationFailedGraph(_activityIdenity, "cause").ToArray();
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents(true);
 
-            Assert.That(allEvents, Is.EquivalentTo(new[] { new ActivityCancellationFailedEvent(eventGraph.First()), }));
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ActivityCancellationFailedEvent(eventGraph.First()),
+                new ActivityStartedEvent(eventGraph.Skip(1).First(), eventGraph)
+            }));
         }
 
         [Test]
         public void All_events_can_return_cancelled_event_and_cancellation_request_failed_event()
         {
-            var cancelledEventGraph = _eventGraphBuilder.ActivityCancelledGraph(_activityIdenity, "workerid", "detail");
-            var activityCancellationFailedEventGraph = _eventGraphBuilder.ActivityCancellationFailedGraph(_activityIdenity, "id");
-            var activityItem = CreateActivityItemWith(cancelledEventGraph.Concat(activityCancellationFailedEventGraph));
+            var cancelledEventGraph = _eventGraphBuilder.ActivityCancelledGraph(_activityIdenity, "workerid", "detail").ToArray();
+            var activityCancellationFailedEventGraph = _eventGraphBuilder.ActivityCancellationFailedGraph(_activityIdenity, "id").ToArray();
+            var activityItem = CreateActivityItemWith(activityCancellationFailedEventGraph.Concat(cancelledEventGraph));
 
             var allEvents = activityItem.AllEvents(true);
 
-            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new ActivityCancelledEvent(cancelledEventGraph.First(), cancelledEventGraph), new ActivityCancellationFailedEvent(activityCancellationFailedEventGraph.First()), }));
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ActivityCancellationFailedEvent(activityCancellationFailedEventGraph.First()),
+                new ActivityStartedEvent(activityCancellationFailedEventGraph.Skip(1).First(), activityCancellationFailedEventGraph),
+                new ActivityCancelledEvent(cancelledEventGraph.First(), cancelledEventGraph),
+                new ActivityCancelRequestedEvent(cancelledEventGraph.Skip(1).First()), 
+            }));
         }
 
         [Test]

@@ -1,4 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System.Linq;
 using Guflow.Decider;
 using Guflow.Tests.TestWorkflows;
 using Moq;
@@ -6,17 +8,18 @@ using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
 {
-    public class WorkflowCancelRequestFailedEventTests
+    [TestFixture]
+    public class ExternalWorkflowCancelRequestFailedEventTests
     {
-        private WorkflowCancelRequestFailedEvent _cancelRequestFailedEvent;
+        private ExternalWorkflowCancelRequestFailedEvent _cancelRequestFailedEvent;
         private EventGraphBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-
-            _cancelRequestFailedEvent = new WorkflowCancelRequestFailedEvent(_builder.WorkflowCancelRequestFailedEvent("cause"));
+            var identity = Identity.New("w", "v");
+            _cancelRequestFailedEvent = new ExternalWorkflowCancelRequestFailedEvent(_builder.ExternalWorkflowCancelRequestFailedEvent(identity,"rid", "cause").First());
         }
 
         [Test]
@@ -52,7 +55,7 @@ namespace Guflow.Tests.Decider
             }
 
             [WorkflowEvent(EventName.CancelRequestFailed)]
-            public WorkflowAction OnCancelRequestFailed(WorkflowCancelRequestFailedEvent @event)
+            public WorkflowAction OnCancelRequestFailed(ExternalWorkflowCancelRequestFailedEvent @event)
             {
                 return _workflowAction;
             }

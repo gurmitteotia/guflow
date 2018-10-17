@@ -45,13 +45,6 @@ namespace Guflow.Decider
                 if (IsInChainOf(timerEvent))
                     return true;
             }
-
-            //swf does not link cancellation failed event with started event id.
-            foreach (var itemEvent in workflowItemEvents.OfType<TimerCancellationFailedEvent>())
-            {
-                if (itemEvent.IsForSameWorkflowItemAs(this))
-                    return true;
-            }
             return false;
         }
 

@@ -139,6 +139,21 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void All_events_can_be_timer_cancellation_failed_event_and_timer_started_event()
+        {
+            var eventGraph = _builder.TimerCancellationFailedGraph(_timerIdentity, "cause").ToArray();
+            var timerItem = CreateTimerItemFor(eventGraph);
+
+            var allEvents = timerItem.AllEvents(true);
+
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new TimerCancellationFailedEvent(eventGraph.First()),
+                new TimerStartedEvent(eventGraph.Skip(1).First(), eventGraph)
+            }));
+        }
+
+        [Test]
         public void All_events_can_return_timer_fired_events()
         {
             var eventGraph = _builder.TimerFiredGraph(_timerIdentity, TimeSpan.FromSeconds(2));
