@@ -93,7 +93,7 @@ namespace Guflow.Decider
         {
             return _workflowItems.OfType<ActivityItem>().FirstOrDefault(activityEvent.IsFor);
         }
-        public IEnumerable<IWorkflowItem> AllItems
+        public IEnumerable<WorkflowItem> AllItems
         {
             get { return _workflowItems.Where(i=>i.GetType()!=typeof(WorkflowActionItem)); }
         }
@@ -137,5 +137,9 @@ namespace Guflow.Decider
 
             return item;
         }
+
+        public bool HasItemFor(WorkflowItemEvent @event)
+            => AllItems.Any(@event.IsFor);
+
     }
 }

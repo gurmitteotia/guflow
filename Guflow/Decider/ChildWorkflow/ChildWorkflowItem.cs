@@ -15,6 +15,7 @@ namespace Guflow.Decider
         private Func<ChildWorkflowTerminatedEvent, WorkflowAction> _terminatedAction;
         private Func<ChildWorkflowTimedoutEvent, WorkflowAction> _timedoutAction;
         private Func<ChildWorkflowStartFailedEvent, WorkflowAction> _startFailedAction;
+        private Func<ExternalWorkflowCancelRequestFailedEvent, WorkflowAction> _cancelRequestFailedAction;
         private Func<IChildWorkflowItem, object> _input;
         private Func<IChildWorkflowItem, string> _childPolicy;
         private Func<IChildWorkflowItem, int?> _taskPriority;
@@ -64,6 +65,7 @@ namespace Guflow.Decider
             _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
             _when = _ => true;
             _onWhenFalseAction = _ => IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
+            _cancelRequestFailedAction = e => e.DefaultAction(workflow);
         }
 
         public string Version => Identity.Version;
@@ -275,6 +277,13 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentChildWorkflowItem OnCancellationFailed(Func<ExternalWorkflowCancelRequestFailedEvent, WorkflowAction> workflowAction)
+        {
+            Ensure.NotNull(workflowAction, nameof(workflowAction));
+            _cancelRequestFailedAction = workflowAction;
+            return this;
+        }
+
         public WorkflowAction CompletedAction(ChildWorkflowCompletedEvent completedEvent)
         {
             return _completedAction(completedEvent);
@@ -327,6 +336,11 @@ namespace Guflow.Decider
         {
             var lastEvent = LastEvent() as ChildWorkflowEvent;
             return WorkflowAction.Signal(signalName, input, Identity.Id, lastEvent?.RunId);
+        }
+
+        public WorkflowAction CancelRequestFailedAction(ExternalWorkflowCancelRequestFailedEvent @event)
+        {
+            return _cancelRequestFailedAction(@event);
         }
     }
 }

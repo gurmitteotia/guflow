@@ -43,7 +43,7 @@ namespace Guflow.Tests.Decider
         {
             var expectedWorkflowAction = new Mock<WorkflowAction>().Object;
 
-            var workflowAction = _cancelRequestFailedEvent.Interpret(new WorkflowToReturnCustomAction(expectedWorkflowAction));
+            var workflowAction = _cancelRequestFailedEvent.Interpret(new TestChildWorkflow(expectedWorkflowAction));
 
             Assert.That(workflowAction, Is.EqualTo(expectedWorkflowAction));
         }
@@ -58,10 +58,10 @@ namespace Guflow.Tests.Decider
 
         private class TestChildWorkflow : Workflow
         {
-            public TestChildWorkflow()
+            public TestChildWorkflow(WorkflowAction action)
             {
                 ScheduleChildWorkflow(WorkflowName, Version)
-                    .OnCancellationFailed();
+                    .OnCancellationFailed(_=>action);
             }
         }
     }

@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Fluent API interface to schedule the child workflow.
+    /// </summary>
     public interface IFluentChildWorkflowItem : IFluentWorkflowItem<IFluentChildWorkflowItem>
     {
         /// <summary>
@@ -59,42 +62,42 @@ namespace Guflow.Decider
         IFluentChildWorkflowItem WithTags(Func<IChildWorkflowItem, IEnumerable<string>> tags);
 
         /// <summary>
-        /// Configure the handler to return the workflow action on <see cref="ChildWorkflowCompletedEvent"/>.
+        /// Configure the handler to return the <see cref="WorkflowAction"/> on <see cref="ChildWorkflowCompletedEvent"/>.
         /// </summary>
         /// <param name="workflowAction">Handler</param>
         /// <returns></returns>
         IFluentChildWorkflowItem OnCompletion(Func<ChildWorkflowCompletedEvent, WorkflowAction> workflowAction);
 
         /// <summary>
-        /// Configure the handler to return the workflow action on <see cref="ChildWorkflowFailedEvent"/>.
+        /// Configure the handler to return the <see cref="WorkflowAction"/> on <see cref="ChildWorkflowFailedEvent"/>.
         /// </summary>
         /// <param name="workflowAction"></param>
         /// <returns></returns>
         IFluentChildWorkflowItem OnFailure(Func<ChildWorkflowFailedEvent, WorkflowAction> workflowAction);
 
         /// <summary>
-        /// Configure the handler to return the workflow action on <see cref="ChildWorkflowCancelledEvent"/>.
+        /// Configure the handler to return the <see cref="WorkflowAction"/> on <see cref="ChildWorkflowCancelledEvent"/>.
         /// </summary>
         /// <param name="workflowAction"></param>
         /// <returns></returns>
         IFluentChildWorkflowItem OnCancelled(Func<ChildWorkflowCancelledEvent, WorkflowAction> workflowAction);
 
         /// <summary>
-        /// Configure the handler to return the workflow on <see cref="ChildWorkflowTerminatedEvent"/>.
+        /// Configure the handler to return the <see cref="WorkflowAction"/> on <see cref="ChildWorkflowTerminatedEvent"/>.
         /// </summary>
         /// <param name="workflowAction"></param>
         /// <returns></returns>
         IFluentChildWorkflowItem OnTerminated(Func<ChildWorkflowTerminatedEvent, WorkflowAction> workflowAction);
 
         /// <summary>
-        /// Configure the handler to return the workflow on <see cref="ChildWorkflowTimedoutEvent"/>.
+        /// Configure the handler to return the <see cref="WorkflowAction"/> on <see cref="ChildWorkflowTimedoutEvent"/>.
         /// </summary>
         /// <param name="workflowAction"></param>
         /// <returns></returns>
         IFluentChildWorkflowItem OnTimedout(Func<ChildWorkflowTimedoutEvent, WorkflowAction> workflowAction);
 
         /// <summary>
-        /// Configure the handler to return the workflow on <see cref="ChildWorkflowStartFailedEvent"/>.
+        /// Configure the handler to return the <see cref="WorkflowAction"/> on <see cref="ChildWorkflowStartFailedEvent"/>.
         /// </summary>
         /// <param name="workflowAction"></param>
         /// <returns></returns>
@@ -116,5 +119,12 @@ namespace Guflow.Decider
         /// <param name="falseAction">Provide WorkflowAction when scheduling condition is evaluated to false. By default it will try to schedule the first join item if this is a non startup item.</param>
         /// <returns></returns>
         IFluentChildWorkflowItem When(Func<IChildWorkflowItem, bool> @true, Func<IChildWorkflowItem, WorkflowAction> falseAction);
+
+        /// <summary>
+        /// Configure the handler to return the <see cref="WorkflowAction"/> on <see cref="ExternalWorkflowCancelRequestFailedEvent"/>.
+        /// </summary>
+        /// <param name="workflowAction"></param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem OnCancellationFailed(Func<ExternalWorkflowCancelRequestFailedEvent, WorkflowAction> workflowAction);
     }
 }

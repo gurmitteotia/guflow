@@ -29,10 +29,5 @@ namespace Guflow.Decider
         {
             return false;
         }
-
-        internal bool IsForSameWorkflowItemAs(WorkflowItemEvent otherWorkflowItemEvent)
-        {
-            return AwsIdentity == otherWorkflowItemEvent.AwsIdentity;
-        }
     }
 }
