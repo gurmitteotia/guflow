@@ -4,6 +4,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Raised when timer is started in SWF.
+    /// </summary>
     public class TimerStartedEvent : TimerEvent
     {
         internal TimerStartedEvent(HistoryEvent timerStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerStartedEvent.EventId)

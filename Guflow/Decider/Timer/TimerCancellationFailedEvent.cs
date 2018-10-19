@@ -9,7 +9,7 @@ namespace Guflow.Decider
         internal TimerCancellationFailedEvent(HistoryEvent timerCancellationFailedEvent) : base(timerCancellationFailedEvent.EventId)
         {
             _eventAttributes = timerCancellationFailedEvent.CancelTimerFailedEventAttributes;
-            AwsIdentity = AwsIdentity.Raw(_eventAttributes.TimerId);
+            SwfIdentity = SwfIdentity.Raw(_eventAttributes.TimerId);
         }
         public string Cause { get { return _eventAttributes.Cause; } }
         internal override WorkflowAction Interpret(IWorkflow workflow)

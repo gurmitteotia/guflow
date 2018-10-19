@@ -41,7 +41,7 @@ namespace Guflow.Decider
         public static TimerItem New(Identity identity, IWorkflow workflow)
         {
             var timerItem = new TimerItem(identity, workflow);
-            timerItem._rescheduleTimer = Reschedule(timerItem, identity, workflow);
+            timerItem._rescheduleTimer = Reschedule(timerItem, timerItem.Identity, workflow);
             timerItem.OnStartFailed(e => e.DefaultAction(workflow));
             timerItem.OnCancellationFailed(e => e.DefaultAction(workflow));
             timerItem.OnFired(e => e.DefaultAction(workflow));
@@ -116,6 +116,21 @@ namespace Guflow.Decider
             AddParent(Identity.Lambda(name, positionalName));
             return this;
         }
+
+        public IFluentTimerItem AfterChildWorkflow(string name, string version, string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name,version, positionalName));
+            return this;
+        }
+
+        public IFluentTimerItem AfterChildWorkflow<TWorkflow>(string positionalName) where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return AfterChildWorkflow(desc.Name, desc.Version, positionalName);
+        }
+
         public IFluentTimerItem OnCancellationFailed(Func<TimerCancellationFailedEvent, WorkflowAction> action)
         {
             Ensure.NotNull(action, "action");

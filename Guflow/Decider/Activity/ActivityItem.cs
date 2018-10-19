@@ -36,7 +36,7 @@ namespace Guflow.Decider
             _onFalseAction = _ =>IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
             _priorityFunc = a => null;
             _timeoutsFunc = a => new ActivityTimeouts();
-            _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
+            _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
         }
 
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
@@ -83,8 +83,8 @@ namespace Guflow.Decider
         }
         public IFluentActivityItem AfterActivity<TActivity>(string positionalName = "") where TActivity : Activity
         {
-            var description = ActivityDescription.FindOn<TActivity>();
-            return AfterActivity(description.Name, description.Version, positionalName);
+            var desc = ActivityDescription.FindOn<TActivity>();
+            return AfterActivity(desc.Name, desc.Version, positionalName);
         }
 
         public IFluentActivityItem AfterLambda(string name, string positionalName = "")
@@ -92,6 +92,20 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(name, nameof(name));
             AddParent(Identity.Lambda(name, positionalName));
             return this;
+        }
+
+        public IFluentActivityItem AfterChildWorkflow(string name, string version, string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name, version, positionalName));
+            return this;
+        }
+
+        public IFluentActivityItem AfterChildWorkflow<TWorkflow>(string positionalName="") where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return AfterChildWorkflow(desc.Name, desc.Version, positionalName);
         }
 
         public IFluentActivityItem OnCompletion(Func<ActivityCompletedEvent, WorkflowAction> action)
@@ -231,7 +245,7 @@ namespace Guflow.Decider
         {
             var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
             scheduleActivityDecision.Input = _inputFunc(this).ToAwsString();
-            scheduleActivityDecision.TaskList = _taskListFunc(this);
+            scheduleActivityDecision.TaskListName = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);
             scheduleActivityDecision.Timeouts = _timeoutsFunc(this);
             return new[] { scheduleActivityDecision };

@@ -47,11 +47,12 @@ namespace Guflow.Decider
                 }
                 else if (historyEvent.IsActivityScheduledEvent(scheduledEventId))
                 {
-                    _activityName = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Name;
-                    _activityVersion = historyEvent.ActivityTaskScheduledEventAttributes.ActivityType.Version;
-                    _activityPositionalName = historyEvent.ActivityTaskScheduledEventAttributes.Control.As<ScheduleData>().PN;
-                    AwsIdentity = AwsIdentity.Raw(historyEvent.ActivityTaskScheduledEventAttributes.ActivityId);
-                    Input = historyEvent.ActivityTaskScheduledEventAttributes.Input;
+                    var attr = historyEvent.ActivityTaskScheduledEventAttributes;
+                    _activityName = attr.ActivityType.Name;
+                    _activityVersion = attr.ActivityType.Version;
+                    _activityPositionalName = attr.Control.As<ScheduleData>().PN;
+                    SwfIdentity = SwfIdentity.Raw(attr.ActivityId);
+                    Input = attr.Input;
                     foundActivityScheduledEvent = true;
                 }
             }
@@ -69,17 +70,6 @@ namespace Guflow.Decider
             foreach (var itemEvent in workflowItemEvents.OfType<ActivityEvent>())
             {
                 if (IsInChainOf(itemEvent))
-                    return true;
-            }
-            //swf does not link cancel requested/failed event with scheduled id or start id
-            foreach (var itemEvent in workflowItemEvents.OfType<ActivityCancelRequestedEvent>())
-            {
-                if (itemEvent.IsForSameWorkflowItemAs(this))
-                    return true;
-            }
-            foreach (var itemEvent in workflowItemEvents.OfType<ActivityCancellationFailedEvent>())
-            {
-                if (itemEvent.IsForSameWorkflowItemAs(this))
                     return true;
             }
             return false;

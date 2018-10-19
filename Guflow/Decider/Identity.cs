@@ -3,19 +3,26 @@ namespace Guflow.Decider
 {
     internal class Identity
     {
-        public string Name { get; private set; }
-        public string Version { get; private set; }
-        public string PositionalName { get; private set; }
-        private readonly AwsIdentity _id;
+        public string Name { get; }
+        public string Version { get; }
+        public string PositionalName { get; }
+
         private Identity(string name, string version, string positionalName)
         {
             Name = name;
             Version = version;
             PositionalName = positionalName;
-            _id = AwsIdentity.Create(Name,Version,PositionalName);
+            Id = SwfIdentity.Create(Name,Version,PositionalName);
         }
-        
-        internal AwsIdentity Id{get { return _id; }}
+        //TODO: Move it out of this class
+        public SwfIdentity Id { get; private set; }
+
+        public Identity ScheduleIdentity(string salt)
+        {
+            var identity = new Identity(Name, Version, PositionalName);
+            identity.Id= SwfIdentity.Create(identity, salt);
+            return identity;
+        }
 
         public static Identity Timer(string name)
         {
@@ -37,27 +44,17 @@ namespace Guflow.Decider
             var otherIdentity = other as Identity;
             if (otherIdentity == null)
                 return false;
-            return _id.Equals(otherIdentity.Id);
+            return Id.Equals(otherIdentity.Id);
         }
 
         public override int GetHashCode()
         {
-            return _id.GetHashCode();
+            return Id.GetHashCode();
         }
 
         public override string ToString()
         {
             return string.Format("{{Name {0}, Version {1} and Positional Name {2}}}", Name, Version, PositionalName);
-        }
-
-        public string To(IdentityFormat format)
-        {
-            return format.Serialize(this);
-        }
-
-        public static Identity From(string data, IdentityFormat format)
-        {
-            return format.Deserialize(data);
         }
     }
 }

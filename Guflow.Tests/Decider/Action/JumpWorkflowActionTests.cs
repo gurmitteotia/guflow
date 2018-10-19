@@ -19,6 +19,9 @@ namespace Guflow.Tests.Decider
         private const string Version = "1.0";
         private const string LambdaName = "lambda_1";
         private const string TimerName = "SomeTimer";
+        private const string ChildWorkflowName = "Cnmae";
+        private const string ChildWorkflowVersion = "1.0";
+
         private EventGraphBuilder _builder;
         private HistoryEventsBuilder _eventsBuilder;
         [SetUp]
@@ -105,6 +108,28 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName, PositionalName), "input") }));
+        }
+
+        [Test]
+        public void Jump_to_a_child_workflow_ignore_its_when_clause()
+        {
+            _eventsBuilder.AddNewEvents(CompletedTimerGraph(TimerName));
+            var workflow = new JumpToChildWorkflowIgnoresItsWhenClause();
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(ChildWorkflowName, ChildWorkflowVersion), "input") }));
+        }
+
+        [Test]
+        public void Jump_to_a_child_workflow_using_generic_api_ignore_its_when_clause()
+        {
+            _eventsBuilder.AddNewEvents(CompletedTimerGraph(TimerName));
+            var workflow = new JumpToChildWorkflowUsingGenericApiIgnoresItsWhenClause();
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(ChildWorkflowName, ChildWorkflowVersion), "input") }));
         }
 
 
@@ -212,6 +237,40 @@ namespace Guflow.Tests.Decider
                     .AfterTimer(TimerName)
                     .When(_ => false);
             }
+        }
+
+        private class JumpToChildWorkflowIgnoresItsWhenClause : Workflow
+        {
+            public JumpToChildWorkflowIgnoresItsWhenClause()
+            {
+                ScheduleTimer(TimerName)
+                    .When(_ => false)
+                    .OnFired(_ => Jump.ToChildWorkflow(ChildWorkflowName, ChildWorkflowVersion));
+
+                ScheduleChildWorkflow(ChildWorkflowName, ChildWorkflowVersion)
+                    .AfterTimer(TimerName)
+                    .When(_ => false);
+            }
+        }
+
+        private class JumpToChildWorkflowUsingGenericApiIgnoresItsWhenClause : Workflow
+        {
+            public JumpToChildWorkflowUsingGenericApiIgnoresItsWhenClause()
+            {
+                ScheduleTimer(TimerName)
+                    .When(_ => false)
+                    .OnFired(_ => Jump.ToChildWorkflow<ChildWorkflow>());
+
+                ScheduleChildWorkflow(ChildWorkflowName, ChildWorkflowVersion)
+                    .AfterTimer(TimerName)
+                    .When(_ => false);
+            }
+        }
+
+        [WorkflowDescription(ChildWorkflowVersion, Name = ChildWorkflowName)]
+        private class ChildWorkflow : Workflow
+        {
+
         }
     }
 }

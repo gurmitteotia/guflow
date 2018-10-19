@@ -17,6 +17,8 @@ namespace Guflow.Tests.Decider
         private const string ActivityVersion = "1.0";
         private const string PositionalName = "First";
         private const string LambdaName = "Lambda";
+        private const string WorkflowName = "Workflow";
+        private const string WorkflowVersion = "1.0";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(20);
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
@@ -70,7 +72,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_an_activity_item()
+        public void Returns_schedule_activity_decision_if_timer_is_fired_to_reschedule_an_activity_item()
         {
             var workflow = new SingleActivityWorkflow();
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
@@ -82,7 +84,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_a_timer_item()
+        public void Returns_schedule_timer_decision_if_timer_is_fired_to_reschedule_a_timer_item()
         {
             var workflow = new WorkflowWithTimer();
             var rescheduleTimer = CreateRescheduleTimerFiredEvent(Identity.Timer(TimerName), _fireAfter);
@@ -93,7 +95,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Should_return_schedule_workflow_action_if_timer_is_fired_to_reschedule_an_lambda_item()
+        public void Returns_schedule_lambda_decision_if_timer_is_fired_to_reschedule_an_lambda_item()
         {
             var workflow = new SingleLambdaWorkflow();
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
@@ -102,6 +104,18 @@ namespace Guflow.Tests.Decider
             var workflowAction = workflow.Decisions(_eventsBuilder.Result());
 
             Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+        }
+
+        [Test]
+        public void Returns_schedule_child_workflow_decision_if_timer_is_fired_to_reschedule_a_child_workflow_item()
+        {
+            var workflow = new ChildWorkflow();
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.New(WorkflowName,WorkflowVersion), _fireAfter, true).ToArray());
+
+            var workflowAction = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion), "input") }));
         }
 
         [Test]
@@ -156,6 +170,14 @@ namespace Guflow.Tests.Decider
             public SingleLambdaWorkflow()
             {
                 ScheduleLambda(LambdaName);
+            }
+        }
+
+        private class ChildWorkflow : Workflow
+        {
+            public ChildWorkflow()
+            {
+                ScheduleChildWorkflow(WorkflowName, WorkflowVersion);
             }
         }
     }

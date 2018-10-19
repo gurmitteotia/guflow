@@ -1,5 +1,5 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
-using System;
+
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
@@ -16,7 +16,7 @@ namespace Guflow.Decider
         public ActivityTimeouts Timeouts { get; internal set; }
         public string Input { get; set; }
    
-        public string TaskList { get; set; }
+        public string TaskListName { get; set; }
         public int? TaskPriority { get; set; }
 
 
@@ -46,13 +46,13 @@ namespace Guflow.Decider
                     ActivityType = new ActivityType() { Name = _identity.Name, Version = _identity.Version },
                     ActivityId = _identity.Id,
                     Control = (new ScheduleData() { PN = _identity.PositionalName}).ToJson(),
-                    HeartbeatTimeout = ToAwsTimeout(Timeouts.HeartbeatTimeout),
-                    ScheduleToCloseTimeout = ToAwsTimeout(Timeouts.ScheduleToCloseTimeout),
-                    ScheduleToStartTimeout = ToAwsTimeout(Timeouts.ScheduleToStartTimeout),
-                    StartToCloseTimeout = ToAwsTimeout(Timeouts.StartToCloseTimeout),
+                    HeartbeatTimeout =Timeouts.HeartbeatTimeout.Seconds(),
+                    ScheduleToCloseTimeout = Timeouts.ScheduleToCloseTimeout.Seconds(),
+                    ScheduleToStartTimeout = Timeouts.ScheduleToStartTimeout.Seconds(),
+                    StartToCloseTimeout = Timeouts.StartToCloseTimeout.Seconds(),
                     Input = Input,
-                    TaskList = ToAwsTaskList(TaskList),
-                    TaskPriority = ToAwsTaskPriority(TaskPriority)
+                    TaskList = TaskListName.TaskList(),
+                    TaskPriority = TaskPriority.SwfFormat()
                 },
                 DecisionType = DecisionType.ScheduleActivityTask
             };
@@ -61,29 +61,6 @@ namespace Guflow.Decider
         public override string ToString()
         {
             return string.Format("{0} for {1}", GetType().Name, _identity);
-        }
-
-        private string ToAwsTaskPriority(int? taskPriority)
-        {
-            if (!taskPriority.HasValue)
-                return null;
-            return taskPriority.Value.ToString();
-        }
-
-        private Amazon.SimpleWorkflow.Model.TaskList ToAwsTaskList(string taskList)
-        {
-            if (string.IsNullOrEmpty(taskList))
-                return null;
-            return new Amazon.SimpleWorkflow.Model.TaskList() {Name = taskList};
-        }
-
-        private string ToAwsTimeout(TimeSpan? timeout)
-        {
-            if (!timeout.HasValue)
-                return null;
-            if (timeout.Value == TimeSpan.MaxValue)
-                return "NONE";
-            return timeout.Value.TotalSeconds.ToString();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace Guflow.Decider
                 if (historyEvent.IsTimerStartedEvent(timerStartedEventId))
                 {
                     _firedAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
-                    AwsIdentity = AwsIdentity.Raw(historyEvent.TimerStartedEventAttributes.TimerId);
+                    SwfIdentity = SwfIdentity.Raw(historyEvent.TimerStartedEventAttributes.TimerId);
                     var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.As<TimerScheduleData>();
                     IsARescheduledTimer = timerScheduleData.IsARescheduleTimer;
                     _timerName = timerScheduleData.TimerName;
@@ -43,13 +43,6 @@ namespace Guflow.Decider
             foreach (var timerEvent in workflowItemEvents.OfType<TimerEvent>())
             {
                 if (IsInChainOf(timerEvent))
-                    return true;
-            }
-
-            //swf does not link cancellation failed event with started event id.
-            foreach (var itemEvent in workflowItemEvents.OfType<TimerCancellationFailedEvent>())
-            {
-                if (itemEvent.IsForSameWorkflowItemAs(this))
                     return true;
             }
             return false;

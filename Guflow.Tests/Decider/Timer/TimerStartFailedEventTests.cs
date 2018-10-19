@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -15,6 +16,9 @@ namespace Guflow.Tests.Decider
         private const string ActivityName = "activity";
         private const string ActivityVersion = "1.0";
         private const string LambdaName = "Lambda";
+        private const string WorkflowName = "Workflow";
+        private const string WorkflowVersion = "1.0";
+
         private EventGraphBuilder _builder;
 
         [SetUp]
@@ -74,10 +78,28 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new[] { new FailWorkflowDecision("RESCHEDULE_TIMER_START_FAILED", TimerFailureCause) }));
         }
+
+        [Test]
+        public void Fail_workflow_for_child_workflow_reshedule_timer()
+        {
+            const string workflowRunid = "rid";
+            var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(workflowRunid);
+            var builder = new HistoryEventsBuilder().AddWorkflowRunId(workflowRunid);
+            builder.AddNewEvents(TimerStartFailedEventGraph(identity, TimerFailureCause));
+
+            var decisions = new WorkflowWithChildWorkflow().Decisions(builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new FailWorkflowDecision("RESCHEDULE_TIMER_START_FAILED", TimerFailureCause) }));
+        }
         private TimerStartFailedEvent CreateTimerStartFailedEvent(Identity timerIdentity, string cause)
         {
             var timerFailedEventGraph = _builder.TimerStartFailedGraph(timerIdentity, cause);
             return new TimerStartFailedEvent(timerFailedEventGraph.First());
+        }
+
+        private HistoryEvent[] TimerStartFailedEventGraph(Identity timerIdentity, string cause)
+        {
+            return _builder.TimerStartFailedGraph(timerIdentity, cause).ToArray();
         }
 
         private class WorkflowWithActivity : Workflow
@@ -100,6 +122,14 @@ namespace Guflow.Tests.Decider
             public WorkflowWithLambda()
             {
                 ScheduleLambda(LambdaName);
+            }
+        }
+
+        private class WorkflowWithChildWorkflow : Workflow
+        {
+            public WorkflowWithChildWorkflow()
+            {
+                ScheduleChildWorkflow(WorkflowName, WorkflowVersion);
             }
         }
         private class WorkflowWithCustomAction : Workflow

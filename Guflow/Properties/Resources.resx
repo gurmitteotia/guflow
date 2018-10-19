@@ -261,4 +261,7 @@
   <data name="Lambda_result_can_not_be_accessed" xml:space="preserve">
     <value>Can't access result. Last event of lambda function is not completed event.</value>
   </data>
+  <data name="ChildWorkflow_result_can_not_be_accessed" xml:space="preserve">
+    <value>Can't access result. Last event of child workflow is not completed event.</value>
+  </data>
 </root>

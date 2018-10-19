@@ -21,6 +21,7 @@ namespace Guflow.Decider
         public IEnumerable<ITimerItem> ParentTimers => _parentItems.OfType<ITimerItem>();
         public IEnumerable<ILambdaItem> ParentLambdas => _parentItems.OfType<ILambdaItem>();
 
+        public IEnumerable<IChildWorkflowItem> ParentChildWorkflows => _parentItems.OfType<IChildWorkflowItem>();
         public string Name => Identity.Name;
 
         public bool IsActive
@@ -72,7 +73,7 @@ namespace Guflow.Decider
         public abstract IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen();
         public abstract IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout);
         public abstract IEnumerable<WorkflowDecision> CancelDecisions();
-        public bool Has(AwsIdentity identity)
+        public virtual bool Has(SwfIdentity identity)
         {
             return Identity.Id == identity;
         }
@@ -146,9 +147,8 @@ namespace Guflow.Decider
                 throw new CyclicDependencyException(string.Format(Resources.Cyclic_dependency, identity));
             _parentItems.Add(parentItem);
         }
-
         protected IWorkflowHistoryEvents WorkflowHistoryEvents => _workflow.WorkflowHistoryEvents;
-
+        protected TimerItem RescheduleTimer(Identity identity) => TimerItem.Reschedule(this, identity, _workflow);
         public WorkflowAction DefaultActionOnLastEvent()
         {
             return LastEvent().DefaultAction(_workflow);

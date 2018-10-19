@@ -4,7 +4,7 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Represents a cancel request made to this workflow.
+    /// Raised when this workflow as received the request to cancel itself.
     /// </summary>
     public class WorkflowCancellationRequestedEvent : WorkflowEvent
     {

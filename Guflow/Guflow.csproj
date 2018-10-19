@@ -12,7 +12,7 @@
     <Description>A fluent API based C#.NET library to program Amazon SWF (Simple Workflow Service).</Description>
     <Copyright>Gurmit Teotia, Copyright ©  2018</Copyright>
     <IsPackable>true</IsPackable>
-    <PackageReleaseNotes>https://github.com/gurmitteotia/guflow/wiki/Release-notes</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/gurmitteotia/guflow/releases</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>.\bin\Debug</OutputPath>
@@ -25,5 +25,18 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.SimpleWorkflow" Version="3.3.0.39" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

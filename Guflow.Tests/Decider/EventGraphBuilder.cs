@@ -8,6 +8,9 @@ using ChildPolicy = Guflow.Decider.ChildPolicy;
 
 namespace Guflow.Tests.Decider
 {
+    /// <summary>
+    /// TODO: Refactor this class in to different builder classes for Activity, Timer, Lambda, ChildWorkfow and Workflow
+    /// </summary>
     internal class EventGraphBuilder
     {
         private long _currentEventId = 0;
@@ -631,18 +634,35 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public HistoryEvent WorkflowCancelRequestFailedEvent(string cause)
+        public IEnumerable<HistoryEvent> ExternalWorkflowCancelRequestFailedEvent(Identity identity, string runid, string cause)
         {
-            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
-            return new HistoryEvent
+            var events = new List<HistoryEvent>();
+            var eventIds = EventIds.WorkflowCancelRequestFailedIds(ref _currentEventId);
+            events.Add(new HistoryEvent
             {
-                EventId = eventIds.EventId(EventIds.Generic),
+                EventId = eventIds.EventId(EventIds.CancelRequestFailed),
                 EventType = EventType.RequestCancelExternalWorkflowExecutionFailed,
                 RequestCancelExternalWorkflowExecutionFailedEventAttributes = new RequestCancelExternalWorkflowExecutionFailedEventAttributes()
                 {
+                    WorkflowId = identity.Id,
+                    RunId = runid,
                     Cause = cause,
+                    InitiatedEventId = eventIds.EventId(EventIds.CancelInitiated)
                 }
-            };
+            });
+
+            events.Add(new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.CancelInitiated),
+                EventType = EventType.RequestCancelExternalWorkflowExecutionInitiated,
+                RequestCancelExternalWorkflowExecutionInitiatedEventAttributes = new RequestCancelExternalWorkflowExecutionInitiatedEventAttributes()
+                {
+                    WorkflowId = identity.Id,
+                    RunId = runid,
+                }
+            });
+
+            return events;
         }
         public HistoryEvent WorkflowCancellationFailedEvent(string cause)
         {
@@ -656,17 +676,6 @@ namespace Guflow.Tests.Decider
                     Cause = cause,
                 }
             };
-        }
-
-        public IEnumerable<HistoryEvent> Concat(params IEnumerable<HistoryEvent>[] graphs)
-        {
-            var result = new List<HistoryEvent>();
-            foreach (var graph in graphs)
-            {
-                result.AddRange(graph);
-            }
-            result.Reverse();
-            return result;
         }
 
         public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(Identity identity, object input, object result, TimeSpan? startToClose = null)
@@ -869,7 +878,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(Identity identity, object input, TimeSpan? timeout=null)
+        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(Identity identity, object input, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
@@ -901,6 +910,449 @@ namespace Guflow.Tests.Decider
         }
 
 
+        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(Identity identity, string runId, object input, object result)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.CompletedIds(ref _currentEventId);
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Completion),
+                EventType = EventType.ChildWorkflowExecutionCompleted,
+                ChildWorkflowExecutionCompletedEventAttributes = new ChildWorkflowExecutionCompletedEventAttributes()
+                {
+                    Result = result.ToAwsString(),
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.ChildWorkflowExecutionStarted,
+
+                ChildWorkflowExecutionStartedEventAttributes = new ChildWorkflowExecutionStartedEventAttributes()
+                {
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
+
+        public IEnumerable<HistoryEvent> ChildWorkflowFailedEventGraph(Identity identity, string runId, object input, string reason, object details)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.FailedIds(ref _currentEventId);
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Failed),
+                EventType = EventType.ChildWorkflowExecutionFailed,
+                ChildWorkflowExecutionFailedEventAttributes = new ChildWorkflowExecutionFailedEventAttributes()
+                {
+                    Reason = reason,
+                    Details = details.ToAwsString(),
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.ChildWorkflowExecutionStarted,
+
+                ChildWorkflowExecutionStartedEventAttributes = new ChildWorkflowExecutionStartedEventAttributes()
+                {
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public IEnumerable<HistoryEvent> ChildWorkflowCancelledEventGraph(Identity identity, string runId, object input, object details)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.ChildWorkflowCancelledIds(ref _currentEventId);
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Cancelled),
+                EventType = EventType.ChildWorkflowExecutionCanceled,
+                ChildWorkflowExecutionCanceledEventAttributes = new ChildWorkflowExecutionCanceledEventAttributes()
+                {
+                    Details = details.ToAwsString(),
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.CancelRequested),
+                EventType = EventType.ExternalWorkflowExecutionCancelRequested,
+                ExternalWorkflowExecutionCancelRequestedEventAttributes = new ExternalWorkflowExecutionCancelRequestedEventAttributes()
+                {
+                    InitiatedEventId = eventIds.EventId(EventIds.CancelInitiated),
+                    WorkflowExecution = workflowExecution,
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.CancelInitiated),
+                EventType = EventType.RequestCancelExternalWorkflowExecutionInitiated,
+                RequestCancelExternalWorkflowExecutionInitiatedEventAttributes = new RequestCancelExternalWorkflowExecutionInitiatedEventAttributes()
+                {
+                    WorkflowId = workflowExecution.WorkflowId,
+                    RunId = workflowExecution.RunId
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.ChildWorkflowExecutionStarted,
+
+                ChildWorkflowExecutionStartedEventAttributes = new ChildWorkflowExecutionStartedEventAttributes()
+                {
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public IEnumerable<HistoryEvent> ChildWorkflowStartedEventGraph(Identity identity, string runId, object input)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.StartedIds(ref _currentEventId);
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.ChildWorkflowExecutionStarted,
+
+                ChildWorkflowExecutionStartedEventAttributes = new ChildWorkflowExecutionStartedEventAttributes()
+                {
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
+
+        public IEnumerable<HistoryEvent> ChildWorkflowTerminatedEventGraph(Identity identity, string runId, object input)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.CompletedIds(ref _currentEventId);
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Completion),
+                EventType = EventType.ChildWorkflowExecutionTerminated,
+                ChildWorkflowExecutionTerminatedEventAttributes = new ChildWorkflowExecutionTerminatedEventAttributes()
+                {
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.ChildWorkflowExecutionStarted,
+
+                ChildWorkflowExecutionStartedEventAttributes = new ChildWorkflowExecutionStartedEventAttributes()
+                {
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public IEnumerable<HistoryEvent> ChildWorkflowTimedoutEventGraph(Identity identity, string runId, object input, string timedoutType)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.TimedoutIds(ref _currentEventId);
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Timedout),
+                EventType = EventType.ChildWorkflowExecutionTimedOut,
+                ChildWorkflowExecutionTimedOutEventAttributes = new ChildWorkflowExecutionTimedOutEventAttributes()
+                {
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled),
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    TimeoutType = timedoutType
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.ChildWorkflowExecutionStarted,
+
+                ChildWorkflowExecutionStartedEventAttributes = new ChildWorkflowExecutionStartedEventAttributes()
+                {
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public IEnumerable<HistoryEvent> ChildWorkflowStartFailedEventGraph(Identity identity, object input, string cause)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.ChildWorkflowStartFailed(ref _currentEventId);
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.StartFailed),
+                EventType = EventType.StartChildWorkflowExecutionFailed,
+                StartChildWorkflowExecutionFailedEventAttributes = new StartChildWorkflowExecutionFailedEventAttributes()
+                {
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled),
+                    WorkflowType = workflowType,
+                    Cause = cause
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public IEnumerable<HistoryEvent> ChildWorkflowCancellationRequestedEventGraph(Identity identity, string runId, string input)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.WorkflowCancelRequestedIds(ref _currentEventId);
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.CancelRequested),
+                EventType = EventType.ExternalWorkflowExecutionCancelRequested,
+                ExternalWorkflowExecutionCancelRequestedEventAttributes = new ExternalWorkflowExecutionCancelRequestedEventAttributes()
+                {
+                    InitiatedEventId = eventIds.EventId(EventIds.CancelInitiated),
+                    WorkflowExecution = workflowExecution
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.CancelInitiated),
+                EventType = EventType.RequestCancelExternalWorkflowExecutionInitiated,
+                RequestCancelExternalWorkflowExecutionInitiatedEventAttributes = new RequestCancelExternalWorkflowExecutionInitiatedEventAttributes()
+                {
+                    RunId = workflowExecution.RunId,
+                    WorkflowId = workflowExecution.WorkflowId,
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.ChildWorkflowExecutionStarted,
+
+                ChildWorkflowExecutionStartedEventAttributes = new ChildWorkflowExecutionStartedEventAttributes()
+                {
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
         private class EventIds
         {
             public const string Completion = "Completion";
@@ -912,7 +1364,9 @@ namespace Guflow.Tests.Decider
             public const string Failed = "Failed";
             public const string Timedout = "Timedout";
             public const string Generic = "Generic";
-
+            public const string StartFailed = "StartFailed";
+            public const string CancelInitiated = "CancelInitiated";
+            public const string CancelRequestFailed = "CancelRequestFailed";
             private readonly Dictionary<string, long> _ids;
 
             private EventIds(Dictionary<string, long> ids)
@@ -1100,6 +1554,59 @@ namespace Guflow.Tests.Decider
                 var ids = new Dictionary<string, long>()
                 {
                     {Generic, eventId},
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds ChildWorkflowCancelledIds(ref long eventId)
+            {
+                const long totalEvents = 5;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {Cancelled, eventId},
+                    {CancelRequested, eventId-1},
+                    {CancelInitiated, eventId-2},
+                    {Started, eventId - 3},
+                    {Scheduled, eventId - 4}
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds ChildWorkflowStartFailed(ref long eventId)
+            {
+                const long totalEvents = 2;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {StartFailed, eventId},
+                    {Scheduled, eventId - 1}
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds WorkflowCancelRequestedIds(ref long eventId)
+            {
+                const long totalEvents = 4;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {CancelRequested, eventId},
+                    {CancelInitiated, eventId - 1},
+                    {Started, eventId - 2},
+                    {Scheduled, eventId - 3}
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds WorkflowCancelRequestFailedIds(ref long eventId)
+            {
+                const long totalEvents = 2;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {CancelRequestFailed, eventId},
+                    {CancelInitiated, eventId - 1},
                 };
                 return new EventIds(ids);
             }

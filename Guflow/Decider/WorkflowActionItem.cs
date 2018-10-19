@@ -70,6 +70,20 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentWorkflowActionItem AfterChildWorkflow(string name, string version, string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name, version, positionalName));
+            return this;
+        }
+
+        public IFluentWorkflowActionItem AfterChildWorkflow<TWorkflow>(string positionalName) where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return AfterChildWorkflow(desc.Name, desc.Version, positionalName);
+        }
+
         public override IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false)
                                             => Enumerable.Empty<WorkflowItemEvent>();
     }

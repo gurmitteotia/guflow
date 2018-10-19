@@ -3,13 +3,17 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
-    public class WorkflowCancelRequestFailedEvent :WorkflowEvent
+    /// <summary>
+    /// Raised when SWF fails to deliver the workflow cancel request to external/child workflow.
+    /// </summary>
+    public class ExternalWorkflowCancelRequestFailedEvent :WorkflowItemEvent
     {
         private readonly RequestCancelExternalWorkflowExecutionFailedEventAttributes _eventAttributes;
 
-        internal WorkflowCancelRequestFailedEvent(HistoryEvent cancelRequestFailedEvent):base(cancelRequestFailedEvent.EventId)
+        internal ExternalWorkflowCancelRequestFailedEvent(HistoryEvent cancelRequestFailedEvent):base(cancelRequestFailedEvent.EventId)
         {
             _eventAttributes = cancelRequestFailedEvent.RequestCancelExternalWorkflowExecutionFailedEventAttributes;
+            SwfIdentity = SwfIdentity.Raw(_eventAttributes.WorkflowId);
         }
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
@@ -22,6 +26,9 @@ namespace Guflow.Decider
             return defaultActions.FailWorkflow("FAILED_TO_SEND_CANCEL_REQUEST", Cause);
         }
 
-        public string Cause {get { return _eventAttributes.Cause; }}
+        /// <summary>
+        /// Return cause to give information on why cancel request to external workflow has failed.
+        /// </summary>
+        public string Cause => _eventAttributes.Cause;
     }
 }

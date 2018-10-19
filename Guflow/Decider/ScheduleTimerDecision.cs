@@ -17,6 +17,11 @@ namespace Guflow.Decider
             _isRescheduleTimer = isRescheduleTimer;
         }
 
+        internal override bool IsFor(WorkflowItem workflowItem)
+        {
+            return workflowItem.Has(_timerIdentity);
+        }
+
         public override bool Equals(object other)
         {
             var otherTimer = other as ScheduleTimerDecision;
@@ -47,7 +52,7 @@ namespace Guflow.Decider
 
         public override string ToString()
         {
-            return string.Format("{0} for {1} and reschedulable timer is {2}",GetType().Name,_timerIdentity,_isRescheduleTimer);
+            return string.Format("{0} for {1} and reschedulable timer is {2} and interval {3}",GetType().Name,_timerIdentity,_isRescheduleTimer, _fireAfter);
         }
     }
 }

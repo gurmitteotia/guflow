@@ -130,9 +130,12 @@ namespace Guflow.Decider
             return Handle(EventName.FailureFailed, workflowFailureFailedEvent);
         }
 
-        WorkflowAction IWorkflow.WorkflowAction(WorkflowCancelRequestFailedEvent workflowCancelRequestFailedEvent)
+        WorkflowAction IWorkflow.WorkflowAction(ExternalWorkflowCancelRequestFailedEvent @event)
         {
-            return Handle(EventName.CancelRequestFailed, workflowCancelRequestFailedEvent);
+            if(!_allWorkflowItems.HasItemFor(@event))
+                return Handle(EventName.CancelRequestFailed, @event);
+            var item = _allWorkflowItems.ChildWorkflowItem(@event);
+            return item.CancelRequestFailedAction(@event);
         }
 
         WorkflowAction IWorkflow.WorkflowAction(WorkflowCancellationFailedEvent workflowCancellationFailedEvent)
@@ -168,6 +171,42 @@ namespace Guflow.Decider
         {
             var lambda = _allWorkflowItems.LambdaItem(lambdaStartFailedEvent);
             return lambda.StartFailedWorkflowAction(lambdaStartFailedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowCompletedEvent completedEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(completedEvent);
+            return childWorkflowItem.CompletedAction(completedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowFailedEvent failedEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(failedEvent);
+            return childWorkflowItem.FailedAction(failedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowCancelledEvent cancelledEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(cancelledEvent);
+            return childWorkflowItem.CancelledAction(cancelledEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowTerminatedEvent terminatedEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(terminatedEvent);
+            return childWorkflowItem.TerminatedAction(terminatedEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowTimedoutEvent timedoutEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(timedoutEvent);
+            return childWorkflowItem.TimedoutAction(timedoutEvent);
+        }
+
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowStartFailedEvent startFailed)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(startFailed);
+            return childWorkflowItem.StartFailed(startFailed);
         }
 
         private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)
@@ -288,6 +327,35 @@ namespace Guflow.Decider
             _allWorkflowItems.Add(lamdbaItem);
             return lamdbaItem;
 
+        }
+
+        /// <summary>
+        /// Schedule the child workflow.
+        /// </summary>
+        /// <param name="name">Child workflow name.</param>
+        /// <param name="version">Child workflow version.</param>
+        /// <param name="positionalName">Positional parameter, if any, useful in scheduling same workflow multiple times.</param>
+        /// <returns></returns>
+        protected IFluentChildWorkflowItem ScheduleChildWorkflow(string name, string version,
+            string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            var childWorkflowItem = new ChildWorkflowItem(Identity.New(name, version, positionalName), this);
+            _allWorkflowItems.Add(childWorkflowItem);
+            return childWorkflowItem;
+        }
+
+        /// <summary>
+        /// Schedule the child workflow.
+        /// </summary>
+        /// <typeparam name="T">Type of child workflow.</typeparam>
+        /// <param name="positionalName">Positional parameter, if any, useful in scheduling same workflow multiple times.</param>
+        /// <returns></returns>
+        protected IFluentChildWorkflowItem ScheduleChildWorkflow<T>(string positionalName = "") where T : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<T>();
+            return ScheduleChildWorkflow(desc.Name, desc.Version, positionalName);
         }
 
         /// <summary>
@@ -413,7 +481,7 @@ namespace Guflow.Decider
         protected CancelRequest CancelRequest => new CancelRequest(_allWorkflowItems);
 
         /// <summary>
-        /// Returns the child activity for given event.
+        /// Returns the activity for given event.
         /// </summary>
         /// <param name="activityEvent"></param>
         /// <returns></returns>
@@ -424,7 +492,7 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Returns child timer for given <see cref="WorkflowItemEvent"/>.
+        /// Returns the timer for given event.
         /// </summary>
         /// <param name="event"></param>
         /// <returns></returns>
@@ -434,22 +502,46 @@ namespace Guflow.Decider
             return _allWorkflowItems.TimerItem(@event);
         }
         /// <summary>
+        /// Returns the lambda for given event.
+        /// </summary>
+        /// <param name="event"></param>
+        /// <returns></returns>
+        protected ILambdaItem Lambda(WorkflowItemEvent @event)
+        {
+            Ensure.NotNull(@event, "@event");
+            return _allWorkflowItems.LambdaItem(@event);
+        }
+        /// <summary>
+        /// Returns child workflow for given event.
+        /// </summary>
+        /// <param name="event"></param>
+        /// <returns></returns>
+        protected IChildWorkflowItem ChildWorkflow(WorkflowItemEvent @event)
+        {
+            Ensure.NotNull(@event, nameof(@event));
+            return _allWorkflowItems.ChildWorkflowItem(@event);
+        }
+        /// <summary>
         /// All child items of workflow.
         /// </summary>
         protected IEnumerable<IWorkflowItem> WorkflowItems => _allWorkflowItems.AllItems;
         /// <summary>
-        /// Returns all activities of workflows.
+        /// Returns all activities of the workflow.
         /// </summary>
         protected IEnumerable<IActivityItem> Activities => _allWorkflowItems.AllActivities;
         /// <summary>
-        /// All schedulable timers of workflows.
+        /// Returns all schedulable timers of the workflow.
         /// </summary>
         protected IEnumerable<ITimerItem> Timers => _allWorkflowItems.AllTimers;
 
         /// <summary>
-        /// Returns all lambda function configured in workflow.
+        /// Returns all lambda functions configured in the workflow.
         /// </summary>
         protected IEnumerable<ILambdaItem> Lambdas => _allWorkflowItems.AllLambdas;
+        /// <summary>
+        /// Returns all child workflows configured in the workflow.
+        /// </summary>
+        protected IEnumerable<IChildWorkflowItem> ChildWorkflows => _allWorkflowItems.AllChildWorkflows;
 
         /// <summary>
         /// Returns the activity configured in this workflow. Throws exception if activity is not found
@@ -478,8 +570,27 @@ namespace Guflow.Decider
         /// Returns the lambda configured in workflow. Throws exception when lambda is not found.
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="positionalName"></param>
         /// <returns></returns>
         protected ILambdaItem Lambda(string name, string positionalName ="") => Lambdas.First(name, positionalName);
+
+        /// <summary>
+        /// Returns the child workflow. Throws exception when child workflow is not found.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="version"></param>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        protected IChildWorkflowItem ChildWorkflow(string name, string version, string positionalName="") => ChildWorkflows.First(name, version, positionalName);
+
+        /// <summary>
+        /// Returns the child workflow. Throws exception when child workflow is not found.
+        /// </summary>
+        /// <typeparam name="TWorkflow"></typeparam>
+        /// <param name="positionalName"></param>
+        /// <returns></returns>
+        protected IChildWorkflowItem ChildWorkflow<TWorkflow>(string positionalName = "") where TWorkflow : Workflow
+            => ChildWorkflows.First<TWorkflow>(positionalName);
 
         /// <summary>
         /// Indicate if workflow history event has any active event. An active event indicates that a scheduling item (activity, timer...) is active. e.g. if an activity is just started but not finished/failed/cancelled
@@ -516,7 +627,7 @@ namespace Guflow.Decider
                                     => ((IWorkflow)this).WorkflowHistoryEvents.AllWorkflowCancellationRequestedEvents();
 
         /// <summary>
-        /// Get event id of latest history event.
+        /// Returns the event id of latest history event.
         /// </summary>
         protected long LatestEventId
             => ((IWorkflow) this).WorkflowHistoryEvents.LatestEventId;
@@ -526,10 +637,10 @@ namespace Guflow.Decider
         /// <param name="signalName"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        protected static Signal Signal(string signalName, object input)
+        protected Signal Signal(string signalName, object input)
         {
             Ensure.NotNullAndEmpty(signalName, "signalName");
-            return new Signal(signalName, input);
+            return new Signal(signalName, input, _allWorkflowItems);
         }
         /// <summary>
         /// Return workflow input as dynamic object. If workflow input is JSON data then you can directly access the properties like: Input.Session.

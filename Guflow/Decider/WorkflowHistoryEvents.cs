@@ -10,22 +10,34 @@ namespace Guflow.Decider
     internal class WorkflowHistoryEvents : IWorkflowHistoryEvents
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
-        private readonly long _newEventsStartId;
-        private readonly long _newEventsEndId;
+        private readonly long _previousStartedEventId;
+        private readonly long _newStartedEventId;
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedActivityEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedTimerEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedLambdaEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
+        private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedChildWorkflowEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
 
-        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long newEventsStartId, long newEventsEndId)
+        //TODO : Get rid of this constructor once the dependent constructor is deleted.
+        private WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long previousStartedEventId, long newStartedEventId)
         {
             _allHistoryEvents = allHistoryEvents;
-            _newEventsStartId = newEventsStartId;
-            _newEventsEndId = newEventsEndId;
+            _previousStartedEventId = previousStartedEventId;
+            _newStartedEventId = newStartedEventId;
         }
 
-        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
-            :this(allHistoryEvents,allHistoryEvents.Last().EventId, allHistoryEvents.First().EventId)
+        public WorkflowHistoryEvents(DecisionTask decisionTask)
         {
+            _allHistoryEvents = decisionTask.Events;
+            _previousStartedEventId = decisionTask.PreviousStartedEventId;
+            _newStartedEventId = decisionTask.StartedEventId;
+            WorkflowRunId = decisionTask.WorkflowExecution.RunId;
+        }
+
+        //TODO: Get rid of this constructor.
+        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, string workflowRunId="")
+            :this(allHistoryEvents,allHistoryEvents.Last().EventId-1, allHistoryEvents.First().EventId)
+        {
+            WorkflowRunId = workflowRunId;
         }
 
         public WorkflowItemEvent LastActivityEvent(ActivityItem activityItem)
@@ -50,7 +62,7 @@ namespace Guflow.Decider
         public IEnumerable<WorkflowEvent> NewEvents()
         {
             var events = new List<WorkflowEvent>();
-            for (var eventId = _newEventsStartId; eventId <= _newEventsEndId; eventId++)
+            for (var eventId = _previousStartedEventId + 1; eventId <= _newStartedEventId; eventId++)
             {
                 var historyEvent = _allHistoryEvents.First(h => h.EventId == eventId);
                 var workflowEvent = historyEvent.CreateInterpretableEvent(_allHistoryEvents);
@@ -84,6 +96,9 @@ namespace Guflow.Decider
             }
             return false;
         }
+
+        public string WorkflowRunId { get; }
+
         public IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem)
         {
             var allEvents = new List<WorkflowItemEvent>();
@@ -165,6 +180,31 @@ namespace Guflow.Decider
                 return @event;
             @event = AllLambdaEvents(lambdaItem).FirstOrDefault();
             _cachedLambdaEvents.Add(lambdaItem, @event);
+            return @event;
+        }
+
+        public IEnumerable<WorkflowItemEvent> AllChildWorkflowEvents(ChildWorkflowItem childWorkflowItem)
+        {
+            var allEvents = new List<WorkflowItemEvent>();
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                var childWorkflowEvent = historyEvent.ChildWorkflowEvent(_allHistoryEvents);
+                if (childWorkflowEvent == null) continue;
+                if (childWorkflowEvent.IsFor(childWorkflowItem) && !childWorkflowEvent.InChainOf(allEvents))
+                {
+                    allEvents.Add(childWorkflowEvent);
+                    yield return childWorkflowEvent;
+                }
+            }
+        }
+
+        public WorkflowItemEvent LastChildWorkflowEvent(ChildWorkflowItem childWorkflowItem)
+        {
+            WorkflowItemEvent @event = null;
+            if (_cachedChildWorkflowEvents.TryGetValue(childWorkflowItem, out @event))
+                return @event;
+            @event = AllChildWorkflowEvents(childWorkflowItem).FirstOrDefault();
+            _cachedChildWorkflowEvents.Add(childWorkflowItem, @event);
             return @event;
         }
 

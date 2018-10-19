@@ -18,18 +18,23 @@ namespace Guflow.Decider
         private Func<LambdaStartFailedEvent, WorkflowAction> _startFailedAction;
         private Func<ILambdaItem, bool> _whenFunc = _ => true;
         private Func<ILambdaItem, WorkflowAction> _onFalseTrigger;
-        private readonly TimerItem _rescheduleTimer;
+        private TimerItem _rescheduleTimer;
         public LambdaItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
+        {
+            InitializeDefault(workflow);
+        }
+
+        private void InitializeDefault(IWorkflow workflow)
         {
             _input = (item) => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _timeout = item => null;
-            _rescheduleTimer = TimerItem.Reschedule(this, identity, workflow);
+            _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
             _completedAction = e => e.DefaultAction(workflow);
             _failedAction = e => e.DefaultAction(workflow);
             _timedoutAction = e => e.DefaultAction(workflow);
             _schedulingFailedAction = e => e.DefaultAction(workflow);
             _startFailedAction = e => e.DefaultAction(workflow);
-            _onFalseTrigger = _=> IsStartupItem()? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
+            _onFalseTrigger = _ => IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
         }
 
         public string PositionalName => Identity.PositionalName;
@@ -106,6 +111,20 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(name, nameof(name));
             AddParent(Identity.Lambda(name, positionalName));
             return this;
+        }
+
+        public IFluentLambdaItem AfterChildWorkflow(string name, string version, string positionalName = "")
+        {
+            Ensure.NotNullAndEmpty(name, nameof(name));
+            Ensure.NotNullAndEmpty(version, nameof(version));
+            AddParent(Identity.New(name, version, positionalName));
+            return this;
+        }
+
+        public IFluentLambdaItem AfterChildWorkflow<TWorkflow>(string positionalName) where TWorkflow : Workflow
+        {
+            var desc = WorkflowDescription.FindOn<TWorkflow>();
+            return AfterChildWorkflow(desc.Name, desc.Version, positionalName);
         }
 
         public IFluentLambdaItem WithInput(Func<ILambdaItem, object> input)

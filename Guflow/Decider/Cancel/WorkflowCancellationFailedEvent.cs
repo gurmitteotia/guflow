@@ -3,6 +3,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Raised when SWF fails to cancel this workflow.
+    /// </summary>
     public class WorkflowCancellationFailedEvent : WorkflowEvent
     {
         private readonly CancelWorkflowExecutionFailedEventAttributes _eventAttributes;
