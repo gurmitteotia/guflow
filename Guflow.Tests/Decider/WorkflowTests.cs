@@ -12,13 +12,13 @@ namespace Guflow.Tests.Decider
     public class WorkflowTests
     {
         private Mock<IWorkflowHistoryEvents> _workflowEvents;
-        private EventGraphBuilder _builder;
+        private EventGraphBuilder _eventGraphBuilder;
         private Workflow _workflow;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
+            _eventGraphBuilder = new EventGraphBuilder();
             _workflowEvents = new Mock<IWorkflowHistoryEvents>();
             _workflow = new StubWorkflow();
         }
@@ -46,7 +46,7 @@ namespace Guflow.Tests.Decider
         public void Get_activity_by_its_event()
         {
             var identity = Identity.New("Activity1", "1.0");
-            var eventGraph = _builder.ActivityCompletedGraph(identity, "id", "result");
+            var eventGraph = _eventGraphBuilder.ActivityCompletedGraph(identity, "id", "result");
             var activityCompletedEvent = new ActivityCompletedEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -59,7 +59,7 @@ namespace Guflow.Tests.Decider
         public void Get_timer_by_its_event()
         {
             var identity = Identity.Timer("Timer1");
-            var eventGraph = _builder.TimerFiredGraph(identity, TimeSpan.FromSeconds(2));
+            var eventGraph = _eventGraphBuilder.TimerFiredGraph(identity, TimeSpan.FromSeconds(2));
             var activityCompletedEvent = new TimerFiredEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -72,7 +72,7 @@ namespace Guflow.Tests.Decider
         public void Get_lambda_item_form_its_event()
         {
             var identity = Identity.Lambda("Lambda");
-            var eventGraph = _builder.LambdaCompletedEventGraph(identity, "id", "result");
+            var eventGraph = _eventGraphBuilder.LambdaCompletedEventGraph(identity, "id", "result");
             var @event = new LambdaCompletedEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -80,20 +80,6 @@ namespace Guflow.Tests.Decider
 
             Assert.That(activity, Is.EqualTo(new LambdaItem(identity, workflow)));
         }
-
-        [Test]
-        public void Get_child_workflow_item_from_its_event()
-        {
-            var identity = Identity.New("Workflow", "1.0");
-            var eventGraph = _builder.ChildWorkflowCompletedGraph(identity, "rid", "input", "result");
-            var @event = new ChildWorkflowCompletedEvent(eventGraph.First(), eventGraph);
-            var workflow = new TestWorkflow();
-
-            var activity = workflow.GetChildWorkflow(@event);
-
-            Assert.That(activity, Is.EqualTo(new ChildWorkflowItem(identity, workflow)));
-        }
-
         [Test]
         public void Invalid_argument_tests()
         {

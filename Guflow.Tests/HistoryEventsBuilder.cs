@@ -11,6 +11,7 @@ namespace Guflow.Tests
     {
         private readonly List<HistoryEvent> _processedEvents = new List<HistoryEvent>();
         private readonly List<HistoryEvent> _newEvents = new List<HistoryEvent>();
+        private string _workflowRunId;
         public HistoryEventsBuilder AddProcessedEvents(params HistoryEvent[] events)
         {
             _processedEvents.InsertRange(0, events);
@@ -29,10 +30,20 @@ namespace Guflow.Tests
             var decisionTask = new DecisionTask()
             {
                 Events = totalEvents,
-                PreviousStartedEventId = _newEvents.Last().EventId-1,
-                StartedEventId = _newEvents.First().EventId
+                WorkflowExecution = new WorkflowExecution() { RunId = _workflowRunId}
             };
+            if (_newEvents.Count > 0)
+            {
+                decisionTask.PreviousStartedEventId = _newEvents.Last().EventId - 1;
+                decisionTask.StartedEventId = _newEvents.First().EventId;
+            }
             return new WorkflowHistoryEvents(decisionTask);
+        }
+
+        public HistoryEventsBuilder AddWorkflowRunId(string workflowId)
+        {
+            _workflowRunId = workflowId;
+            return this;
         }
     }
 }

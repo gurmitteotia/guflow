@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -81,10 +82,12 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Fail_workflow_for_child_workflow_reshedule_timer()
         {
-            var workflow = new WorkflowWithChildWorkflow();
-            var rescheduleTimerStartFailed = CreateTimerStartFailedEvent(Identity.New(WorkflowName, WorkflowVersion), TimerFailureCause);
+            const string workflowRunid = "rid";
+            var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(workflowRunid);
+            var builder = new HistoryEventsBuilder().AddWorkflowRunId(workflowRunid);
+            builder.AddNewEvents(TimerStartFailedEventGraph(identity, TimerFailureCause));
 
-            var decisions = rescheduleTimerStartFailed.Interpret(workflow).Decisions();
+            var decisions = new WorkflowWithChildWorkflow().Decisions(builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new FailWorkflowDecision("RESCHEDULE_TIMER_START_FAILED", TimerFailureCause) }));
         }
@@ -92,6 +95,11 @@ namespace Guflow.Tests.Decider
         {
             var timerFailedEventGraph = _builder.TimerStartFailedGraph(timerIdentity, cause);
             return new TimerStartFailedEvent(timerFailedEventGraph.First());
+        }
+
+        private HistoryEvent[] TimerStartFailedEventGraph(Identity timerIdentity, string cause)
+        {
+            return _builder.TimerStartFailedGraph(timerIdentity, cause).ToArray();
         }
 
         private class WorkflowWithActivity : Workflow

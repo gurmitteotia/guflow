@@ -17,14 +17,18 @@ namespace Guflow.Tests.Decider
         private const string TimerName = "TimerName1";
         private const string WorkflowName = "Workflow";
         private const string WorkflowVersion = "1.0";
+        private const string ParentWorkflowId = "pid";
+        private Identity _childWorkflowId;
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
-
+        
         [SetUp]
         public void Setup()
         {
             _eventGraphBuilder = new EventGraphBuilder();
             _eventsBuilder = new HistoryEventsBuilder();
+            _eventsBuilder.AddWorkflowRunId(ParentWorkflowId);
+            _childWorkflowId = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowId);
         }
        
 
@@ -223,7 +227,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(WorkflowName,WorkflowVersion), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(_childWorkflowId, "input") }));
         }
 
         [Test]
@@ -235,7 +239,10 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.New(WorkflowName, WorkflowVersion), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EqualTo(new[]
+            {
+                new ScheduleTimerDecision(_childWorkflowId, TimeSpan.FromSeconds(2), true)
+            }));
         }
 
         [Test]
@@ -255,7 +262,7 @@ namespace Guflow.Tests.Decider
         private HistoryEvent[] ChildWorkflowCompletedEventGraph()
         {
             return _eventGraphBuilder
-                .ChildWorkflowCompletedGraph(Identity.New(WorkflowName, WorkflowVersion), "rid", "input", "result")
+                .ChildWorkflowCompletedGraph(_childWorkflowId ,"rid", "input", "result")
                 .ToArray();
         }
 

@@ -13,18 +13,24 @@ namespace Guflow.Tests.Decider
     public class ChildWorkflowCompletedEventTests
     {
         private EventGraphBuilder _eventGraphBuilder;
+        private HistoryEventsBuilder _builder;
         private ChildWorkflowCompletedEvent _event;
 
         private const string WorkflowName = "workflow";
         private const string WorkflowVersion = "1.0";
         private const string PositionalName = "Pos";
+        private const string ParentWorkflowRunId = "Pid";
         private Identity _workflowIdentity;
         [SetUp]
         public void Setup()
         {
             _eventGraphBuilder = new EventGraphBuilder();
-             _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName);
-            var eventGraph = _eventGraphBuilder.ChildWorkflowCompletedGraph(_workflowIdentity, "runid", "input", "result");
+            _builder = new HistoryEventsBuilder();
+            _builder.AddWorkflowRunId(ParentWorkflowRunId);
+
+             _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName).ScheduleIdentity(ParentWorkflowRunId);
+            var eventGraph = _eventGraphBuilder.ChildWorkflowCompletedGraph(_workflowIdentity, "runid", "input", "result").ToArray();
+            _builder.AddNewEvents(eventGraph);
             _event = new ChildWorkflowCompletedEvent(eventGraph.First() , eventGraph);
         }
 
@@ -48,7 +54,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_schedule_children()
         {
-            var decisions = _event.Interpret(new ChildWorkflow()).Decisions();
+            var decisions = new ChildWorkflow().Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer("TimerName"), TimeSpan.Zero)}));
         }
@@ -62,7 +68,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_return_a_custom_workflow_action()
         {
-            var decisions = _event.Interpret(new ChildWorkflowWithCustomAction("result")).Decisions();
+            var decisions = new ChildWorkflowWithCustomAction("result").Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result")}));
         }

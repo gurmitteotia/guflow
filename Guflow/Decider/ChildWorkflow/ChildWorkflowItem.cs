@@ -25,8 +25,8 @@ namespace Guflow.Decider
         private Func<IChildWorkflowItem, IEnumerable<string>> _tags;
         private Func<IChildWorkflowItem, bool> _when;
         private Func<IChildWorkflowItem, WorkflowAction> _onWhenFalseAction;
-
-        private TimerItem _rescheduleTimer;
+        private Identity ScheduleIdentity => Identity.ScheduleIdentity(WorkflowHistoryEvents.WorkflowRunId);
+        private TimerItem RescheduleTimer => RescheduleTimer(ScheduleIdentity);
 
         public ChildWorkflowItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
         {
@@ -62,12 +62,11 @@ namespace Guflow.Decider
             _startFailedAction = w => w.DefaultAction(workflow);
             _input = w => workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _tags = _ => Enumerable.Empty<string>();
-            _rescheduleTimer = TimerItem.Reschedule(this, ScheduleIdentity, workflow);
             _when = _ => true;
             _onWhenFalseAction = _ => IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
             _cancelRequestFailedAction = e => e.DefaultAction(workflow);
         }
-
+       
         public string Version => Identity.Version;
         public string PositionalName => Identity.PositionalName;
 
@@ -76,7 +75,7 @@ namespace Guflow.Decider
             var lastEvent = WorkflowHistoryEvents.LastChildWorkflowEvent(this);
             WorkflowItemEvent timerEvent = null;
             if (includeRescheduleTimerEvents)
-                timerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
+                timerEvent = WorkflowHistoryEvents.LastTimerEvent(RescheduleTimer, true);
 
             if (lastEvent > timerEvent) return lastEvent;
             return timerEvent;
@@ -87,7 +86,7 @@ namespace Guflow.Decider
             var childWorkflowItems = WorkflowHistoryEvents.AllChildWorkflowEvents(this);
             var timerEvents = Enumerable.Empty<WorkflowItemEvent>();
             if (includeRescheduleTimerEvents)
-                timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer, true);
+                timerEvents = WorkflowHistoryEvents.AllTimerEvents(RescheduleTimer, true);
             return childWorkflowItems.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
         }
 
@@ -114,19 +113,22 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
         {
-            _rescheduleTimer.FireAfter(timeout);
-            return _rescheduleTimer.ScheduleDecisions();
+            var timer = RescheduleTimer;
+            timer.FireAfter(timeout);
+            return timer.ScheduleDecisions();
         }
 
         public override IEnumerable<WorkflowDecision> CancelDecisions()
         {
             var lastEvent = LastEvent(true);
-            var latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
+            var latestTimerEvent = WorkflowHistoryEvents.LastTimerEvent(RescheduleTimer, true);
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
-                return _rescheduleTimer.CancelDecisions();
+                return RescheduleTimer.CancelDecisions();
 
             return new[] { new CancelRequestWorkflowDecision(ScheduleIdentity.Id, (lastEvent as ChildWorkflowEvent)?.RunId), };
         }
+
+        public override bool Has(SwfIdentity identity) => ScheduleIdentity.Id == identity;
 
         public IFluentChildWorkflowItem AfterTimer(string name)
         {
@@ -316,19 +318,19 @@ namespace Guflow.Decider
 
         WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
-            ITimer timer = _rescheduleTimer;
+            ITimer timer = RescheduleTimer;
             return timer.Fired(timerFiredEvent);
         }
 
         WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
         {
-            ITimer timer = _rescheduleTimer;
+            ITimer timer = RescheduleTimer;
             return timer.StartFailed(timerStartFailedEvent);
         }
 
         WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
-            ITimer timer = _rescheduleTimer;
+            ITimer timer = RescheduleTimer;
             return timer.CancellationFailed(timerCancellationFailedEvent);
         }
 

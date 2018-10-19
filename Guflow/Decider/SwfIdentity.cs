@@ -13,6 +13,10 @@ namespace Guflow.Decider
             var combinedName = string.Format("{0}{1}{2}", name, version, positionalName).ToLower();
             return new SwfIdentity(combinedName.GetMd5Hash());
         }
+        internal static SwfIdentity Create(Identity identity, string salt)
+        {
+            return Create(identity.Name + salt, identity.Version, identity.PositionalName);
+        }
         public static SwfIdentity Raw(string identity)
         {
             return new SwfIdentity(identity);

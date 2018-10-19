@@ -30,12 +30,14 @@ namespace Guflow.Decider
             _allHistoryEvents = decisionTask.Events;
             _previousStartedEventId = decisionTask.PreviousStartedEventId;
             _newStartedEventId = decisionTask.StartedEventId;
+            WorkflowRunId = decisionTask.WorkflowExecution.RunId;
         }
 
         //TODO: Get rid of this constructor.
-        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
+        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, string workflowRunId="")
             :this(allHistoryEvents,allHistoryEvents.Last().EventId-1, allHistoryEvents.First().EventId)
         {
+            WorkflowRunId = workflowRunId;
         }
 
         public WorkflowItemEvent LastActivityEvent(ActivityItem activityItem)
@@ -94,6 +96,9 @@ namespace Guflow.Decider
             }
             return false;
         }
+
+        public string WorkflowRunId { get; }
+
         public IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem)
         {
             var allEvents = new List<WorkflowItemEvent>();

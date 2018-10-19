@@ -28,7 +28,7 @@ namespace Guflow.Decider
         {
             _input = (item) => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _timeout = item => null;
-            _rescheduleTimer = TimerItem.Reschedule(this, ScheduleIdentity, workflow);
+            _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
             _completedAction = e => e.DefaultAction(workflow);
             _failedAction = e => e.DefaultAction(workflow);
             _timedoutAction = e => e.DefaultAction(workflow);
@@ -70,7 +70,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return new[] { new ScheduleLambdaDecision(ScheduleIdentity, _input(this), _timeout(this)) };
+            return new[] { new ScheduleLambdaDecision(Identity, _input(this), _timeout(this)) };
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)

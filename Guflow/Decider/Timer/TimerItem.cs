@@ -41,7 +41,7 @@ namespace Guflow.Decider
         public static TimerItem New(Identity identity, IWorkflow workflow)
         {
             var timerItem = new TimerItem(identity, workflow);
-            timerItem._rescheduleTimer = Reschedule(timerItem, timerItem.ScheduleIdentity, workflow);
+            timerItem._rescheduleTimer = Reschedule(timerItem, timerItem.Identity, workflow);
             timerItem.OnStartFailed(e => e.DefaultAction(workflow));
             timerItem.OnCancellationFailed(e => e.DefaultAction(workflow));
             timerItem.OnFired(e => e.DefaultAction(workflow));
@@ -183,7 +183,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return new[] { new ScheduleTimerDecision(ScheduleIdentity, _fireAfterFunc(this), this == _rescheduleTimer) };
+            return new[] { new ScheduleTimerDecision(Identity, _fireAfterFunc(this), this == _rescheduleTimer) };
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
@@ -203,7 +203,7 @@ namespace Guflow.Decider
                     cancelDecisions = _timerCancelAction(this).Decisions();
                 }
 
-                return new []{new CancelTimerDecision(ScheduleIdentity)}.Concat(cancelDecisions);
+                return new []{new CancelTimerDecision(Identity)}.Concat(cancelDecisions);
             }
             finally
             {

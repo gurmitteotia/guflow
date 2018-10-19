@@ -14,20 +14,26 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class ChildWorkflowItemTests
     {
-        private EventGraphBuilder _builder;
+        private EventGraphBuilder _eventGraphBuilder;
+        private HistoryEventsBuilder _builder;
         private Mock<IWorkflow> _workflow;
         private Identity _identity;
+        private Identity _scheduleIdentity;
         private const string WorkflowName = "Workflow";
         private const string Version = "1.0";
         private const string PositionalName = "Pos";
+        private const string WorkflowRunId = "wid";
         [SetUp]
         public void Setup()
         {
             _identity = Identity.New(WorkflowName, Version, PositionalName);
-            _builder = new EventGraphBuilder();
+            _scheduleIdentity = _identity.ScheduleIdentity(WorkflowRunId);
+            _eventGraphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder().AddWorkflowRunId(WorkflowRunId);
+            _builder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedGraph("input").ToArray());
             _workflow = new Mock<IWorkflow>();
             _workflow.SetupGet(w => w.WorkflowHistoryEvents)
-                .Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph("input")));
+                .Returns(_builder.Result());
         }
 
         [Test]
@@ -46,7 +52,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new Mock<IWorkflow>();
             const string workflowInput = "\"input\"";
-            workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
+            workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_eventGraphBuilder.WorkflowStartedGraph(workflowInput)));
             var item = new ChildWorkflowItem(_identity, workflow.Object);
             item.WithInput(_ => new{Id=1});
 
@@ -76,7 +82,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId , Is.EqualTo(_identity.Id.ToString()));
+            Assert.That(attr.WorkflowId , Is.EqualTo(_scheduleIdentity.Id.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN , Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("child"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("3"));
@@ -97,7 +103,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_identity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy, Is.Null);
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.Null);
@@ -134,7 +140,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_identity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("newchild"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("4"));
@@ -161,7 +167,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_identity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("newchild"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("4"));
@@ -175,7 +181,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_completed_event()
         {
-            var eventGraph = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input", "result").ToArray();
+            var eventGraph = _eventGraphBuilder.ChildWorkflowCompletedGraph(_scheduleIdentity, "runid", "input", "result").ToArray();
             var childWorkflow = ChildWorkflow(eventGraph);
 
             var allEvents = childWorkflow.AllEvents();
@@ -189,7 +195,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_failed_event()
         {
-            var eventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "details").ToArray();
+            var eventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "details").ToArray();
             var childWorkflow = ChildWorkflow(eventGraph);
 
             var allEvents = childWorkflow.AllEvents();
@@ -203,7 +209,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_cancelled_event()
         {
-            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(_identity, "runid", "input", "details").ToArray();
+            var eventGraph = _eventGraphBuilder.ChildWorkflowCancelledEventGraph(_scheduleIdentity, "runid", "input", "details").ToArray();
             var childWorkflow = ChildWorkflow(eventGraph);
 
             var allEvents = childWorkflow.AllEvents();
@@ -218,7 +224,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_timedout_event()
         {
-            var eventGraph = _builder.ChildWorkflowTimedoutEventGraph(_identity, "runid", "input", "details").ToArray();
+            var eventGraph = _eventGraphBuilder.ChildWorkflowTimedoutEventGraph(_scheduleIdentity, "runid", "input", "details").ToArray();
             var childWorkflow = ChildWorkflow(eventGraph);
 
             var allEvents = childWorkflow.AllEvents();
@@ -232,7 +238,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_started_event()
         {
-            var eventGraph = _builder.ChildWorkflowStartedEventGraph(_identity, "runid", "input").ToArray();
+            var eventGraph = _eventGraphBuilder.ChildWorkflowStartedEventGraph(_scheduleIdentity, "runid", "input").ToArray();
             var childWorkflow = ChildWorkflow(eventGraph);
 
             var allEvents = childWorkflow.AllEvents();
@@ -246,7 +252,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_start_failed_event()
         {
-            var eventGraph = _builder.ChildWorkflowStartFailedEventGraph(_identity, "runid", "input").ToArray();
+            var eventGraph = _eventGraphBuilder.ChildWorkflowStartFailedEventGraph(_scheduleIdentity, "runid", "input").ToArray();
             var childWorkflow = ChildWorkflow(eventGraph);
 
             var allEvents = childWorkflow.AllEvents();
@@ -260,8 +266,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_failed_and_completed_event()
         {
-            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input","reason","detail").ToArray();
-            var completedEventGraph = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input","result").ToArray();
+            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input","reason","detail").ToArray();
+            var completedEventGraph = _eventGraphBuilder.ChildWorkflowCompletedGraph(_scheduleIdentity, "runid", "input","result").ToArray();
             var allEventsGraph = completedEventGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -277,8 +283,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_failed_and_started_event()
         {
-            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
-            var startedEventGraph = _builder.ChildWorkflowStartedEventGraph(_identity, "runid", "input").ToArray();
+            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
+            var startedEventGraph = _eventGraphBuilder.ChildWorkflowStartedEventGraph(_scheduleIdentity, "runid", "input").ToArray();
             var allEventsGraph = startedEventGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -294,7 +300,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_external_workflow_cancellation_requested_event_and_workflow_started_event()
         {
-            var cancellationRequested = _builder.ChildWorkflowCancellationRequestedEventGraph(_identity, "runid", "input").ToArray();
+            var cancellationRequested = _eventGraphBuilder.ChildWorkflowCancellationRequestedEventGraph(_scheduleIdentity, "runid", "input").ToArray();
             
             var childWorkflow = ChildWorkflow(cancellationRequested);
 
@@ -310,7 +316,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_child_workflow_cancelled_event__and_external_workflow_cancellation_requested_event()
         {
-            var cancelledEvent = _builder.ChildWorkflowCancelledEventGraph(_identity, "runid", "input", "details").ToArray();
+            var cancelledEvent = _eventGraphBuilder.ChildWorkflowCancelledEventGraph(_scheduleIdentity, "runid", "input", "details").ToArray();
 
             var childWorkflow = ChildWorkflow(cancelledEvent);
 
@@ -326,8 +332,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_reschedule_timer_events()
         {
-            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _builder.TimerStartedGraph(_identity, TimeSpan.FromSeconds(20), true).ToArray();
+            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -343,8 +349,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_filter_out_reschedule_timer_events()
         {
-            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _builder.TimerStartedGraph(_identity, TimeSpan.FromSeconds(20), true).ToArray();
+            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -360,8 +366,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_return_child_workflow_completed_event()
         {
-            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
-            var completedEvent = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input", "result").ToArray();
+            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
+            var completedEvent = _eventGraphBuilder.ChildWorkflowCompletedGraph(_scheduleIdentity, "runid", "input", "result").ToArray();
             var allEventsGraph = completedEvent.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -373,8 +379,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_is_cached()
         {
-            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
-            var completedEvent = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input", "result").ToArray();
+            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
+            var completedEvent = _eventGraphBuilder.ChildWorkflowCompletedGraph(_scheduleIdentity, "runid", "input", "result").ToArray();
             var allEventsGraph = completedEvent.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -388,8 +394,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_return_reschedule_timer_event()
         {
-            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _builder.TimerStartedGraph(_identity, TimeSpan.FromSeconds(20), true).ToArray();
+            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -401,8 +407,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_filter_out_reschedule_timer_event()
         {
-            var failedEventGraph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _builder.TimerStartedGraph(_identity, TimeSpan.FromSeconds(20), true).ToArray();
+            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -417,13 +423,13 @@ namespace Guflow.Tests.Decider
             var item = new ChildWorkflowItem(_identity, _workflow.Object);
             var decisions = item.RescheduleDecisions(TimeSpan.FromSeconds(20));
 
-            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(_identity, TimeSpan.FromSeconds(20), true)}));
+            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(_scheduleIdentity, TimeSpan.FromSeconds(20), true)}));
         }
 
         [Test]
         public void Invalid_arguments()
         {
-            var childWorkflowItem = new ChildWorkflowItem(_identity, Mock.Of<IWorkflow>());
+            var childWorkflowItem = new ChildWorkflowItem(_identity, _workflow.Object);
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnCompletion(null));
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnFailure(null));
             Assert.Throws<ArgumentNullException>(() => childWorkflowItem.OnCancelled(null));
@@ -452,7 +458,7 @@ namespace Guflow.Tests.Decider
 
         private ChildWorkflowItem ChildWorkflow(IEnumerable<HistoryEvent> events)
         {
-            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(events));
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(events, WorkflowRunId));
             return new ChildWorkflowItem(_identity, _workflow.Object);
         }
     }

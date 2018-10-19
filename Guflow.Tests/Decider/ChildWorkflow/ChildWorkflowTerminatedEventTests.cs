@@ -10,18 +10,22 @@ namespace Guflow.Tests.Decider
     public class ChildWorkflowTerminatedEventTests
     {
         private EventGraphBuilder _eventGraphBuilder;
+        private HistoryEventsBuilder _builder;
         private ChildWorkflowTerminatedEvent _event;
 
         private const string WorkflowName = "workflow";
         private const string WorkflowVersion = "1.0";
         private const string PositionalName = "Pos";
+        private const string WorkflowRunId = "runid";
         private Identity _workflowIdentity;
         [SetUp]
         public void Setup()
         {
             _eventGraphBuilder = new EventGraphBuilder();
-            _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName);
-            var eventGraph = _eventGraphBuilder.ChildWorkflowTerminatedEventGraph(_workflowIdentity, "runid", "input");
+            _builder = new HistoryEventsBuilder().AddWorkflowRunId(WorkflowRunId);
+            _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName).ScheduleIdentity(WorkflowRunId);
+            var eventGraph = _eventGraphBuilder.ChildWorkflowTerminatedEventGraph(_workflowIdentity, "runid", "input").ToArray();
+            _builder.AddNewEvents(eventGraph);
             _event = new ChildWorkflowTerminatedEvent(eventGraph.First(), eventGraph);
         }
 
@@ -36,7 +40,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_fail_the_workflow()
         {
-            var decisions = _event.Interpret(new ChildWorkflow()).Decisions();
+            var decisions = new ChildWorkflow().Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[]
             {
@@ -46,7 +50,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_return_a_custom_workflow_action()
         {
-            var decisions = _event.Interpret(new ChildWorkflowWithCustomAction("result")).Decisions();
+            var decisions = new ChildWorkflowWithCustomAction("result").Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result") }));
         }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Guflow.Tests.TestWorkflows;
 using Moq;
@@ -68,9 +69,11 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Fail_workflow_for_child_workflow_reschedule_timer()
         {
-            var workflow = new WorkflowWithChildWorkflow();
-            var timerCancellationFailedEvent = CreateTimerCancellationFailedEvent(Identity.New(WorkflowName, WorkflowVersion), Cause);
-            var decisions = timerCancellationFailedEvent.Interpret(workflow).Decisions();
+            const string workflowRunid = "rid";
+            var builder = new HistoryEventsBuilder().AddWorkflowRunId(workflowRunid);
+            builder.AddNewEvents(TimerCancellationFailedEventGrpah(Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(workflowRunid), Cause));
+            
+            var decisions = new WorkflowWithChildWorkflow().Decisions(builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new FailWorkflowDecision("RESCHEDULE_TIMER_CANCELLATION_FAILED", Cause) }));
         }
@@ -88,6 +91,10 @@ namespace Guflow.Tests.Decider
         {
             var timerCancellationFailedEventGraph = _builder.TimerCancellationFailedGraph(identity, Cause);
             return new TimerCancellationFailedEvent(timerCancellationFailedEventGraph.First());
+        }
+        private HistoryEvent[] TimerCancellationFailedEventGrpah(Identity identity, string cause)
+        {
+            return _builder.TimerCancellationFailedGraph(identity, Cause).ToArray();
         }
         private class TestWorkflow : Workflow
         {

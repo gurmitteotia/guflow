@@ -14,8 +14,15 @@ namespace Guflow.Decider
             PositionalName = positionalName;
             Id = SwfIdentity.Create(Name,Version,PositionalName);
         }
+        //TODO: Move it out of this class
+        public SwfIdentity Id { get; private set; }
 
-        public SwfIdentity Id { get; }
+        public Identity ScheduleIdentity(string salt)
+        {
+            var identity = new Identity(Name, Version, PositionalName);
+            identity.Id= SwfIdentity.Create(identity, salt);
+            return identity;
+        }
 
         public static Identity Timer(string name)
         {
