@@ -10,20 +10,20 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Equality_test()
         {
-            Assert.That(AwsIdentity.Create("name","ver","pos").Equals(AwsIdentity.Create("name","ver","pos")));
-            Assert.That(AwsIdentity.Create("name", "ver", "").Equals(AwsIdentity.Create("name", "ver", "")));
-            Assert.That(AwsIdentity.Raw("identity").Equals(AwsIdentity.Raw("identity")));
-            Assert.That(AwsIdentity.Create("name", "ver", "pos")==AwsIdentity.Create("name", "ver", "pos"));
-            Assert.That(AwsIdentity.Create("name", "ver", "")==AwsIdentity.Create("name", "ver", ""));
-            Assert.That(AwsIdentity.Raw("identity")==AwsIdentity.Raw("identity"));
+            Assert.That(SwfIdentity.Create("name","ver","pos").Equals(SwfIdentity.Create("name","ver","pos")));
+            Assert.That(SwfIdentity.Create("name", "ver", "").Equals(SwfIdentity.Create("name", "ver", "")));
+            Assert.That(SwfIdentity.Raw("identity").Equals(SwfIdentity.Raw("identity")));
+            Assert.That(SwfIdentity.Create("name", "ver", "pos")==SwfIdentity.Create("name", "ver", "pos"));
+            Assert.That(SwfIdentity.Create("name", "ver", "")==SwfIdentity.Create("name", "ver", ""));
+            Assert.That(SwfIdentity.Raw("identity")==SwfIdentity.Raw("identity"));
             
-            Assert.False(AwsIdentity.Create("name", "ver", "pos").Equals(AwsIdentity.Create("name", "ver", "pos1")));
-            Assert.False(AwsIdentity.Create("name", "ver", "pos").Equals(AwsIdentity.Create("name", "ver1", "pos")));
-            Assert.False(AwsIdentity.Create("name", "ver", "pos").Equals(AwsIdentity.Create("name1", "ver", "pos")));
-            Assert.False(AwsIdentity.Raw("identity").Equals(AwsIdentity.Raw("identity1")));
-            Assert.True(AwsIdentity.Create("name", "ver", "pos")!=AwsIdentity.Create("name", "ver", "pos1"));
-            Assert.True(AwsIdentity.Create("name", "ver", "pos")!=AwsIdentity.Create("name", "ver1", "pos"));
-            Assert.True(AwsIdentity.Create("name", "ver", "pos")!=AwsIdentity.Create("name1", "ver", "pos"));
+            Assert.False(SwfIdentity.Create("name", "ver", "pos").Equals(SwfIdentity.Create("name", "ver", "pos1")));
+            Assert.False(SwfIdentity.Create("name", "ver", "pos").Equals(SwfIdentity.Create("name", "ver1", "pos")));
+            Assert.False(SwfIdentity.Create("name", "ver", "pos").Equals(SwfIdentity.Create("name1", "ver", "pos")));
+            Assert.False(SwfIdentity.Raw("identity").Equals(SwfIdentity.Raw("identity1")));
+            Assert.True(SwfIdentity.Create("name", "ver", "pos")!=SwfIdentity.Create("name", "ver", "pos1"));
+            Assert.True(SwfIdentity.Create("name", "ver", "pos")!=SwfIdentity.Create("name", "ver1", "pos"));
+            Assert.True(SwfIdentity.Create("name", "ver", "pos")!=SwfIdentity.Create("name1", "ver", "pos"));
         }
     }
 }

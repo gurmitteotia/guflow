@@ -13,7 +13,7 @@ namespace Guflow.Decider
         internal ActivityCancellationFailedEvent(HistoryEvent activityCancellationFailedEvent) : base(activityCancellationFailedEvent.EventId)
         {
             _eventAttributes = activityCancellationFailedEvent.RequestCancelActivityTaskFailedEventAttributes;
-            AwsIdentity = AwsIdentity.Raw(_eventAttributes.ActivityId);
+            SwfIdentity = SwfIdentity.Raw(_eventAttributes.ActivityId);
         }
         /// <summary>
         /// Returns cause, why activity cancellation request has failed.

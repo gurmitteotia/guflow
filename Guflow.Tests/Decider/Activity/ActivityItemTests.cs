@@ -471,26 +471,35 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void All_events_can_return_timer_cancellattion_failed_event()
+        public void All_events_can_return_timer_cancellattion_failed_event_and_timer_started_event()
         {
             var eventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_activityIdenity, "cause");
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents(true);
 
-            Assert.That(allEvents, Is.EquivalentTo(new[] { new TimerCancellationFailedEvent(eventGraph.First())}));
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new TimerCancellationFailedEvent(eventGraph.First()),
+                new TimerStartedEvent(eventGraph.Skip(1).First(), eventGraph)
+            }));
         }
 
         [Test]
         public void All_events_can_return_timer_started_and_cancellattion_failed_event()
         {
-            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
-            var timerCancellationFailedEventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_activityIdenity, "cause");
-            var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(timerCancellationFailedEventGraph));
+            var failedEventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_activityIdenity, "cause");
+            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity, TimeSpan.FromSeconds(3));
+            var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(failedEventGraph));
 
             var allEvents = activityItem.AllEvents(true);
 
-            Assert.That(allEvents, Is.EquivalentTo(new WorkflowItemEvent[] { new TimerStartedEvent(timerStartedEventGraph.First(), timerStartedEventGraph), new TimerCancellationFailedEvent(timerCancellationFailedEventGraph.First()) }));
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new TimerStartedEvent(timerStartedEventGraph.First(), timerStartedEventGraph),
+                new TimerCancellationFailedEvent(failedEventGraph.First()),
+                new TimerStartedEvent(failedEventGraph.Skip(1).First(), failedEventGraph),
+            }));
         }
 
         [Test]

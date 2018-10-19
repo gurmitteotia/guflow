@@ -208,9 +208,10 @@ namespace Guflow.Tests.Decider
 
             var allEvents = childWorkflow.AllEvents();
 
-            Assert.That(allEvents, Is.EqualTo(new[]
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
             {
-                new ChildWorkflowCancelledEvent(eventGraph.First(), eventGraph)
+                new ChildWorkflowCancelledEvent(eventGraph.First(), eventGraph),
+                new ExternalWorkflowCancellationRequestedEvent(eventGraph.Skip(1).First()), 
             }));
         }
 

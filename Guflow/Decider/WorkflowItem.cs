@@ -73,9 +73,9 @@ namespace Guflow.Decider
         public abstract IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen();
         public abstract IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout);
         public abstract IEnumerable<WorkflowDecision> CancelDecisions();
-        public bool Has(AwsIdentity identity)
+        public bool Has(SwfIdentity identity)
         {
-            return Identity.Id == identity;
+            return ScheduleIdentity.Id == identity;
         }
         public bool Has(Identity identity)
         {
@@ -147,6 +147,8 @@ namespace Guflow.Decider
                 throw new CyclicDependencyException(string.Format(Resources.Cyclic_dependency, identity));
             _parentItems.Add(parentItem);
         }
+
+        protected virtual Identity ScheduleIdentity => Identity;
 
         protected IWorkflowHistoryEvents WorkflowHistoryEvents => _workflow.WorkflowHistoryEvents;
 

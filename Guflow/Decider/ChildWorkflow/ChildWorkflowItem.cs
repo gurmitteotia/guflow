@@ -62,7 +62,7 @@ namespace Guflow.Decider
             _startFailedAction = w => w.DefaultAction(workflow);
             _input = w => workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _tags = _ => Enumerable.Empty<string>();
-            _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
+            _rescheduleTimer = TimerItem.Reschedule(this, ScheduleIdentity, workflow);
             _when = _ => true;
             _onWhenFalseAction = _ => IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
             _cancelRequestFailedAction = e => e.DefaultAction(workflow);
@@ -101,7 +101,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return new[] {new ScheduleChildWorkflowDecision(Identity, _input(this))
+            return new[] {new ScheduleChildWorkflowDecision(ScheduleIdentity, _input(this))
             {
                 ChildPolicy = _childPolicy(this),
                 TaskPriority = _taskPriority(this),
@@ -125,7 +125,7 @@ namespace Guflow.Decider
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
                 return _rescheduleTimer.CancelDecisions();
 
-            return new[] { new CancelRequestWorkflowDecision(Identity.Id, (lastEvent as ChildWorkflowEvent)?.RunId), };
+            return new[] { new CancelRequestWorkflowDecision(ScheduleIdentity.Id, (lastEvent as ChildWorkflowEvent)?.RunId), };
         }
 
         public IFluentChildWorkflowItem AfterTimer(string name)
@@ -335,7 +335,7 @@ namespace Guflow.Decider
         public WorkflowAction SignalAction(string signalName, string input)
         {
             var lastEvent = LastEvent() as ChildWorkflowEvent;
-            return WorkflowAction.Signal(signalName, input, Identity.Id, lastEvent?.RunId);
+            return WorkflowAction.Signal(signalName, input, ScheduleIdentity.Id, lastEvent?.RunId);
         }
 
         public WorkflowAction CancelRequestFailedAction(ExternalWorkflowCancelRequestFailedEvent @event)

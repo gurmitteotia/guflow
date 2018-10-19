@@ -13,7 +13,7 @@ namespace Guflow.Decider
         internal ExternalWorkflowCancelRequestFailedEvent(HistoryEvent cancelRequestFailedEvent):base(cancelRequestFailedEvent.EventId)
         {
             _eventAttributes = cancelRequestFailedEvent.RequestCancelExternalWorkflowExecutionFailedEventAttributes;
-            AwsIdentity = AwsIdentity.Raw(_eventAttributes.WorkflowId);
+            SwfIdentity = SwfIdentity.Raw(_eventAttributes.WorkflowId);
         }
 
         internal override WorkflowAction Interpret(IWorkflow workflow)

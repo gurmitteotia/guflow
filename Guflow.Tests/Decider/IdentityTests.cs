@@ -21,15 +21,7 @@ namespace Guflow.Tests.Decider
             Assert.False(Identity.New("transcode", "1.0", "first").Equals(Identity.New("Download", "1.0", "first")));
             Assert.False(Identity.New("transcode", "1.0", "first").Equals(Identity.New("Transcode", "1.0")));
         }
-        [Test]
-        public void Json_tests()
-        {
-            var originalIdentity = Identity.New("transcode", "1.0", "first");
-            string jsonIdentity = originalIdentity.To(IdentityFormat.Json);
-            var recreatedFromJson = Identity.From(jsonIdentity, IdentityFormat.Json);
-
-            Assert.That(recreatedFromJson,Is.EqualTo(originalIdentity));
-        }
+       
         [Test]
         public void Allowed_length_test()
         {

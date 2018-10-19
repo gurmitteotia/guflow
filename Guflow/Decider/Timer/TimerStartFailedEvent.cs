@@ -9,7 +9,7 @@ namespace Guflow.Decider
         internal TimerStartFailedEvent(HistoryEvent startTimerFailedEvent) : base(startTimerFailedEvent.EventId)
         {
             _startTimerFailedAttributes = startTimerFailedEvent.StartTimerFailedEventAttributes;
-            AwsIdentity =  AwsIdentity.Raw(_startTimerFailedAttributes.TimerId);
+            SwfIdentity =  SwfIdentity.Raw(_startTimerFailedAttributes.TimerId);
         }
 
         internal string Cause { get { return _startTimerFailedAttributes.Cause; } }
