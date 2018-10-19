@@ -14,6 +14,7 @@ namespace Guflow.Tests.Decider
         private const string SignalName = "name";
         private const string SignalInput = "input";
         private const string TimerName = "Timer";
+        private const string ParentWorkflowRunId = "RunId";
         private Signal _signal;
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _builder;
@@ -23,7 +24,7 @@ namespace Guflow.Tests.Decider
         {
             _signal = new Signal(SignalName, SignalInput, new WorkflowItems());
             _eventGraphBuilder = new EventGraphBuilder();
-            _builder = new HistoryEventsBuilder();
+            _builder = new HistoryEventsBuilder().AddWorkflowRunId(ParentWorkflowRunId);
             _builder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
         }
         [Test]
@@ -54,7 +55,7 @@ namespace Guflow.Tests.Decider
         public void Signal_for_child_workflow()
         {
             var workflow = new SignalChildWorkflow();
-            var identity = Identity.New(WorkflowName,WorkflowVersion);
+            var identity = Identity.New(WorkflowName,WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
 
             _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity,"runid","input").ToArray());
             _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName),TimeSpan.Zero).ToArray());
@@ -68,7 +69,7 @@ namespace Guflow.Tests.Decider
         public void Signal_for_child_workflow_using_generic_type_api()
         {
             var workflow = new SignalChildWorkflowUsingGenericTypeApi();
-            var identity = Identity.New(WorkflowName, WorkflowVersion);
+            var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
 
             _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity, "runid", "input").ToArray());
             _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.Zero).ToArray());
@@ -82,7 +83,7 @@ namespace Guflow.Tests.Decider
         public void Signal_for_child_workflow_using_child_workflow_query_api()
         {
             var workflow = new SignalChildWorkflowUsingQueryApi();
-            var identity = Identity.New(WorkflowName, WorkflowVersion);
+            var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
 
             _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity, "runid", "input").ToArray());
             _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.Zero).ToArray());
