@@ -1,5 +1,5 @@
 ### Guflow
-A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Workflow Service ), let you coordinate the execution of serverless AWS Lambda functions, activities and timers with ease.
+A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Workflow Service ), lets you coordinate the execution of serverless AWS Lambda functions, activities, child workflows and timers with ease.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/gurmitteotia/guflow?svg=true)](https://ci.appveyor.com/project/gurmitteotia/guflow/branch/master)
 ### Installation
@@ -9,11 +9,11 @@ A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Wo
  dotnet add package Guflow
  ```
  ### Description
- Guflow provides high level and easy to use APIs to program [Amazon SWF](https://aws.amazon.com/swf/). In Guflow you write-
-* Workflows to orchestrate the scheduling of AWS lambda functions, activities and timers
+ Guflow provides high level and easy to use APIs to program [Amazon SWF](https://aws.amazon.com/swf/). In Guflow you can write-
+* Workflows to orchestrate the scheduling of AWS lambda functions, activities, child workflows and timers
 * Activities to carry out the task.
 
-You will find Guflow to be an alternative to Amazon Step functions and Amazon Flow framework and it provides simplicity and flexbility in one place. If you want some feature to be included in Guflow library or something is not working for you pleae file an [issue](https://github.com/gurmitteotia/guflow/issues). Your ideas, suggestion and collorbation will greatly help this library and its users.
+Guflow, supporting all the relevant features of [Amazon SWF](https://aws.amazon.com/swf/), is an alternative to Amazon Step functions and the Amazon Flow framework and it provides simplicity and flexbility in one place.
 
 ### Features:
 Guflow:
@@ -24,14 +24,15 @@ Guflow:
 * Supports activity throttling
 * Supports parallel execution of lambda, activities and timers in workflow
 * Supports fork and join of workflow branches
-* Supports loops around an individual item(lambda, activity, timer) or whole execution branch
-* Supported by behavioural unit tests and continuously released
-* Designed to support all the relevant features of Amazon SWF. At the time of writing this document Guflow supports:
+* Supports loop around an individual item(lambda, activity, child workflow and timer) or whole execution branch
+* Supported by behavioural unit tests and continuously released.
+* Supports all the relevant features of Amazon SWF:
   * Lambda
   * Activity
   * Timer
+  * Child workflows
   * Signal
-  * Workflow cancellation support
+  * Workflow/child-workflow cancellation
   * Marker
   * Activity heartbeat and cancellation
   * Handling of all error events.
@@ -91,9 +92,11 @@ Above workflow has four possible execution scenarios:
 You can implement the above workflow using SWF activities with same ease. You can also mix activities, lambdas or timers in a workflow. 
 
 
-To understand the scheduling of lambda functions, activities and timers in a workflow, please read about [Delflow algorithm](https://github.com/gurmitteotia/guflow/wiki/Deflow-algorithm) and [workflow branches](https://github.com/gurmitteotia/guflow/wiki/Execution-branches). Default implementation will good enough for majority of complex scenarios, however you have flexibility to customize every aspect of it.
+To understand the scheduling of lambda functions, activities, child workflows and timers in a workflow, please read about [Delflow algorithm](https://github.com/gurmitteotia/guflow/wiki/Deflow-algorithm) and [workflow branches](https://github.com/gurmitteotia/guflow/wiki/Execution-branches). Default implementation will good enough for majority of complex scenarios, however you have flexibility to customize every aspect of it.
 
-**Features in pipeline:** Please look at [project board](https://github.com/gurmitteotia/guflow/projects/1) to see what is is coming next.
+You can find details about all supported workflow actions [here](https://github.com/gurmitteotia/guflow/wiki/Workflow-actions). 
+
+**Features in pipeline:** Please look at [project board](https://github.com/gurmitteotia/guflow/projects/1) to see what is is coming next. If you want some feature to be included in Guflow library or something is not working for you please file an [issue](https://github.com/gurmitteotia/guflow/issues). Your ideas, suggestion and collorbation will greatly help this library and its users.
 
 ### Documentation
 Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tutorial), [documentation](https://github.com/gurmitteotia/guflow/wiki) and [samples](https://github.com/gurmitteotia/guflow-samples) to get you started easily.
