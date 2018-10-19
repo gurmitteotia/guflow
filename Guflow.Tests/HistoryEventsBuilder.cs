@@ -25,8 +25,14 @@ namespace Guflow.Tests
 
         public WorkflowHistoryEvents Result()
         {
-            var totalEvents = _newEvents.Concat(_processedEvents);
-            return new WorkflowHistoryEvents(totalEvents, _newEvents.Last().EventId, _newEvents.First().EventId);
+            var totalEvents = _newEvents.Concat(_processedEvents).ToList();
+            var decisionTask = new DecisionTask()
+            {
+                Events = totalEvents,
+                PreviousStartedEventId = _newEvents.Last().EventId-1,
+                StartedEventId = _newEvents.First().EventId
+            };
+            return new WorkflowHistoryEvents(decisionTask);
         }
     }
 }

@@ -88,37 +88,24 @@ namespace Guflow.Tests.Decider
 
         private WorkflowHistoryEvents ActivityEventGraph()
         {
-            var startedEvent = _eventGraphBuilder.WorkflowStartedEvent();
-            var completedEvent = _eventGraphBuilder.ActivityCompletedGraph(Identity.New(ActivityName, ActivityVersion), "id",
-                "res");
-            return new WorkflowHistoryEvents(completedEvent.Concat(new[] { startedEvent }), completedEvent.Last().EventId, completedEvent.First().EventId);
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.ActivityCompletedGraph(Identity.New(ActivityName, ActivityVersion), "id","res").ToArray());
+            return _eventsBuilder.Result();
         }
 
         private WorkflowHistoryEvents TimerCompletedEventGraph()
         {
-            var startedEvent = _eventGraphBuilder.WorkflowStartedEvent();
-            var completedEvent = _eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.FromSeconds(2));
-            return new WorkflowHistoryEvents(completedEvent.Concat(new[] { startedEvent }), completedEvent.Last().EventId, completedEvent.First().EventId);
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.FromSeconds(2)).ToArray());
+            return _eventsBuilder.Result();
         }
 
         private WorkflowHistoryEvents LambdaCompletedEventGraph()
         {
-            var startedEvent = _eventGraphBuilder.WorkflowStartedEvent();
-            var completedEvent = _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "result");
-            return new WorkflowHistoryEvents(completedEvent.Concat(new[] { startedEvent }), completedEvent.Last().EventId, completedEvent.First().EventId);
-        }
-
-        private WorkflowHistoryEvents ChildWorkflowCompletedEventGraph()
-        {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .ChildWorkflowCompletedGraph(Identity.New(ChildWorkflowName, ChildWorkflowVersion, ChildWorkflowPosName), "rid", "input",
-                    "result")
-                .ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "result").ToArray());
             return _eventsBuilder.Result();
-
         }
-
         private WorkflowHistoryEvents ParentWorkflowCompletedEventGraph()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());

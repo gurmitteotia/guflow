@@ -45,8 +45,7 @@ namespace Guflow.Decider
         {
             var workflowType = _decisionTask.WorkflowType;
             var workflow = workflowHost.FindBy(workflowType.Name, workflowType.Version);
-            var historyEvents = new WorkflowHistoryEvents(_decisionTask.Events,
-                                _decisionTask.PreviousStartedEventId + 1, _decisionTask.StartedEventId);
+            var historyEvents = new WorkflowHistoryEvents(_decisionTask);
 
             var decisions = Perform(() => workflow.Decisions(historyEvents));
             await workflowHost.SendDecisionsAsync(_decisionTask.TaskToken, decisions);

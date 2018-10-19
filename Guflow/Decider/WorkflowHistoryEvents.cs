@@ -10,22 +10,31 @@ namespace Guflow.Decider
     internal class WorkflowHistoryEvents : IWorkflowHistoryEvents
     {
         private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
-        private readonly long _newEventsStartId;
-        private readonly long _newEventsEndId;
+        private readonly long _previousStartedEventId;
+        private readonly long _newStartedEventId;
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedActivityEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedTimerEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedLambdaEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedChildWorkflowEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
 
-        public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long newEventsStartId, long newEventsEndId)
+        //TODO : Get rid of this constructor once the dependent constructor is deleted.
+        private WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long previousStartedEventId, long newStartedEventId)
         {
             _allHistoryEvents = allHistoryEvents;
-            _newEventsStartId = newEventsStartId;
-            _newEventsEndId = newEventsEndId;
+            _previousStartedEventId = previousStartedEventId;
+            _newStartedEventId = newStartedEventId;
         }
 
+        public WorkflowHistoryEvents(DecisionTask decisionTask)
+        {
+            _allHistoryEvents = decisionTask.Events;
+            _previousStartedEventId = decisionTask.PreviousStartedEventId;
+            _newStartedEventId = decisionTask.StartedEventId;
+        }
+
+        //TODO: Get rid of this constructor.
         public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents)
-            :this(allHistoryEvents,allHistoryEvents.Last().EventId, allHistoryEvents.First().EventId)
+            :this(allHistoryEvents,allHistoryEvents.Last().EventId-1, allHistoryEvents.First().EventId)
         {
         }
 
@@ -51,7 +60,7 @@ namespace Guflow.Decider
         public IEnumerable<WorkflowEvent> NewEvents()
         {
             var events = new List<WorkflowEvent>();
-            for (var eventId = _newEventsStartId; eventId <= _newEventsEndId; eventId++)
+            for (var eventId = _previousStartedEventId + 1; eventId <= _newStartedEventId; eventId++)
             {
                 var historyEvent = _allHistoryEvents.First(h => h.EventId == eventId);
                 var workflowEvent = historyEvent.CreateInterpretableEvent(_allHistoryEvents);
