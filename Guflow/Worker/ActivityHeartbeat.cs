@@ -20,6 +20,9 @@ namespace Guflow.Worker
         private ErrorHandler _errorHandler;
         private IErrorHandler _fallbackErrorHandler = ErrorHandler.NotHandled;
         private bool _enabled = false;
+
+        private ILog _log = Log.GetLogger<ActivityHeartbeat>();
+
         internal ActivityHeartbeat()
         {
             _activityDetailsFunc = ()=>string.Empty;
@@ -81,6 +84,7 @@ namespace Guflow.Worker
                var waited = await WaitFor(interval);
                 if (!waited)
                         continue;
+                _log.Debug($"Reporting the heartbeat for task token {taskToken}, after interval {interval}.");
                await ExecuteInRetryLoop(async () => await RecordHeartbeat(heartbeatSwfApi, taskToken));
             }
         }
