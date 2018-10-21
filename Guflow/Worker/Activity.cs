@@ -62,7 +62,8 @@ namespace Guflow.Worker
             }
             catch (OperationCanceledException exception)
             {
-                return Cancel(exception.Message);
+                var desc = ActivityDescription.FindOn(GetType());
+                return Cancel($"Activity name: {desc.Name} and version: { desc.Version} is cancelled.");
             }
             catch (Exception exception)
             {

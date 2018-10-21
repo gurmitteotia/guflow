@@ -239,7 +239,7 @@ namespace Guflow.Tests.Worker
 
             var response = await activity.ExecuteAsync(_activityArgs);
 
-            Assert.That(response, Is.EqualTo(new ActivityCancelledResponse("The operation was canceled.")));
+            Assert.That(response, Is.EqualTo(new ActivityCancelledResponse("Activity name: CancelledActivity and version: 1.0 is cancelled.")));
         }
 
         [Test]
@@ -552,6 +552,7 @@ namespace Guflow.Tests.Worker
             public bool CancellationRequested => _cancellationToken.IsCancellationRequested;
         }
 
+        [ActivityDescription("1.0")]
         private class CancelledActivity : Activity
         {
             private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
