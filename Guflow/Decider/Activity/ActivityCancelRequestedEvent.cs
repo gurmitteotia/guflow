@@ -13,7 +13,6 @@ namespace Guflow.Decider
         internal ActivityCancelRequestedEvent(HistoryEvent activityCancelRequestedEvent) : base(activityCancelRequestedEvent.EventId)
         {
             SwfIdentity = SwfIdentity.Raw(activityCancelRequestedEvent.ActivityTaskCancelRequestedEventAttributes.ActivityId);
-            IsActive = true;
         }
     }
 }

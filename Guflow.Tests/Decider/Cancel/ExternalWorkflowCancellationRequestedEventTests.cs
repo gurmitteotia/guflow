@@ -30,7 +30,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Active()
         {
-            Assert.That(_event.IsActive);
+            Assert.That(_event.IsActive, Is.False);
         }
     }
 }

@@ -330,6 +330,22 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void All_events_can_return_external_workflow_cancel_request_failed_event_and_workflow_started_event()
+        {
+            var cancelFailedEvent = _eventGraphBuilder.ChildWorkflowCancelRequestFailedEventGraph(_scheduleIdentity, "runid", "cause").ToArray();
+
+            var childWorkflow = ChildWorkflow(cancelFailedEvent);
+
+            var allEvents = childWorkflow.AllEvents();
+
+            Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ExternalWorkflowCancelRequestFailedEvent(cancelFailedEvent.First()), 
+                new ChildWorkflowStartedEvent(cancelFailedEvent.Skip(2).First(), cancelFailedEvent),
+            }));
+        }
+
+        [Test]
         public void All_events_can_return_reschedule_timer_events()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
@@ -415,6 +431,33 @@ namespace Guflow.Tests.Decider
             var lastEvent = childWorkflow.LastEvent();
 
             Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowFailedEvent(failedEventGraph.First(), allEventsGraph)));
+        }
+
+        [Test]
+        public void Last_event_returns_child_workflow_started_event_when_its_cancellation_is_in_progress()
+        {
+            var eventGrpah = _eventGraphBuilder.ChildWorkflowCancellationRequestedEventGraph(_scheduleIdentity, "runid", "input").ToArray();
+
+            var childWorkflow = ChildWorkflow(eventGrpah);
+
+            var lastEvent = childWorkflow.LastEvent();
+
+            Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowStartedEvent(eventGrpah.Skip(2).First(), eventGrpah)));
+
+
+        }
+
+        [Test]
+        public void Last_event_returns_child_workflow_started_event_when_its_cancellation_is_failed_and_it_was_started()
+        {
+            var cancelFailedEvent = _eventGraphBuilder.ChildWorkflowCancelRequestFailedEventGraph(_scheduleIdentity, "runid", "cause").ToArray();
+
+            var childWorkflow = ChildWorkflow(cancelFailedEvent);
+
+            var lastEvent = childWorkflow.LastEvent();
+
+            Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowStartedEvent(cancelFailedEvent.Skip(2).First(), cancelFailedEvent)));
+
         }
 
         [Test]

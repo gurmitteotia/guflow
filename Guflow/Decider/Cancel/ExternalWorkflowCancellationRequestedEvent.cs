@@ -14,7 +14,6 @@ namespace Guflow.Decider
         {
             var attr = cancelRequested.ExternalWorkflowExecutionCancelRequestedEventAttributes;
             SwfIdentity = SwfIdentity.Raw(attr.WorkflowExecution.WorkflowId);
-            IsActive = true;
         }
     }
 }

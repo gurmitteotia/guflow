@@ -1327,7 +1327,7 @@ namespace Guflow.Tests.Decider
                 {
                     WorkflowExecution = workflowExecution,
                     WorkflowType = workflowType,
-                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled),
                 }
             });
 
@@ -1341,6 +1341,72 @@ namespace Guflow.Tests.Decider
                     WorkflowId = identity.Id,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
+                    LambdaRole = "lambda_role",
+                    ExecutionStartToCloseTimeout = "3",
+                    TagList = new List<string>() { "tag1" },
+                    TaskList = new Amazon.SimpleWorkflow.Model.TaskList() { Name = "name" },
+                    TaskPriority = "1",
+                    TaskStartToCloseTimeout = "4"
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public IEnumerable<HistoryEvent> ChildWorkflowCancelRequestFailedEventGraph(Identity identity, string runId, string cause)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.ChildWorkflowCancelRequestFailedIds(ref _currentEventId);
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.CancelRequestFailed),
+                EventType = EventType.RequestCancelExternalWorkflowExecutionFailed,
+                RequestCancelExternalWorkflowExecutionFailedEventAttributes = new RequestCancelExternalWorkflowExecutionFailedEventAttributes()
+                {
+                    InitiatedEventId = eventIds.EventId(EventIds.CancelInitiated),
+                    WorkflowId = workflowExecution.WorkflowId,
+                    RunId = workflowExecution.RunId,
+                    Cause = cause,
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.CancelInitiated),
+                EventType = EventType.RequestCancelExternalWorkflowExecutionInitiated,
+                RequestCancelExternalWorkflowExecutionInitiatedEventAttributes = new RequestCancelExternalWorkflowExecutionInitiatedEventAttributes()
+                {
+                    RunId = workflowExecution.RunId,
+                    WorkflowId = workflowExecution.WorkflowId,
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Started),
+                EventType = EventType.ChildWorkflowExecutionStarted,
+
+                ChildWorkflowExecutionStartedEventAttributes = new ChildWorkflowExecutionStartedEventAttributes()
+                {
+                    WorkflowExecution = workflowExecution,
+                    WorkflowType = workflowType,
+                    InitiatedEventId = eventIds.EventId(EventIds.Scheduled)
+                }
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventId = eventIds.EventId(EventIds.Scheduled),
+                EventType = EventType.StartChildWorkflowExecutionInitiated,
+                StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
+                {
+                    Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
+                    WorkflowId = identity.Id,
+                    WorkflowType = workflowType,
+                    Input = "input",
                     LambdaRole = "lambda_role",
                     ExecutionStartToCloseTimeout = "3",
                     TagList = new List<string>() { "tag1" },
@@ -1592,6 +1658,20 @@ namespace Guflow.Tests.Decider
                 var ids = new Dictionary<string, long>()
                 {
                     {CancelRequested, eventId},
+                    {CancelInitiated, eventId - 1},
+                    {Started, eventId - 2},
+                    {Scheduled, eventId - 3}
+                };
+                return new EventIds(ids);
+            }
+
+            public static EventIds ChildWorkflowCancelRequestFailedIds(ref long eventId)
+            {
+                const long totalEvents = 4;
+                eventId += totalEvents;
+                var ids = new Dictionary<string, long>()
+                {
+                    {CancelRequestFailed, eventId},
                     {CancelInitiated, eventId - 1},
                     {Started, eventId - 2},
                     {Scheduled, eventId - 3}

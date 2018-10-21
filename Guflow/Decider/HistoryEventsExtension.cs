@@ -231,7 +231,7 @@ namespace Guflow.Decider
             return null;
         }
 
-        public static WorkflowItemEvent CreateActivityEventFor(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public static WorkflowItemEvent ActivityEvent(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             if (historyEvent.IsActivityCompletedEvent())
                 return new ActivityCompletedEvent(historyEvent, allHistoryEvents);
@@ -254,7 +254,7 @@ namespace Guflow.Decider
             return null;
         }
 
-        public static WorkflowItemEvent CreateTimerEventFor(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+        public static WorkflowItemEvent TimerEvent(this HistoryEvent historyEvent, IEnumerable<HistoryEvent> allHistoryEvents)
         {
             if (historyEvent.IsTimerFiredEvent())
                 return new TimerFiredEvent(historyEvent, allHistoryEvents);
@@ -307,7 +307,8 @@ namespace Guflow.Decider
                 return new ChildWorkflowStartFailedEvent(historyEvent, allEvents);
             if (historyEvent.IsExternalWorkflowCancelRequestedEvent())
                 return new ExternalWorkflowCancellationRequestedEvent(historyEvent);
-
+            if (historyEvent.IsExternalWorkflowCancelRequestFailedEvent())
+                return new ExternalWorkflowCancelRequestFailedEvent(historyEvent);
             return null;
         }
 
@@ -343,11 +344,18 @@ namespace Guflow.Decider
         {
             return historyEvent.EventType == EventType.ExternalWorkflowExecutionCancelRequested;
         }
+        private static bool IsExternalWorkflowCancelRequestFailedEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.RequestCancelExternalWorkflowExecutionFailed;
+        }
 
         public static WorkflowItemEvent CreateWorkflowItemEventFor(this HistoryEvent historyEvent,IEnumerable<HistoryEvent> allHistoryEvents)
         {
-            var activityEvent = historyEvent.CreateActivityEventFor(allHistoryEvents);
-            return activityEvent ?? historyEvent.CreateTimerEventFor(allHistoryEvents);
+            var itemEvent = historyEvent.ActivityEvent(allHistoryEvents);
+            itemEvent = itemEvent ?? historyEvent.TimerEvent(allHistoryEvents);
+            itemEvent = itemEvent ?? historyEvent.ChildWorkflowEvent(allHistoryEvents);
+            itemEvent = itemEvent ?? historyEvent.LambdaEvent(allHistoryEvents);
+            return itemEvent;
         }
     }
 }

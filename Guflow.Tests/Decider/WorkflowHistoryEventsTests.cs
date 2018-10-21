@@ -18,6 +18,9 @@ namespace Guflow.Tests.Decider
         private const string ActivityName = "Activity1";
         private const string ActivityVersion = "1.0";
         private const string TimerName = "timer1";
+        private const string WorkflowName = "Cname";
+        private const string WorkflowVersion = "1.0";
+        private const string LambdaName = "LambdaName";
         private Identity _childWorkflow;
 
         [SetUp]
@@ -330,6 +333,16 @@ namespace Guflow.Tests.Decider
             Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
         }
 
+
+        [Test]
+        public void Should_not_be_active_when_activity_is_cancelled()
+        {
+            var cancelledGraph = _builder.ActivityCancelledGraph(Identity.New(ActivityName, ActivityVersion), "id", "details");
+            var workflowHistoryEvents = new WorkflowHistoryEvents(cancelledGraph);
+
+            Assert.IsFalse(workflowHistoryEvents.HasActiveEvent());
+        }
+
         [Test]
         public void Should_not_be_active_when_activity_is_completed()
         {
@@ -344,6 +357,72 @@ namespace Guflow.Tests.Decider
         {
             var eventGraph = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion), "id")
                                             .Concat(_builder.ActivityFailedGraph(Identity.New(ActivityName, ActivityVersion), "id", "res","detail"));
+            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
+        }
+
+        [Test]
+        public void Should_be_active_when_activity_is_started_but_its_cancel_request_failed()
+        {
+            var eventGraph = _builder.ActivityCancellationFailedGraph(Identity.New(ActivityName, ActivityVersion), "reason")
+                .Concat(_builder.ActivityFailedGraph(Identity.New(ActivityName, ActivityVersion), "id", "res", "detail"));
+            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
+        }
+
+        [Test]
+        public void Should_not_be_active_when_child_workflow_is_cancelled()
+        {
+            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(Identity.New(WorkflowName, WorkflowVersion),
+                "rid", "input", "detail");
+                
+            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+
+            Assert.IsFalse(workflowHistoryEvents.HasActiveEvent());
+        }
+
+        [Test]
+        public void Should_be_active_when_child_workflow_is_started_and_its_cancellation_is_requested()
+        {
+            var eventGraph = _builder.ChildWorkflowCancellationRequestedEventGraph(Identity.New(WorkflowName, WorkflowVersion),
+                "rid", "input");
+
+            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
+        }
+
+        [Test]
+        public void Should_be_active_when_child_workflow_is_started_and_its_cancel_request_is_failed()
+        {
+            var startedGraph =
+                _builder.ChildWorkflowStartedEventGraph(Identity.New(WorkflowName, WorkflowVersion), "rid", "input");
+            var cancelFailedGraph = _builder.ExternalWorkflowCancelRequestFailedEvent(Identity.New(WorkflowName, WorkflowVersion),
+                "rid", "input");
+
+            var workflowHistoryEvents = new WorkflowHistoryEvents(cancelFailedGraph.Concat(startedGraph));
+
+            Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
+        }
+
+        [Test]
+        public void Should_not_be_active_when_child_workflow_is_completed()
+        {
+            var eventGraph = _builder.ChildWorkflowCompletedGraph(Identity.New(WorkflowName, WorkflowVersion),
+                "rid", "input", "detail");
+
+            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
+
+            Assert.IsFalse(workflowHistoryEvents.HasActiveEvent());
+        }
+
+        [Test]
+        public void Should_be_active_when_lambda_is_started()
+        {
+            var eventGraph = _builder.LambdaStartedEventGraph(Identity.Lambda(LambdaName), "input");
+
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());

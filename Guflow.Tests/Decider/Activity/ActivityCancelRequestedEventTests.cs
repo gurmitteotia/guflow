@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_populate_properties()
         {
-            Assert.That(_activityCancelRequestedEvent.IsActive,Is.True);
+            Assert.That(_activityCancelRequestedEvent.IsActive,Is.False);
         }
 
         [Test]

@@ -170,7 +170,6 @@ namespace Guflow.Tests.Decider
             Assert.That(decision.Timeouts.StartToCloseTimeout, Is.EqualTo(TimeSpan.FromSeconds(5)));
         }
 
-
         [Test]
         public void Last_event_is_cached()
         {
@@ -183,6 +182,18 @@ namespace Guflow.Tests.Decider
             var latestEventCached = activityItem.LastEvent(true);
 
             Assert.IsTrue(ReferenceEquals(latestEvent, latestEventCached));
+        }
+
+        [Test]
+        public void Last_event_can_be_null()
+        {
+            var workflowHistoryEvents = new WorkflowHistoryEvents(_eventGraphBuilder.WorkflowStartedGraph());
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(workflowHistoryEvents);
+            var activityItem = new ActivityItem(_activityIdenity, _workflow.Object);
+
+            var latestEvent = activityItem.LastEvent();
+
+            Assert.IsNull(latestEvent);
         }
 
         [Test]
@@ -210,6 +221,30 @@ namespace Guflow.Tests.Decider
             var latestEvent = activityItem.LastEvent(true);
 
             Assert.That(latestEvent, Is.EqualTo(new ActivityFailedEvent(activityFailedEventGraph.First(), activityFailedEventGraph)));
+        }
+
+        [Test]
+        public void Last_event_is_activity_started_event_when_its_cancel_request_is_in_progress()
+        {
+            var eventGraph = _eventGraphBuilder.ActivityCancelRequestedGraph(_activityIdenity, "id").ToArray();
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+
+            var last = activityItem.LastEvent();
+
+            Assert.That(last, Is.EqualTo(new ActivityStartedEvent(eventGraph.Skip(1).First(), eventGraph)));
+        }
+
+        [Test]
+        public void Last_event_is_activity_started_event_when_its_cancel_request_is_failed()
+        {
+            var eventGraph = _eventGraphBuilder.ActivityCancellationFailedGraph(_activityIdenity, "cause").ToArray();
+            var activityItem = CreateActivityItemWith(eventGraph);
+
+
+            var last = activityItem.LastEvent();
+
+            Assert.That(last, Is.EqualTo(new ActivityStartedEvent(eventGraph.Skip(1).First(), eventGraph)));
         }
 
         [Test]
@@ -581,20 +616,6 @@ namespace Guflow.Tests.Decider
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
             _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(workflowHistoryEvents);
             return new ActivityItem(_activityIdenity, _workflow.Object);
-        }
-        private class WorkflowWithParentActivity : Workflow
-        {
-            public WorkflowWithParentActivity(string parentActivityName,string parentActivityVersion, string postionalName)
-            {
-                ScheduleActivity(parentActivityName, parentActivityVersion, postionalName);
-            }
-        }
-        private class WorkflowWithParentTimer : Workflow
-        {
-            public WorkflowWithParentTimer(string parentTimerName)
-            {
-                ScheduleTimer(parentTimerName);
-            }
         }
     }
 }

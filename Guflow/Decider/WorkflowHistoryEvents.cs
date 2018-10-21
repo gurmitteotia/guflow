@@ -17,6 +17,9 @@ namespace Guflow.Decider
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedLambdaEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedChildWorkflowEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
 
+        private static readonly List<Type> ActivityLastEventFilters = new List<Type>(){typeof(ActivityCancelRequestedEvent), typeof(ActivityCancellationFailedEvent)};
+        private static readonly List<Type> ChildWorkflowLastEventFilters = new List<Type>(){typeof(ExternalWorkflowCancelRequestFailedEvent), typeof(ExternalWorkflowCancellationRequestedEvent)};
+
         //TODO : Get rid of this constructor once the dependent constructor is deleted.
         private WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long previousStartedEventId, long newStartedEventId)
         {
@@ -45,7 +48,7 @@ namespace Guflow.Decider
             WorkflowItemEvent result = null;
             if (_cachedActivityEvents.TryGetValue(activityItem, out result)) return result;
 
-            result = AllActivityEvents(activityItem).FirstOrDefault();
+            result = AllActivityEvents(activityItem).FirstOrDefault(e=>!ActivityLastEventFilters.Contains(e.GetType()));
            _cachedActivityEvents.Add(activityItem, result);
             return result;
         }
@@ -104,7 +107,7 @@ namespace Guflow.Decider
             var allEvents = new List<WorkflowItemEvent>();
             foreach (var historyEvent in _allHistoryEvents)
             {
-                var workflowItemEvent = historyEvent.CreateActivityEventFor(_allHistoryEvents);
+                var workflowItemEvent = historyEvent.ActivityEvent(_allHistoryEvents);
                 if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(activityItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
@@ -119,7 +122,7 @@ namespace Guflow.Decider
             var allEvents = new List<WorkflowItemEvent>();
             foreach (var historyEvent in _allHistoryEvents)
             {
-                var workflowItemEvent = historyEvent.CreateTimerEventFor(_allHistoryEvents);
+                var workflowItemEvent = historyEvent.TimerEvent(_allHistoryEvents);
                 if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
@@ -203,7 +206,7 @@ namespace Guflow.Decider
             WorkflowItemEvent @event = null;
             if (_cachedChildWorkflowEvents.TryGetValue(childWorkflowItem, out @event))
                 return @event;
-            @event = AllChildWorkflowEvents(childWorkflowItem).FirstOrDefault();
+            @event = AllChildWorkflowEvents(childWorkflowItem).FirstOrDefault(e=>!ChildWorkflowLastEventFilters.Contains(e.GetType()));
             _cachedChildWorkflowEvents.Add(childWorkflowItem, @event);
             return @event;
         }
