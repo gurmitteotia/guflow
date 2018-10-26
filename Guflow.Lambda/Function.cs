@@ -9,7 +9,7 @@ namespace Guflow.Lambda
     {
         
         /// <summary>
-        /// A simple function that takes a string and does a ToUpper
+        /// A simple function that takes a string return predefined result.
         /// </summary>
         /// <param name="input"></param>
         /// <param name="context"></param>
