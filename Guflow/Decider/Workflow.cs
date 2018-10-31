@@ -104,7 +104,9 @@ namespace Guflow.Decider
         }
         WorkflowAction IWorkflow.WorkflowAction(WorkflowSignaledEvent workflowSignaledEvent)
         {
-            return Handle(EventName.Signal, workflowSignaledEvent);
+            var method = _workflowEventMethods.SignalEventMethod(workflowSignaledEvent.SignalName);
+            if (method == null) return workflowSignaledEvent.DefaultAction(this);
+            return method.Invoke(workflowSignaledEvent);
         }
         WorkflowAction IWorkflow.WorkflowAction(WorkflowCancellationRequestedEvent workflowCancellationRequestedEvent)
         {
@@ -211,7 +213,7 @@ namespace Guflow.Decider
 
         private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)
         {
-            var workflowEventMethod = _workflowEventMethods.FindFor(eventName);
+            var workflowEventMethod = _workflowEventMethods.EventMethod(eventName);
             return workflowEventMethod == null
                 ? workflowEvent.DefaultAction(this)
                 : workflowEventMethod.Invoke(workflowEvent);

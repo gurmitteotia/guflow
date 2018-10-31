@@ -264,4 +264,7 @@
   <data name="ChildWorkflow_result_can_not_be_accessed" xml:space="preserve">
     <value>Can't access result. Last event of child workflow is not completed event.</value>
   </data>
+  <data name="Multiple_signal_event_method" xml:space="preserve">
+    <value>Multiple signal event methods are found for signal {0}. Please provide only one method.</value>
+  </data>
 </root>
