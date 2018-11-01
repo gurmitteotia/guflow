@@ -61,7 +61,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Signal_can_be_handled_using_matching_name_by_a_signal_method()
+        public void Signal_can_be_handled_using_matching_signal_method()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
             var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("signal1", "input"));
@@ -113,7 +113,7 @@ namespace Guflow.Tests.Decider
             Assert.Throws<AmbiguousWorkflowMethodException>(()=> workflowSignaledEvent.Interpret(new WorkflowWithTwoSignalMethodsForSameSignal(expectedAction)));
         }
         [Test]
-        public void Throws_exception_when_two_signal_method_exists_for_same_signal_name()
+        public void Throws_exception_when_two_signal_method_exists_for_same_signal_name_property()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
             var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("signal1", "input"));
