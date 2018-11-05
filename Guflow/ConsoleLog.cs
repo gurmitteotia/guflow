@@ -69,11 +69,11 @@ namespace Guflow
 
         private string FormatMessage(string level, string message)
         {
-            return string.Format("{0} {1} {2}- {3} \r\n", DateTime.Now, level, _typeName, message);
+            return string.Format("{0} {1} {2}- {3} \r\n", DateTime.UtcNow, level, _typeName, message);
         }
         private string FormatMessage(string level, string message, Exception exception)
         {
-            return string.Format("{0} {1} {2}- {3} {4}\r\n", DateTime.Now, level, _typeName, message, exception);
+            return string.Format("{0} {1} {2}- {3} {4}\r\n", DateTime.UtcNow, level, _typeName, message, exception);
         }
     }
 }
