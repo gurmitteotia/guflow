@@ -13,12 +13,12 @@ namespace Guflow.Decider
         /// Access completed result of lambda function as dynamic object. If completed result is JSON object then you can directly access its properties.
         /// Throws exception when last event is not lambda completed event.
         /// </summary>
-        /// <param name="lambdaItem"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
-        public static dynamic Result(this ILambdaItem lambdaItem)
+        public static dynamic Result(this ILambdaItem item)
         {
-            Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            var completedEvent = lambdaItem.LastEvent() as LambdaCompletedEvent;
+            Ensure.NotNull(item, nameof(item));
+            var completedEvent = item.LastEvent() as LambdaCompletedEvent;
             if (completedEvent == null)
                 throw new InvalidOperationException(Resources.Lambda_result_can_not_be_accessed);
             return completedEvent.Result();
@@ -28,12 +28,12 @@ namespace Guflow.Decider
         /// Access completed result of lambda as TType object. 
         /// Throws exception when last event is not lambda completed event.
         /// </summary>
-        /// <param name="lambdaItem"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
-        public static TType Result<TType>(this ILambdaItem lambdaItem)
+        public static TType Result<TType>(this ILambdaItem item)
         {
-            Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            var completedEvent = lambdaItem.LastEvent() as LambdaCompletedEvent;
+            Ensure.NotNull(item, nameof(item));
+            var completedEvent = item.LastEvent() as LambdaCompletedEvent;
             if (completedEvent == null)
                 throw new InvalidOperationException(Resources.Lambda_result_can_not_be_accessed);
 
@@ -43,35 +43,59 @@ namespace Guflow.Decider
         /// <summary>
         /// Returns true if the last event of lambda is <see cref="LambdaCompletedEvent"/>.
         /// </summary>
-        /// <param name="lambdaItem"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
-        public static bool HasCompleted(this ILambdaItem lambdaItem)
-        {
-            Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            return lambdaItem.LastEvent() is LambdaCompletedEvent;
-        }
+        public static bool HasCompleted(this ILambdaItem item)
+            => item.LastCompletedEvent() != null;
+
 
 
         /// <summary>
         /// Returns true if the last event of lambda is <see cref="LambdaFailedEvent"/>.
         /// </summary>
-        /// <param name="lambdaItem"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
-        public static bool HasFailed(this ILambdaItem lambdaItem)
-        {
-            Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            return lambdaItem.LastEvent() is LambdaFailedEvent;
-        }
+        public static bool HasFailed(this ILambdaItem item)
+            => item.LastFailedEvent() != null;
+
 
         /// <summary>
         /// Returns true if the last event of lambda is <see cref="LambdaTimedoutEvent"/>.
         /// </summary>
-        /// <param name="lambdaItem"></param>
+        /// <param name="item"></param>
         /// <returns></returns>
-        public static bool HasTimedout(this ILambdaItem lambdaItem)
+        public static bool HasTimedout(this ILambdaItem item) => item.LastTimedoutEvent() != null;
+      
+
+        /// <summary>
+        /// Retruns the <see cref="LambdaFailedEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <returns></returns>
+        public static LambdaFailedEvent LastFailedEvent(this ILambdaItem item)
         {
-            Ensure.NotNull(lambdaItem, nameof(lambdaItem));
-            return lambdaItem.LastEvent() is LambdaTimedoutEvent;
+            Ensure.NotNull(item, nameof(item));
+            return item.LastEvent() as LambdaFailedEvent;
+        }
+        /// <summary>
+        ///  Retruns the <see cref="LambdaTimedoutEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static LambdaTimedoutEvent LastTimedoutEvent(this ILambdaItem item)
+        {
+            Ensure.NotNull(item, nameof(item));
+            return item.LastEvent() as LambdaTimedoutEvent;
+        }
+
+        /// <summary>
+        /// Retruns the <see cref="LambdaCompletedEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static LambdaCompletedEvent LastCompletedEvent(this ILambdaItem item)
+        {
+            Ensure.NotNull(item, nameof(item));
+            return item.LastEvent() as LambdaCompletedEvent;
         }
 
         internal static ILambdaItem First(this IEnumerable<ILambdaItem> items, string name, string positionalName = "")

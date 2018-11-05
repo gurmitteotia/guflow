@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Guflow.Decider;
@@ -88,6 +89,21 @@ namespace Guflow
             {
                 throw new InvalidMethodSignatureException(string.Format(Resources.Parameter_can_not_be_deserialized, targetName, value), exception);
             }
+        }
+
+        public static MethodInfo[] Filter<TCustomAttribute>(this IEnumerable<MethodInfo> methods, Func<TCustomAttribute, bool> filter) where TCustomAttribute : Attribute
+        {
+            return methods.Where(m => m.GetCustomAttributes<TCustomAttribute>().Any(filter)).ToArray();
+        }
+
+        public static MethodInfo[] Filter<TCustomAttribute>(this IEnumerable<MethodInfo> methods) where TCustomAttribute : Attribute
+        {
+            return methods.Filter<TCustomAttribute>(_ => true).ToArray();
+        }
+
+        public static MethodInfo[] Filter(this IEnumerable<MethodInfo> methods, string name)
+        {
+            return methods.Where(m => string.Equals(m.Name, name, StringComparison.OrdinalIgnoreCase)).ToArray();
         }
     }
 }

@@ -45,11 +45,8 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static bool HasCompleted(this IChildWorkflowItem item)
-        {
-            Ensure.NotNull(item, nameof(item));
-            return item.LastEvent() is ChildWorkflowCompletedEvent;
-        }
+        public static bool HasCompleted(this IChildWorkflowItem item) => item.LastCompletedEvent() != null;
+
 
 
         /// <summary>
@@ -57,32 +54,22 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static bool HasFailed(this IChildWorkflowItem item)
-        {
-            Ensure.NotNull(item, nameof(item));
-            return item.LastEvent() is ChildWorkflowFailedEvent;
-        }
+        public static bool HasFailed(this IChildWorkflowItem item) => item.LastFailedEvent() != null;
 
         /// <summary>
         /// Returns true if the last event of child workflow is <see cref="ChildWorkflowTimedoutEvent"/>.
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static bool HasTimedout(this IChildWorkflowItem item)
-        {
-            Ensure.NotNull(item, nameof(item));
-            return item.LastEvent() is ChildWorkflowTimedoutEvent;
-        }
+        public static bool HasTimedout(this IChildWorkflowItem item) => item.LastTimedoutEvent() != null;
+
         /// <summary>
         /// Returns true if last event of child workflow is <see cref="ChildWorkflowTerminatedEvent"/>
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public static bool HasTerminated(this IChildWorkflowItem item)
-        {
-            Ensure.NotNull(item, nameof(item));
-            return item.LastEvent() is ChildWorkflowTerminatedEvent;
-        }
+        public static bool HasTerminated(this IChildWorkflowItem item) => item.LastTerminatedEvent() != null;
+      
         /// <summary>
         /// Returns true if last event of child workflow is <see cref="ChildWorkflowCancelledEvent"/>
         /// </summary>
@@ -93,6 +80,59 @@ namespace Guflow.Decider
             Ensure.NotNull(item, nameof(item));
             return item.LastEvent() is ChildWorkflowCancelledEvent;
         }
+        /// <summary>
+        /// Retruns the <see cref="ChildWorkflowFailedEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static ChildWorkflowFailedEvent LastFailedEvent(this IChildWorkflowItem item)
+        {
+            Ensure.NotNull(item, nameof(item));
+            return item.LastEvent() as ChildWorkflowFailedEvent;
+        }
+        /// <summary>
+        ///  Retruns the <see cref="ChildWorkflowTimedoutEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static ChildWorkflowTimedoutEvent LastTimedoutEvent(this IChildWorkflowItem item)
+        {
+            Ensure.NotNull(item, nameof(item));
+            return item.LastEvent() as ChildWorkflowTimedoutEvent;
+        }
+        /// <summary>
+        /// Retruns the <see cref="ChildWorkflowCancelledEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static ChildWorkflowCancelledEvent LastCancelledEvent(this IChildWorkflowItem item)
+        {
+            Ensure.NotNull(item, nameof(item));
+            return item.LastEvent() as ChildWorkflowCancelledEvent;
+        }
+
+        /// <summary>
+        /// Retruns the <see cref="ChildWorkflowCompletedEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static ChildWorkflowCompletedEvent LastCompletedEvent(this IChildWorkflowItem item)
+        {
+            Ensure.NotNull(item, nameof(item));
+            return item.LastEvent() as ChildWorkflowCompletedEvent;
+        }
+
+        /// <summary>
+        /// Retruns the <see cref="ChildWorkflowTerminatedEvent"/> and if it is the last event, otherwise null is returned.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static ChildWorkflowTerminatedEvent LastTerminatedEvent(this IChildWorkflowItem item)
+        {
+            Ensure.NotNull(item, nameof(item));
+            return item.LastEvent() as ChildWorkflowTerminatedEvent;
+        }
+
         internal static IChildWorkflowItem First(this IEnumerable<IChildWorkflowItem> items, string name, string version,string positionalName = "")
         {
             return items.OfType<ChildWorkflowItem>().First(t => t.Has(Identity.New(name,version ,positionalName)));

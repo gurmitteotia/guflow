@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
         public void Can_invoke_the_public_method_with_matching_attribute()
         {
             var targetWorkflow = new TestClassWithPublicMethod();
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -34,7 +34,7 @@ namespace Guflow.Tests.Decider
         public void Can_invoke_the_protected_method_with_matching_attribute()
         {
             var targetWorkflow = new TestClassWithProtectedMethod();
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -45,7 +45,7 @@ namespace Guflow.Tests.Decider
         public void Can_invoke_the_private_method_with_matching_attribute()
         {
             var targetWorkflow = new TestClassWithPrivateMethod();
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -55,7 +55,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_empty_workflow_action_when_target_method_returns_void()
         {
-            var workflowMethod = WorkflowEventMethods.For(new TestClassWithPrivateMethod()).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(new TestClassWithPrivateMethod()).EventMethod(_eventName);
 
             var workflowAction =workflowMethod.Invoke(_argument);
 
@@ -66,7 +66,7 @@ namespace Guflow.Tests.Decider
         public void Returns_workflow_action_of_target_method()
         {
             var expectedWorkflowAction = new Mock<WorkflowAction>().Object;
-            var workflowMethod = WorkflowEventMethods.For(new TestClassToReturnWorkflowAction(expectedWorkflowAction)).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(new TestClassToReturnWorkflowAction(expectedWorkflowAction)).EventMethod(_eventName);
 
             var workflowAction = workflowMethod.Invoke(_argument);
 
@@ -76,14 +76,14 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_target_method_return_type_is_other_then_void_or_workflow_action()
         {
-            Assert.Throws<InvalidMethodSignatureException>(()=>WorkflowEventMethods.For(new TestClassWithIncompatibleReturnType()).FindFor(_eventName));
+            Assert.Throws<InvalidMethodSignatureException>(()=>WorkflowEventMethods.For(new TestClassWithIncompatibleReturnType()).EventMethod(_eventName));
         }
 
         [Test]
         public void Pass_the_source_parameter_to_target_method_when_target_type_is_assignable_from_source_parameter()
         {
             var targetWorkflow = new MethodWithParameterOfBaseClass();
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -94,7 +94,7 @@ namespace Guflow.Tests.Decider
         public void Pass_the_source_parameter_to_target_method_when_both_parameters_are_of_same_type()
         {
             var targetWorkflow = new MethodWithParameterOfSameClass();
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -107,7 +107,7 @@ namespace Guflow.Tests.Decider
             var targetWorkflow = new MethodWithDeserializedArguments();
             _argument.Reason = "reason3";
             _argument.EventId = 56;
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -121,7 +121,7 @@ namespace Guflow.Tests.Decider
             var targetWorkflow = new MethodWithDeserializedArgumentsAndSourcEvent();
             _argument.Reason = "reason3";
             _argument.EventId = 56;
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -136,7 +136,7 @@ namespace Guflow.Tests.Decider
             var targetWorkflow = new MethodWithDeserializedArguments();
             _argument.Reason = null;
             _argument.EventId = 56;
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -151,7 +151,7 @@ namespace Guflow.Tests.Decider
 
             _argument.Reason = new Reason(){Id=10, Details = "details"}.ToJson();
             _argument.EventId = 56;
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -166,7 +166,7 @@ namespace Guflow.Tests.Decider
             var targetWorkflow = new MethodWithIncompatibleArgumentType();
             _argument.Reason = "reason3";
             _argument.EventId = 56;
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             Assert.Throws<InvalidMethodSignatureException>(()=> workflowMethod.Invoke(_argument));
         }
@@ -177,7 +177,7 @@ namespace Guflow.Tests.Decider
             var targetWorkflow = new MethodWithNonExistingArgument();
             _argument.Reason = "reason3";
             _argument.EventId = 56;
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             workflowMethod.Invoke(_argument);
 
@@ -192,19 +192,19 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_multiple_methods_are_found_for_same_event()
         {
-            Assert.Throws<AmbiguousWorkflowMethodException>(()=> WorkflowEventMethods.For(new TestClassWithMultipleMethods()).FindFor(_eventName));
+            Assert.Throws<AmbiguousWorkflowMethodException>(()=> WorkflowEventMethods.For(new TestClassWithMultipleMethods()).EventMethod(_eventName));
         }
 
         [Test]
         public void Can_return_null_when_target_method_not_found()
         {
-            Assert.That(WorkflowEventMethods.For(new EmptyWorkflow()).FindFor(_eventName),Is.Null);
+            Assert.That(WorkflowEventMethods.For(new EmptyWorkflow()).EventMethod(_eventName),Is.Null);
         }
 
         [Test]
         public void Return_workflow_empty_action_when_target_method_returns_null()
         {
-            var workflowMethod = WorkflowEventMethods.For(new MethodReturnsNull()).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(new MethodReturnsNull()).EventMethod(_eventName);
 
             var workflowAction = workflowMethod.Invoke(_argument);
 
@@ -215,7 +215,7 @@ namespace Guflow.Tests.Decider
         public void Throws_actual_exception_thrown_by_target_method()
         {
             var targetWorkflow = new MethodThrowsException(new Exception(""));
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
 
             Assert.Throws<Exception>(()=>workflowMethod.Invoke(_argument));
         }
@@ -224,7 +224,7 @@ namespace Guflow.Tests.Decider
         public void Pass_default_value_in_struct_when_source_string_property_is_null()
         {
             var targetWorkflow = new MethodDeserialingStringInToStruct();
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
             _argument.Reason = null;
 
             workflowMethod.Invoke(_argument);
@@ -237,7 +237,7 @@ namespace Guflow.Tests.Decider
         public void Can_pass_source_primitive_type_to_string_parameters()
         {
             var targetWorkflow = new MethodWithStringParamemtersForPrimitiveStructType();
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
             _argument.EventTime = DateTime.Now;
 
             workflowMethod.Invoke(_argument);
@@ -250,7 +250,7 @@ namespace Guflow.Tests.Decider
         public void Can_pass_source_string_type_to_primitive_type_parameters()
         {
             var targetWorkflow = new MethodWithPrimitiveType();
-            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).FindFor(_eventName);
+            var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
             var argument = new ArgumentInStringFormat(10)
             {
                 Duration = TimeSpan.FromSeconds(2).ToString(),

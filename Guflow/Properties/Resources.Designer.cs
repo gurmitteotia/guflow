@@ -368,6 +368,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Multiple signal event methods are found for signal {0}. Please provide only one method..
+        /// </summary>
+        public static string Multiple_signal_event_method {
+            get {
+                return ResourceManager.GetString("Multiple_signal_event_method", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Empty activities. Please provide at least one activity to begin hosting..
         /// </summary>
         public static string No_activity_to_host {
