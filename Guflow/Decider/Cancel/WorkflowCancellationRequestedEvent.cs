@@ -4,7 +4,7 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Raised when this workflow as received the request to cancel itself.
+    /// Raised when this workflow has received the request to cancel itself.
     /// </summary>
     public class WorkflowCancellationRequestedEvent : WorkflowEvent
     {
@@ -16,6 +16,9 @@ namespace Guflow.Decider
             _eventAttributes = cancellationRequestedEvent.WorkflowExecutionCancelRequestedEventAttributes;
         }
 
+        /// <summary>
+        /// Reason why this cancellation request is generated.
+        /// </summary>
         public string Cause => _eventAttributes.Cause;
 
         public string ExternalWorkflowRunid => _eventAttributes.ExternalWorkflowExecution?.RunId;

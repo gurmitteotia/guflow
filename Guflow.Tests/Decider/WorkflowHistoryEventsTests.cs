@@ -166,6 +166,16 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Workflow_restart_failed_event_is_interpreted()
+        {
+            var eventGraph = _builder.WorkflowRestartFailedEventGraph("cause");
+            var events = new WorkflowHistoryEvents(new[] { eventGraph });
+            var newEvents = events.NewEvents();
+
+            Assert.That(newEvents, Is.EqualTo(new[] { new WorkflowRestartFailedEvent(eventGraph) }));
+        }
+
+        [Test]
         public void External_workflow_cancel_request_failed_event_is_interpreted()
         {
             var eventGraph = _builder.ExternalWorkflowCancelRequestFailedEvent(Identity.New("w","v"),"rid","cause");

@@ -42,6 +42,11 @@ namespace Guflow.Decider
         /// <summary>
         /// Raised when SWF fails to process RecordMarker action.
         /// </summary>
-        RecordMarkerFailed
+        RecordMarkerFailed,
+
+        /// <summary>
+        /// Raised when SWF fails to restart the current workflow. This event can be raised in response to RestartWorkflow action.
+        /// </summary>
+        RestartFailed
     }
 }

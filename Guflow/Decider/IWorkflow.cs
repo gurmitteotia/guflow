@@ -38,5 +38,6 @@ namespace Guflow.Decider
         WorkflowAction WorkflowAction(ChildWorkflowTerminatedEvent terminatedEvent);
         WorkflowAction WorkflowAction(ChildWorkflowTimedoutEvent timedoutEvent);
         WorkflowAction WorkflowAction(ChildWorkflowStartFailedEvent startFailed);
+        WorkflowAction WorkflowAction(WorkflowRestartFailedEvent failedEvent);
     }
 }

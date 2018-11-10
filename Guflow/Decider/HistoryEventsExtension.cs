@@ -7,68 +7,72 @@ namespace Guflow.Decider
 {
     internal static class HistoryEventsExtension
     {
-        public static bool IsActivityCompletedEvent(this HistoryEvent historyEvent)
+        private static bool IsActivityCompletedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ActivityTaskCompleted;
         }
 
-        public static bool IsActivityFailedEvent(this HistoryEvent historyEvent)
+        private static bool IsActivityFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ActivityTaskFailed;
         }
 
-        public static bool IsActivityTimedoutEvent(this HistoryEvent historyEvent)
+        private static bool IsActivityTimedoutEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ActivityTaskTimedOut;
         }
 
-        public static bool IsActivityCancelledEvent(this HistoryEvent historyEvent)
+        private static bool IsActivityCancelledEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ActivityTaskCanceled;
         }
-        public static bool IsActivityCancellationFailedEvent(this HistoryEvent historyEvent)
+
+        private static bool IsActivityCancellationFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.RequestCancelActivityTaskFailed;
         }
-        public static bool IsActivityScheduledEvent(this HistoryEvent historyEvent)
+
+        private static bool IsActivityScheduledEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ActivityTaskScheduled;
         }
 
-        public static bool IsActivitySchedulingFailedEvent(this HistoryEvent historyEvent)
+        private static bool IsActivitySchedulingFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ScheduleActivityTaskFailed;
         }
-        public static bool IsActivityStartedEvent(this HistoryEvent historyEvent)
+
+        private static bool IsActivityStartedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ActivityTaskStarted;
         }
 
-        public static bool IsActivityCancelRequestedEvent(this HistoryEvent historyEvent)
+        private static bool IsActivityCancelRequestedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.ActivityTaskCancelRequested;
         }
-        public static bool IsTimerFiredEvent(this HistoryEvent historyEvent)
+
+        private static bool IsTimerFiredEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.TimerFired;
         }
 
-        public static bool IsTimerStartedEvent(this HistoryEvent historyEvent)
+        private static bool IsTimerStartedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.TimerStarted;
         }
 
-        public static bool IsTimerStartFailedEvent(this HistoryEvent historyEvent)
+        private static bool IsTimerStartFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.StartTimerFailed;
         }
 
-        public static bool IsTimerCancelledEvent(this HistoryEvent historyEvent)
+        private static bool IsTimerCancelledEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.TimerCanceled;
         }
 
-        public static bool IsTimerCancellationFailedEvent(this HistoryEvent historyEvent)
+        private static bool IsTimerCancellationFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.CancelTimerFailed;
         }
@@ -80,17 +84,21 @@ namespace Guflow.Decider
         {
             return historyEvent.EventType == EventType.WorkflowExecutionCancelRequested;
         }
-        public static bool IsWorkflowCompletionFailedEvent(this HistoryEvent historyEvent)
+
+        private static bool IsWorkflowCompletionFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.CompleteWorkflowExecutionFailed;
         }
 
-        public static bool IsWorkflowFailureFailedEvent(this HistoryEvent historyEvent)
+        private static bool IsWorkflowRestartFailedEvent(this HistoryEvent historyEvent)
+            => historyEvent.EventType == EventType.ContinueAsNewWorkflowExecutionFailed;
+
+        private static bool IsWorkflowFailureFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.FailWorkflowExecutionFailed;
         }
 
-        public static bool IsWorkflowSignalFailedEvent(this HistoryEvent historyEvent)
+        private static bool IsWorkflowSignalFailedEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.SignalExternalWorkflowExecutionFailed;
         }
@@ -228,6 +236,8 @@ namespace Guflow.Decider
                 return new ChildWorkflowTerminatedEvent(historyEvent, allHistoryEvents);
             if(historyEvent.IsChildWorkflowStartFailedEvent())
                 return new ChildWorkflowStartFailedEvent(historyEvent, allHistoryEvents);
+            if(historyEvent.IsWorkflowRestartFailedEvent())
+                return new WorkflowRestartFailedEvent(historyEvent);
             return null;
         }
 

@@ -3,7 +3,10 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
-    public class WorkflowCompletionFailedEvent : WorkflowEvent
+    /// <summary>
+    /// Raised when Amazon SWF can not complete the workflow.
+    /// </summary>
+    public sealed class WorkflowCompletionFailedEvent : WorkflowEvent
     {
         private readonly CompleteWorkflowExecutionFailedEventAttributes _eventAttributes;
 
@@ -12,6 +15,9 @@ namespace Guflow.Decider
             _eventAttributes = workflowCompletionFailureEvent.CompleteWorkflowExecutionFailedEventAttributes;
         }
 
+        /// <summary>
+        /// Reason why workflow was not completed.
+        /// </summary>
         public string Cause { get { return _eventAttributes.Cause; } }
 
         internal override WorkflowAction Interpret(IWorkflow workflow)

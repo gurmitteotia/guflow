@@ -3,6 +3,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Raised when Amazon SWf can not fail the workflow. This event can be raised in response to FailWorkflow action.
+    /// </summary>
     public class WorkflowFailureFailedEvent: WorkflowEvent
     {
         private readonly FailWorkflowExecutionFailedEventAttributes _eventAttributes;
@@ -10,7 +13,10 @@ namespace Guflow.Decider
         {
             _eventAttributes = workflowFailureFailedEvent.FailWorkflowExecutionFailedEventAttributes;
         }
-        public string Cause { get { return _eventAttributes.Cause; } }
+        /// <summary>
+        /// Gets reason about failure.
+        /// </summary>
+        public string Cause => _eventAttributes.Cause;
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {

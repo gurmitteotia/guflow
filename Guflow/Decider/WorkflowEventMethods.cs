@@ -32,7 +32,7 @@ namespace Guflow.Decider
 
         public WorkflowEventMethod SignalEventMethod(string signalName)
         {
-            var signalMethods = _allTargetMethods.Filter<SignalAttribute>();
+            var signalMethods = _allTargetMethods.Filter<SignalEventAttribute>();
             var strategy = MethodFindingStrategy.Composite(MethodFindingStrategy.MatchBySignalNameProperty(signalName), MethodFindingStrategy.MatchBySignalMethodName(signalName));
             var foundMethod = strategy.Find(signalMethods, EventName.Signal);
             if (foundMethod == null) return EventMethod(EventName.Signal);
@@ -56,7 +56,7 @@ namespace Guflow.Decider
             }
 
             public static IMethodFindingStrategy MatchBySignalMethodName(string signalName) => new MethodFindingStrategy(m=>m.Filter(signalName));
-            public static IMethodFindingStrategy MatchBySignalNameProperty(string signalName) => new MethodFindingStrategy(m=> m.Filter<SignalAttribute>(s => s.IsFor(signalName)));
+            public static IMethodFindingStrategy MatchBySignalNameProperty(string signalName) => new MethodFindingStrategy(m=> m.Filter<SignalEventAttribute>(s => s.IsFor(signalName)));
             public static IMethodFindingStrategy MatchByEventName(EventName eventName) => new MethodFindingStrategy(m=> m.Filter<WorkflowEventAttribute>(s => s.IsFor(eventName)));
 
             public static IMethodFindingStrategy Composite(params IMethodFindingStrategy[] strategies) => new ChainedMethodFindingStrategy(strategies);

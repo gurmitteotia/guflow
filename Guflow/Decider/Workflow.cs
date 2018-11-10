@@ -211,6 +211,11 @@ namespace Guflow.Decider
             return childWorkflowItem.StartFailed(startFailed);
         }
 
+        WorkflowAction IWorkflow.WorkflowAction(WorkflowRestartFailedEvent failedEvent)
+        {
+            return Handle(EventName.RestartFailed, failedEvent);
+        }
+
         private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)
         {
             var workflowEventMethod = _workflowEventMethods.EventMethod(eventName);

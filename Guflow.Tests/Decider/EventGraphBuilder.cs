@@ -1419,6 +1419,20 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
+        public HistoryEvent WorkflowRestartFailedEventGraph(string cause)
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.ContinueAsNewWorkflowExecutionFailed,
+                ContinueAsNewWorkflowExecutionFailedEventAttributes = new ContinueAsNewWorkflowExecutionFailedEventAttributes()
+                {
+                    Cause = cause,
+                }
+            };
+        }
+
         private class EventIds
         {
             public const string Completion = "Completion";

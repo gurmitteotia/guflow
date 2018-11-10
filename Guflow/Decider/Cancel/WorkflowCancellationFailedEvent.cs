@@ -15,7 +15,10 @@ namespace Guflow.Decider
             _eventAttributes = cancellationFailedEvent.CancelWorkflowExecutionFailedEventAttributes;
         }
 
-        public string Cause { get { return _eventAttributes.Cause; } }
+        /// <summary>
+        /// Gets the reason on why workflow could not be cancelled.
+        /// </summary>
+        public string Cause => _eventAttributes.Cause;
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {

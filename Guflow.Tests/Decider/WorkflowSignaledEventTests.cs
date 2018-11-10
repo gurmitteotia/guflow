@@ -162,7 +162,7 @@ namespace Guflow.Tests.Decider
                 _workflowAction = workflowAction;
             }
 
-            [Signal]
+            [SignalEvent]
             protected WorkflowAction Signal1(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return _workflowAction;
@@ -177,7 +177,7 @@ namespace Guflow.Tests.Decider
                 _workflowAction = workflowAction;
             }
 
-            [Signal(Name= "Signal1")]
+            [SignalEvent(Name= "Signal1")]
             protected WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return _workflowAction;
@@ -192,12 +192,12 @@ namespace Guflow.Tests.Decider
                 _workflowAction = workflowAction;
             }
 
-            [Signal(Name = "Signal1")]
+            [SignalEvent(Name = "Signal1")]
             protected WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return _workflowAction;
             }
-            [Signal]
+            [SignalEvent]
             protected WorkflowAction Signal1(string details)
             {
                 return WorkflowAction.Empty;
@@ -211,12 +211,12 @@ namespace Guflow.Tests.Decider
                 _workflowAction = workflowAction;
             }
 
-            [Signal]
+            [SignalEvent]
             protected WorkflowAction Signal1(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return _workflowAction;
             }
-            [Signal]
+            [SignalEvent]
             protected WorkflowAction Signal1(string details)
             {
                 return WorkflowAction.Empty;
@@ -231,12 +231,12 @@ namespace Guflow.Tests.Decider
                 _workflowAction = workflowAction;
             }
 
-            [Signal(Name = "signal1")]
+            [SignalEvent(Name = "signal1")]
             protected WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return _workflowAction;
             }
-            [Signal(Name = "signal1")]
+            [SignalEvent(Name = "signal1")]
             protected WorkflowAction OnSignal(string details)
             {
                 return WorkflowAction.Empty;
@@ -250,7 +250,7 @@ namespace Guflow.Tests.Decider
                 _workflowAction = workflowAction;
             }
 
-            [Signal(Name = "SignalNotMatching")]
+            [SignalEvent(Name = "SignalNotMatching")]
             protected WorkflowAction OnSignal(WorkflowSignaledEvent workflowSignalEvent)
             {
                 return Ignore;
