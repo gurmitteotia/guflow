@@ -639,7 +639,7 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] TimerStartedGraph(Identity identity, bool isARescheduleTimer)
         {
-            return _eventGraphBuilder.TimerStartedGraph(identity, TimeSpan.Zero, isARescheduleTimer).ToArray();
+            return _eventGraphBuilder.TimerStartedGraph(identity.ScheduleId(), TimeSpan.Zero, isARescheduleTimer).ToArray();
         }
 
         private HistoryEvent[] ChildWorkflowCompletedGraph(string name, string version)

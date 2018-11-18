@@ -223,7 +223,7 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] TimerFiredEventGraph(string timerName)
         {
-            return _eventGraphBuilder.TimerFiredGraph(Identity.Timer(timerName), TimeSpan.FromSeconds(2)).ToArray();
+            return _eventGraphBuilder.TimerFiredGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.FromSeconds(2)).ToArray();
         }
     
         private class WorkflowWithMultipleChilds : Workflow

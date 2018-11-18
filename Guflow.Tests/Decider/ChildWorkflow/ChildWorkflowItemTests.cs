@@ -349,7 +349,7 @@ namespace Guflow.Tests.Decider
         public void All_events_can_return_reschedule_timer_events()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity.Id, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -366,7 +366,7 @@ namespace Guflow.Tests.Decider
         public void All_events_can_filter_out_reschedule_timer_events()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity.Id, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -411,7 +411,7 @@ namespace Guflow.Tests.Decider
         public void Last_event_can_return_reschedule_timer_event()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity.Id, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -424,7 +424,7 @@ namespace Guflow.Tests.Decider
         public void Last_event_can_filter_out_reschedule_timer_event()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity.Id, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 

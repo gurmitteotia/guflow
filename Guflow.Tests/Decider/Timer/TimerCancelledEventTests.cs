@@ -26,7 +26,7 @@ namespace Guflow.Tests.Decider
         }
         private TimerCancelledEvent CreateTimerCancelledEvent(Identity identity, TimeSpan fireAfter)
         {
-            var timerCancelledEventGraph = _builder.TimerCancelledGraph(identity, fireAfter);
+            var timerCancelledEventGraph = _builder.TimerCancelledGraph(identity.ScheduleId(), fireAfter);
             return new TimerCancelledEvent(timerCancelledEventGraph.First(),timerCancelledEventGraph);
         }
     }

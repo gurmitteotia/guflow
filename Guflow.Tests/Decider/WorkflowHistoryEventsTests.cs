@@ -441,7 +441,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_timer_is_started()
         {
-            var timerStartedEventGraph = _builder.TimerStartedGraph(Identity.Timer("id"),TimeSpan.FromSeconds(2));
+            var timerStartedEventGraph = _builder.TimerStartedGraph(Identity.Timer("id").ScheduleId(), TimeSpan.FromSeconds(2));
             var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
@@ -450,7 +450,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_not_be_active_when_timer_is_fired()
         {
-            var timerStartedEventGraph = _builder.TimerFiredGraph(Identity.Timer("id"), TimeSpan.FromSeconds(2));
+            var timerStartedEventGraph = _builder.TimerFiredGraph(Identity.Timer("id").ScheduleId(), TimeSpan.FromSeconds(2));
             var workflowHistoryEvents = new WorkflowHistoryEvents(timerStartedEventGraph);
 
             Assert.IsFalse(workflowHistoryEvents.HasActiveEvent());
@@ -502,7 +502,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Latest_event_id()
         {
-            var events = _builder.TimerFiredGraph(Identity.Timer("id"), TimeSpan.FromSeconds(2));
+            var events = _builder.TimerFiredGraph(Identity.Timer("id").ScheduleId(), TimeSpan.FromSeconds(2));
             var workflowHistoryEvents = new WorkflowHistoryEvents(events);
 
             Assert.That(workflowHistoryEvents.LatestEventId, Is.EqualTo(events.First().EventId));
@@ -534,19 +534,19 @@ namespace Guflow.Tests.Decider
         }
         private HistoryEvent [] TimerFiredEventGraph()
         {
-            return _builder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.FromSeconds(4)).ToArray();
+            return _builder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(4)).ToArray();
         }
         private HistoryEvent [] TimerStartFailedEventGraph()
         {
-            return _builder.TimerStartFailedGraph(Identity.Timer(TimerName), "cause").ToArray();
+            return _builder.TimerStartFailedGraph(Identity.Timer(TimerName).ScheduleId(), "cause").ToArray();
         }
         private HistoryEvent [] TimerCancelledEventGraph()
         {
-            return _builder.TimerCancelledGraph(Identity.Timer(TimerName),TimeSpan.FromSeconds(4)).ToArray();
+            return _builder.TimerCancelledGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(4)).ToArray();
         }
         private HistoryEvent [] TimerCancellationFailedEventGraph()
         {
-            return _builder.TimerCancellationFailedGraph(Identity.Timer(TimerName), "cause").ToArray();
+            return _builder.TimerCancellationFailedGraph(Identity.Timer(TimerName).ScheduleId(), "cause").ToArray();
         }
         private HistoryEvent WorkflowSignaledEventGraph()
         {
@@ -561,7 +561,7 @@ namespace Guflow.Tests.Decider
             var nonInterpretEvent = new[] {new HistoryEvent() {EventType = EventType.DecisionTaskCompleted}};
             var activityStarted = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion), "id");
             var activityScheduled = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion));
-            var timerStarted = _builder.TimerStartedGraph(Identity.Timer(TimerName), TimeSpan.FromSeconds(1));
+            var timerStarted = _builder.TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(1));
             var childWorfklowStarted = _builder.ChildWorkflowStartedEventGraph(_childWorkflow, "rid", "input");
             return timerStarted.Concat(activityScheduled)
                 .Concat(activityStarted).Concat(nonInterpretEvent).Concat(childWorfklowStarted).ToArray();

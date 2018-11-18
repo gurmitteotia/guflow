@@ -254,7 +254,7 @@ namespace Guflow.Tests.Decider
         public void All_events_can_return_reschedule_timer_events()
         {
             var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
-            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity, TimeSpan.FromSeconds(1), true);
+            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(1), true);
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
@@ -271,7 +271,7 @@ namespace Guflow.Tests.Decider
         public void All_events_by_default_filters_out_reschedule_timer_events()
         {
             var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
-            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity, TimeSpan.FromSeconds(1), true);
+            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(1), true);
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
@@ -300,7 +300,7 @@ namespace Guflow.Tests.Decider
         public void Last_event_can_return_event_for_rescheduled_timer()
         {
             var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
-            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity, TimeSpan.FromSeconds(1), true);
+            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(1), true);
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 
@@ -313,7 +313,7 @@ namespace Guflow.Tests.Decider
         public void Last_event_by_default_filters_out_rescheduled_timer()
         {
             var failedEventGraph = _builder.LambdaFailedEventGraph(_lambdaIdentity, "input", "reason", "details");
-            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity, TimeSpan.FromSeconds(1), true);
+            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(1), true);
             var allEvents = startedEventGraph.Concat(failedEventGraph);
             var lamdbaItem = CreateLambdaItem(allEvents);
 

@@ -36,7 +36,7 @@ namespace Guflow.Tests.Decider
 
         private TimerStartedEvent CreateTimerStartedEvent(Identity identity, TimeSpan fireAfter)
         {
-            var timerFiredEventGraph = _builder.TimerStartedGraph(identity, fireAfter);
+            var timerFiredEventGraph = _builder.TimerStartedGraph(identity.ScheduleId(), fireAfter);
             return new TimerStartedEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
         }
     }

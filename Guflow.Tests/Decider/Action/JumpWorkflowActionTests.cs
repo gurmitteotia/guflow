@@ -175,7 +175,7 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] CompletedTimerGraph(string timerName)
         {
-            return _builder.TimerFiredGraph(Identity.Timer(timerName), TimeSpan.Zero).ToArray();
+            return _builder.TimerFiredGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.Zero).ToArray();
         }
 
         private class WorkflowToJumpToDifferentBranch : Workflow

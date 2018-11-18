@@ -58,7 +58,7 @@ namespace Guflow.Tests.Decider
             var identity = Identity.New(WorkflowName,WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
 
             _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity,"runid","input").ToArray());
-            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName),TimeSpan.Zero).ToArray());
+            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(),TimeSpan.Zero).ToArray());
 
             var decisions = workflow.Decisions(_builder.Result());
 
@@ -72,7 +72,7 @@ namespace Guflow.Tests.Decider
             var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
 
             _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity, "runid", "input").ToArray());
-            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.Zero).ToArray());
+            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero).ToArray());
 
             var decisions = workflow.Decisions(_builder.Result());
 
@@ -86,7 +86,7 @@ namespace Guflow.Tests.Decider
             var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
 
             _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity, "runid", "input").ToArray());
-            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.Zero).ToArray());
+            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero).ToArray());
 
             var decisions = workflow.Decisions(_builder.Result());
 

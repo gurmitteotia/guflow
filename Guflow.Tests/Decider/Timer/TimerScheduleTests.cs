@@ -88,7 +88,7 @@ namespace Guflow.Tests.Decider
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .TimerFiredGraph(Identity.Timer(ParentTimerName), TimeSpan.FromSeconds(2))
+                .TimerFiredGraph(Identity.Timer(ParentTimerName).ScheduleId(), TimeSpan.FromSeconds(2))
                 .ToArray());
             return _eventsBuilder.Result();
         }

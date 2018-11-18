@@ -191,7 +191,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerFiredGraph(Identity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
+        public IEnumerable<HistoryEvent> TimerFiredGraph(SwfIdentity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerFiredIds(ref _currentEventId);
@@ -203,7 +203,7 @@ namespace Guflow.Tests.Decider
                 TimerFiredEventAttributes = new TimerFiredEventAttributes()
                 {
                     StartedEventId = eventIds.EventId(EventIds.Started),
-                    TimerId = timerId.Id
+                    TimerId = timerId
                 },
             });
 
@@ -213,7 +213,7 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.EventId(EventIds.Started),
                 TimerStartedEventAttributes = new TimerStartedEventAttributes()
                 {
-                    TimerId = timerId.Id,
+                    TimerId = timerId,
                     StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
                     Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = isARescheduleTimer }).ToJson()
                 }
@@ -221,7 +221,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerCancelledGraph(Identity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
+        public IEnumerable<HistoryEvent> TimerCancelledGraph(SwfIdentity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerCancelledIds(ref _currentEventId);
@@ -233,7 +233,7 @@ namespace Guflow.Tests.Decider
                 TimerCanceledEventAttributes = new TimerCanceledEventAttributes()
                 {
                     StartedEventId = eventIds.EventId(EventIds.Started),
-                    TimerId = timerId.Id,
+                    TimerId = timerId,
                 },
             });
 
@@ -243,7 +243,7 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.EventId(EventIds.Started),
                 TimerStartedEventAttributes = new TimerStartedEventAttributes()
                 {
-                    TimerId = timerId.Id,
+                    TimerId = timerId,
                     StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
                     Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = isARescheduleTimer }).ToJson()
                 }
@@ -252,7 +252,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerStartFailedGraph(Identity timerId, string cause)
+        public IEnumerable<HistoryEvent> TimerStartFailedGraph(SwfIdentity timerId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerStartFailedIds(ref _currentEventId);
@@ -263,7 +263,7 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.EventId(EventIds.Failed),
                 StartTimerFailedEventAttributes = new StartTimerFailedEventAttributes()
                 {
-                    TimerId = timerId.Id,
+                    TimerId = timerId,
                     Cause = cause
                 },
             });
@@ -338,7 +338,7 @@ namespace Guflow.Tests.Decider
             });
             return historyEvents;
         }
-        public IEnumerable<HistoryEvent> TimerCancellationFailedGraph(Identity timerId, string cause)
+        public IEnumerable<HistoryEvent> TimerCancellationFailedGraph(SwfIdentity timerId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CancellationFailedIds(ref _currentEventId);
@@ -349,7 +349,7 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.EventId(EventIds.Failed),
                 CancelTimerFailedEventAttributes = new CancelTimerFailedEventAttributes()
                 {
-                    TimerId = timerId.Id,
+                    TimerId = timerId,
                     Cause = cause
                 }
             });
@@ -360,7 +360,7 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.EventId(EventIds.Started),
                 TimerStartedEventAttributes = new TimerStartedEventAttributes()
                 {
-                    TimerId = timerId.Id,
+                    TimerId = timerId,
                     StartToFireTimeout = ((long)20).ToString(),
                     Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = false }).ToJson()
                 }
@@ -368,7 +368,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerStartedGraph(Identity identity, TimeSpan fireAfter, bool isARescheduleTimer = false)
+        public IEnumerable<HistoryEvent> TimerStartedGraph(SwfIdentity identity, TimeSpan fireAfter, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerStartedIds(ref _currentEventId);
@@ -379,7 +379,7 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.EventId(EventIds.Started),
                 TimerStartedEventAttributes = new TimerStartedEventAttributes()
                 {
-                    TimerId = identity.Id,
+                    TimerId = identity,
                     StartToFireTimeout = ((long)fireAfter.TotalSeconds).ToString(),
                     Control = (new TimerScheduleData() { TimerName = identity.Name, IsARescheduleTimer = isARescheduleTimer }).ToJson()
                 }

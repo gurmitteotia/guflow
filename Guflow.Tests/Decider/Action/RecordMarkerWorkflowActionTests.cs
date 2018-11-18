@@ -29,7 +29,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_returned_as_custom_action_workflow()
         {
-            var timerFiredEventGraph = _builder.TimerFiredGraph(Identity.Timer("timer1"), TimeSpan.FromSeconds(2));
+            var timerFiredEventGraph = _builder.TimerFiredGraph(Identity.Timer("timer1").ScheduleId(), TimeSpan.FromSeconds(2));
             var timerFiredEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
 
             var decisions = timerFiredEvent.Interpret(new WorkflowToReturnRecordMarker("markerName", "details")).Decisions();

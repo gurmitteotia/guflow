@@ -83,7 +83,7 @@ namespace Guflow.Tests.Decider
         public void Fail_workflow_for_child_workflow_reshedule_timer()
         {
             const string workflowRunid = "rid";
-            var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(workflowRunid);
+            var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleId(workflowRunid);
             var builder = new HistoryEventsBuilder().AddWorkflowRunId(workflowRunid);
             builder.AddNewEvents(TimerStartFailedEventGraph(identity, TimerFailureCause));
 
@@ -93,11 +93,11 @@ namespace Guflow.Tests.Decider
         }
         private TimerStartFailedEvent CreateTimerStartFailedEvent(Identity timerIdentity, string cause)
         {
-            var timerFailedEventGraph = _builder.TimerStartFailedGraph(timerIdentity, cause);
+            var timerFailedEventGraph = _builder.TimerStartFailedGraph(timerIdentity.ScheduleId(), cause);
             return new TimerStartFailedEvent(timerFailedEventGraph.First());
         }
 
-        private HistoryEvent[] TimerStartFailedEventGraph(Identity timerIdentity, string cause)
+        private HistoryEvent[] TimerStartFailedEventGraph(SwfIdentity timerIdentity, string cause)
         {
             return _builder.TimerStartFailedGraph(timerIdentity, cause).ToArray();
         }

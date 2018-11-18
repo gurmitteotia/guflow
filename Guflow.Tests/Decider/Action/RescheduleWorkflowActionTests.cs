@@ -285,12 +285,12 @@ namespace Guflow.Tests.Decider
         }
         private HistoryEvent[] TimerFiredEventGraph(string timerName, bool rescheduleTimer)
         {
-            return _eventGraphBuilder.TimerFiredGraph(Identity.Timer(timerName), TimeSpan.Zero, rescheduleTimer).ToArray();
+            return _eventGraphBuilder.TimerFiredGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.Zero, rescheduleTimer).ToArray();
         }
 
         private HistoryEvent[] TimerFailedEventGraph(string timerName)
         {
-            return _eventGraphBuilder.TimerStartFailedGraph(Identity.Timer(timerName), "blah").ToArray();
+            return _eventGraphBuilder.TimerStartFailedGraph(Identity.Timer(timerName).ScheduleId(), "blah").ToArray();
         }
 
         private class WorkflowToRescheduleActivity : Workflow

@@ -200,7 +200,7 @@ namespace Guflow.Tests.Decider
         public void Last_event_is_timer_event_when_timer_events_are_newer_then_activity_event()
         {
             var activityFailedEventGraph = _eventGraphBuilder.ActivityFailedGraph(_activityIdenity, "workerid", "reason", "detail");
-            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity,TimeSpan.FromSeconds(2));
+            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity.ScheduleId(),TimeSpan.FromSeconds(2));
             
             var activityItem = CreateActivityItemWith(activityFailedEventGraph.Concat(timerStartedEventGraph));
 
@@ -212,7 +212,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_is_activity_event_when_activity_events_are_newer_then_timer_event()
         {
-            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity, TimeSpan.FromSeconds(2));
+            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(2));
             var activityFailedEventGraph = _eventGraphBuilder.ActivityFailedGraph(_activityIdenity, "workerid", "reason", "detail");
             var eventGraph = timerFiredEventGraph.Concat(activityFailedEventGraph);
             var activityItem = CreateActivityItemWith(eventGraph);
@@ -251,7 +251,7 @@ namespace Guflow.Tests.Decider
         public void Last_event_by_default_filter_out_reschedule_timer_events()
         {
             var activityFailedEventGraph = _eventGraphBuilder.ActivityFailedGraph(_activityIdenity, "workerid", "reason", "detail");
-            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity, TimeSpan.FromSeconds(2));
+            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(2));
 
             var activityItem = CreateActivityItemWith(activityFailedEventGraph.Concat(timerStartedEventGraph));
 
@@ -427,7 +427,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_fired_event()
         {
-            var eventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity, TimeSpan.FromSeconds(3),true);
+            var eventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(3),true);
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents(true);
@@ -439,7 +439,7 @@ namespace Guflow.Tests.Decider
         public void All_events_return_the_events_in_the_order_of_their_occurrence()
         {
             var startedEventGraph = _eventGraphBuilder.ActivityStartedGraph(_activityIdenity, "id");
-            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(3), true);
             var completedEventGraph = _eventGraphBuilder.ActivityCompletedGraph(_activityIdenity, "workerid", "detail");
 
             var activityItem = CreateActivityItemWith(startedEventGraph.Concat(timerFiredEventGraph).Concat(completedEventGraph));
@@ -456,7 +456,7 @@ namespace Guflow.Tests.Decider
         public void All_events_by_default_filters_out_reschedule_timer_events()
         {
             var startedEventGraph = _eventGraphBuilder.ActivityStartedGraph(_activityIdenity, "id");
-            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(3), true);
             var completedEventGraph = _eventGraphBuilder.ActivityCompletedGraph(_activityIdenity, "workerid", "detail");
 
             var activityItem = CreateActivityItemWith(startedEventGraph.Concat(timerFiredEventGraph).Concat(completedEventGraph));
@@ -471,8 +471,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_fired_and_timer_started_event_event()
         {
-            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity,TimeSpan.FromSeconds(3),true);
-            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity.ScheduleId(),TimeSpan.FromSeconds(3),true);
+            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(3), true);
             var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(timerFiredEventGraph));
 
             var allEvents = activityItem.AllEvents(true);
@@ -484,7 +484,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_cancelled_event()
         {
-            var eventGraph = _eventGraphBuilder.TimerCancelledGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var eventGraph = _eventGraphBuilder.TimerCancelledGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(3), true);
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents(true);
@@ -495,8 +495,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_cancelled_and_timer_started_event()
         {
-            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity,TimeSpan.FromSeconds(3),true);
-            var timerCancelledEventGraph = _eventGraphBuilder.TimerCancelledGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity.ScheduleId(),TimeSpan.FromSeconds(3),true);
+            var timerCancelledEventGraph = _eventGraphBuilder.TimerCancelledGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(3), true);
             var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(timerCancelledEventGraph));
 
             var allEvents = activityItem.AllEvents(true);
@@ -508,7 +508,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_cancellattion_failed_event_and_timer_started_event()
         {
-            var eventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_activityIdenity, "cause");
+            var eventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_activityIdenity.ScheduleId(), "cause");
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents(true);
@@ -523,8 +523,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_started_and_cancellattion_failed_event()
         {
-            var failedEventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_activityIdenity, "cause");
-            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity, TimeSpan.FromSeconds(3));
+            var failedEventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_activityIdenity.ScheduleId(), "cause");
+            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(3));
             var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(failedEventGraph));
 
             var allEvents = activityItem.AllEvents(true);
@@ -540,7 +540,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_started_event()
         {
-            var eventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity, TimeSpan.FromSeconds(3), true);
+            var eventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity.ScheduleId(), TimeSpan.FromSeconds(3), true);
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents(true);
@@ -551,7 +551,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_start_failed_event()
         {
-            var eventGraph = _eventGraphBuilder.TimerStartFailedGraph(_activityIdenity,"cause");
+            var eventGraph = _eventGraphBuilder.TimerStartFailedGraph(_activityIdenity.ScheduleId(),"cause");
             var activityItem = CreateActivityItemWith(eventGraph);
 
             var allEvents = activityItem.AllEvents(true);
@@ -570,7 +570,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_last_event_is_reschedule_timer_started()
         {
-            var startedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity, TimeSpan.Zero, true);
+            var startedEventGraph = _eventGraphBuilder.TimerStartedGraph(_activityIdenity.ScheduleId(), TimeSpan.Zero, true);
             var activityItem = CreateActivityItemWith(startedEventGraph);
             Assert.IsTrue(activityItem.IsActive);
         }

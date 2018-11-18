@@ -37,7 +37,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_timer_decision_for_timer_item_when_it_is_active()
         {
-            SetupWorkflowToReturns(_eventGraph.TimerStartedGraph(Identity.Timer("TimerName"), TimeSpan.FromSeconds(2)));
+            SetupWorkflowToReturns(_eventGraph.TimerStartedGraph(Identity.Timer("TimerName").ScheduleId(), TimeSpan.FromSeconds(2)));
             var timerItem = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(timerItem);
 
@@ -72,7 +72,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_timer_decision_for_activity_item_when_reschedule_timer_is_active()
         {
-            SetupWorkflowToReturns(_eventGraph.TimerStartedGraph(Identity.New("activityName1", "ver"), TimeSpan.FromSeconds(2), true));
+            SetupWorkflowToReturns(_eventGraph.TimerStartedGraph(Identity.New("activityName1", "ver").ScheduleId(), TimeSpan.FromSeconds(2), true));
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
@@ -110,7 +110,7 @@ namespace Guflow.Tests.Decider
         public void Returns_cancel_timer_decision_for_child_workflow_item_when_reschedule_timer_is_active()
         {
             var identity = Identity.New("workflow", "ver");
-            SetupWorkflowToReturns(_eventGraph.TimerStartedGraph(identity, TimeSpan.FromSeconds(2), true));
+            SetupWorkflowToReturns(_eventGraph.TimerStartedGraph(identity.ScheduleId(), TimeSpan.FromSeconds(2), true));
             var item = new ChildWorkflowItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(item);
 
@@ -268,12 +268,12 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] TimerStartedEventGraph(string timerName)
         {
-            return _eventGraph.TimerStartedGraph(Identity.Timer(timerName), TimeSpan.FromSeconds(1)).ToArray();
+            return _eventGraph.TimerStartedGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.FromSeconds(1)).ToArray();
         }
 
         private HistoryEvent[] TimerFiredEventGraph(string timerName)
         {
-            return _eventGraph.TimerFiredGraph(Identity.Timer(timerName), TimeSpan.FromSeconds(1)).ToArray();
+            return _eventGraph.TimerFiredGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.FromSeconds(1)).ToArray();
         }
 
         private HistoryEvent[] ChildWorkflowStarted(string runId)

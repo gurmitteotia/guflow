@@ -46,7 +46,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_timer_start_event_is_missing()
         {
-            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), _fireAfter);
+            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(), _fireAfter);
             Assert.Throws<IncompleteEventGraphException>(()=> new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph.Where(h=>h.EventType!=EventType.TimerStarted)));
         }
 
@@ -76,7 +76,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.New(ActivityName, ActivityVersion, PositionalName), _fireAfter, true).ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(), _fireAfter, true).ToArray());
 
             var workflowAction = workflow.Decisions(_eventsBuilder.Result());
 
@@ -99,7 +99,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleLambdaWorkflow();
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Lambda(LambdaName), _fireAfter, true).ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Lambda(LambdaName).ScheduleId(), _fireAfter, true).ToArray());
 
             var workflowAction = workflow.Decisions(_eventsBuilder.Result());
 
@@ -111,7 +111,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new ChildWorkflow();
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.New(WorkflowName,WorkflowVersion), _fireAfter, true).ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.New(WorkflowName,WorkflowVersion).ScheduleId(), _fireAfter, true).ToArray());
 
             var workflowAction = workflow.Decisions(_eventsBuilder.Result());
 
@@ -129,13 +129,13 @@ namespace Guflow.Tests.Decider
 
         private TimerFiredEvent CreateTimerFiredEvent(Identity identity, TimeSpan fireAfter)
         {
-            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(identity, fireAfter);
+            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(identity.ScheduleId(), fireAfter);
             return new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
         }
 
         private TimerFiredEvent CreateRescheduleTimerFiredEvent(Identity identity, TimeSpan fireAfter)
         {
-            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(identity, fireAfter, true);
+            var timerFiredEventGraph = _eventGraphBuilder.TimerFiredGraph(identity.ScheduleId(), fireAfter, true);
             return new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
         }
 

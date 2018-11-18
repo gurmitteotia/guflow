@@ -71,7 +71,7 @@ namespace Guflow.Tests.Decider
         {
             const string workflowRunid = "rid";
             var builder = new HistoryEventsBuilder().AddWorkflowRunId(workflowRunid);
-            builder.AddNewEvents(TimerCancellationFailedEventGrpah(Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(workflowRunid), Cause));
+            builder.AddNewEvents(TimerCancellationFailedEventGrpah(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(workflowRunid), Cause));
             
             var decisions = new WorkflowWithChildWorkflow().Decisions(builder.Result());
 
@@ -89,10 +89,10 @@ namespace Guflow.Tests.Decider
         
         private TimerCancellationFailedEvent CreateTimerCancellationFailedEvent(Identity identity, string cause)
         {
-            var timerCancellationFailedEventGraph = _builder.TimerCancellationFailedGraph(identity, Cause);
+            var timerCancellationFailedEventGraph = _builder.TimerCancellationFailedGraph(identity.ScheduleId(), Cause);
             return new TimerCancellationFailedEvent(timerCancellationFailedEventGraph.First());
         }
-        private HistoryEvent[] TimerCancellationFailedEventGrpah(Identity identity, string cause)
+        private HistoryEvent[] TimerCancellationFailedEventGrpah(SwfIdentity identity, string cause)
         {
             return _builder.TimerCancellationFailedGraph(identity, Cause).ToArray();
         }

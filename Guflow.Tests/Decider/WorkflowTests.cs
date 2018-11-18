@@ -59,7 +59,7 @@ namespace Guflow.Tests.Decider
         public void Get_timer_by_its_event()
         {
             var identity = Identity.Timer("Timer1");
-            var eventGraph = _eventGraphBuilder.TimerFiredGraph(identity, TimeSpan.FromSeconds(2));
+            var eventGraph = _eventGraphBuilder.TimerFiredGraph(identity.ScheduleId(), TimeSpan.FromSeconds(2));
             var activityCompletedEvent = new TimerFiredEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
