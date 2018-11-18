@@ -96,7 +96,7 @@ namespace Guflow.Tests.Decider
         private WorkflowHistoryEvents LambdaCompletedEventGraph()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "result").ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "result").ToArray());
             return _eventsBuilder.Result();
         }
 

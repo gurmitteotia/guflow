@@ -678,7 +678,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(Identity identity, object input, object result, TimeSpan? startToClose = null)
+        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(SwfIdentity identity, object input, object result, TimeSpan? startToClose = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -712,7 +712,7 @@ namespace Guflow.Tests.Decider
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    Id = identity.Id,
+                    Id = identity,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
                     StartToCloseTimeout = startToClose.Seconds()
@@ -722,7 +722,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> LambdaFailedEventGraph(Identity identity, object input, string reason, string details, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaFailedEventGraph(SwfIdentity identity, object input, string reason, string details, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.FailedIds(ref _currentEventId);
@@ -757,7 +757,7 @@ namespace Guflow.Tests.Decider
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    Id = identity.Id,
+                    Id = identity,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
                     StartToCloseTimeout = timeout.Seconds()
@@ -767,7 +767,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> LamdbaTimedoutEventGraph(Identity identity, object input, string timedoutType, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LamdbaTimedoutEventGraph(SwfIdentity identity, object input, string timedoutType, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimedoutIds(ref _currentEventId);
@@ -801,7 +801,7 @@ namespace Guflow.Tests.Decider
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    Id = identity.Id,
+                    Id = identity,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
                     StartToCloseTimeout = timeout.Seconds()
@@ -811,7 +811,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public HistoryEvent LambdaSchedulingFailedEventGraph(Identity identity, string reason)
+        public HistoryEvent LambdaSchedulingFailedEventGraph(SwfIdentity identity, string reason)
         {
             var eventIds = EventIds.SchedulingFailedIds(ref _currentEventId);
             return new HistoryEvent()
@@ -820,14 +820,14 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.ScheduleLambdaFunctionFailed,
                 ScheduleLambdaFunctionFailedEventAttributes = new ScheduleLambdaFunctionFailedEventAttributes
                 {
-                    Id = identity.Id,
+                    Id = identity,
                     Name = identity.Name,
                     Cause = reason
                 }
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaStartFailedEventGraph(Identity identity, string input, string cause, string message, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaStartFailedEventGraph(SwfIdentity identity, string input, string cause, string message, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.LambdaStartFailedIds(ref _currentEventId);
@@ -850,7 +850,7 @@ namespace Guflow.Tests.Decider
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    Id = identity.Id,
+                    Id = identity,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
                     StartToCloseTimeout = timeout.Seconds()
@@ -860,7 +860,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public HistoryEvent LambdaScheduledEventGraph(Identity identity, object input, TimeSpan? timeout = null)
+        public HistoryEvent LambdaScheduledEventGraph(SwfIdentity identity, object input, TimeSpan? timeout = null)
         {
             var eventIds = EventIds.ScheduledIds(ref _currentEventId);
             return new HistoryEvent()
@@ -869,7 +869,7 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.LambdaFunctionScheduled,
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes
                 {
-                    Id = identity.Id,
+                    Id = identity,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
@@ -878,7 +878,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(Identity identity, object input, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(SwfIdentity identity, object input, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
@@ -899,7 +899,7 @@ namespace Guflow.Tests.Decider
                 LambdaFunctionScheduledEventAttributes = new LambdaFunctionScheduledEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    Id = identity.Id,
+                    Id = identity,
                     Name = identity.Name,
                     Input = input.ToAwsString(),
                     StartToCloseTimeout = timeout.Seconds()

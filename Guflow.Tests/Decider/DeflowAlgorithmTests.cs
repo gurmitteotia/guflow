@@ -424,7 +424,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = new LambdaWorkflow().Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -438,8 +438,8 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
-                new ScheduleLambdaDecision(Identity.Lambda(SendEmailLambda), "input"), 
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(SendEmailLambda).ScheduleId(), "input"), 
             }));
         }
 
@@ -456,7 +456,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
             }));
         }
 
@@ -470,7 +470,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda).ScheduleId(), "input"),
             }));
         }
 
@@ -503,7 +503,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
                 new ScheduleChildWorkflowDecision(Identity.New(InvoiceCustomerWorkflow, Version),"input"), 
             }));
 
@@ -520,7 +520,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
             }));
 
         }
@@ -535,7 +535,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda).ScheduleId(), "input"),
             }));
 
         }
@@ -568,7 +568,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(BookFlightLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(BookFlightLambda).ScheduleId(), "input"),
             }));
         }
 
@@ -630,11 +630,11 @@ namespace Guflow.Tests.Decider
         }
         private HistoryEvent[] LambdaCompletedGraph(string lambdaName)
         {
-            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(lambdaName), "id", "result").ToArray();
+            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(lambdaName).ScheduleId(), "id", "result").ToArray();
         }
         private HistoryEvent[] LambdaStartedGraph(string lambdaName)
         {
-            return _eventGraphBuilder.LambdaStartedEventGraph(Identity.Lambda(lambdaName), "id").ToArray();
+            return _eventGraphBuilder.LambdaStartedEventGraph(Identity.Lambda(lambdaName).ScheduleId(), "id").ToArray();
         }
 
         private HistoryEvent[] TimerStartedGraph(Identity identity, bool isARescheduleTimer)

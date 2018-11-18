@@ -198,7 +198,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Lambda_function_completed_event_is_interpreted()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("l"), "input", "result").ToArray();
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("l").ScheduleId(), "input", "result").ToArray();
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -208,7 +208,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Lambda_function_failed_event_is_interpreted()
         {
-            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("l"), "input", "reason", "details").ToArray();
+            var eventGraph = _builder.LambdaFailedEventGraph(Identity.Lambda("l").ScheduleId(), "input", "reason", "details").ToArray();
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -218,7 +218,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Lambda_function_timedout_event_is_interpreted()
         {
-            var eventGraph = _builder.LamdbaTimedoutEventGraph(Identity.Lambda("l"), "input", "reason").ToArray();
+            var eventGraph = _builder.LamdbaTimedoutEventGraph(Identity.Lambda("l").ScheduleId(), "input", "reason").ToArray();
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -228,7 +228,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Lambda_function_scheduling_failed_event_is_interpreted()
         {
-            var eventGraph = new []{_builder.LambdaSchedulingFailedEventGraph(Identity.Lambda("l"), "reason")};
+            var eventGraph = new []{_builder.LambdaSchedulingFailedEventGraph(Identity.Lambda("l").ScheduleId(), "reason")};
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -238,7 +238,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Lambda_function_start_failed_event_is_interpreted()
         {
-            var eventGraph =  _builder.LambdaStartFailedEventGraph(Identity.Lambda("l"), "input", "reason", "details");
+            var eventGraph =  _builder.LambdaStartFailedEventGraph(Identity.Lambda("l").ScheduleId(), "input", "reason", "details");
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -431,7 +431,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_lambda_is_started()
         {
-            var eventGraph = _builder.LambdaStartedEventGraph(Identity.Lambda(LambdaName), "input");
+            var eventGraph = _builder.LambdaStartedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input");
 
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
 

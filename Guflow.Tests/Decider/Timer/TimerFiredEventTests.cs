@@ -103,7 +103,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName).ScheduleId(), "input") }));
         }
 
         [Test]

@@ -173,7 +173,7 @@ namespace Guflow.Tests.Decider
            
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -186,7 +186,7 @@ namespace Guflow.Tests.Decider
            
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -201,7 +201,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -268,11 +268,11 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] LambdaCompletedEventGraph()
         {
-            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "type").ToArray();
+            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "type").ToArray();
         }
         private HistoryEvent[] LambdaFailedEventGraph()
         {
-            return _eventGraphBuilder.LambdaFailedEventGraph(Identity.Lambda(LambdaName), "input", "type","details").ToArray();
+            return _eventGraphBuilder.LambdaFailedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "type","details").ToArray();
         }
         private HistoryEvent[] ActivityCompletedEventGraph(string activityName, string activityVersion, string positionalName)
         {

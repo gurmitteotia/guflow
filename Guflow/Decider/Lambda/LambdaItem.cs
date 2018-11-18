@@ -70,7 +70,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return new[] { new ScheduleLambdaDecision(Identity, _input(this), _timeout(this)) };
+            return new[] { new ScheduleLambdaDecision(Identity.ScheduleId(), _input(this), _timeout(this)) };
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)

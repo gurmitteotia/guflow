@@ -13,12 +13,14 @@ namespace Guflow.Tests.Decider
     {
         private EventGraphBuilder _builder;
         private LambdaCompletedEvent _event;
-
+        private const string LambdaName = "lambda_name";
+        private const string  PositionalName = "pos_name";
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name", "pos_name"), "input", "result", TimeSpan.FromSeconds(10));
+           
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName, PositionalName).ScheduleId(), "input", "result", TimeSpan.FromSeconds(10));
             _event = new LambdaCompletedEvent(eventGraph.First(), eventGraph);
 
         }
@@ -33,7 +35,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_lambda_scheduled_event_not_found()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", TimeSpan.FromSeconds(10));
+            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "result", TimeSpan.FromSeconds(10));
             Assert.Throws<IncompleteEventGraphException>(()=>_event = new LambdaCompletedEvent(eventGraph.First(), Enumerable.Empty<HistoryEvent>()));
         }
 
@@ -57,9 +59,9 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithLambda()
             {
-                ScheduleLambda("lambda_name", "pos_name");
+                ScheduleLambda(LambdaName, PositionalName);
 
-                ScheduleTimer("timer_name").AfterLambda("lambda_name", "pos_name");
+                ScheduleTimer("timer_name").AfterLambda(LambdaName, PositionalName);
             }
         }
 
@@ -67,9 +69,9 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomAction(WorkflowAction action)
             {
-                ScheduleLambda("lambda_name", "pos_name").OnCompletion(e=>action);
+                ScheduleLambda(LambdaName, PositionalName).OnCompletion(e=>action);
 
-                ScheduleTimer("timer_name").AfterLambda("lambda_name", "pos_name");
+                ScheduleTimer("timer_name").AfterLambda(LambdaName, PositionalName);
             }
         }
     }

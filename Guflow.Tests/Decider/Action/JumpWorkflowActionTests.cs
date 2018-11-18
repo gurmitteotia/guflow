@@ -107,7 +107,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName, PositionalName), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName, PositionalName).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -149,7 +149,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = new WorkflowToJumpToParentLambda().Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{new ScheduleLambdaDecision(Identity.Lambda(LambdaName,PositionalName),"input")}));
+            Assert.That(decisions, Is.EqualTo(new []{new ScheduleLambdaDecision(Identity.Lambda(LambdaName,PositionalName).ScheduleId(),"input")}));
         }
 
         private class WorkflowToReturnScheduleActivityAction : Workflow

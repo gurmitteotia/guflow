@@ -72,7 +72,7 @@ namespace Guflow.Tests.Decider
         public void Get_lambda_item_form_its_event()
         {
             var identity = Identity.Lambda("Lambda");
-            var eventGraph = _eventGraphBuilder.LambdaCompletedEventGraph(identity, "id", "result");
+            var eventGraph = _eventGraphBuilder.LambdaCompletedEventGraph(identity.ScheduleId(), "id", "result");
             var @event = new LambdaCompletedEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -303,7 +303,7 @@ namespace Guflow.Tests.Decider
                 new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2)),
                 new CancelActivityDecision(Identity.New("newid", "1.0")),
                 new CancelTimerDecision(Identity.Timer("first")),
-                new ScheduleLambdaDecision(Identity.Lambda("name"),"input" ), 
+                new ScheduleLambdaDecision(Identity.Lambda("name").ScheduleId(),"input" ), 
             };
         }
 
