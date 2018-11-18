@@ -466,7 +466,7 @@ namespace Guflow.Tests.Decider
             var item = new ChildWorkflowItem(_identity, _workflow.Object);
             var decisions = item.RescheduleDecisions(TimeSpan.FromSeconds(20));
 
-            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(_scheduleIdentity, TimeSpan.FromSeconds(20), true)}));
+            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(_scheduleIdentity.ScheduleId(), TimeSpan.FromSeconds(20), true)}));
         }
 
         [Test]

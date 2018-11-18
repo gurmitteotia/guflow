@@ -52,7 +52,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.New("name", "ver", "pos"), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.New("name", "ver", "pos").ScheduleId(), TimeSpan.FromSeconds(2), true) }));
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleTimerDecision(Identity.Timer("SomeTimer"), TimeSpan.FromSeconds(0))}));
+            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleTimerDecision(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0))}));
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("SomeTimer"), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0)) }));
         }
 
         [Test]

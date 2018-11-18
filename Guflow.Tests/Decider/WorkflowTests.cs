@@ -300,7 +300,7 @@ namespace Guflow.Tests.Decider
             return new WorkflowDecision[]
             {
                 new ScheduleActivityDecision(Identity.New("id", "1.0")),
-                new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2)),
+                new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2)),
                 new CancelActivityDecision(Identity.New("newid", "1.0")),
                 new CancelTimerDecision(Identity.Timer("first")),
                 new ScheduleLambdaDecision(Identity.Lambda("name"),"input" ), 

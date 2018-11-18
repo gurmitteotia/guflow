@@ -584,7 +584,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
-                new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.Zero),
+                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero),
             }));
         }
 

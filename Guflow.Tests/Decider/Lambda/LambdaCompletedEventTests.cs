@@ -42,7 +42,7 @@ namespace Guflow.Tests.Decider
         {
             var decisions = _event.Interpret(new WorkflowWithLambda()).Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name"), TimeSpan.Zero) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name").ScheduleId(), TimeSpan.Zero) }));
         }
 
         [Test]

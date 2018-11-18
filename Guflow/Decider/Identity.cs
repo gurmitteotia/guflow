@@ -12,7 +12,7 @@ namespace Guflow.Decider
             Name = name;
             Version = version;
             PositionalName = positionalName;
-            Id = SwfIdentity.Create(Name,Version,PositionalName);
+            Id = SwfIdentity.Create(this);
         }
         //TODO: Move it out of this class
         public SwfIdentity Id { get; private set; }
@@ -23,6 +23,12 @@ namespace Guflow.Decider
             identity.Id= SwfIdentity.Create(identity, salt);
             return identity;
         }
+
+        public SwfIdentity ScheduleId(string salt = "")
+        {
+            return SwfIdentity.Create(this,salt);
+        }
+        public static readonly Identity Empty = new Identity("","","");
 
         public static Identity Timer(string name)
         {

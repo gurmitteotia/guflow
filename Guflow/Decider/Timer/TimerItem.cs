@@ -183,7 +183,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return new[] { new ScheduleTimerDecision(Identity, _fireAfterFunc(this), this == _rescheduleTimer) };
+            return new[] { new ScheduleTimerDecision(SwfIdentity.Create(Identity) , _fireAfterFunc(this), this == _rescheduleTimer) };
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)

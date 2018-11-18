@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
 
             var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision,Is.EqualTo(new []{new ScheduleTimerDecision(_timerIdentity,new TimeSpan())}));
+            Assert.That(decision,Is.EqualTo(new []{new ScheduleTimerDecision(_timerIdentity.ScheduleId(), new TimeSpan())}));
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace Guflow.Tests.Decider
             timerItem.FireAfter(TimeSpan.FromSeconds(3));
             var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(new []{new ScheduleTimerDecision(_timerIdentity, TimeSpan.FromSeconds(3))}));
+            Assert.That(decision, Is.EqualTo(new []{new ScheduleTimerDecision(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3))}));
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
             timerItem.FireAfter(_=>TimeSpan.FromSeconds(4));
             var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity, TimeSpan.FromSeconds(4)) }));
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(4)) }));
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace Guflow.Tests.Decider
             timerItem.FireAfter(_ => TimeSpan.FromSeconds(3)).FireAfter(TimeSpan.FromSeconds(4));
             var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity, TimeSpan.FromSeconds(3)) }));
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3)) }));
         }
 
         [Test]

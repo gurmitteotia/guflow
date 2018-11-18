@@ -1,25 +1,44 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Represent the identity for a scheduled workflow item. This class is used internally.
+    /// </summary>
     public sealed class SwfIdentity
     {
         private readonly string _identity;
-        private SwfIdentity(string identity)
+        private readonly Identity _itemId;
+
+        private SwfIdentity(Identity itemId, string identity)
         {
             _identity = identity;
+            _itemId = itemId;
         }
-        public static SwfIdentity Create(string name, string version, string positionalName)
+
+        internal string Name => _itemId.Name;
+        internal string Version => _itemId.Version;
+        internal string PositionalName => _itemId.PositionalName;
+
+        internal static SwfIdentity Create(string name, string version, string positionalName)
+        {
+            var timerId = Identity.New(name, version, positionalName);
+            return Create(timerId);
+        }
+        internal static SwfIdentity Create(Identity itemId, string salt="")
+        {
+            var identity = SwfId(itemId.Name + salt, itemId.Version, itemId.PositionalName);
+            return new SwfIdentity(itemId, identity);
+        }
+
+        private static string SwfId(string name, string version, string positionalName)
         {
             var combinedName = string.Format("{0}{1}{2}", name, version, positionalName).ToLower();
-            return new SwfIdentity(combinedName.GetMd5Hash());
+            return combinedName.GetMd5Hash();
         }
-        internal static SwfIdentity Create(Identity identity, string salt)
+
+        internal static SwfIdentity Raw(string identity)
         {
-            return Create(identity.Name + salt, identity.Version, identity.PositionalName);
-        }
-        public static SwfIdentity Raw(string identity)
-        {
-            return new SwfIdentity(identity);
+            return new SwfIdentity(Identity.Empty, identity);
         }
         private bool Equals(SwfIdentity other)
         {

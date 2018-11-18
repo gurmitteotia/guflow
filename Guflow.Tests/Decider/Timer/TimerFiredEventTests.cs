@@ -91,7 +91,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = rescheduleTimer.Interpret(workflow).Decisions();
 
-            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.Zero) }));
+            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero) }));
         }
 
         [Test]

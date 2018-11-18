@@ -56,7 +56,7 @@ namespace Guflow.Tests.Decider
         {
             var decisions = new ChildWorkflow().Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer("TimerName"), TimeSpan.Zero)}));
+            Assert.That(decisions, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer("TimerName").ScheduleId(), TimeSpan.Zero)}));
         }
 
         [Test]
