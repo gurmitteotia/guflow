@@ -80,7 +80,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName)) }));
+            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
 
         [Test]

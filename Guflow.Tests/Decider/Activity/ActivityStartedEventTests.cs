@@ -10,10 +10,10 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class ActivityStartedEventTests
     {
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
-        private const string _positionalName = "First";
-        private const string _workerId = "id";
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
+        private const string WorkerId = "id";
         private ActivityStartedEvent _activityStartedEvent;
 
         private EventGraphBuilder _builder;
@@ -22,13 +22,13 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var scheduledActivityEventGraph = _builder.ActivityStartedGraph(Identity.New(_activityName, _activityVersion, _positionalName),_workerId);
+            var scheduledActivityEventGraph = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(),WorkerId);
             _activityStartedEvent = new ActivityStartedEvent(scheduledActivityEventGraph.First(), scheduledActivityEventGraph);
         }
         [Test]
         public void Should_populate_properties_from_event_attributes()
         {
-            Assert.That(_activityStartedEvent.WorkerIdentity,Is.EqualTo(_workerId));
+            Assert.That(_activityStartedEvent.WorkerIdentity,Is.EqualTo(WorkerId));
             Assert.That(_activityStartedEvent.IsActive,Is.True);
         }
 

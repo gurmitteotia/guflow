@@ -319,7 +319,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_activity_is_just_started()
         {
-            var activityStartedEventGraph = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion), "id");
+            var activityStartedEventGraph = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id");
             var workflowHistoryEvents = new WorkflowHistoryEvents(activityStartedEventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
@@ -328,7 +328,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_activity_is_just_scheduled()
         {
-            var activityScheduledEventGraph = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion));
+            var activityScheduledEventGraph = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId());
             var workflowHistoryEvents = new WorkflowHistoryEvents(activityScheduledEventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
@@ -337,7 +337,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_activity_cancellation_is_in_progress()
         {
-            var activityCancelRequestedGraph = _builder.ActivityCancelRequestedGraph(Identity.New(ActivityName, ActivityVersion),"id");
+            var activityCancelRequestedGraph = _builder.ActivityCancelRequestedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id");
             var workflowHistoryEvents = new WorkflowHistoryEvents(activityCancelRequestedGraph);
 
             Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
@@ -347,7 +347,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_not_be_active_when_activity_is_cancelled()
         {
-            var cancelledGraph = _builder.ActivityCancelledGraph(Identity.New(ActivityName, ActivityVersion), "id", "details");
+            var cancelledGraph = _builder.ActivityCancelledGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id", "details");
             var workflowHistoryEvents = new WorkflowHistoryEvents(cancelledGraph);
 
             Assert.IsFalse(workflowHistoryEvents.HasActiveEvent());
@@ -356,7 +356,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_not_be_active_when_activity_is_completed()
         {
-            var activityCompletedEventGraph =_builder.ActivityCompletedGraph(Identity.New(ActivityName, ActivityVersion), "id", "res");
+            var activityCompletedEventGraph =_builder.ActivityCompletedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id", "res");
             var workflowHistoryEvents = new WorkflowHistoryEvents(activityCompletedEventGraph);
 
             Assert.IsFalse(workflowHistoryEvents.HasActiveEvent());
@@ -365,8 +365,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_activity_is_just_started_after_failure()
         {
-            var eventGraph = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion), "id")
-                                            .Concat(_builder.ActivityFailedGraph(Identity.New(ActivityName, ActivityVersion), "id", "res","detail"));
+            var eventGraph = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id")
+                                            .Concat(_builder.ActivityFailedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id", "res","detail"));
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
@@ -375,8 +375,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_activity_is_started_but_its_cancel_request_failed()
         {
-            var eventGraph = _builder.ActivityCancellationFailedGraph(Identity.New(ActivityName, ActivityVersion), "reason")
-                .Concat(_builder.ActivityFailedGraph(Identity.New(ActivityName, ActivityVersion), "id", "res", "detail"));
+            var eventGraph = _builder.ActivityCancellationFailedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "reason")
+                .Concat(_builder.ActivityFailedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id", "res", "detail"));
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
 
             Assert.IsTrue(workflowHistoryEvents.HasActiveEvent());
@@ -510,23 +510,23 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] ActivityCompletedEventGraph()
         {
-            return  _builder.ActivityCompletedGraph(Identity.New(ActivityName, ActivityVersion), "id", "result").ToArray();
+            return  _builder.ActivityCompletedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id", "result").ToArray();
         }
         private HistoryEvent [] ActivityFailedEventGraph()
         {
-            return _builder.ActivityFailedGraph(Identity.New(ActivityName, ActivityVersion), "id", "reason","detail").ToArray();
+            return _builder.ActivityFailedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id", "reason","detail").ToArray();
         }
         private HistoryEvent [] ActivityTimedoutEventGraph()
         {
-            return _builder.ActivityTimedoutGraph(Identity.New(ActivityName, ActivityVersion), "id", "reason", "detail").ToArray();
+            return _builder.ActivityTimedoutGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id", "reason", "detail").ToArray();
         }
         private HistoryEvent [] ActivityCancelledEventGraph()
         {
-            return _builder.ActivityCancelledGraph(Identity.New(ActivityName, ActivityVersion), "id", "detail").ToArray();
+            return _builder.ActivityCancelledGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id", "detail").ToArray();
         }
         private HistoryEvent [] ActivityCancellationFailedEventGraph()
         {
-            return _builder.ActivityCancellationFailedGraph(Identity.New(ActivityName, ActivityVersion), "detail").ToArray();
+            return _builder.ActivityCancellationFailedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "detail").ToArray();
         }
         private HistoryEvent [] WorkflowStartedEventGraph()
         {
@@ -559,8 +559,8 @@ namespace Guflow.Tests.Decider
         private HistoryEvent [] NotInterpretingEventGraph()
         {
             var nonInterpretEvent = new[] {new HistoryEvent() {EventType = EventType.DecisionTaskCompleted}};
-            var activityStarted = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion), "id");
-            var activityScheduled = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion));
+            var activityStarted = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id");
+            var activityScheduled = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId());
             var timerStarted = _builder.TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(1));
             var childWorfklowStarted = _builder.ChildWorkflowStartedEventGraph(_childWorkflow, "rid", "input");
             return timerStarted.Concat(activityScheduled)

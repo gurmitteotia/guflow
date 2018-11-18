@@ -23,7 +23,8 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var cancelledActivityEventGraph = _builder.ActivityCancelledGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _detail);
+            var activityIdentity = Identity.New(_activityName, _activityVersion, _positionalName).ScheduleId();
+            var cancelledActivityEventGraph = _builder.ActivityCancelledGraph(activityIdentity, _identity, _detail);
             _activityCancelledEvent = new ActivityCancelledEvent(cancelledActivityEventGraph.First(), cancelledActivityEventGraph);
         }
 

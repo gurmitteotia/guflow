@@ -11,31 +11,33 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class ActivityCompletedEventTests
     {
-        private const string _result = "result";
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
-        private const string _positionalName = "First";
-        private const string _identity = "machine name";
-        private const string _input = "input";
+        private const string Result = "result";
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
+        private const string Identity = "machine name";
+        private const string Input = "input";
         private ActivityCompletedEvent _activityCompletedEvent;
 
         private EventGraphBuilder _builder;
+        private SwfIdentity _activityIdentity;
 
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result,_input);
+            _activityIdentity = Guflow.Decider.Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
+            var completedActivityEventGraph = _builder.ActivityCompletedGraph(_activityIdentity, Identity, Result,Input);
             _activityCompletedEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
         }
 
         [Test]
         public void Populate_activity_details_from_history_events()
         {
-            Assert.That(_activityCompletedEvent.Result, Is.EqualTo(_result));
-            Assert.That(_activityCompletedEvent.WorkerIdentity, Is.EqualTo(_identity));
+            Assert.That(_activityCompletedEvent.Result, Is.EqualTo(Result));
+            Assert.That(_activityCompletedEvent.WorkerIdentity, Is.EqualTo(Identity));
             Assert.That(_activityCompletedEvent.IsActive,Is.False);
-            Assert.That(_activityCompletedEvent.Input,Is.EqualTo(_input));
+            Assert.That(_activityCompletedEvent.Input,Is.EqualTo(Input));
         }
 
         [Test]
@@ -49,7 +51,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_populate_worker_id_when_activity_started_event_not_found_in_event_graph()
         {
-            var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
+            var completedActivityEventGraph = _builder.ActivityCompletedGraph(_activityIdentity, Identity, Result);
             
             var activityCompletedEvent= new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h=>h.EventType!=EventType.ActivityTaskStarted));
 
@@ -58,7 +60,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_activity_scheduled_event_not_found_in_event_graph()
         {
-            var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _result);
+            var completedActivityEventGraph = _builder.ActivityCompletedGraph(_activityIdentity, Identity, Result);
 
             Assert.Throws<IncompleteEventGraphException>(() => new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph.Where(h => h.EventType != EventType.ActivityTaskScheduled)));
         }
@@ -70,7 +72,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = _activityCompletedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(new ActivityItem(Identity.New(_activityName,_activityVersion,_positionalName),null))));
+            Assert.That(workflowAction,Is.EqualTo(WorkflowAction.ContinueWorkflow(new ActivityItem(Guflow.Decider.Identity.New(ActivityName,ActivityVersion,PositionalName),null))));
         }
 
         [Test]
@@ -88,7 +90,7 @@ namespace Guflow.Tests.Decider
         {
             public SingleActivityWorkflow()
             {
-                ScheduleActivity(_activityName,_activityVersion,_positionalName);
+                ScheduleActivity(ActivityName,ActivityVersion,PositionalName);
             }
         }
 
@@ -96,7 +98,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCompletion(c => workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => workflowAction);
             }
         }
     }

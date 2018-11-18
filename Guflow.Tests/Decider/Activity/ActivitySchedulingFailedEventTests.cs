@@ -10,9 +10,9 @@ namespace Guflow.Tests.Decider
     public class ActivitySchedulingFailedEventTests
     {
         private ActivitySchedulingFailedEvent _activitySchedulingFailedEvent;
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
-        private const string _positionalName = "First";
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
         private const string _cause = "detail";
         private EventGraphBuilder _builder;
 
@@ -20,7 +20,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var schedulingFailedEventGraph = _builder.ActivitySchedulingFailedGraph(Identity.New(_activityName, _activityVersion, _positionalName),_cause);
+            var schedulingFailedEventGraph = _builder.ActivitySchedulingFailedGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(),_cause);
             _activitySchedulingFailedEvent = new ActivitySchedulingFailedEvent(schedulingFailedEventGraph.First());
         }
 
@@ -55,7 +55,7 @@ namespace Guflow.Tests.Decider
         {
             public SingleActivityWorkflow()
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName);
             }
         }
 
@@ -63,7 +63,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnSchedulingFailed(e => workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnSchedulingFailed(e => workflowAction);
             }
         }
     }

@@ -49,7 +49,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_activity_decision_for_activity_item_when_reschedule_timer_is_not_active()
         {
-            SetupWorkflowToReturns(_eventGraph.ActivityStartedGraph(Identity.New("activityName1", "ver"), "id"));
+            SetupWorkflowToReturns(_eventGraph.ActivityStartedGraph(Identity.New("activityName1", "ver").ScheduleId(), "id"));
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
@@ -257,13 +257,13 @@ namespace Guflow.Tests.Decider
 
         private IWorkflowHistoryEvents CreateCompletedActivityEvent(string activityName, string activityVersion, string positionalName)
         {
-            var allHistoryEvents = _eventGraph.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res");
+            var allHistoryEvents = _eventGraph.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "res");
             return new WorkflowHistoryEvents(allHistoryEvents);
         }
 
         private HistoryEvent[] CompletedActivityEventGraph(string activityName, string activityVersion, string positionalName)
         {
-            return _eventGraph.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res").ToArray();
+            return _eventGraph.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "res").ToArray();
         }
 
         private HistoryEvent[] TimerStartedEventGraph(string timerName)

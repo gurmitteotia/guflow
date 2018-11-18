@@ -46,7 +46,7 @@ namespace Guflow.Tests.Decider
         public void Get_activity_by_its_event()
         {
             var identity = Identity.New("Activity1", "1.0");
-            var eventGraph = _eventGraphBuilder.ActivityCompletedGraph(identity, "id", "result");
+            var eventGraph = _eventGraphBuilder.ActivityCompletedGraph(identity.ScheduleId(), "id", "result");
             var activityCompletedEvent = new ActivityCompletedEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -100,12 +100,12 @@ namespace Guflow.Tests.Decider
         public void Filters_out_propose_to_complete_workflow_decision_when_it_is_generated_along_with_other_decisions()
         {
             var decisions = new WorkflowDecision[]{new CompleteWorkflowDecision("complete", true),
-                                                                                new ScheduleActivityDecision(Identity.New("something","1.0"))};
+                                                                                new ScheduleActivityDecision(Identity.New("something","1.0").ScheduleId())};
             _workflowEvents.Setup(w => w.NewEvents()).Returns(Events(decisions));
 
             var workflowDecisions = _workflow.Decisions(_workflowEvents.Object);
 
-            Assert.That(workflowDecisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New("something", "1.0")) }));
+            Assert.That(workflowDecisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New("something", "1.0").ScheduleId()) }));
         }
 
         [Test]
@@ -299,7 +299,7 @@ namespace Guflow.Tests.Decider
         {
             return new WorkflowDecision[]
             {
-                new ScheduleActivityDecision(Identity.New("id", "1.0")),
+                new ScheduleActivityDecision(Identity.New("id", "1.0").ScheduleId()),
                 new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2)),
                 new CancelActivityDecision(Identity.New("newid", "1.0")),
                 new CancelTimerDecision(Identity.Timer("first")),

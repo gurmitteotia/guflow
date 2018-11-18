@@ -91,7 +91,7 @@ namespace Guflow.Tests.Decider
         private WorkflowHistoryEvents ActivityEventGraph()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.ActivityCompletedGraph(Identity.New(ActivityName, ActivityVersion), "id","res").ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.ActivityCompletedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id","res").ToArray());
             return _eventsBuilder.Result();
         }
 

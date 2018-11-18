@@ -25,7 +25,7 @@ namespace Guflow.Tests.Decider
             var workflowStartedEvent = new WorkflowStartedEvent(workflowStartedEventGraph);
             _eventsBuilder.AddProcessedEvents(workflowStartedEventGraph);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .ActivityCompletedGraph(Identity.New("activityName", "1.0"), "id", "result").ToArray());
+                .ActivityCompletedGraph(Identity.New("activityName", "1.0").ScheduleId(), "id", "result").ToArray());
 
             var workflow = new WorkflowToRestart();
 
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent("input"));
             _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .ActivityCompletedGraph(Identity.New("activityName", "1.0"), "id", "result").ToArray());
+                .ActivityCompletedGraph(Identity.New("activityName", "1.0").ScheduleId(), "id", "result").ToArray());
 
             var workflow = new WorkflowToRestartWithCustomProperties();
 

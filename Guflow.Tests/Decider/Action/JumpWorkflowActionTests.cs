@@ -63,7 +63,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName))}));
+            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
 
         [Test]
@@ -170,7 +170,7 @@ namespace Guflow.Tests.Decider
      
         private HistoryEvent [] CompletedActivityGraph(string activityName, string activityVersion, string positionalName ="")
         {
-            return _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "result").ToArray();
+            return _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "result").ToArray();
         }
 
         private HistoryEvent[] CompletedTimerGraph(string timerName)

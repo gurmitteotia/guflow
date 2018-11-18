@@ -10,9 +10,9 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class ActivityScheduledEventTests
     {
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
-        private const string _positionalName = "First";
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
         private ActivityScheduledEvent _activityScheduledEvent;
 
         private EventGraphBuilder _builder;
@@ -21,7 +21,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var scheduledActivityEventGraph = _builder.ActivityScheduledGraph(Identity.New(_activityName, _activityVersion, _positionalName));
+            var scheduledActivityEventGraph = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId());
             _activityScheduledEvent = new ActivityScheduledEvent(scheduledActivityEventGraph.First(),scheduledActivityEventGraph);
         }
 

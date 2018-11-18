@@ -243,7 +243,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            var scheduleActivityDecision = new ScheduleActivityDecision(Identity);
+            var scheduleActivityDecision = new ScheduleActivityDecision(Identity.ScheduleId());
             scheduleActivityDecision.Input = _inputFunc(this).ToAwsString();
             scheduleActivityDecision.TaskListName = _taskListFunc(this);
             scheduleActivityDecision.TaskPriority = _priorityFunc(this);

@@ -38,7 +38,7 @@ namespace Guflow.Tests.Decider
 
             var workflowStartedDecisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Download", "1.0")) }));
+            Assert.That(workflowStartedDecisions, Is.EquivalentTo(new[] { new ScheduleActivityDecision(Identity.New("Download", "1.0").ScheduleId()) }));
         }
 
         [Test]
@@ -72,7 +72,7 @@ namespace Guflow.Tests.Decider
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {
-            var allHistoryEvents = _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion), "id", "res");
+            var allHistoryEvents = _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion).ScheduleId(), "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class TestWorkflow : Workflow

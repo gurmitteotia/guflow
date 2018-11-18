@@ -41,7 +41,7 @@ namespace Guflow.Tests.Decider
             
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName))}));
+            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion , PositionalName))}));
+            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion , PositionalName).ScheduleId()) }));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
 
         [Test]
@@ -215,7 +215,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         [Test]
@@ -256,7 +256,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         private HistoryEvent[] ChildWorkflowCompletedEventGraph()
@@ -276,12 +276,12 @@ namespace Guflow.Tests.Decider
         }
         private HistoryEvent[] ActivityCompletedEventGraph(string activityName, string activityVersion, string positionalName)
         {
-            return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res").ToArray();
+            return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "res").ToArray();
         }
 
         private HistoryEvent[] ActivityFailedEventGraph(string activityName, string activityVersion, string positionalName)
         {
-            return _eventGraphBuilder.ActivityFailedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res", "details").ToArray();
+            return _eventGraphBuilder.ActivityFailedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "res", "details").ToArray();
         }
         private HistoryEvent[] TimerFiredEventGraph(string timerName, bool rescheduleTimer)
         {

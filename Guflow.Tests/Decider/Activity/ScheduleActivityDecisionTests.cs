@@ -16,13 +16,13 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _activityIdentity = Identity.New("Download", "1.0", "First");
-            _scheduleActivityDecision = new ScheduleActivityDecision(_activityIdentity);
+            _scheduleActivityDecision = new ScheduleActivityDecision(_activityIdentity.ScheduleId());
         }
         [Test]
         public void Equality_tests()
         {
-            Assert.True(new ScheduleActivityDecision(Identity.New("Download","1.0","First")).Equals(new ScheduleActivityDecision(Identity.New("Download","1.0","First"))));
-            Assert.False(new ScheduleActivityDecision(Identity.New("Download", "1.0", "First")).Equals(new ScheduleActivityDecision(Identity.New("Download", "2.0", "First"))));
+            Assert.True(new ScheduleActivityDecision(Identity.New("Download","1.0","First").ScheduleId()).Equals(new ScheduleActivityDecision(Identity.New("Download","1.0","First").ScheduleId())));
+            Assert.False(new ScheduleActivityDecision(Identity.New("Download", "1.0", "First").ScheduleId()).Equals(new ScheduleActivityDecision(Identity.New("Download", "2.0", "First").ScheduleId())));
         }
 
         [Test]

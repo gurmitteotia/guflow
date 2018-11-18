@@ -77,7 +77,8 @@ namespace Guflow.Tests.Decider
 
         private ActivityTimedoutEvent CreateActivityTimedoutEvent(string timeoutType, string details)
         {
-            var activityTimedoutEventGraph = _builder.ActivityTimedoutGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, timeoutType, details);
+            var activityIdentity = Identity.New(_activityName, _activityVersion, _positionalName).ScheduleId();
+            var activityTimedoutEventGraph = _builder.ActivityTimedoutGraph(activityIdentity, _identity, timeoutType, details);
             return new ActivityTimedoutEvent(activityTimedoutEventGraph.First(), activityTimedoutEventGraph);
         }
 

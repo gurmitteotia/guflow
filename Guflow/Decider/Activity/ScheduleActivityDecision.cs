@@ -7,8 +7,8 @@ namespace Guflow.Decider
 {
     internal sealed class ScheduleActivityDecision : WorkflowDecision
     {
-        private readonly Identity _identity;
-        public ScheduleActivityDecision(Identity identity) : base(false)
+        private readonly SwfIdentity _identity;
+        public ScheduleActivityDecision(SwfIdentity identity) : base(false)
         {
             _identity = identity;
         }
@@ -44,7 +44,7 @@ namespace Guflow.Decider
                 ScheduleActivityTaskDecisionAttributes = new ScheduleActivityTaskDecisionAttributes()
                 {
                     ActivityType = new ActivityType() { Name = _identity.Name, Version = _identity.Version },
-                    ActivityId = _identity.Id,
+                    ActivityId = _identity,
                     Control = (new ScheduleData() { PN = _identity.PositionalName}).ToJson(),
                     HeartbeatTimeout =Timeouts.HeartbeatTimeout.Seconds(),
                     ScheduleToCloseTimeout = Timeouts.ScheduleToCloseTimeout.Seconds(),

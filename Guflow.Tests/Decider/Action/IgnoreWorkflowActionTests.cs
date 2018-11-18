@@ -43,7 +43,8 @@ namespace Guflow.Tests.Decider
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {
-            var allHistoryEvents = _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, string.Empty), "id", "res");
+            var activityIdentity = Identity.New(activityName, activityVersion, string.Empty).ScheduleId();
+            var allHistoryEvents = _builder.ActivityCompletedGraph(activityIdentity, "id", "res");
             return new ActivityCompletedEvent(allHistoryEvents.First(), allHistoryEvents);
         }
         private class WorkflowReturningStartWorkflowAction : Workflow
