@@ -115,7 +115,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion), "input") }));
+            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(), "input") }));
         }
 
         [Test]

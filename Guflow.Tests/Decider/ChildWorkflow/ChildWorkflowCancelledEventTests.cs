@@ -27,7 +27,7 @@ namespace Guflow.Tests.Decider
             _builder = new HistoryEventsBuilder();
             _builder.AddWorkflowRunId(ParentWorkflowRunId);
             var eventGraph =
-                _eventGraphBuilder.ChildWorkflowCancelledEventGraph(_workflowIdentity, "rid", "input", "details").ToArray();
+                _eventGraphBuilder.ChildWorkflowCancelledEventGraph(_workflowIdentity.ScheduleId(), "rid", "input", "details").ToArray();
             _builder.AddNewEvents(eventGraph);
             _event = new ChildWorkflowCancelledEvent(eventGraph.First(), eventGraph);
         }

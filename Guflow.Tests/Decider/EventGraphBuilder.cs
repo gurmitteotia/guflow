@@ -910,11 +910,11 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(Identity identity, string runId, object input, object result)
+        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(SwfIdentity identity, string runId, object input, object result)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
-            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity };
             var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
             historyEvents.Add(new HistoryEvent()
             {
@@ -950,7 +950,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
                     LambdaRole = "lambda_role",
@@ -966,11 +966,11 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public IEnumerable<HistoryEvent> ChildWorkflowFailedEventGraph(Identity identity, string runId, object input, string reason, object details)
+        public IEnumerable<HistoryEvent> ChildWorkflowFailedEventGraph(SwfIdentity identity, string runId, object input, string reason, object details)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.FailedIds(ref _currentEventId);
-            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity };
             var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
             historyEvents.Add(new HistoryEvent()
             {
@@ -1007,7 +1007,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
                     LambdaRole = "lambda_role",
@@ -1022,11 +1022,11 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCancelledEventGraph(Identity identity, string runId, object input, object details)
+        public IEnumerable<HistoryEvent> ChildWorkflowCancelledEventGraph(SwfIdentity identity, string runId, object input, object details)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.ChildWorkflowCancelledIds(ref _currentEventId);
-            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity };
             var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
             historyEvents.Add(new HistoryEvent()
             {
@@ -1084,7 +1084,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
                     LambdaRole = "lambda_role",
@@ -1099,11 +1099,11 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowStartedEventGraph(Identity identity, string runId, object input)
+        public IEnumerable<HistoryEvent> ChildWorkflowStartedEventGraph(SwfIdentity identity, string runId, object input)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
-            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity };
             var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
             historyEvents.Add(new HistoryEvent()
             {
@@ -1125,7 +1125,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
                     LambdaRole = "lambda_role",
@@ -1141,11 +1141,11 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public IEnumerable<HistoryEvent> ChildWorkflowTerminatedEventGraph(Identity identity, string runId, object input)
+        public IEnumerable<HistoryEvent> ChildWorkflowTerminatedEventGraph(SwfIdentity identity, string runId, object input)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
-            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity };
             var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
             historyEvents.Add(new HistoryEvent()
             {
@@ -1180,7 +1180,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
                     LambdaRole = "lambda_role",
@@ -1195,11 +1195,11 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowTimedoutEventGraph(Identity identity, string runId, object input, string timedoutType)
+        public IEnumerable<HistoryEvent> ChildWorkflowTimedoutEventGraph(SwfIdentity identity, string runId, object input, string timedoutType)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimedoutIds(ref _currentEventId);
-            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity };
             var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
             historyEvents.Add(new HistoryEvent()
             {
@@ -1235,7 +1235,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
                     LambdaRole = "lambda_role",
@@ -1250,7 +1250,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowStartFailedEventGraph(Identity identity, object input, string cause)
+        public IEnumerable<HistoryEvent> ChildWorkflowStartFailedEventGraph(SwfIdentity identity, object input, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.ChildWorkflowStartFailed(ref _currentEventId);
@@ -1274,7 +1274,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
                     LambdaRole = "lambda_role",
@@ -1289,11 +1289,11 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCancellationRequestedEventGraph(Identity identity, string runId, string input)
+        public IEnumerable<HistoryEvent> ChildWorkflowCancellationRequestedEventGraph(SwfIdentity identity, string runId, string input)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.WorkflowCancelRequestedIds(ref _currentEventId);
-            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity };
             var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
 
             historyEvents.Add(new HistoryEvent()
@@ -1338,7 +1338,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = input.ToAwsString(),
                     LambdaRole = "lambda_role",
@@ -1353,11 +1353,11 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCancelRequestFailedEventGraph(Identity identity, string runId, string cause)
+        public IEnumerable<HistoryEvent> ChildWorkflowCancelRequestFailedEventGraph(SwfIdentity identity, string runId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.ChildWorkflowCancelRequestFailedIds(ref _currentEventId);
-            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity.Id };
+            var workflowExecution = new WorkflowExecution() { RunId = runId, WorkflowId = identity };
             var workflowType = new WorkflowType() { Name = identity.Name, Version = identity.Version };
 
             historyEvents.Add(new HistoryEvent()
@@ -1404,7 +1404,7 @@ namespace Guflow.Tests.Decider
                 StartChildWorkflowExecutionInitiatedEventAttributes = new StartChildWorkflowExecutionInitiatedEventAttributes()
                 {
                     Control = (new ScheduleData() { PN = identity.PositionalName }).ToJson(),
-                    WorkflowId = identity.Id,
+                    WorkflowId = identity,
                     WorkflowType = workflowType,
                     Input = "input",
                     LambdaRole = "lambda_role",

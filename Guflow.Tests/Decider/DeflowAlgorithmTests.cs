@@ -504,7 +504,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
-                new ScheduleChildWorkflowDecision(Identity.New(InvoiceCustomerWorkflow, Version),"input"), 
+                new ScheduleChildWorkflowDecision(Identity.New(InvoiceCustomerWorkflow, Version).ScheduleId(),"input"), 
             }));
 
         }
@@ -600,7 +600,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
-                new ScheduleChildWorkflowDecision(Identity.New(BookFlightWorkflow, Version), "input"), 
+                new ScheduleChildWorkflowDecision(Identity.New(BookFlightWorkflow, Version).ScheduleId(), "input"), 
             }));
         }
 
@@ -644,7 +644,7 @@ namespace Guflow.Tests.Decider
 
         private HistoryEvent[] ChildWorkflowCompletedGraph(string name, string version)
         {
-            return _eventGraphBuilder.ChildWorkflowCompletedGraph(Identity.New(name, version), "id","input" ,"result").ToArray();
+            return _eventGraphBuilder.ChildWorkflowCompletedGraph(Identity.New(name, version).ScheduleId(), "id","input" ,"result").ToArray();
         }
 
         [WorkflowDescription("1.0")]

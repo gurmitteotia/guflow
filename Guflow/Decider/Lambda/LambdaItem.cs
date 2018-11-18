@@ -28,7 +28,7 @@ namespace Guflow.Decider
         {
             _input = (item) => WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _timeout = item => null;
-            _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
+            _rescheduleTimer = TimerItem.Reschedule(this, Identity.ScheduleId(), workflow);
             _completedAction = e => e.DefaultAction(workflow);
             _failedAction = e => e.DefaultAction(workflow);
             _timedoutAction = e => e.DefaultAction(workflow);

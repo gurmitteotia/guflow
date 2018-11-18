@@ -9,10 +9,10 @@ namespace Guflow.Decider
 {
     internal class ScheduleChildWorkflowDecision : WorkflowDecision
     {
-        private readonly Identity _identity;
+        private readonly SwfIdentity _identity;
         private readonly object _input;
 
-        public ScheduleChildWorkflowDecision(Identity identity, object input) : base(false)
+        public ScheduleChildWorkflowDecision(SwfIdentity identity, object input) : base(false)
         {
             _identity = identity;
             _input = input;
@@ -37,7 +37,7 @@ namespace Guflow.Decider
                 DecisionType = DecisionType.StartChildWorkflowExecution,
                 StartChildWorkflowExecutionDecisionAttributes = new StartChildWorkflowExecutionDecisionAttributes()
                 {
-                    WorkflowId = _identity.Id,
+                    WorkflowId = _identity,
                     WorkflowType = new WorkflowType() { Name = _identity.Name, Version = _identity.Version},
                     Input = _input.ToAwsString(),
                     Control = new ScheduleData() { PN = _identity.PositionalName}.ToJson(),
@@ -56,12 +56,12 @@ namespace Guflow.Decider
         {
             var decision = obj as ScheduleChildWorkflowDecision;
             return decision != null &&
-                   EqualityComparer<Identity>.Default.Equals(_identity, decision._identity);
+                   EqualityComparer<SwfIdentity>.Default.Equals(_identity, decision._identity);
         }
 
         public override int GetHashCode()
         {
-            return -1493283476 + EqualityComparer<Identity>.Default.GetHashCode(_identity);
+            return -1493283476 + EqualityComparer<SwfIdentity>.Default.GetHashCode(_identity);
         }
     }
 }

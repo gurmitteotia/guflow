@@ -118,7 +118,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(ChildWorkflowName, ChildWorkflowVersion), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(ChildWorkflowName, ChildWorkflowVersion).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -129,7 +129,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(ChildWorkflowName, ChildWorkflowVersion), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(ChildWorkflowName, ChildWorkflowVersion).ScheduleId(), "input") }));
         }
 
 

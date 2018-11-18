@@ -85,7 +85,7 @@ namespace Guflow.Tests.Decider
         public void Returns_cancel_child_workflow_decision_for_child_workflow_item_when_reschedule_timer_is_not_active()
         {
             var identity = Identity.New("workflow", "ver");
-            SetupWorkflowToReturns(_eventGraph.ChildWorkflowStartedEventGraph(identity, "id", "input"));
+            SetupWorkflowToReturns(_eventGraph.ChildWorkflowStartedEventGraph(identity.ScheduleId(), "id", "input"));
             var childWorkflowItem = new ChildWorkflowItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(childWorkflowItem);
 
@@ -279,7 +279,7 @@ namespace Guflow.Tests.Decider
         private HistoryEvent[] ChildWorkflowStarted(string runId)
         {
             return _eventGraph
-                .ChildWorkflowStartedEventGraph(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName), runId, "input").ToArray();
+                .ChildWorkflowStartedEventGraph(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).ScheduleId(), runId, "input").ToArray();
         }
 
         private class WorkflowToReturnCancelActivityAction : Workflow

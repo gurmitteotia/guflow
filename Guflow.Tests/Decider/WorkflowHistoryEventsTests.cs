@@ -248,7 +248,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Child_workflow_completed_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowCompletedGraph(_childWorkflow, "rid","i","result");
+            var eventGraph = _builder.ChildWorkflowCompletedGraph(_childWorkflow.ScheduleId(), "rid","i","result");
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -258,7 +258,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Child_workflow_failed_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowFailedEventGraph(_childWorkflow, "rid", "i", "reason", "details");
+            var eventGraph = _builder.ChildWorkflowFailedEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "reason", "details");
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -268,7 +268,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Child_workflow_cancelled_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(_childWorkflow, "rid", "i", "details");
+            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "details");
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -278,7 +278,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Child_workflow_timedout_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowTimedoutEventGraph(_childWorkflow, "rid", "i", "details");
+            var eventGraph = _builder.ChildWorkflowTimedoutEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "details");
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -288,7 +288,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Child_workflow_terminated_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowTerminatedEventGraph(_childWorkflow, "rid", "i");
+            var eventGraph = _builder.ChildWorkflowTerminatedEventGraph(_childWorkflow.ScheduleId(), "rid", "i");
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -298,7 +298,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Child_workflow_start_failed_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowStartFailedEventGraph(_childWorkflow, "rid", "i");
+            var eventGraph = _builder.ChildWorkflowStartFailedEventGraph(_childWorkflow.ScheduleId(), "rid", "i");
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
@@ -385,7 +385,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_not_be_active_when_child_workflow_is_cancelled()
         {
-            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(Identity.New(WorkflowName, WorkflowVersion),
+            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(),
                 "rid", "input", "detail");
                 
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
@@ -396,7 +396,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_be_active_when_child_workflow_is_started_and_its_cancellation_is_requested()
         {
-            var eventGraph = _builder.ChildWorkflowCancellationRequestedEventGraph(Identity.New(WorkflowName, WorkflowVersion),
+            var eventGraph = _builder.ChildWorkflowCancellationRequestedEventGraph(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(),
                 "rid", "input");
 
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
@@ -408,7 +408,7 @@ namespace Guflow.Tests.Decider
         public void Should_be_active_when_child_workflow_is_started_and_its_cancel_request_is_failed()
         {
             var startedGraph =
-                _builder.ChildWorkflowStartedEventGraph(Identity.New(WorkflowName, WorkflowVersion), "rid", "input");
+                _builder.ChildWorkflowStartedEventGraph(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(), "rid", "input");
             var cancelFailedGraph = _builder.ExternalWorkflowCancelRequestFailedEvent(Identity.New(WorkflowName, WorkflowVersion),
                 "rid", "input");
 
@@ -420,7 +420,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Should_not_be_active_when_child_workflow_is_completed()
         {
-            var eventGraph = _builder.ChildWorkflowCompletedGraph(Identity.New(WorkflowName, WorkflowVersion),
+            var eventGraph = _builder.ChildWorkflowCompletedGraph(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(),
                 "rid", "input", "detail");
 
             var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
@@ -562,7 +562,7 @@ namespace Guflow.Tests.Decider
             var activityStarted = _builder.ActivityStartedGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId(), "id");
             var activityScheduled = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId());
             var timerStarted = _builder.TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(1));
-            var childWorfklowStarted = _builder.ChildWorkflowStartedEventGraph(_childWorkflow, "rid", "input");
+            var childWorfklowStarted = _builder.ChildWorkflowStartedEventGraph(_childWorkflow.ScheduleId(), "rid", "input");
             return timerStarted.Concat(activityScheduled)
                 .Concat(activityStarted).Concat(nonInterpretEvent).Concat(childWorfklowStarted).ToArray();
         }

@@ -25,7 +25,7 @@ namespace Guflow.Decider
         private Func<IChildWorkflowItem, IEnumerable<string>> _tags;
         private Func<IChildWorkflowItem, bool> _when;
         private Func<IChildWorkflowItem, WorkflowAction> _onWhenFalseAction;
-        private Identity ScheduleIdentity => Identity.ScheduleIdentity(WorkflowHistoryEvents.WorkflowRunId);
+        private SwfIdentity ScheduleIdentity => Identity.ScheduleId(WorkflowHistoryEvents.WorkflowRunId);
         private TimerItem RescheduleTimer => RescheduleTimer(ScheduleIdentity);
 
         public ChildWorkflowItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
@@ -125,10 +125,10 @@ namespace Guflow.Decider
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
                 return RescheduleTimer.CancelDecisions();
 
-            return new[] { new CancelRequestWorkflowDecision(ScheduleIdentity.Id, (lastEvent as ChildWorkflowEvent)?.RunId), };
+            return new[] { new CancelRequestWorkflowDecision(ScheduleIdentity, (lastEvent as ChildWorkflowEvent)?.RunId), };
         }
 
-        public override bool Has(SwfIdentity identity) => ScheduleIdentity.Id == identity;
+        public override bool Has(SwfIdentity identity) => ScheduleIdentity == identity;
 
         public IFluentChildWorkflowItem AfterTimer(string name)
         {
@@ -337,7 +337,7 @@ namespace Guflow.Decider
         public WorkflowAction SignalAction(string signalName, string input)
         {
             var lastEvent = LastEvent() as ChildWorkflowEvent;
-            return WorkflowAction.Signal(signalName, input, ScheduleIdentity.Id, lastEvent?.RunId);
+            return WorkflowAction.Signal(signalName, input, ScheduleIdentity, lastEvent?.RunId);
         }
 
         public WorkflowAction CancelRequestFailedAction(ExternalWorkflowCancelRequestFailedEvent @event)

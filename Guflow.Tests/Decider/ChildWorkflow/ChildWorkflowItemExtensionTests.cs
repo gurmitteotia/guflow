@@ -14,11 +14,13 @@ namespace Guflow.Tests.Decider
         private Mock<IChildWorkflowItem> _childWorkflowItem;
         private EventGraphBuilder _builder;
         private Identity _identity;
+        private SwfIdentity _scheduleId;
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
             _identity = Identity.New("name", "ver", "pos");
+            _scheduleId = _identity.ScheduleId();
             _childWorkflowItem = new Mock<IChildWorkflowItem>();
         }
 
@@ -152,28 +154,28 @@ namespace Guflow.Tests.Decider
 
         private ChildWorkflowCompletedEvent CompletedEvent(string result)
         {
-            var graph = _builder.ChildWorkflowCompletedGraph(_identity, "runid", "input", result);
+            var graph = _builder.ChildWorkflowCompletedGraph(_scheduleId, "runid", "input", result);
             return new ChildWorkflowCompletedEvent(graph.First(), graph);
         }
 
         private ChildWorkflowFailedEvent FailedEvent(string reason, string details)
         {
-            var graph = _builder.ChildWorkflowFailedEventGraph(_identity, "runid", "input", reason, details);
+            var graph = _builder.ChildWorkflowFailedEventGraph(_scheduleId, "runid", "input", reason, details);
             return new ChildWorkflowFailedEvent(graph.First(), graph);
         }
         private ChildWorkflowTimedoutEvent TimedoutEvent(string timeoutType)
         {
-            var graph = _builder.ChildWorkflowTimedoutEventGraph(_identity, "runid", "input", timeoutType);
+            var graph = _builder.ChildWorkflowTimedoutEventGraph(_scheduleId, "runid", "input", timeoutType);
             return new ChildWorkflowTimedoutEvent(graph.First(), graph);
         }
         private ChildWorkflowTerminatedEvent TerminatedEvent()
         {
-            var graph = _builder.ChildWorkflowTerminatedEventGraph(_identity, "runid", "input");
+            var graph = _builder.ChildWorkflowTerminatedEventGraph(_scheduleId, "runid", "input");
             return new ChildWorkflowTerminatedEvent(graph.First(), graph);
         }
         private ChildWorkflowCancelledEvent CancelledEvent(string details)
         {
-            var graph = _builder.ChildWorkflowCancelledEventGraph(_identity, "runid", "input", details);
+            var graph = _builder.ChildWorkflowCancelledEventGraph(_scheduleId, "runid", "input", details);
             return new ChildWorkflowCancelledEvent(graph.First(), graph);
         }
 

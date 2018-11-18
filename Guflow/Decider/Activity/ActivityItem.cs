@@ -36,7 +36,7 @@ namespace Guflow.Decider
             _onFalseAction = _ =>IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
             _priorityFunc = a => null;
             _timeoutsFunc = a => new ActivityTimeouts();
-            _rescheduleTimer = TimerItem.Reschedule(this, Identity, workflow);
+            _rescheduleTimer = TimerItem.Reschedule(this, Identity.ScheduleId(), workflow);
         }
 
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)

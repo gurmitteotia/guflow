@@ -20,7 +20,7 @@ namespace Guflow.Tests.Decider
         private const string WorkflowVersion = "1.0";
         private const string PositionalName = "Pos";
         private const string ParentWorkflowRunId = "Pid";
-        private Identity _workflowIdentity;
+        private SwfIdentity _workflowIdentity;
         [SetUp]
         public void Setup()
         {
@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
             _builder = new HistoryEventsBuilder();
             _builder.AddWorkflowRunId(ParentWorkflowRunId);
 
-             _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName).ScheduleIdentity(ParentWorkflowRunId);
+             _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName).ScheduleId(ParentWorkflowRunId);
             var eventGraph = _eventGraphBuilder.ChildWorkflowCompletedGraph(_workflowIdentity, "runid", "input", "result").ToArray();
             _builder.AddNewEvents(eventGraph);
             _event = new ChildWorkflowCompletedEvent(eventGraph.First() , eventGraph);

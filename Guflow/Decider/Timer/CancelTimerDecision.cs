@@ -6,8 +6,8 @@ namespace Guflow.Decider
 {
     internal sealed class CancelTimerDecision : WorkflowDecision
     {
-        private readonly Identity _timerIdentity;
-        public CancelTimerDecision(Identity timerIdentity):base(false)
+        private readonly SwfIdentity _timerIdentity;
+        public CancelTimerDecision(SwfIdentity timerIdentity):base(false)
         {
             _timerIdentity = timerIdentity;
         }
@@ -19,7 +19,7 @@ namespace Guflow.Decider
                 DecisionType = DecisionType.CancelTimer,
                 CancelTimerDecisionAttributes = new CancelTimerDecisionAttributes()
                 {
-                    TimerId = _timerIdentity.Id.ToString()
+                    TimerId = _timerIdentity.ToString()
                 }
             };
         }

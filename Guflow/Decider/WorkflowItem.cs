@@ -148,7 +148,7 @@ namespace Guflow.Decider
             _parentItems.Add(parentItem);
         }
         protected IWorkflowHistoryEvents WorkflowHistoryEvents => _workflow.WorkflowHistoryEvents;
-        protected TimerItem RescheduleTimer(Identity identity) => TimerItem.Reschedule(this, identity, _workflow);
+        protected TimerItem RescheduleTimer(SwfIdentity identity) => TimerItem.Reschedule(this, identity, _workflow);
         public WorkflowAction DefaultActionOnLastEvent()
         {
             return LastEvent().DefaultAction(_workflow);

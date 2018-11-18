@@ -227,7 +227,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(_childWorkflowId, "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(_childWorkflowId.ScheduleId(), "input") }));
         }
 
         [Test]
@@ -262,7 +262,7 @@ namespace Guflow.Tests.Decider
         private HistoryEvent[] ChildWorkflowCompletedEventGraph()
         {
             return _eventGraphBuilder
-                .ChildWorkflowCompletedGraph(_childWorkflowId ,"rid", "input", "result")
+                .ChildWorkflowCompletedGraph(_childWorkflowId.ScheduleId() ,"rid", "input", "result")
                 .ToArray();
         }
 

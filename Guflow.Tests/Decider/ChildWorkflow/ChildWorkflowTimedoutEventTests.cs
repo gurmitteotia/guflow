@@ -16,14 +16,13 @@ namespace Guflow.Tests.Decider
         private const string WorkflowVersion = "1.0";
         private const string PositionalName = "Pos";
         private const string WorkflowRunId = "runid";
-        private Identity _workflowIdentity;
         [SetUp]
         public void Setup()
         {
             _eventGraphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder().AddWorkflowRunId(WorkflowRunId);
-            _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName).ScheduleIdentity(WorkflowRunId);
-            var eventGraph = _eventGraphBuilder.ChildWorkflowTimedoutEventGraph(_workflowIdentity, "runid", "input", "timeoutType").ToArray();
+            var scheduleId = Identity.New(WorkflowName, WorkflowVersion, PositionalName).ScheduleId(WorkflowRunId);
+            var eventGraph = _eventGraphBuilder.ChildWorkflowTimedoutEventGraph(scheduleId, "runid", "input", "timeoutType").ToArray();
             _builder.AddNewEvents(eventGraph);
             _event = new ChildWorkflowTimedoutEvent(eventGraph.First(), eventGraph);
         }

@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         private HistoryEventsBuilder _builder;
         private Mock<IWorkflow> _workflow;
         private Identity _identity;
-        private Identity _scheduleIdentity;
+        private SwfIdentity _scheduleIdentity;
         private const string WorkflowName = "Workflow";
         private const string Version = "1.0";
         private const string PositionalName = "Pos";
@@ -27,7 +27,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _identity = Identity.New(WorkflowName, Version, PositionalName);
-            _scheduleIdentity = _identity.ScheduleIdentity(WorkflowRunId);
+            _scheduleIdentity = _identity.ScheduleId(WorkflowRunId);
             _eventGraphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder().AddWorkflowRunId(WorkflowRunId);
             _builder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedGraph("input").ToArray());
@@ -82,7 +82,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId , Is.EqualTo(_scheduleIdentity.Id.ToString()));
+            Assert.That(attr.WorkflowId , Is.EqualTo(_scheduleIdentity.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN , Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("child"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("3"));
@@ -103,7 +103,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy, Is.Null);
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.Null);
@@ -140,7 +140,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("newchild"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("4"));
@@ -167,7 +167,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("newchild"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("4"));
@@ -349,7 +349,7 @@ namespace Guflow.Tests.Decider
         public void All_events_can_return_reschedule_timer_events()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity.Id, TimeSpan.FromSeconds(20), true).ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -366,7 +366,7 @@ namespace Guflow.Tests.Decider
         public void All_events_can_filter_out_reschedule_timer_events()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity.Id, TimeSpan.FromSeconds(20), true).ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -411,7 +411,7 @@ namespace Guflow.Tests.Decider
         public void Last_event_can_return_reschedule_timer_event()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity.Id, TimeSpan.FromSeconds(20), true).ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -424,7 +424,7 @@ namespace Guflow.Tests.Decider
         public void Last_event_can_filter_out_reschedule_timer_event()
         {
             var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity.Id, TimeSpan.FromSeconds(20), true).ToArray();
+            var timerStartedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleIdentity, TimeSpan.FromSeconds(20), true).ToArray();
             var allEventsGraph = timerStartedGraph.Concat(failedEventGraph);
             var childWorkflow = ChildWorkflow(allEventsGraph);
 
@@ -466,7 +466,7 @@ namespace Guflow.Tests.Decider
             var item = new ChildWorkflowItem(_identity, _workflow.Object);
             var decisions = item.RescheduleDecisions(TimeSpan.FromSeconds(20));
 
-            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(_scheduleIdentity.ScheduleId(), TimeSpan.FromSeconds(20), true)}));
+            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(_scheduleIdentity, TimeSpan.FromSeconds(20), true)}));
         }
 
         [Test]

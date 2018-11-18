@@ -18,13 +18,13 @@ namespace Guflow.Tests.Decider
         private const string PositionalName = "Pos";
         private const string ParentWorkflowRunId = "Pid";
 
-        private Identity _workflowIdentity;
+        private SwfIdentity _workflowIdentity;
 
         [SetUp]
         public void Setup()
         {
             _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName)
-                .ScheduleIdentity(ParentWorkflowRunId);
+                .ScheduleId(ParentWorkflowRunId);
             _eventGraphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder().AddWorkflowRunId(ParentWorkflowRunId);
 
