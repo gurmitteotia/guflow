@@ -22,15 +22,15 @@ namespace Guflow.Tests.Decider
         private const string ChildWorkflowName = "Cnmae";
         private const string ChildWorkflowVersion = "1.0";
 
-        private EventGraphBuilder _builder;
-        private HistoryEventsBuilder _eventsBuilder;
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
-            _eventsBuilder = new HistoryEventsBuilder();
-            _eventsBuilder.AddProcessedEvents(_builder.WorkflowStartedEvent());
-            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(new []{_builder.WorkflowStartedEvent()}));
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(new []{_graphBuilder.WorkflowStartedEvent()}));
         }
 
         [Test]
@@ -42,6 +42,36 @@ namespace Guflow.Tests.Decider
             var decisions = workflowAction.Decisions();
 
             Assert.That(decisions, Is.EquivalentTo(workflowItem.ScheduleDecisions()));
+        }
+
+        [Test]
+        public void Schedule_the_timer_with_default_scheduleid_when_it_has_not_already_scheduled()
+        {
+            var identity = Identity.Timer("Somename");
+            var workflowItem = TimerItem.New(identity, _workflow.Object);
+            var workflowAction = WorkflowAction.JumpTo(workflowItem);
+
+            var decisions = workflowAction.Decisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[]{new ScheduleTimerDecision(identity.ScheduleId(),TimeSpan.Zero) }));
+        }
+
+        [Test]
+        public void Reuse_the_scheduleid_when_it_has_already_scheduled()
+        {
+            const string runId = "runid";
+            var identity = Identity.Timer("Somename");
+            var scheduleId = identity.ScheduleId(runId + "Reset");
+            _builder.AddWorkflowRunId(runId);
+            _builder.AddProcessedEvents(_graphBuilder.TimerStartedGraph(scheduleId, TimeSpan.Zero).ToArray());
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(_builder.Result());
+
+            var workflowItem = TimerItem.New(identity, _workflow.Object);
+            var workflowAction = WorkflowAction.JumpTo(workflowItem);
+
+            var decisions = workflowAction.Decisions();
+
+            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(scheduleId, TimeSpan.Zero) }));
         }
 
         [Test]
@@ -58,10 +88,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_returned_as_workflow_action_when_scheduling_the_activity()
         {
-            _eventsBuilder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
+            _builder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new WorkflowToReturnScheduleActivityAction();
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
@@ -69,10 +99,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_returned_as_workflow_action_when_scheduling_the_timer()
         {
-            _eventsBuilder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
+            _builder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new WorkflowToReturnScheduleTimerAction();
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new []{ new ScheduleTimerDecision(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0))}));
         }
@@ -80,10 +110,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Jump_to_a_timer_ignore_its_when_clause()
         {
-            _eventsBuilder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
+            _builder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new JumpToTimerWithItsWhenClauseToBeAlwaysFalse();
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0)) }));
         }
@@ -91,10 +121,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Jump_to_an_activity_ignore_its_when_clause()
         {
-            _eventsBuilder.AddNewEvents(CompletedTimerGraph(TimerName));
+            _builder.AddNewEvents(CompletedTimerGraph(TimerName));
             var workflow = new JumpToActivityWithItsWhenClauseToBeAlwaysFalse();
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
@@ -102,10 +132,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Jump_to_an_lambda_ignore_its_when_clause()
         {
-            _eventsBuilder.AddNewEvents(CompletedTimerGraph(TimerName));
+            _builder.AddNewEvents(CompletedTimerGraph(TimerName));
             var workflow = new JumpToLambdaIgnoresItsWhenClause();
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName, PositionalName).ScheduleId(), "input") }));
         }
@@ -113,10 +143,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Jump_to_a_child_workflow_ignore_its_when_clause()
         {
-            _eventsBuilder.AddNewEvents(CompletedTimerGraph(TimerName));
+            _builder.AddNewEvents(CompletedTimerGraph(TimerName));
             var workflow = new JumpToChildWorkflowIgnoresItsWhenClause();
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(ChildWorkflowName, ChildWorkflowVersion).ScheduleId(), "input") }));
         }
@@ -124,10 +154,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Jump_to_a_child_workflow_using_generic_api_ignore_its_when_clause()
         {
-            _eventsBuilder.AddNewEvents(CompletedTimerGraph(TimerName));
+            _builder.AddNewEvents(CompletedTimerGraph(TimerName));
             var workflow = new JumpToChildWorkflowUsingGenericApiIgnoresItsWhenClause();
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(ChildWorkflowName, ChildWorkflowVersion).ScheduleId(), "input") }));
         }
@@ -136,18 +166,18 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Jumping_out_to_different_parent_branch_is_not_allowed()
         {
-            _eventsBuilder.AddNewEvents(CompletedActivityGraph(SiblingActivityName, Version));
+            _builder.AddNewEvents(CompletedActivityGraph(SiblingActivityName, Version));
             var workflow = new WorkflowToJumpToDifferentBranch();
 
-            Assert.Throws<OutOfBranchJumpException>(()=> workflow.Decisions(_eventsBuilder.Result()));
+            Assert.Throws<OutOfBranchJumpException>(()=> workflow.Decisions(_builder.Result()));
         }
 
         [Test]
         public void Jump_to_parent_lambda_item()
         {
-            _eventsBuilder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion));
+            _builder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion));
 
-            var decisions = new WorkflowToJumpToParentLambda().Decisions(_eventsBuilder.Result());
+            var decisions = new WorkflowToJumpToParentLambda().Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new []{new ScheduleLambdaDecision(Identity.Lambda(LambdaName,PositionalName).ScheduleId(),"input")}));
         }
@@ -170,12 +200,12 @@ namespace Guflow.Tests.Decider
      
         private HistoryEvent [] CompletedActivityGraph(string activityName, string activityVersion, string positionalName ="")
         {
-            return _builder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "result").ToArray();
+            return _graphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "result").ToArray();
         }
 
         private HistoryEvent[] CompletedTimerGraph(string timerName)
         {
-            return _builder.TimerFiredGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.Zero).ToArray();
+            return _graphBuilder.TimerFiredGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.Zero).ToArray();
         }
 
         private class WorkflowToJumpToDifferentBranch : Workflow

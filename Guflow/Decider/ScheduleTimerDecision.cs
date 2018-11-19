@@ -53,7 +53,7 @@ namespace Guflow.Decider
 
         public override string ToString()
         {
-            return string.Format("{0} for {1} and reschedulable timer is {2} and interval {3}",GetType().Name, _id.Name,_isRescheduleTimer, _fireAfter);
+            return string.Format("{0} for {1} and reschedulable timer is {2}, interval {3} and id {4}",GetType().Name, _id.Name,_isRescheduleTimer, _fireAfter, _id);
         }
     }
 }

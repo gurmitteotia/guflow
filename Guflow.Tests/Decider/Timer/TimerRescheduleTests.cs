@@ -59,11 +59,11 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Current_timer_is_cancelled_and_is_scheduled_with_default_scheduled_id_on_reset()
+        public void Current_timer_is_cancelled_and_is_scheduled_with_flipped_scheduled_id_on_reset()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
-                .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4)).ToArray());
+                .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId + "Reset"), TimeSpan.FromMinutes(4)).ToArray());
             _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
@@ -71,8 +71,26 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
-                new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId()),
-                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset"), TimeSpan.FromMinutes(4))
+                new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId + "Reset")),
+                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4))
+            }));
+        }
+
+        [Test]
+        public void Current_timer_is_cancelled_and_is_scheduled_with_flipped_scheduled_id_and_timeout_on_reschedule()
+        {
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
+                .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId + "Reset"), TimeSpan.FromMinutes(4)).ToArray());
+            _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
+
+            var decisions = new TimerRescheduleWorkflow().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+            {
+                new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset")),
+                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(10))
             }));
         }
 

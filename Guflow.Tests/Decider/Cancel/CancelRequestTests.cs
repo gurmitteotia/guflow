@@ -22,16 +22,15 @@ namespace Guflow.Tests.Decider
         private const string WorkflowPosName = "pos";
         private Mock<IWorkflow> _workflow;
         private EventGraphBuilder _eventGraph;
-        private HistoryEventsBuilder _historyBuilder;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
             _eventGraph = new EventGraphBuilder();
             _workflow = new Mock<IWorkflow>();
-            _workflow.SetupGet(w => w.WorkflowHistoryEvents)
-                .Returns(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
-            _historyBuilder = new HistoryEventsBuilder();
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(new[] { new HistoryEvent() }));
+            _builder = new HistoryEventsBuilder();
         }
 
         [Test]
@@ -44,6 +43,22 @@ namespace Guflow.Tests.Decider
             var decisions = workflowAction.Decisions();
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(Identity.Timer("TimerName").ScheduleId()) }));
+        }
+
+        [Test]
+        public void Returns_cancel_timer_decision_for_timer_item_when_it_is_active_with_reset_schedule_id()
+        {
+            const string runId = "runid";
+            _builder.AddWorkflowRunId(runId);
+            var scheduleId = Identity.Timer("TimerName").ScheduleId(runId+"Reset");
+            _builder.AddProcessedEvents(_eventGraph.TimerStartedGraph(scheduleId, TimeSpan.FromSeconds(2)).ToArray());
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(_builder.Result());
+            var timerItem = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
+            var workflowAction = WorkflowAction.Cancel(timerItem);
+
+            var decisions = workflowAction.Decisions();
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(scheduleId) }));
         }
 
         [Test]
@@ -159,11 +174,11 @@ namespace Guflow.Tests.Decider
         public void By_default_cancel_request_for_timer_does_not_generate_additional_workflow_action_when_timer_is_active()
         {
             var workflow = new WorkflowToReturnCancelledTimerAction();
-            _historyBuilder.AddNewEvents(TimerStartedEventGraph(TimerName));
-            _historyBuilder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
+            _builder.AddNewEvents(TimerStartedEventGraph(TimerName));
+            _builder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
                 PositionalName));
           
-            var decisions = workflow.Decisions(_historyBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId()) }));
         }
@@ -174,11 +189,11 @@ namespace Guflow.Tests.Decider
             var additionalAction = new Mock<WorkflowAction>();
             additionalAction.Setup(a => a.Decisions()).Returns(new[] {new RecordMarkerWorkflowDecision("result" ,"details"), });
             var workflow = new WorkflowToReturnCustomActionDuringCancel(additionalAction.Object);
-            _historyBuilder.AddNewEvents(TimerStartedEventGraph(TimerName));
-            _historyBuilder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
+            _builder.AddNewEvents(TimerStartedEventGraph(TimerName));
+            _builder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
                 PositionalName));
 
-            var decisions = workflow.Decisions(_historyBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
@@ -193,10 +208,10 @@ namespace Guflow.Tests.Decider
             var additionalAction = new Mock<WorkflowAction>();
             additionalAction.Setup(a => a.Decisions()).Returns(new[] { new RecordMarkerWorkflowDecision("result", "details"), });
             var workflow = new WorkflowToReturnCustomActionDuringCancel(additionalAction.Object);
-            _historyBuilder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
+            _builder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
                 PositionalName));
 
-            var decisions = workflow.Decisions(_historyBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
@@ -208,11 +223,11 @@ namespace Guflow.Tests.Decider
         public void Can_invoke_cancel_request_for_timer_in_timer_oncancel_api()
         {
             var workflow = new InvokedCancelRequestForTimerInOnCancelMethod();
-            _historyBuilder.AddNewEvents(TimerStartedEventGraph(TimerName));
-            _historyBuilder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
+            _builder.AddNewEvents(TimerStartedEventGraph(TimerName));
+            _builder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
                 PositionalName));
 
-            var decisions = workflow.Decisions(_historyBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
@@ -225,11 +240,11 @@ namespace Guflow.Tests.Decider
         {
             const string parentRunId = "ParentRunId";
             var workflow = new CancelRequestForChildWorkflow();
-            _historyBuilder.AddProcessedEvents(ChildWorkflowStarted(parentRunId, "rid"));
-            _historyBuilder.AddWorkflowRunId(parentRunId);
-            _historyBuilder.AddNewEvents(TimerFiredEventGraph(TimerName));
+            _builder.AddProcessedEvents(ChildWorkflowStarted(parentRunId, "rid"));
+            _builder.AddWorkflowRunId(parentRunId);
+            _builder.AddNewEvents(TimerFiredEventGraph(TimerName));
 
-            var decisions = workflow.Decisions(_historyBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[]{new CancelRequestWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).ScheduleId(parentRunId), "rid")}));
         }
@@ -240,11 +255,11 @@ namespace Guflow.Tests.Decider
             const string parentRunId = "ParentRunId";
 
             var workflow = new CancelRequestForChildWorkflowUsingGenericTypeApi();
-            _historyBuilder.AddProcessedEvents(ChildWorkflowStarted(parentRunId, "rid"));
-            _historyBuilder.AddWorkflowRunId(parentRunId);
-            _historyBuilder.AddNewEvents(TimerFiredEventGraph(TimerName));
+            _builder.AddProcessedEvents(ChildWorkflowStarted(parentRunId, "rid"));
+            _builder.AddWorkflowRunId(parentRunId);
+            _builder.AddNewEvents(TimerFiredEventGraph(TimerName));
 
-            var decisions = workflow.Decisions(_historyBuilder.Result());
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).ScheduleId(parentRunId), "rid") }));
         }
