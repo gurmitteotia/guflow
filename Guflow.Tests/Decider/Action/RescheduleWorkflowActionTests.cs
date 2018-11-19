@@ -165,6 +165,21 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Reschedule_timer_with_reset_id_when_timer_is_fired_with_reset_schedule_id()
+        {
+            const string runId = "runid";
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddWorkflowRunId(runId);
+            var scheduleId = Identity.Timer(TimerName).ScheduleId(runId+"Reset");
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(scheduleId, TimeSpan.Zero).ToArray());
+            var workflow = new WorkflowToRescheduleTimerWithTimerUpToLimit(2);
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(scheduleId, TimeSpan.FromSeconds(2), true) }));
+        }
+
+        [Test]
         public void Reschedule_lambda()
         {
             var workflow = new WorkflowToRescheduleLambda();

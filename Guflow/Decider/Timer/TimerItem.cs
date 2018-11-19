@@ -45,11 +45,8 @@ namespace Guflow.Decider
         }
         public static TimerItem New(Identity identity, IWorkflow workflow)
         {
-            return New(identity, identity.ScheduleId(), workflow);
-        }
-        private static TimerItem New(Identity identity, ScheduleId scheduleId, IWorkflow workflow)
-        {
-            var timerItem = new TimerItem(identity, scheduleId,workflow);
+            var scheduleId = identity.ScheduleId();
+            var timerItem = new TimerItem(identity, scheduleId, workflow);
             timerItem._rescheduleTimer = Reschedule(timerItem, scheduleId, workflow);
             timerItem.OnStartFailed(e => e.DefaultAction(workflow));
             timerItem.OnCancellationFailed(e => e.DefaultAction(workflow));
