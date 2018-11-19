@@ -55,7 +55,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver")) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver").ScheduleId()) }));
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver")) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver").ScheduleId()) }));
         }
 
         [Test]
@@ -127,7 +127,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(events);
 
-            Assert.That(decisions, Is.EqualTo(new []{new CancelActivityDecision(Identity.New("ActivityToCancel", "1.2"))}));
+            Assert.That(decisions, Is.EqualTo(new []{new CancelActivityDecision(Identity.New("ActivityToCancel", "1.2").ScheduleId())}));
         }
 
         [Test]
@@ -151,7 +151,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
-                new CancelActivityDecision(Identity.New(ActivityName, ActivityVersion)), new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId())
+                new CancelActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()), new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId())
             }));
         }
 

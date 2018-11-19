@@ -17,13 +17,6 @@ namespace Guflow.Decider
         //TODO: Move it out of this class
         public ScheduleId Id { get; private set; }
 
-        public Identity ScheduleIdentity(string salt)
-        {
-            var identity = new Identity(Name, Version, PositionalName);
-            identity.Id= Decider.ScheduleId.Create(identity, salt);
-            return identity;
-        }
-
         public ScheduleId ScheduleId(string salt = "")
         {
             return Decider.ScheduleId.Create(this,salt);

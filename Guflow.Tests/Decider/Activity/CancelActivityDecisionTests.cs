@@ -12,21 +12,21 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Equality_tests()
         {
-            Assert.IsTrue(new CancelActivityDecision(Identity.New("activity","1.0")).Equals(new CancelActivityDecision(Identity.New("activity","1.0"))));
+            Assert.IsTrue(new CancelActivityDecision(Identity.New("activity","1.0").ScheduleId()).Equals(new CancelActivityDecision(Identity.New("activity","1.0").ScheduleId())));
 
-            Assert.IsFalse(new CancelActivityDecision(Identity.New("activity", "1.0")).Equals(new CancelActivityDecision(Identity.New("activity", "2.0"))));
+            Assert.IsFalse(new CancelActivityDecision(Identity.New("activity", "1.0").ScheduleId()).Equals(new CancelActivityDecision(Identity.New("activity", "2.0").ScheduleId())));
         }
 
         [Test]
         public void Return_aws_decision_to_cancel_activity()
         {
-            var activityIdentity = Identity.New("activity", "1.0");
-            var cancelActivityDecision = new CancelActivityDecision(activityIdentity);
+            var scheduleId = Identity.New("activity", "1.0").ScheduleId();
+            var cancelActivityDecision = new CancelActivityDecision(scheduleId);
 
             Decision swfDecision = cancelActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.RequestCancelActivityTask));
-            Assert.That(swfDecision.RequestCancelActivityTaskDecisionAttributes.ActivityId,Is.EqualTo(activityIdentity.Id.ToString()));
+            Assert.That(swfDecision.RequestCancelActivityTaskDecisionAttributes.ActivityId,Is.EqualTo(scheduleId.ToString()));
         }
     }
 }

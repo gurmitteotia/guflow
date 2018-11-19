@@ -178,7 +178,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void External_workflow_cancel_request_failed_event_is_interpreted()
         {
-            var eventGraph = _builder.ExternalWorkflowCancelRequestFailedEvent(Identity.New("w","v"),"rid","cause");
+            var eventGraph = _builder.ExternalWorkflowCancelRequestFailedEvent(Identity.New("w","v").ScheduleId(),"rid","cause");
             var events = new WorkflowHistoryEvents(eventGraph );
             var newEvents = events.NewEvents();
 
@@ -409,7 +409,7 @@ namespace Guflow.Tests.Decider
         {
             var startedGraph =
                 _builder.ChildWorkflowStartedEventGraph(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(), "rid", "input");
-            var cancelFailedGraph = _builder.ExternalWorkflowCancelRequestFailedEvent(Identity.New(WorkflowName, WorkflowVersion),
+            var cancelFailedGraph = _builder.ExternalWorkflowCancelRequestFailedEvent(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(),
                 "rid", "input");
 
             var workflowHistoryEvents = new WorkflowHistoryEvents(cancelFailedGraph.Concat(startedGraph));

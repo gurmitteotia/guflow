@@ -73,10 +73,8 @@ namespace Guflow.Decider
         public abstract IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen();
         public abstract IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout);
         public abstract IEnumerable<WorkflowDecision> CancelDecisions();
-        public virtual bool Has(ScheduleId identity)
-        {
-            return Identity.ScheduleId() == identity;
-        }
+        public abstract bool Has(ScheduleId id);
+        
         public bool Has(Identity identity)
         {
             return Identity.Equals(identity);

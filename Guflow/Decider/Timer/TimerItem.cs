@@ -66,7 +66,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        public override bool Has(ScheduleId identity) => _scheduleId == identity;
+        public override bool Has(ScheduleId id) => _scheduleId == id;
        
 
         public IFluentTimerItem FireAfter(Func<ITimerItem, TimeSpan> time)

@@ -634,7 +634,7 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public IEnumerable<HistoryEvent> ExternalWorkflowCancelRequestFailedEvent(Identity identity, string runid, string cause)
+        public IEnumerable<HistoryEvent> ExternalWorkflowCancelRequestFailedEvent(ScheduleId id, string runid, string cause)
         {
             var events = new List<HistoryEvent>();
             var eventIds = EventIds.WorkflowCancelRequestFailedIds(ref _currentEventId);
@@ -644,7 +644,7 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.RequestCancelExternalWorkflowExecutionFailed,
                 RequestCancelExternalWorkflowExecutionFailedEventAttributes = new RequestCancelExternalWorkflowExecutionFailedEventAttributes()
                 {
-                    WorkflowId = identity.Id,
+                    WorkflowId = id,
                     RunId = runid,
                     Cause = cause,
                     InitiatedEventId = eventIds.EventId(EventIds.CancelInitiated)
@@ -657,7 +657,7 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.RequestCancelExternalWorkflowExecutionInitiated,
                 RequestCancelExternalWorkflowExecutionInitiatedEventAttributes = new RequestCancelExternalWorkflowExecutionInitiatedEventAttributes()
                 {
-                    WorkflowId = identity.Id,
+                    WorkflowId = id,
                     RunId = runid,
                 }
             });

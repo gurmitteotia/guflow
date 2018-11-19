@@ -21,7 +21,7 @@ namespace Guflow.Tests.Decider
         {
             _eventGraphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder().AddWorkflowRunId(ParentWorkflowRunId);
-            var identity = Identity.New(WorkflowName, Version).ScheduleIdentity(ParentWorkflowRunId);
+            var identity = Identity.New(WorkflowName, Version).ScheduleId(ParentWorkflowRunId);
             var eventGraph = _eventGraphBuilder.ExternalWorkflowCancelRequestFailedEvent(identity, "rid", "cause").ToArray();
             _builder.AddNewEvents(eventGraph);
             _cancelRequestFailedEvent = new ExternalWorkflowCancelRequestFailedEvent(eventGraph.First());

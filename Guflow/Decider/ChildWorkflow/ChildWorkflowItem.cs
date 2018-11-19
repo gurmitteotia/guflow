@@ -25,8 +25,8 @@ namespace Guflow.Decider
         private Func<IChildWorkflowItem, IEnumerable<string>> _tags;
         private Func<IChildWorkflowItem, bool> _when;
         private Func<IChildWorkflowItem, WorkflowAction> _onWhenFalseAction;
-        private ScheduleId ScheduleIdentity => Identity.ScheduleId(WorkflowHistoryEvents.WorkflowRunId);
-        private TimerItem RescheduleTimer => RescheduleTimer(ScheduleIdentity);
+        private ScheduleId ScheduleId => Identity.ScheduleId(WorkflowHistoryEvents.WorkflowRunId);
+        private TimerItem RescheduleTimer => RescheduleTimer(ScheduleId);
 
         public ChildWorkflowItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
         {
@@ -100,7 +100,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return new[] {new ScheduleChildWorkflowDecision(ScheduleIdentity, _input(this))
+            return new[] {new ScheduleChildWorkflowDecision(ScheduleId, _input(this))
             {
                 ChildPolicy = _childPolicy(this),
                 TaskPriority = _taskPriority(this),
@@ -125,10 +125,10 @@ namespace Guflow.Decider
             if (latestTimerEvent != null && lastEvent == latestTimerEvent)
                 return RescheduleTimer.CancelDecisions();
 
-            return new[] { new CancelRequestWorkflowDecision(ScheduleIdentity, (lastEvent as ChildWorkflowEvent)?.RunId), };
+            return new[] { new CancelRequestWorkflowDecision(ScheduleId, (lastEvent as ChildWorkflowEvent)?.RunId), };
         }
 
-        public override bool Has(ScheduleId identity) => ScheduleIdentity == identity;
+        public override bool Has(ScheduleId id) => ScheduleId == id;
 
         public IFluentChildWorkflowItem AfterTimer(string name)
         {
@@ -337,7 +337,7 @@ namespace Guflow.Decider
         public WorkflowAction SignalAction(string signalName, string input)
         {
             var lastEvent = LastEvent() as ChildWorkflowEvent;
-            return WorkflowAction.Signal(signalName, input, ScheduleIdentity, lastEvent?.RunId);
+            return WorkflowAction.Signal(signalName, input, ScheduleId, lastEvent?.RunId);
         }
 
         public WorkflowAction CancelRequestFailedAction(ExternalWorkflowCancelRequestFailedEvent @event)
