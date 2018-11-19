@@ -250,6 +250,17 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Last_event_filters_out_activity_scheduling_failed_event()
+        {
+            var activityScheduled = _eventGraphBuilder.ActivityScheduledGraph(_scheduleId);
+            var activityScheduleFailed = _eventGraphBuilder.ActivitySchedulingFailedGraph(_scheduleId, "DUPLICATE_ID");
+            var activityItem = CreateActivityItemWith(activityScheduleFailed.Concat(activityScheduled));
+
+            var @event = activityItem.LastEvent();
+            Assert.That(@event, Is.EqualTo(new ActivityScheduledEvent(activityScheduled.First(), activityScheduled)));
+        }
+
+        [Test]
         public void Last_event_by_default_filter_out_reschedule_timer_events()
         {
             var activityFailedEventGraph = _eventGraphBuilder.ActivityFailedGraph(_scheduleId, "workerid", "reason", "detail");

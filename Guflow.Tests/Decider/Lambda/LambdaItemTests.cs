@@ -325,6 +325,18 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Last_event_filters_outs_lambda_scheduling_failed_event()
+        {
+            var started = _builder.LambdaStartedEventGraph(_scheduleId, "input", TimeSpan.FromSeconds(1));
+            var failed =  new[]{_builder.LambdaSchedulingFailedEventGraph(_scheduleId, "reason")};
+            var lamdbaItem = CreateLambdaItem(failed.Concat(started));
+
+            var lastEvent = lamdbaItem.LastEvent();
+
+            Assert.That(lastEvent, Is.EqualTo(new LambdaStartedEvent(started.First(), started)));
+        }
+
+        [Test]
         public void Last_event_is_cached()
         {
             var eventGraph = _builder.LambdaCompletedEventGraph(_scheduleId, "input", "result");

@@ -52,6 +52,9 @@ namespace Guflow.Decider
         {
             return _timerStartedEventId == otherTimerEvent._timerStartedEventId;
         }
+
+        internal ScheduleId Id => ScheduleId;
+        internal TimeSpan Timeout => _firedAfter;
         public override string ToString()
         {
             return string.Format("{0} for timer {1}, fired after {2}",GetType().Name,_timerName,_firedAfter);

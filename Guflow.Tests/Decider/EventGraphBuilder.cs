@@ -341,7 +341,7 @@ namespace Guflow.Tests.Decider
         public IEnumerable<HistoryEvent> TimerCancellationFailedGraph(ScheduleId timerId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
-            var eventIds = EventIds.CancellationFailedIds(ref _currentEventId);
+            var eventIds = EventIds.TimerCancellationFailedIds(ref _currentEventId);
 
             historyEvents.Add(new HistoryEvent()
             {
@@ -351,18 +351,6 @@ namespace Guflow.Tests.Decider
                 {
                     TimerId = timerId,
                     Cause = cause
-                }
-            });
-
-            historyEvents.Add(new HistoryEvent()
-            {
-                EventType = EventType.TimerStarted,
-                EventId = eventIds.EventId(EventIds.Started),
-                TimerStartedEventAttributes = new TimerStartedEventAttributes()
-                {
-                    TimerId = timerId,
-                    StartToFireTimeout = ((long)20).ToString(),
-                    Control = (new TimerScheduleData() { TimerName = timerId.Name, IsARescheduleTimer = false }).ToJson()
                 }
             });
             return historyEvents;
@@ -1556,14 +1544,13 @@ namespace Guflow.Tests.Decider
                 return new EventIds(ids);
             }
 
-            public static EventIds CancellationFailedIds(ref long eventId)
+            public static EventIds TimerCancellationFailedIds(ref long eventId)
             {
-                const long totalEvents = 2;
+                const long totalEvents = 1;
                 eventId += totalEvents;
                 var ids = new Dictionary<string, long>()
                 {
                     {Failed, eventId},
-                    {Started, eventId-1},
                 };
                 return new EventIds(ids);
             }

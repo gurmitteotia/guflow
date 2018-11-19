@@ -13,12 +13,13 @@ namespace Guflow.Tests.Decider
     public class TimerItemTests
     {
         private readonly Identity _timerIdentity = Identity.Timer("timerName");
-        private EventGraphBuilder _builder;
-
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
         }
 
         [Test]
@@ -61,6 +62,17 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3)) }));
         }
 
+        //[Test]
+        //public void Schedule_the_timer_with_schedule_id_of_last_event_when_it_already_scheduled()
+        //{
+        //    _builder.AddProcessedEvents(_graphBuilder.a)
+        //    var timerItem = TimerItem.New(_timerIdentity, null);
+
+        //    var decision = timerItem.ScheduleDecisions();
+
+        //    Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity.ScheduleId(), new TimeSpan()) }));
+        //}
+
         [Test]
         public void Return_empty_when_when_condition_is_evaluated_to_false()
         {
@@ -75,7 +87,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_be_timer_started_event()
         {
-            var eventGraph = _builder.TimerStartedGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
+            var eventGraph = _graphBuilder.TimerStartedGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent(true);
@@ -86,7 +98,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_is_cached()
         {
-            var eventGraph = _builder.TimerStartedGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
+            var eventGraph = _graphBuilder.TimerStartedGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent(true);
@@ -97,7 +109,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Last_event_can_be_timer_fired_event()
         {
-            var eventGraph =_builder.TimerFiredGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
+            var eventGraph =_graphBuilder.TimerFiredGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent(true);
@@ -106,20 +118,21 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Last_event_can_be_timer_start_failed_event()
+        public void Last_event_filter_out_timer_start_failed_event()
         {
-            var eventGraph =_builder.TimerStartFailedGraph(_timerIdentity.ScheduleId(), "cause");
-            var timerItem = CreateTimerItemFor(eventGraph);
+            var started = _graphBuilder.TimerStartedGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(1));
+            var failed =_graphBuilder.TimerStartFailedGraph(_timerIdentity.ScheduleId(), "cause");
+            var timerItem = CreateTimerItemFor(failed.Concat(started));
 
             var latestEvent = timerItem.LastEvent(true);
 
-            Assert.That(latestEvent, Is.EqualTo(new TimerStartFailedEvent(eventGraph.First())));
+            Assert.That(latestEvent, Is.EqualTo(new TimerStartedEvent(started.First(), started)));
         }
 
         [Test]
         public void Last_event_can_be_timer_cancelled_event()
         {
-            var eventGraph = _builder.TimerCancelledGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
+            var eventGraph = _graphBuilder.TimerCancelledGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.LastEvent(true);
@@ -128,20 +141,21 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Last_event_can_be_timer_cancellation_failed_event()
+        public void Last_event_filters_out_timer_cancellation_failed_event()
         {
-            var eventGraph=_builder.TimerCancellationFailedGraph(_timerIdentity.ScheduleId(), "cause");
-            var timerItem = CreateTimerItemFor(eventGraph);
+            var started = _graphBuilder.TimerStartedGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(1));
+            var failed =_graphBuilder.TimerCancellationFailedGraph(_timerIdentity.ScheduleId(), "cause");
+            var timerItem = CreateTimerItemFor(failed.Concat(started));
 
             var latestEvent = timerItem.LastEvent(true);
 
-            Assert.That(latestEvent, Is.EqualTo(new TimerCancellationFailedEvent(eventGraph.First())));
+            Assert.That(latestEvent, Is.EqualTo(new TimerStartedEvent(started.First(), started)));
         }
 
         [Test]
         public void All_events_can_be_timer_cancellation_failed_event_and_timer_started_event()
         {
-            var eventGraph = _builder.TimerCancellationFailedGraph(_timerIdentity.ScheduleId(), "cause").ToArray();
+            var eventGraph = _graphBuilder.TimerCancellationFailedGraph(_timerIdentity.ScheduleId(), "cause").ToArray();
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var allEvents = timerItem.AllEvents(true);
@@ -156,7 +170,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_fired_events()
         {
-            var eventGraph = _builder.TimerFiredGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
+            var eventGraph = _graphBuilder.TimerFiredGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
             var timerItem = CreateTimerItemFor(eventGraph);
 
             var latestEvent = timerItem.AllEvents(true);

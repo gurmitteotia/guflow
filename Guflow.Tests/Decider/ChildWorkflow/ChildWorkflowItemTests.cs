@@ -461,6 +461,20 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Last_event_filters_out_child_workflow_scheduling_failed_event()
+        {
+            var started = _eventGraphBuilder.ChildWorkflowStartedEventGraph(_scheduleIdentity, "runid", "input");
+            var startFailed = _eventGraphBuilder.ChildWorkflowStartFailedEventGraph(_scheduleIdentity,"input", "cause").ToArray();
+
+            var childWorkflow = ChildWorkflow(startFailed.Concat(started));
+
+            var lastEvent = childWorkflow.LastEvent();
+
+            Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowStartedEvent(started.First(), started)));
+        }
+
+
+        [Test]
         public void Reschedule_decision_is_timer_schedule_decision_for_child_workflow_item()
         {
             var item = new ChildWorkflowItem(_identity, _workflow.Object);
