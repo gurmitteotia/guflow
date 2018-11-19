@@ -12,13 +12,15 @@ namespace Guflow.Tests.Decider
     public class WorkflowTests
     {
         private Mock<IWorkflowHistoryEvents> _workflowEvents;
-        private EventGraphBuilder _eventGraphBuilder;
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
         private Workflow _workflow;
 
         [SetUp]
         public void Setup()
         {
-            _eventGraphBuilder = new EventGraphBuilder();
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
             _workflowEvents = new Mock<IWorkflowHistoryEvents>();
             _workflow = new StubWorkflow();
         }
@@ -46,7 +48,7 @@ namespace Guflow.Tests.Decider
         public void Get_activity_by_its_event()
         {
             var identity = Identity.New("Activity1", "1.0");
-            var eventGraph = _eventGraphBuilder.ActivityCompletedGraph(identity.ScheduleId(), "id", "result");
+            var eventGraph = _graphBuilder.ActivityCompletedGraph(identity.ScheduleId(), "id", "result");
             var activityCompletedEvent = new ActivityCompletedEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -59,20 +61,22 @@ namespace Guflow.Tests.Decider
         public void Get_timer_by_its_event()
         {
             var identity = Identity.Timer("Timer1");
-            var eventGraph = _eventGraphBuilder.TimerFiredGraph(identity.ScheduleId(), TimeSpan.FromSeconds(2));
-            var activityCompletedEvent = new TimerFiredEvent(eventGraph.First(), eventGraph);
+            var eventGraph = _graphBuilder.TimerFiredGraph(identity.ScheduleId(), TimeSpan.FromSeconds(2));
+            _builder.AddNewEvents(eventGraph.ToArray());
+
             var workflow = new TestWorkflow();
+            workflow.Decisions(_builder.Result());
 
-            var activity = workflow.GetTimerOf(activityCompletedEvent);
+            var timer = workflow.TimerItem;
 
-            Assert.That(activity, Is.EqualTo(TimerItem.New(identity, workflow)));
+            Assert.That(workflow.TimerItem.Name, Is.EqualTo("Timer1"));
         }
 
         [Test]
         public void Get_lambda_item_form_its_event()
         {
             var identity = Identity.Lambda("Lambda");
-            var eventGraph = _eventGraphBuilder.LambdaCompletedEventGraph(identity.ScheduleId(), "id", "result");
+            var eventGraph = _graphBuilder.LambdaCompletedEventGraph(identity.ScheduleId(), "id", "result");
             var @event = new LambdaCompletedEvent(eventGraph.First(), eventGraph);
             var workflow = new TestWorkflow();
 
@@ -412,7 +416,11 @@ namespace Guflow.Tests.Decider
         {
             public TestWorkflow()
             {
-                ScheduleTimer("Timer1");
+                ScheduleTimer("Timer1").OnFired(e =>
+                {
+                    TimerItem = Timer(e);
+                    return Ignore;
+                });
                 ScheduleActivity("Activity1", "1.0");
                 ScheduleLambda("Lambda");
                 ScheduleChildWorkflow("Workflow", "1.0");
@@ -435,6 +443,8 @@ namespace Guflow.Tests.Decider
             {
                 return ChildWorkflow(@event);
             }
+
+            public ITimerItem TimerItem;
         }
 
         private class WithNullActivityName : Workflow

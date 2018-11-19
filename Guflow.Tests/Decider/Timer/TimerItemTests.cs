@@ -15,17 +15,21 @@ namespace Guflow.Tests.Decider
         private readonly Identity _timerIdentity = Identity.Timer("timerName");
         private EventGraphBuilder _graphBuilder;
         private HistoryEventsBuilder _builder;
+        private Mock<IWorkflow> _workflow;
         [SetUp]
         public void Setup()
         {
             _graphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder();
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
+            _workflow = new Mock<IWorkflow>();
+            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(_builder.Result());
         }
 
         [Test]
         public void By_default_schedule_timer_to_fire_immediately()
         {
-            var timerItem = TimerItem.New(_timerIdentity,null);
+            var timerItem = TimerItem.New(_timerIdentity, _workflow.Object);
 
             var decision = timerItem.ScheduleDecisions();
 
@@ -35,7 +39,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_configured_to_schedule_timer_to_fire_after_timeout()
         {
-            var timerItem = TimerItem.New(_timerIdentity, null);
+            var timerItem = TimerItem.New(_timerIdentity, _workflow.Object);
             timerItem.FireAfter(TimeSpan.FromSeconds(3));
             var decision = timerItem.ScheduleDecisions();
 
@@ -45,7 +49,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_configured_to_schedule_timer_to_fire_after_timeout_using_lambda()
         {
-            var timerItem = TimerItem.New(_timerIdentity, null);
+            var timerItem = TimerItem.New(_timerIdentity, _workflow.Object);
             timerItem.FireAfter(_=>TimeSpan.FromSeconds(4));
             var decision = timerItem.ScheduleDecisions();
 
@@ -55,7 +59,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Fire_after_lambda_handler_override_the_fire_after_timeout()
         {
-            var timerItem = TimerItem.New(_timerIdentity, null);
+            var timerItem = TimerItem.New(_timerIdentity, _workflow.Object);
             timerItem.FireAfter(_ => TimeSpan.FromSeconds(3)).FireAfter(TimeSpan.FromSeconds(4));
             var decision = timerItem.ScheduleDecisions();
 
@@ -155,15 +159,16 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_be_timer_cancellation_failed_event_and_timer_started_event()
         {
-            var eventGraph = _graphBuilder.TimerCancellationFailedGraph(_timerIdentity.ScheduleId(), "cause").ToArray();
-            var timerItem = CreateTimerItemFor(eventGraph);
+            var started = _graphBuilder.TimerStartedGraph(_timerIdentity.ScheduleId(), TimeSpan.Zero).ToArray();
+            var failed = _graphBuilder.TimerCancellationFailedGraph(_timerIdentity.ScheduleId(), "cause").ToArray();
+            var timerItem = CreateTimerItemFor(failed.Concat(started));
 
             var allEvents = timerItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
             {
-                new TimerCancellationFailedEvent(eventGraph.First()),
-                new TimerStartedEvent(eventGraph.Skip(1).First(), eventGraph)
+                new TimerCancellationFailedEvent(failed.First()),
+                new TimerStartedEvent(started.First(), started)
             }));
         }
 

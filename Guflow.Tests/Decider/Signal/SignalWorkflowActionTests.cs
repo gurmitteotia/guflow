@@ -9,21 +9,22 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class SignalWorkflowActionTests
     {
-        private EventGraphBuilder _builder;
-
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
         }
         [Test]
         public void Can_be_returned_as_custom_action_from_workflow()
         {
             var workflow = new WorkflowToReturnSignal("name","input","id","runid");
-            var timerFiredEventGraph= _builder.TimerFiredGraph(Identity.Timer("timer1").ScheduleId(), TimeSpan.FromSeconds(2));
-            var timerEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
+            var timerFiredEventGraph= _graphBuilder.TimerFiredGraph(Identity.Timer("timer1").ScheduleId(), TimeSpan.FromSeconds(2));
+            _builder.AddNewEvents(timerFiredEventGraph.ToArray());
 
-            var decisions = timerEvent.Interpret(workflow).Decisions();
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions,Is.EqualTo(new []{new SignalWorkflowDecision("name","input","id","runid")}));
         }

@@ -521,32 +521,33 @@ namespace Guflow.Tests.Decider
         [Test]
         public void All_events_can_return_timer_cancellattion_failed_event_and_timer_started_event()
         {
-            var eventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_scheduleId, "cause");
-            var activityItem = CreateActivityItemWith(eventGraph);
+            var startedGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleId, TimeSpan.Zero);
+            var failedGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_scheduleId, "cause");
+            var activityItem = CreateActivityItemWith(failedGraph.Concat(startedGraph));
 
             var allEvents = activityItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
             {
-                new TimerCancellationFailedEvent(eventGraph.First()),
-                new TimerStartedEvent(eventGraph.Skip(1).First(), eventGraph)
+                new TimerCancellationFailedEvent(failedGraph.First()),
+                new TimerStartedEvent(startedGraph.First(), startedGraph)
             }));
         }
 
         [Test]
-        public void All_events_can_return_timer_started_and_cancellattion_failed_event()
+        public void All_events_can_return_timer_fired_and_cancellattion_failed_event()
         {
-            var failedEventGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_scheduleId, "cause");
-            var timerStartedEventGraph = _eventGraphBuilder.TimerStartedGraph(_scheduleId, TimeSpan.FromSeconds(3));
-            var activityItem = CreateActivityItemWith(timerStartedEventGraph.Concat(failedEventGraph));
+            var firedGraph = _eventGraphBuilder.TimerFiredGraph(_scheduleId, TimeSpan.Zero);
+            var failedGraph = _eventGraphBuilder.TimerCancellationFailedGraph(_scheduleId, "cause");
+
+            var activityItem = CreateActivityItemWith(failedGraph.Concat(firedGraph));
 
             var allEvents = activityItem.AllEvents(true);
 
             Assert.That(allEvents, Is.EqualTo(new WorkflowItemEvent[]
             {
-                new TimerStartedEvent(timerStartedEventGraph.First(), timerStartedEventGraph),
-                new TimerCancellationFailedEvent(failedEventGraph.First()),
-                new TimerStartedEvent(failedEventGraph.Skip(1).First(), failedEventGraph),
+                new TimerCancellationFailedEvent(failedGraph.First()),
+                new TimerFiredEvent(firedGraph.First(), firedGraph),
             }));
         }
 

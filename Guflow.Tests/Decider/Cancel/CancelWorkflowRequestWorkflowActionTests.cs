@@ -9,12 +9,13 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class CancelWorkflowRequestWorkflowActionTests
     {
-        private EventGraphBuilder _builder;
-
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
         }
 
 
@@ -29,13 +30,15 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_returned_as_custom_action_from_workflow()
         {
-            var workflow = new WorkflowToReturnCancelRequest("id", "runid");
-            var timerFiredEventGraph = _builder.TimerFiredGraph(Identity.Timer("timer1").ScheduleId(), TimeSpan.FromSeconds(2));
-            var timerEvent = new TimerFiredEvent(timerFiredEventGraph.First(), timerFiredEventGraph);
+            const string runId = "runid";
+            var workflow = new WorkflowToReturnCancelRequest("id", "other workflow runid");
+            var scheduleId = Identity.Timer("timer1").ScheduleId();
+            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(scheduleId, TimeSpan.FromSeconds(2)).ToArray());
+            _builder.AddWorkflowRunId(runId);
 
-            var decisions = timerEvent.Interpret(workflow).Decisions();
+            var decisions = workflow.Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{new CancelRequestWorkflowDecision("id", "runid")}));
+            Assert.That(decisions, Is.EqualTo(new []{new CancelRequestWorkflowDecision("id", "other workflow runid") }));
         }
 
         private class WorkflowToReturnCancelRequest : Workflow

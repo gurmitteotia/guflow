@@ -9,12 +9,14 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class RecordMarkerWorkflowActionTests
     {
-        private EventGraphBuilder _builder;
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
         }
         [Test]
         public void Returns_record_marker_workflow_decision()
@@ -29,10 +31,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_be_returned_as_custom_action_workflow()
         {
-            var timerFiredEventGraph = _builder.TimerFiredGraph(Identity.Timer("timer1").ScheduleId(), TimeSpan.FromSeconds(2));
-            var timerFiredEvent = new TimerFiredEvent(timerFiredEventGraph.First(),timerFiredEventGraph);
+            var timerFiredEventGraph = _graphBuilder.TimerFiredGraph(Identity.Timer("timer1").ScheduleId(), TimeSpan.FromSeconds(2)).ToArray();
+            _builder.AddNewEvents(timerFiredEventGraph);
 
-            var decisions = timerFiredEvent.Interpret(new WorkflowToReturnRecordMarker("markerName", "details")).Decisions();
+            var decisions = new WorkflowToReturnRecordMarker("markerName", "details").Decisions(_builder.Result());
 
             Assert.That(decisions,Is.EqualTo(new []{new RecordMarkerWorkflowDecision("markerName","details")}));
         }
