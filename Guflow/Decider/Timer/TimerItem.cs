@@ -65,10 +65,7 @@ namespace Guflow.Decider
             _fireAfter = time;
             return this;
         }
-
         public override bool Has(ScheduleId id) => _scheduleId == id;
-       
-
         public IFluentTimerItem FireAfter(Func<ITimerItem, TimeSpan> time)
         {
             Ensure.NotNull(time, "time");

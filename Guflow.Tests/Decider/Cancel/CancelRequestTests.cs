@@ -91,7 +91,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(identity.Id, "id")}));
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(identity.ScheduleId(), "id")}));
         }
 
         [Test]
@@ -103,7 +103,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(identity.Id, null) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(identity.ScheduleId(), null) }));
         }
 
         [Test]
@@ -223,25 +223,30 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_request_for_child_workflow()
         {
+            const string parentRunId = "ParentRunId";
             var workflow = new CancelRequestForChildWorkflow();
-            _historyBuilder.AddProcessedEvents(ChildWorkflowStarted("rid"));
+            _historyBuilder.AddProcessedEvents(ChildWorkflowStarted(parentRunId, "rid"));
+            _historyBuilder.AddWorkflowRunId(parentRunId);
             _historyBuilder.AddNewEvents(TimerFiredEventGraph(TimerName));
 
             var decisions = workflow.Decisions(_historyBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[]{new CancelRequestWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).Id, "rid")}));
+            Assert.That(decisions, Is.EqualTo(new[]{new CancelRequestWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).ScheduleId(parentRunId), "rid")}));
         }
 
         [Test]
         public void Returns_cancel_request_for_child_workflow_using_generic_api()
         {
+            const string parentRunId = "ParentRunId";
+
             var workflow = new CancelRequestForChildWorkflowUsingGenericTypeApi();
-            _historyBuilder.AddProcessedEvents(ChildWorkflowStarted("rid"));
+            _historyBuilder.AddProcessedEvents(ChildWorkflowStarted(parentRunId, "rid"));
+            _historyBuilder.AddWorkflowRunId(parentRunId);
             _historyBuilder.AddNewEvents(TimerFiredEventGraph(TimerName));
 
             var decisions = workflow.Decisions(_historyBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).Id, "rid") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).ScheduleId(parentRunId), "rid") }));
         }
 
         [Test]
@@ -279,10 +284,10 @@ namespace Guflow.Tests.Decider
             return _eventGraph.TimerFiredGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.FromSeconds(1)).ToArray();
         }
 
-        private HistoryEvent[] ChildWorkflowStarted(string runId)
+        private HistoryEvent[] ChildWorkflowStarted(string parentRunId, string runId)
         {
             return _eventGraph
-                .ChildWorkflowStartedEventGraph(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).ScheduleId(), runId, "input").ToArray();
+                .ChildWorkflowStartedEventGraph(Identity.New(WorkflowName, WorkflowVersion, WorkflowPosName).ScheduleId(parentRunId), runId, "input").ToArray();
         }
 
         private class WorkflowToReturnCancelActivityAction : Workflow

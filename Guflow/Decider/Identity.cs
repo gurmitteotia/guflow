@@ -6,17 +6,14 @@ namespace Guflow.Decider
         public string Name { get; }
         public string Version { get; }
         public string PositionalName { get; }
-
+        private readonly string _id;
         private Identity(string name, string version, string positionalName)
         {
             Name = name;
             Version = version;
             PositionalName = positionalName;
-            Id = Decider.ScheduleId.Create(this);
+            _id = Decider.ScheduleId.Create(this);
         }
-        //TODO: Move it out of this class
-        public ScheduleId Id { get; private set; }
-
         public ScheduleId ScheduleId(string salt = "")
         {
             return Decider.ScheduleId.Create(this,salt);
@@ -43,12 +40,12 @@ namespace Guflow.Decider
             var otherIdentity = other as Identity;
             if (otherIdentity == null)
                 return false;
-            return Id.Equals(otherIdentity.Id);
+            return _id.Equals(otherIdentity._id);
         }
 
         public override int GetHashCode()
         {
-            return Id.GetHashCode();
+            return _id.GetHashCode();
         }
 
         public override string ToString()

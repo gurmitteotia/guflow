@@ -8,20 +8,20 @@ namespace Guflow.Decider
 {
     internal class ScheduleLambdaDecision : WorkflowDecision
     {
-        private readonly ScheduleId _identity;
+        private readonly ScheduleId _id;
         private readonly object _input;
         private readonly TimeSpan? _timout;
 
-        internal ScheduleLambdaDecision(ScheduleId identity, object input, TimeSpan? timout = null) : base(canCloseWorkflow:false, proposal: false)
+        internal ScheduleLambdaDecision(ScheduleId id, object input, TimeSpan? timout = null) : base(canCloseWorkflow:false, proposal: false)
         {
-            _identity = identity;
+            _id = id;
             _input = input;
             _timout = timout;
         }
 
         internal override bool IsFor(WorkflowItem workflowItem)
         {
-            return workflowItem.Has(_identity);
+            return workflowItem.Has(_id);
         }
 
         internal override Decision SwfDecision()
@@ -31,23 +31,23 @@ namespace Guflow.Decider
                 DecisionType = DecisionType.ScheduleLambdaFunction,
                 ScheduleLambdaFunctionDecisionAttributes = new ScheduleLambdaFunctionDecisionAttributes
                 {
-                    Id = _identity,
-                    Name = _identity.Name,
+                    Id = _id,
+                    Name = _id.Name,
                     Input = _input.ToLambdaInput(),
                     StartToCloseTimeout = _timout.Seconds(),
-                    Control = new ScheduleData() { PN = _identity.PositionalName}.ToJson()
+                    Control = new ScheduleData() { PN = _id.PositionalName}.ToJson()
                 }
             };
         }
         public override bool Equals(object obj)
         {
             var decision = obj as ScheduleLambdaDecision;
-            return decision != null && _identity.Equals(decision._identity);
+            return decision != null && _id.Equals(decision._id);
 
         }
         public override int GetHashCode()
         {
-            return -1493283476 + _identity.GetHashCode();
+            return -1493283476 + _id.GetHashCode();
         }
 
     }

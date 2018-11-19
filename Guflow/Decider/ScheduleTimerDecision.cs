@@ -7,20 +7,20 @@ namespace Guflow.Decider
 {
     internal sealed class ScheduleTimerDecision : WorkflowDecision
     {
-        private readonly ScheduleId _scheduleId;
+        private readonly ScheduleId _id;
         private readonly TimeSpan _fireAfter;
         private readonly bool _isRescheduleTimer;
 
-        public ScheduleTimerDecision(ScheduleId scheduleId, TimeSpan fireAfter, bool isRescheduleTimer=false):base(false)
+        public ScheduleTimerDecision(ScheduleId id, TimeSpan fireAfter, bool isRescheduleTimer=false):base(false)
         {
-            _scheduleId = scheduleId;
+            _id = id;
             _fireAfter = fireAfter;
             _isRescheduleTimer = isRescheduleTimer;
         }
 
         internal override bool IsFor(WorkflowItem workflowItem)
         {
-            return workflowItem.Has(_scheduleId);
+            return workflowItem.Has(_id);
         }
 
         public override bool Equals(object other)
@@ -28,13 +28,13 @@ namespace Guflow.Decider
             var otherTimer = other as ScheduleTimerDecision;
             if (otherTimer == null)
                 return false;
-            return string.Equals(_scheduleId, otherTimer._scheduleId) && _fireAfter.Equals(otherTimer._fireAfter)
+            return string.Equals(_id, otherTimer._id) && _fireAfter.Equals(otherTimer._fireAfter)
                    && _isRescheduleTimer == otherTimer._isRescheduleTimer;
         }
 
         public override int GetHashCode()
         {
-            return _scheduleId.GetHashCode();
+            return _id.GetHashCode();
         }
 
         internal override Decision SwfDecision()
@@ -44,16 +44,16 @@ namespace Guflow.Decider
                 DecisionType = DecisionType.StartTimer,
                 StartTimerDecisionAttributes = new StartTimerDecisionAttributes()
                 {
-                    TimerId = _scheduleId.ToString(),
+                    TimerId = _id.ToString(),
                     StartToFireTimeout = Math.Round(_fireAfter.TotalSeconds).ToString(),
-                    Control = (new TimerScheduleData() {IsARescheduleTimer = _isRescheduleTimer, TimerName = _scheduleId.Name}).ToJson()
+                    Control = (new TimerScheduleData() {IsARescheduleTimer = _isRescheduleTimer, TimerName = _id.Name}).ToJson()
                 }
             };
         }
 
         public override string ToString()
         {
-            return string.Format("{0} for {1} and reschedulable timer is {2} and interval {3}",GetType().Name, _scheduleId.Name,_isRescheduleTimer, _fireAfter);
+            return string.Format("{0} for {1} and reschedulable timer is {2} and interval {3}",GetType().Name, _id.Name,_isRescheduleTimer, _fireAfter);
         }
     }
 }
