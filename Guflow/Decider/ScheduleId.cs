@@ -4,14 +4,14 @@ namespace Guflow.Decider
     /// <summary>
     /// Represent the identity for a scheduled workflow item. This class is used internally.
     /// </summary>
-    public sealed class SwfIdentity
+    public sealed class ScheduleId
     {
-        private readonly string _identity;
+        private readonly string _id;
         private readonly Identity _itemId;
 
-        private SwfIdentity(Identity itemId, string identity)
+        private ScheduleId(Identity itemId, string id)
         {
-            _identity = identity;
+            _id = id;
             _itemId = itemId;
         }
 
@@ -19,15 +19,15 @@ namespace Guflow.Decider
         internal string Version => _itemId.Version;
         internal string PositionalName => _itemId.PositionalName;
 
-        internal static SwfIdentity Create(string name, string version, string positionalName)
+        internal static ScheduleId Create(string name, string version, string positionalName)
         {
             var timerId = Identity.New(name, version, positionalName);
             return Create(timerId);
         }
-        internal static SwfIdentity Create(Identity itemId, string salt="")
+        internal static ScheduleId Create(Identity itemId, string salt="")
         {
             var identity = SwfId(itemId.Name + salt, itemId.Version, itemId.PositionalName);
-            return new SwfIdentity(itemId, identity);
+            return new ScheduleId(itemId, identity);
         }
 
         private static string SwfId(string name, string version, string positionalName)
@@ -36,23 +36,23 @@ namespace Guflow.Decider
             return combinedName.GetMd5Hash();
         }
 
-        internal static SwfIdentity Raw(string identity)
+        internal static ScheduleId Raw(string id)
         {
-            return new SwfIdentity(Identity.Empty, identity);
+            return new ScheduleId(Identity.Empty, id);
         }
-        private bool Equals(SwfIdentity other)
+        private bool Equals(ScheduleId other)
         {
-            return string.Equals(_identity, other._identity);
+            return string.Equals(_id, other._id);
         }
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((SwfIdentity)obj);
+            return Equals((ScheduleId)obj);
         }
 
-        public static bool operator ==(SwfIdentity left, SwfIdentity right)
+        public static bool operator ==(ScheduleId left, ScheduleId right)
         {
             if (ReferenceEquals(left, null) && ReferenceEquals(right, null))
                 return true;
@@ -62,21 +62,21 @@ namespace Guflow.Decider
                 return false;
             return left.Equals(right);
         }
-        public static bool operator !=(SwfIdentity left, SwfIdentity right)
+        public static bool operator !=(ScheduleId left, ScheduleId right)
         {
             return !(left == right);
         }
-        public static implicit operator string(SwfIdentity instance)
+        public static implicit operator string(ScheduleId instance)
         {
-            return instance._identity;
+            return instance._id;
         }
         public override int GetHashCode()
         {
-            return _identity.GetHashCode();
+            return _id.GetHashCode();
         }
         public override string ToString()
         {
-            return _identity;
+            return _id;
         }
     }
 }

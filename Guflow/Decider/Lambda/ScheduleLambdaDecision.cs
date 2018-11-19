@@ -8,11 +8,11 @@ namespace Guflow.Decider
 {
     internal class ScheduleLambdaDecision : WorkflowDecision
     {
-        private readonly SwfIdentity _identity;
+        private readonly ScheduleId _identity;
         private readonly object _input;
         private readonly TimeSpan? _timout;
 
-        internal ScheduleLambdaDecision(SwfIdentity identity, object input, TimeSpan? timout = null) : base(canCloseWorkflow:false, proposal: false)
+        internal ScheduleLambdaDecision(ScheduleId identity, object input, TimeSpan? timout = null) : base(canCloseWorkflow:false, proposal: false)
         {
             _identity = identity;
             _input = input;

@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         private const string Reason = "reason";
         private const string Detail = "detail";
         private EventGraphBuilder _builder;
-        private SwfIdentity _activityIdentity;
+        private ScheduleId _activityIdentity;
 
         [SetUp]
         public void Setup()

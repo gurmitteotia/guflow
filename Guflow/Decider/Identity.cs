@@ -12,21 +12,21 @@ namespace Guflow.Decider
             Name = name;
             Version = version;
             PositionalName = positionalName;
-            Id = SwfIdentity.Create(this);
+            Id = Decider.ScheduleId.Create(this);
         }
         //TODO: Move it out of this class
-        public SwfIdentity Id { get; private set; }
+        public ScheduleId Id { get; private set; }
 
         public Identity ScheduleIdentity(string salt)
         {
             var identity = new Identity(Name, Version, PositionalName);
-            identity.Id= SwfIdentity.Create(identity, salt);
+            identity.Id= Decider.ScheduleId.Create(identity, salt);
             return identity;
         }
 
-        public SwfIdentity ScheduleId(string salt = "")
+        public ScheduleId ScheduleId(string salt = "")
         {
-            return SwfIdentity.Create(this,salt);
+            return Decider.ScheduleId.Create(this,salt);
         }
         public static readonly Identity Empty = new Identity("","","");
 

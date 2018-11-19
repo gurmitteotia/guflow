@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         private const string WorkflowName = "Workflow";
         private const string WorkflowVersion = "1.0";
         private const string ParentWorkflowId = "pid";
-        private Identity _childWorkflowId;
+        private ScheduleId _scheduleId;
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
         
@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
             _eventGraphBuilder = new EventGraphBuilder();
             _eventsBuilder = new HistoryEventsBuilder();
             _eventsBuilder.AddWorkflowRunId(ParentWorkflowId);
-            _childWorkflowId = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowId);
+            _scheduleId = Identity.New(WorkflowName, WorkflowVersion).ScheduleId(ParentWorkflowId);
         }
        
 
@@ -227,7 +227,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(_childWorkflowId.ScheduleId(), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(_scheduleId, "input") }));
         }
 
         [Test]
@@ -241,7 +241,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new[]
             {
-                new ScheduleTimerDecision(_childWorkflowId.ScheduleId(), TimeSpan.FromSeconds(2), true)
+                new ScheduleTimerDecision(_scheduleId, TimeSpan.FromSeconds(2), true)
             }));
         }
 
@@ -262,7 +262,7 @@ namespace Guflow.Tests.Decider
         private HistoryEvent[] ChildWorkflowCompletedEventGraph()
         {
             return _eventGraphBuilder
-                .ChildWorkflowCompletedGraph(_childWorkflowId.ScheduleId() ,"rid", "input", "result")
+                .ChildWorkflowCompletedGraph(_scheduleId,"rid", "input", "result")
                 .ToArray();
         }
 

@@ -12,7 +12,7 @@ namespace Guflow.Decider
         internal LambdaSchedulingFailedEvent(HistoryEvent failedEvent) : base(failedEvent.EventId)
         {
             var attr = failedEvent.ScheduleLambdaFunctionFailedEventAttributes;
-            SwfIdentity = SwfIdentity.Raw(attr.Id);
+            ScheduleId = ScheduleId.Raw(attr.Id);
             Cause = attr.Cause?.Value;
         }
 

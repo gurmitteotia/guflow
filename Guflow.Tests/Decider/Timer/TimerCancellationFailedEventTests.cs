@@ -92,7 +92,7 @@ namespace Guflow.Tests.Decider
             var timerCancellationFailedEventGraph = _builder.TimerCancellationFailedGraph(identity.ScheduleId(), Cause);
             return new TimerCancellationFailedEvent(timerCancellationFailedEventGraph.First());
         }
-        private HistoryEvent[] TimerCancellationFailedEventGrpah(SwfIdentity identity, string cause)
+        private HistoryEvent[] TimerCancellationFailedEventGrpah(ScheduleId identity, string cause)
         {
             return _builder.TimerCancellationFailedGraph(identity, Cause).ToArray();
         }

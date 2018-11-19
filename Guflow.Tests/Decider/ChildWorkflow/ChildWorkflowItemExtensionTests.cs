@@ -14,7 +14,7 @@ namespace Guflow.Tests.Decider
         private Mock<IChildWorkflowItem> _childWorkflowItem;
         private EventGraphBuilder _builder;
         private Identity _identity;
-        private SwfIdentity _scheduleId;
+        private ScheduleId _scheduleId;
         [SetUp]
         public void Setup()
         {

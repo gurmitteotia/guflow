@@ -6,10 +6,10 @@ namespace Guflow.Decider
 {
     internal sealed class CancelTimerDecision : WorkflowDecision
     {
-        private readonly SwfIdentity _timerIdentity;
-        public CancelTimerDecision(SwfIdentity timerIdentity):base(false)
+        private readonly ScheduleId _id;
+        public CancelTimerDecision(ScheduleId id):base(false)
         {
-            _timerIdentity = timerIdentity;
+            _id = id;
         }
 
         internal override Decision SwfDecision()
@@ -19,14 +19,14 @@ namespace Guflow.Decider
                 DecisionType = DecisionType.CancelTimer,
                 CancelTimerDecisionAttributes = new CancelTimerDecisionAttributes()
                 {
-                    TimerId = _timerIdentity.ToString()
+                    TimerId = _id.ToString()
                 }
             };
         }
 
         private bool Equals(CancelTimerDecision other)
         {
-            return _timerIdentity.Equals(other._timerIdentity);
+            return _id.Equals(other._id);
         }
 
         public override bool Equals(object obj)
@@ -39,12 +39,12 @@ namespace Guflow.Decider
 
         public override int GetHashCode()
         {
-            return _timerIdentity.GetHashCode();
+            return _id.GetHashCode();
         }
 
         public override string ToString()
         {
-            return string.Format("{0} for {1}", GetType().Name, _timerIdentity);
+            return string.Format("{0} for {1}", GetType().Name, _id);
         }
     }
 }

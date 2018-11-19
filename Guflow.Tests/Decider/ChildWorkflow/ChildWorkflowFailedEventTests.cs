@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         private const string PositionalName = "Pos";
         private const string ParentWorkflowRunId = "Pid";
 
-        private SwfIdentity _workflowIdentity;
+        private ScheduleId _workflowIdentity;
 
         [SetUp]
         public void Setup()

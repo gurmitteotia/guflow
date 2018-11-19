@@ -16,7 +16,7 @@ namespace Guflow.Tests.Decider
         private EventGraphBuilder _builder;
         private Mock<IWorkflow> _workflow;
         private Identity _lambdaIdentity;
-        private SwfIdentity _scheduleId;
+        private ScheduleId _scheduleId;
         private const string LambdaName = "lambda";
         [SetUp]
         public void Setup()

@@ -9,12 +9,12 @@ namespace Guflow.Decider
 {
     internal class ScheduleChildWorkflowDecision : WorkflowDecision
     {
-        private readonly SwfIdentity _identity;
+        private readonly ScheduleId _id;
         private readonly object _input;
 
-        public ScheduleChildWorkflowDecision(SwfIdentity identity, object input) : base(false)
+        public ScheduleChildWorkflowDecision(ScheduleId id, object input) : base(false)
         {
-            _identity = identity;
+            _id = id;
             _input = input;
         }
 
@@ -27,7 +27,7 @@ namespace Guflow.Decider
 
         internal override bool IsFor(WorkflowItem workflowItem)
         {
-            return workflowItem.Has(_identity);
+            return workflowItem.Has(_id);
         }
 
         internal override Decision SwfDecision()
@@ -37,10 +37,10 @@ namespace Guflow.Decider
                 DecisionType = DecisionType.StartChildWorkflowExecution,
                 StartChildWorkflowExecutionDecisionAttributes = new StartChildWorkflowExecutionDecisionAttributes()
                 {
-                    WorkflowId = _identity,
-                    WorkflowType = new WorkflowType() { Name = _identity.Name, Version = _identity.Version},
+                    WorkflowId = _id,
+                    WorkflowType = new WorkflowType() { Name = _id.Name, Version = _id.Version},
                     Input = _input.ToAwsString(),
-                    Control = new ScheduleData() { PN = _identity.PositionalName}.ToJson(),
+                    Control = new ScheduleData() { PN = _id.PositionalName}.ToJson(),
                     ChildPolicy = ChildPolicy,
                     ExecutionStartToCloseTimeout = ExecutionTimeouts.ExecutionStartToCloseTimeout.Seconds(),
                     TaskStartToCloseTimeout = ExecutionTimeouts.TaskStartToCloseTimeout.Seconds(),
@@ -56,12 +56,12 @@ namespace Guflow.Decider
         {
             var decision = obj as ScheduleChildWorkflowDecision;
             return decision != null &&
-                   EqualityComparer<SwfIdentity>.Default.Equals(_identity, decision._identity);
+                   EqualityComparer<ScheduleId>.Default.Equals(_id, decision._id);
         }
 
         public override int GetHashCode()
         {
-            return -1493283476 + EqualityComparer<SwfIdentity>.Default.GetHashCode(_identity);
+            return -1493283476 + EqualityComparer<ScheduleId>.Default.GetHashCode(_id);
         }
     }
 }

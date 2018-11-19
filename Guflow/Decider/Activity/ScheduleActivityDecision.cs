@@ -7,10 +7,10 @@ namespace Guflow.Decider
 {
     internal sealed class ScheduleActivityDecision : WorkflowDecision
     {
-        private readonly SwfIdentity _identity;
-        public ScheduleActivityDecision(SwfIdentity identity) : base(false)
+        private readonly ScheduleId _id;
+        public ScheduleActivityDecision(ScheduleId id) : base(false)
         {
-            _identity = identity;
+            _id = id;
         }
 
         public ActivityTimeouts Timeouts { get; internal set; }
@@ -22,19 +22,19 @@ namespace Guflow.Decider
 
         internal override bool IsFor(WorkflowItem workflowItem)
         {
-            return workflowItem.Has(_identity);
+            return workflowItem.Has(_id);
         }
         public override bool Equals(object other)
         {
             var otherDecision = other as ScheduleActivityDecision;
             if (otherDecision == null)
                 return false;
-            return _identity.Equals(otherDecision._identity);
+            return _id.Equals(otherDecision._id);
         }
 
         public override int GetHashCode()
         {
-            return _identity.GetHashCode();
+            return _id.GetHashCode();
         }
 
         internal override Decision SwfDecision()
@@ -43,9 +43,9 @@ namespace Guflow.Decider
             {
                 ScheduleActivityTaskDecisionAttributes = new ScheduleActivityTaskDecisionAttributes()
                 {
-                    ActivityType = new ActivityType() { Name = _identity.Name, Version = _identity.Version },
-                    ActivityId = _identity,
-                    Control = (new ScheduleData() { PN = _identity.PositionalName}).ToJson(),
+                    ActivityType = new ActivityType() { Name = _id.Name, Version = _id.Version },
+                    ActivityId = _id,
+                    Control = (new ScheduleData() { PN = _id.PositionalName}).ToJson(),
                     HeartbeatTimeout =Timeouts.HeartbeatTimeout.Seconds(),
                     ScheduleToCloseTimeout = Timeouts.ScheduleToCloseTimeout.Seconds(),
                     ScheduleToStartTimeout = Timeouts.ScheduleToStartTimeout.Seconds(),
@@ -60,7 +60,7 @@ namespace Guflow.Decider
 
         public override string ToString()
         {
-            return string.Format("{0} for {1}", GetType().Name, _identity);
+            return string.Format("{0} for {1}", GetType().Name, _id);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         private HistoryEventsBuilder _builder;
         private Mock<IWorkflow> _workflow;
         private Identity _identity;
-        private SwfIdentity _scheduleIdentity;
+        private ScheduleId _scheduleIdentity;
         private const string WorkflowName = "Workflow";
         private const string Version = "1.0";
         private const string PositionalName = "Pos";

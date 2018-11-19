@@ -13,7 +13,7 @@ namespace Guflow.Tests.Decider
     public class ActivityItemTests
     {
         private readonly Identity _activityIdentity = Identity.New("somename", "1.0", "name");
-        private SwfIdentity _scheduleId;
+        private ScheduleId _scheduleId;
         private Mock<IWorkflow> _workflow;
 
         private EventGraphBuilder _eventGraphBuilder;

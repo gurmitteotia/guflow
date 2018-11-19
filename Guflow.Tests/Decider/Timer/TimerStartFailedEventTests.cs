@@ -97,7 +97,7 @@ namespace Guflow.Tests.Decider
             return new TimerStartFailedEvent(timerFailedEventGraph.First());
         }
 
-        private HistoryEvent[] TimerStartFailedEventGraph(SwfIdentity timerIdentity, string cause)
+        private HistoryEvent[] TimerStartFailedEventGraph(ScheduleId timerIdentity, string cause)
         {
             return _builder.TimerStartFailedGraph(timerIdentity, cause).ToArray();
         }

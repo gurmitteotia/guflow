@@ -20,7 +20,7 @@ namespace Guflow.Tests.Decider
         private ActivityCompletedEvent _activityCompletedEvent;
 
         private EventGraphBuilder _builder;
-        private SwfIdentity _activityIdentity;
+        private ScheduleId _activityIdentity;
 
         [SetUp]
         public void Setup()

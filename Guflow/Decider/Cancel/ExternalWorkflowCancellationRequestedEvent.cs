@@ -13,7 +13,7 @@ namespace Guflow.Decider
             : base(cancelRequested.EventId)
         {
             var attr = cancelRequested.ExternalWorkflowExecutionCancelRequestedEventAttributes;
-            SwfIdentity = SwfIdentity.Raw(attr.WorkflowExecution.WorkflowId);
+            ScheduleId = ScheduleId.Raw(attr.WorkflowExecution.WorkflowId);
         }
     }
 }

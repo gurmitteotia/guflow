@@ -24,7 +24,7 @@ namespace Guflow.Tests.Decider
         private const string ParentWorkflowRunId = "runid";
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
-        private SwfIdentity _scheduleId;
+        private ScheduleId _scheduleId;
         [SetUp]
         public void Setup()
         {

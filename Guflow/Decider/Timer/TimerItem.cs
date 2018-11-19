@@ -8,7 +8,7 @@ namespace Guflow.Decider
 {
     internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer
     {
-        private readonly SwfIdentity _scheduleId;
+        private readonly ScheduleId _scheduleId;
         private TimeSpan _fireAfter= new TimeSpan();
         private Func<ITimerItem, TimeSpan> _fireAfterFunc;
         private Func<TimerFiredEvent, WorkflowAction> _firedAction;
@@ -21,7 +21,7 @@ namespace Guflow.Decider
 
         private bool _invokedTimerCancelAction = false;// to avoid recurssion.
 
-        private TimerItem(Identity identity, SwfIdentity scheduleId, IWorkflow workflow)
+        private TimerItem(Identity identity, ScheduleId scheduleId, IWorkflow workflow)
                      : base(identity, workflow)
         {
             _scheduleId = scheduleId;
@@ -31,7 +31,7 @@ namespace Guflow.Decider
             _fireAfterFunc = _ => _fireAfter;
         }
 
-        public static TimerItem Reschedule(WorkflowItem ownerItem, SwfIdentity scheduleId, IWorkflow workflow)
+        public static TimerItem Reschedule(WorkflowItem ownerItem, ScheduleId scheduleId, IWorkflow workflow)
         {
             var identity = Decider.Identity.New(scheduleId.Name, scheduleId.Version, scheduleId.PositionalName);
             var timerItem = new TimerItem(identity, scheduleId, workflow);
@@ -45,10 +45,10 @@ namespace Guflow.Decider
         {
             return New(identity, identity.ScheduleId(), workflow);
         }
-        private static TimerItem New(Identity identity, SwfIdentity scheduleId, IWorkflow workflow)
+        private static TimerItem New(Identity identity, ScheduleId scheduleId, IWorkflow workflow)
         {
             var timerItem = new TimerItem(identity, scheduleId,workflow);
-            timerItem._rescheduleTimer = Reschedule(timerItem, timerItem.Identity.ScheduleId(), workflow);
+            timerItem._rescheduleTimer = Reschedule(timerItem, scheduleId, workflow);
             timerItem.OnStartFailed(e => e.DefaultAction(workflow));
             timerItem.OnCancellationFailed(e => e.DefaultAction(workflow));
             timerItem.OnFired(e => e.DefaultAction(workflow));
@@ -65,6 +65,9 @@ namespace Guflow.Decider
             _fireAfter = time;
             return this;
         }
+
+        public override bool Has(ScheduleId identity) => _scheduleId == identity;
+       
 
         public IFluentTimerItem FireAfter(Func<ITimerItem, TimeSpan> time)
         {

@@ -14,7 +14,7 @@ namespace Guflow.Tests.Decider
     internal class EventGraphBuilder
     {
         private long _currentEventId = 0;
-        public IEnumerable<HistoryEvent> ActivityCompletedGraph(SwfIdentity activityIdentity, string workerIdentity, string result, string input = "")
+        public IEnumerable<HistoryEvent> ActivityCompletedGraph(ScheduleId activityIdentity, string workerIdentity, string result, string input = "")
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -55,7 +55,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivityFailedGraph(SwfIdentity activityIdentity, string identity, string reason, string detail)
+        public IEnumerable<HistoryEvent> ActivityFailedGraph(ScheduleId activityIdentity, string identity, string reason, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.FailedIds(ref _currentEventId);
@@ -97,7 +97,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivityTimedoutGraph(SwfIdentity activityIdentity, string identity, string timeoutType, string detail)
+        public IEnumerable<HistoryEvent> ActivityTimedoutGraph(ScheduleId activityIdentity, string identity, string timeoutType, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimedoutIds(ref _currentEventId);
@@ -139,7 +139,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivityCancelledGraph(SwfIdentity activityIdentity, string identity, string detail)
+        public IEnumerable<HistoryEvent> ActivityCancelledGraph(ScheduleId activityIdentity, string identity, string detail)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CancelledIds(ref _currentEventId);
@@ -191,7 +191,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerFiredGraph(SwfIdentity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
+        public IEnumerable<HistoryEvent> TimerFiredGraph(ScheduleId timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerFiredIds(ref _currentEventId);
@@ -221,7 +221,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerCancelledGraph(SwfIdentity timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
+        public IEnumerable<HistoryEvent> TimerCancelledGraph(ScheduleId timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerCancelledIds(ref _currentEventId);
@@ -252,7 +252,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerStartFailedGraph(SwfIdentity timerId, string cause)
+        public IEnumerable<HistoryEvent> TimerStartFailedGraph(ScheduleId timerId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerStartFailedIds(ref _currentEventId);
@@ -297,7 +297,7 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public IEnumerable<HistoryEvent> ActivityCancellationFailedGraph(SwfIdentity activityId, string cause)
+        public IEnumerable<HistoryEvent> ActivityCancellationFailedGraph(ScheduleId activityId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -338,7 +338,7 @@ namespace Guflow.Tests.Decider
             });
             return historyEvents;
         }
-        public IEnumerable<HistoryEvent> TimerCancellationFailedGraph(SwfIdentity timerId, string cause)
+        public IEnumerable<HistoryEvent> TimerCancellationFailedGraph(ScheduleId timerId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CancellationFailedIds(ref _currentEventId);
@@ -368,7 +368,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerStartedGraph(SwfIdentity identity, TimeSpan fireAfter, bool isARescheduleTimer = false)
+        public IEnumerable<HistoryEvent> TimerStartedGraph(ScheduleId identity, TimeSpan fireAfter, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerStartedIds(ref _currentEventId);
@@ -388,7 +388,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivitySchedulingFailedGraph(SwfIdentity activityIdentity, string cause)
+        public IEnumerable<HistoryEvent> ActivitySchedulingFailedGraph(ScheduleId activityIdentity, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.SchedulingFailedIds(ref _currentEventId);
@@ -408,7 +408,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivityScheduledGraph(SwfIdentity activityIdentity)
+        public IEnumerable<HistoryEvent> ActivityScheduledGraph(ScheduleId activityIdentity)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.ScheduledIds(ref _currentEventId);
@@ -428,7 +428,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivityStartedGraph(SwfIdentity activityIdentity, string identity)
+        public IEnumerable<HistoryEvent> ActivityStartedGraph(ScheduleId activityIdentity, string identity)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
@@ -458,7 +458,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivityCancelRequestedGraph(SwfIdentity activityIdentity, string identity)
+        public IEnumerable<HistoryEvent> ActivityCancelRequestedGraph(ScheduleId activityIdentity, string identity)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.ActivityCancelRequestedIds(ref _currentEventId);
@@ -678,7 +678,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(SwfIdentity identity, object input, object result, TimeSpan? startToClose = null)
+        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(ScheduleId identity, object input, object result, TimeSpan? startToClose = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -722,7 +722,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> LambdaFailedEventGraph(SwfIdentity identity, object input, string reason, string details, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaFailedEventGraph(ScheduleId identity, object input, string reason, string details, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.FailedIds(ref _currentEventId);
@@ -767,7 +767,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> LamdbaTimedoutEventGraph(SwfIdentity identity, object input, string timedoutType, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LamdbaTimedoutEventGraph(ScheduleId identity, object input, string timedoutType, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimedoutIds(ref _currentEventId);
@@ -811,7 +811,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public HistoryEvent LambdaSchedulingFailedEventGraph(SwfIdentity identity, string reason)
+        public HistoryEvent LambdaSchedulingFailedEventGraph(ScheduleId identity, string reason)
         {
             var eventIds = EventIds.SchedulingFailedIds(ref _currentEventId);
             return new HistoryEvent()
@@ -827,7 +827,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaStartFailedEventGraph(SwfIdentity identity, string input, string cause, string message, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaStartFailedEventGraph(ScheduleId identity, string input, string cause, string message, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.LambdaStartFailedIds(ref _currentEventId);
@@ -860,7 +860,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public HistoryEvent LambdaScheduledEventGraph(SwfIdentity identity, object input, TimeSpan? timeout = null)
+        public HistoryEvent LambdaScheduledEventGraph(ScheduleId identity, object input, TimeSpan? timeout = null)
         {
             var eventIds = EventIds.ScheduledIds(ref _currentEventId);
             return new HistoryEvent()
@@ -878,7 +878,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(SwfIdentity identity, object input, TimeSpan? timeout = null)
+        public IEnumerable<HistoryEvent> LambdaStartedEventGraph(ScheduleId identity, object input, TimeSpan? timeout = null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
@@ -910,7 +910,7 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(SwfIdentity identity, string runId, object input, object result)
+        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(ScheduleId identity, string runId, object input, object result)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -966,7 +966,7 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public IEnumerable<HistoryEvent> ChildWorkflowFailedEventGraph(SwfIdentity identity, string runId, object input, string reason, object details)
+        public IEnumerable<HistoryEvent> ChildWorkflowFailedEventGraph(ScheduleId identity, string runId, object input, string reason, object details)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.FailedIds(ref _currentEventId);
@@ -1022,7 +1022,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCancelledEventGraph(SwfIdentity identity, string runId, object input, object details)
+        public IEnumerable<HistoryEvent> ChildWorkflowCancelledEventGraph(ScheduleId identity, string runId, object input, object details)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.ChildWorkflowCancelledIds(ref _currentEventId);
@@ -1099,7 +1099,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowStartedEventGraph(SwfIdentity identity, string runId, object input)
+        public IEnumerable<HistoryEvent> ChildWorkflowStartedEventGraph(ScheduleId identity, string runId, object input)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
@@ -1141,7 +1141,7 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public IEnumerable<HistoryEvent> ChildWorkflowTerminatedEventGraph(SwfIdentity identity, string runId, object input)
+        public IEnumerable<HistoryEvent> ChildWorkflowTerminatedEventGraph(ScheduleId identity, string runId, object input)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -1195,7 +1195,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowTimedoutEventGraph(SwfIdentity identity, string runId, object input, string timedoutType)
+        public IEnumerable<HistoryEvent> ChildWorkflowTimedoutEventGraph(ScheduleId identity, string runId, object input, string timedoutType)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimedoutIds(ref _currentEventId);
@@ -1250,7 +1250,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowStartFailedEventGraph(SwfIdentity identity, object input, string cause)
+        public IEnumerable<HistoryEvent> ChildWorkflowStartFailedEventGraph(ScheduleId identity, object input, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.ChildWorkflowStartFailed(ref _currentEventId);
@@ -1289,7 +1289,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCancellationRequestedEventGraph(SwfIdentity identity, string runId, string input)
+        public IEnumerable<HistoryEvent> ChildWorkflowCancellationRequestedEventGraph(ScheduleId identity, string runId, string input)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.WorkflowCancelRequestedIds(ref _currentEventId);
@@ -1353,7 +1353,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCancelRequestFailedEventGraph(SwfIdentity identity, string runId, string cause)
+        public IEnumerable<HistoryEvent> ChildWorkflowCancelRequestFailedEventGraph(ScheduleId identity, string runId, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.ChildWorkflowCancelRequestFailedIds(ref _currentEventId);

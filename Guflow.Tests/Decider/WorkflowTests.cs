@@ -302,7 +302,7 @@ namespace Guflow.Tests.Decider
                 new ScheduleActivityDecision(Identity.New("id", "1.0").ScheduleId()),
                 new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2)),
                 new CancelActivityDecision(Identity.New("newid", "1.0")),
-                new CancelTimerDecision(Identity.Timer("first")),
+                new CancelTimerDecision(Identity.Timer("first").ScheduleId()),
                 new ScheduleLambdaDecision(Identity.Lambda("name").ScheduleId(),"input" ), 
             };
         }
