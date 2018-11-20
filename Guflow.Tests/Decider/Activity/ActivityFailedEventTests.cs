@@ -18,14 +18,14 @@ namespace Guflow.Tests.Decider
         private const string Reason = "reason";
         private const string Detail = "detail";
         private EventGraphBuilder _builder;
-        private ScheduleId _activityIdentity;
+        private ScheduleId _scheduleId;
 
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            _activityIdentity = Guflow.Decider.Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
-            var failedActivityEventGraph = _builder.ActivityFailedGraph(_activityIdentity, Identity, Reason, Detail);
+            _scheduleId = Guflow.Decider.Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
+            var failedActivityEventGraph = _builder.ActivityFailedGraph(_scheduleId, Identity, Reason, Detail);
             _activityFailedEvent = new ActivityFailedEvent(failedActivityEventGraph.First(), failedActivityEventGraph);
         }
             

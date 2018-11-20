@@ -11,11 +11,11 @@ namespace Guflow.Tests.Decider
     public class ActivityCancelledEventTests
     {
         private ActivityCancelledEvent _activityCancelledEvent;
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
-        private const string _positionalName = "First";
-        private const string _identity = "machine name";
-        private const string _detail = "detail";
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
+        private const string Identity = "machine name";
+        private const string Detail = "detail";
 
         private EventGraphBuilder _builder;
 
@@ -23,16 +23,16 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var activityIdentity = Identity.New(_activityName, _activityVersion, _positionalName).ScheduleId();
-            var cancelledActivityEventGraph = _builder.ActivityCancelledGraph(activityIdentity, _identity, _detail);
+            var scheduleId = Guflow.Decider.Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
+            var cancelledActivityEventGraph = _builder.ActivityCancelledGraph(scheduleId, Identity, Detail);
             _activityCancelledEvent = new ActivityCancelledEvent(cancelledActivityEventGraph.First(), cancelledActivityEventGraph);
         }
 
         [Test]
         public void Should_populate_properties_from_event_attributes()
         {
-            Assert.That(_activityCancelledEvent.Details, Is.EqualTo(_detail));
-            Assert.That(_activityCancelledEvent.WorkerIdentity, Is.EqualTo(_identity));
+            Assert.That(_activityCancelledEvent.Details, Is.EqualTo(Detail));
+            Assert.That(_activityCancelledEvent.WorkerIdentity, Is.EqualTo(Identity));
             Assert.That(_activityCancelledEvent.IsActive,Is.False);
         }
 
@@ -43,7 +43,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = _activityCancelledEvent.Interpret(workflow).Decisions();
 
-            Assert.That(decisions, Is.EqualTo(new []{new CancelWorkflowDecision(_detail)}) );
+            Assert.That(decisions, Is.EqualTo(new []{new CancelWorkflowDecision(Detail)}) );
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace Guflow.Tests.Decider
         {
             public SingleActivityWorkflow()
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName);
             }
         }
 
@@ -77,7 +77,7 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnCancelled(c => workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCancelled(c => workflowAction);
             }
         }
     }
