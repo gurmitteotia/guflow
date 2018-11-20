@@ -10,20 +10,20 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Equality_test()
         {
-            Assert.That(SwfIdentity.Create("name","ver","pos").Equals(SwfIdentity.Create("name","ver","pos")));
-            Assert.That(SwfIdentity.Create("name", "ver", "").Equals(SwfIdentity.Create("name", "ver", "")));
-            Assert.That(SwfIdentity.Raw("identity").Equals(SwfIdentity.Raw("identity")));
-            Assert.That(SwfIdentity.Create("name", "ver", "pos")==SwfIdentity.Create("name", "ver", "pos"));
-            Assert.That(SwfIdentity.Create("name", "ver", "")==SwfIdentity.Create("name", "ver", ""));
-            Assert.That(SwfIdentity.Raw("identity")==SwfIdentity.Raw("identity"));
+            Assert.That(ScheduleId.Create("name","ver","pos").Equals(ScheduleId.Create("name","ver","pos")));
+            Assert.That(ScheduleId.Create("name", "ver", "").Equals(ScheduleId.Create("name", "ver", "")));
+            Assert.That(ScheduleId.Raw("identity").Equals(ScheduleId.Raw("identity")));
+            Assert.That(ScheduleId.Create("name", "ver", "pos")==ScheduleId.Create("name", "ver", "pos"));
+            Assert.That(ScheduleId.Create("name", "ver", "")==ScheduleId.Create("name", "ver", ""));
+            Assert.That(ScheduleId.Raw("identity")==ScheduleId.Raw("identity"));
             
-            Assert.False(SwfIdentity.Create("name", "ver", "pos").Equals(SwfIdentity.Create("name", "ver", "pos1")));
-            Assert.False(SwfIdentity.Create("name", "ver", "pos").Equals(SwfIdentity.Create("name", "ver1", "pos")));
-            Assert.False(SwfIdentity.Create("name", "ver", "pos").Equals(SwfIdentity.Create("name1", "ver", "pos")));
-            Assert.False(SwfIdentity.Raw("identity").Equals(SwfIdentity.Raw("identity1")));
-            Assert.True(SwfIdentity.Create("name", "ver", "pos")!=SwfIdentity.Create("name", "ver", "pos1"));
-            Assert.True(SwfIdentity.Create("name", "ver", "pos")!=SwfIdentity.Create("name", "ver1", "pos"));
-            Assert.True(SwfIdentity.Create("name", "ver", "pos")!=SwfIdentity.Create("name1", "ver", "pos"));
+            Assert.False(ScheduleId.Create("name", "ver", "pos").Equals(ScheduleId.Create("name", "ver", "pos1")));
+            Assert.False(ScheduleId.Create("name", "ver", "pos").Equals(ScheduleId.Create("name", "ver1", "pos")));
+            Assert.False(ScheduleId.Create("name", "ver", "pos").Equals(ScheduleId.Create("name1", "ver", "pos")));
+            Assert.False(ScheduleId.Raw("identity").Equals(ScheduleId.Raw("identity1")));
+            Assert.True(ScheduleId.Create("name", "ver", "pos")!=ScheduleId.Create("name", "ver", "pos1"));
+            Assert.True(ScheduleId.Create("name", "ver", "pos")!=ScheduleId.Create("name", "ver1", "pos"));
+            Assert.True(ScheduleId.Create("name", "ver", "pos")!=ScheduleId.Create("name1", "ver", "pos"));
         }
     }
 }

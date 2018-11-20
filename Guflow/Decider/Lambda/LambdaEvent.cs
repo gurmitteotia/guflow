@@ -36,13 +36,13 @@ namespace Guflow.Decider
                     Input = attr.Input;
                     _name = attr.Name;
                     _positionalName = attr.Control.As<ScheduleData>().PN;
-                    SwfIdentity = SwfIdentity.Raw(historyEvent.LambdaFunctionScheduledEventAttributes.Id);
+                    ScheduleId = ScheduleId.Raw(historyEvent.LambdaFunctionScheduledEventAttributes.Id);
                     if (!string.IsNullOrEmpty(attr.StartToCloseTimeout))
                         Timeout = TimeSpan.FromSeconds(Double.Parse(attr.StartToCloseTimeout));
                     break;
                 }
             }
-            if (SwfIdentity == null)
+            if (ScheduleId == null)
                 throw new IncompleteEventGraphException($"Can not find lambda scheduled event for id {scheduledEventId}.");
         }
         internal override bool InChainOf(IEnumerable<WorkflowItemEvent> workflowItemEvents)

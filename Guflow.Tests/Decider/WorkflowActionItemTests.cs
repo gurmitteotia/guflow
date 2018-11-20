@@ -60,8 +60,9 @@ namespace Guflow.Tests.Decider
         private WorkflowHistoryEvents ChildWorkflowCompletedEventGraph()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            var scheduleId = Identity.New(ChildWorkflowName, ChildWorkflowVersion, ChildWorkflowPosName).ScheduleId();
             _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .ChildWorkflowCompletedGraph(Identity.New(ChildWorkflowName, ChildWorkflowVersion, ChildWorkflowPosName), "rid", "input",
+                .ChildWorkflowCompletedGraph(scheduleId, "rid", "input",
                     "result")
                 .ToArray());
             return _eventsBuilder.Result();

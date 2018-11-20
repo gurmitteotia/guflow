@@ -73,10 +73,8 @@ namespace Guflow.Decider
         public abstract IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen();
         public abstract IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout);
         public abstract IEnumerable<WorkflowDecision> CancelDecisions();
-        public virtual bool Has(SwfIdentity identity)
-        {
-            return Identity.Id == identity;
-        }
+        public abstract bool Has(ScheduleId id);
+        
         public bool Has(Identity identity)
         {
             return Identity.Equals(identity);
@@ -148,7 +146,7 @@ namespace Guflow.Decider
             _parentItems.Add(parentItem);
         }
         protected IWorkflowHistoryEvents WorkflowHistoryEvents => _workflow.WorkflowHistoryEvents;
-        protected TimerItem RescheduleTimer(Identity identity) => TimerItem.Reschedule(this, identity, _workflow);
+        protected TimerItem RescheduleTimer(ScheduleId identity) => TimerItem.Reschedule(this, identity, _workflow);
         public WorkflowAction DefaultActionOnLastEvent()
         {
             return LastEvent().DefaultAction(_workflow);

@@ -157,14 +157,14 @@ namespace Guflow.Tests.Decider
 
         private ActivityCompletedEvent CreateCompletedEvent()
         {
-            var eventGraph = _builder.ActivityCompletedGraph(Identity.New("name", "1.0"), "id",
+            var eventGraph = _builder.ActivityCompletedGraph(Identity.New("name", "1.0").ScheduleId(), "id",
                 "result");
             return new ActivityCompletedEvent(eventGraph.First(), eventGraph);
         }
 
         private ActivityFailedEvent CreateFailedEvent()
         {
-            var eventGraph = _builder.ActivityFailedGraph(Identity.New("name", "1.0"), "id","reason", "detail");
+            var eventGraph = _builder.ActivityFailedGraph(Identity.New("name", "1.0").ScheduleId(), "id","reason", "detail");
             return new ActivityFailedEvent(eventGraph.First(), eventGraph);
         }
 

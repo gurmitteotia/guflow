@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         private HistoryEventsBuilder _builder;
         private Mock<IWorkflow> _workflow;
         private Identity _identity;
-        private Identity _scheduleIdentity;
+        private ScheduleId _scheduleIdentity;
         private const string WorkflowName = "Workflow";
         private const string Version = "1.0";
         private const string PositionalName = "Pos";
@@ -27,7 +27,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _identity = Identity.New(WorkflowName, Version, PositionalName);
-            _scheduleIdentity = _identity.ScheduleIdentity(WorkflowRunId);
+            _scheduleIdentity = _identity.ScheduleId(WorkflowRunId);
             _eventGraphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder().AddWorkflowRunId(WorkflowRunId);
             _builder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedGraph("input").ToArray());
@@ -82,7 +82,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId , Is.EqualTo(_scheduleIdentity.Id.ToString()));
+            Assert.That(attr.WorkflowId , Is.EqualTo(_scheduleIdentity.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN , Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("child"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("3"));
@@ -103,7 +103,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy, Is.Null);
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.Null);
@@ -140,7 +140,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("newchild"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("4"));
@@ -167,7 +167,7 @@ namespace Guflow.Tests.Decider
             var attr = swfDecision.StartChildWorkflowExecutionDecisionAttributes;
             Assert.That(attr.WorkflowType.Name, Is.EqualTo(WorkflowName));
             Assert.That(attr.WorkflowType.Version, Is.EqualTo(Version));
-            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.Id.ToString()));
+            Assert.That(attr.WorkflowId, Is.EqualTo(_scheduleIdentity.ToString()));
             Assert.That(attr.Control.As<ScheduleData>().PN, Is.EqualTo(_identity.PositionalName));
             Assert.That(attr.ChildPolicy.Value, Is.EqualTo("newchild"));
             Assert.That(attr.ExecutionStartToCloseTimeout, Is.EqualTo("4"));
@@ -459,6 +459,20 @@ namespace Guflow.Tests.Decider
             Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowStartedEvent(cancelFailedEvent.Skip(2).First(), cancelFailedEvent)));
 
         }
+
+        [Test]
+        public void Last_event_filters_out_child_workflow_scheduling_failed_event()
+        {
+            var started = _eventGraphBuilder.ChildWorkflowStartedEventGraph(_scheduleIdentity, "runid", "input");
+            var startFailed = _eventGraphBuilder.ChildWorkflowStartFailedEventGraph(_scheduleIdentity,"input", "cause").ToArray();
+
+            var childWorkflow = ChildWorkflow(startFailed.Concat(started));
+
+            var lastEvent = childWorkflow.LastEvent();
+
+            Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowStartedEvent(started.First(), started)));
+        }
+
 
         [Test]
         public void Reschedule_decision_is_timer_schedule_decision_for_child_workflow_item()

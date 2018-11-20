@@ -75,7 +75,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = new TestWorkflow().Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()) }));
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = new TestWorkflow().Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()) }));
         }
 
         [Test]
@@ -131,7 +131,7 @@ namespace Guflow.Tests.Decider
             var decisions = new WorkflowHasImmediateParentWithIgnoreActionToKeepBranchInactive()
                     .Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()) }));
         }
 
         [Test]
@@ -157,7 +157,7 @@ namespace Guflow.Tests.Decider
             var decisions = new WorkflowHasStartingItemInBranchWithIgnoreActionToKeepBranchInactive().Decisions(
                     _eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()) }));
         }
 
         [Test]
@@ -190,8 +190,8 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
-                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version))
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()),
+                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version).ScheduleId())
             }));
         }
 
@@ -207,7 +207,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version))
+                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version).ScheduleId())
             }));
         }
 
@@ -223,7 +223,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChooseSeatActivity, Version)),
+                new ScheduleActivityDecision(Identity.New(ChooseSeatActivity, Version).ScheduleId()),
             }));
         }
 
@@ -239,7 +239,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()),
             }));
         }
 
@@ -254,7 +254,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version)),
+                new ScheduleActivityDecision(Identity.New(SendEmailActivity, Version).ScheduleId()),
             }));
         }
 
@@ -270,7 +270,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()),
             }));
         }
 
@@ -286,7 +286,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()),
             }));
         }
 
@@ -318,7 +318,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()),
             }));
         }
 
@@ -334,7 +334,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)),
+                new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()),
             }));
         }
 
@@ -385,7 +385,7 @@ namespace Guflow.Tests.Decider
           
             var decisions = new WorkflowWithBranchBecomingInActiveByIgnoreAction().Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ChargeCustomerActivity, Version).ScheduleId()) }));
         }
 
         [Test]
@@ -424,7 +424,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = new LambdaWorkflow().Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -438,8 +438,8 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
-                new ScheduleLambdaDecision(Identity.Lambda(SendEmailLambda), "input"), 
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(SendEmailLambda).ScheduleId(), "input"), 
             }));
         }
 
@@ -456,7 +456,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
             }));
         }
 
@@ -470,7 +470,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda).ScheduleId(), "input"),
             }));
         }
 
@@ -503,8 +503,8 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
-                new ScheduleChildWorkflowDecision(Identity.New(InvoiceCustomerWorkflow, Version),"input"), 
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
+                new ScheduleChildWorkflowDecision(Identity.New(InvoiceCustomerWorkflow, Version).ScheduleId(),"input"), 
             }));
 
         }
@@ -520,7 +520,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
             }));
 
         }
@@ -535,7 +535,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(BookHotelLambda).ScheduleId(), "input"),
             }));
 
         }
@@ -568,7 +568,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(BookFlightLambda), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(BookFlightLambda).ScheduleId(), "input"),
             }));
         }
 
@@ -584,7 +584,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
-                new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.Zero),
+                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero),
             }));
         }
 
@@ -600,7 +600,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
-                new ScheduleChildWorkflowDecision(Identity.New(BookFlightWorkflow, Version), "input"), 
+                new ScheduleChildWorkflowDecision(Identity.New(BookFlightWorkflow, Version).ScheduleId(), "input"), 
             }));
         }
 
@@ -616,35 +616,35 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new []
             {
-                new ScheduleActivityDecision(Identity.New(BookFlightActivity, Version)),
+                new ScheduleActivityDecision(Identity.New(BookFlightActivity, Version).ScheduleId()),
             }));
         }
 
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
         {
-            return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, Version), "id", "result").ToArray();
+            return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, Version).ScheduleId(), "id", "result").ToArray();
         }
         private HistoryEvent[] ActivityStartedGraph(string activityName)
         {
-            return _eventGraphBuilder.ActivityStartedGraph(Identity.New(activityName, Version), "id").ToArray();
+            return _eventGraphBuilder.ActivityStartedGraph(Identity.New(activityName, Version).ScheduleId(), "id").ToArray();
         }
         private HistoryEvent[] LambdaCompletedGraph(string lambdaName)
         {
-            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(lambdaName), "id", "result").ToArray();
+            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(lambdaName).ScheduleId(), "id", "result").ToArray();
         }
         private HistoryEvent[] LambdaStartedGraph(string lambdaName)
         {
-            return _eventGraphBuilder.LambdaStartedEventGraph(Identity.Lambda(lambdaName), "id").ToArray();
+            return _eventGraphBuilder.LambdaStartedEventGraph(Identity.Lambda(lambdaName).ScheduleId(), "id").ToArray();
         }
 
         private HistoryEvent[] TimerStartedGraph(Identity identity, bool isARescheduleTimer)
         {
-            return _eventGraphBuilder.TimerStartedGraph(identity, TimeSpan.Zero, isARescheduleTimer).ToArray();
+            return _eventGraphBuilder.TimerStartedGraph(identity.ScheduleId(), TimeSpan.Zero, isARescheduleTimer).ToArray();
         }
 
         private HistoryEvent[] ChildWorkflowCompletedGraph(string name, string version)
         {
-            return _eventGraphBuilder.ChildWorkflowCompletedGraph(Identity.New(name, version), "id","input" ,"result").ToArray();
+            return _eventGraphBuilder.ChildWorkflowCompletedGraph(Identity.New(name, version).ScheduleId(), "id","input" ,"result").ToArray();
         }
 
         [WorkflowDescription("1.0")]

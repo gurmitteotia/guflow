@@ -51,7 +51,7 @@ namespace Guflow.Decider
                     _activityName = attr.ActivityType.Name;
                     _activityVersion = attr.ActivityType.Version;
                     _activityPositionalName = attr.Control.As<ScheduleData>().PN;
-                    SwfIdentity = SwfIdentity.Raw(attr.ActivityId);
+                    ScheduleId = ScheduleId.Raw(attr.ActivityId);
                     Input = attr.Input;
                     foundActivityScheduledEvent = true;
                 }

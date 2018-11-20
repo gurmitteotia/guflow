@@ -12,21 +12,21 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Equality_tests()
         {
-            Assert.IsTrue(new CancelTimerDecision(Identity.Timer("timer")).Equals(new CancelTimerDecision(Identity.Timer("timer"))));
+            Assert.IsTrue(new CancelTimerDecision(Identity.Timer("timer").ScheduleId()).Equals(new CancelTimerDecision(Identity.Timer("timer").ScheduleId())));
 
-            Assert.IsFalse(new CancelTimerDecision(Identity.Timer("timer")).Equals(new CancelTimerDecision(Identity.Timer("timer1"))));
+            Assert.IsFalse(new CancelTimerDecision(Identity.Timer("timer").ScheduleId()).Equals(new CancelTimerDecision(Identity.Timer("timer1").ScheduleId())));
         }
 
         [Test]
         public void Should_return_aws_decision_to_cancel_timer()
         {
-            var timerIdentity = Identity.Timer("timer");
-            var cancelTimerDecision = new CancelTimerDecision(timerIdentity);
+            var scheduleId = Identity.Timer("timer").ScheduleId();
+            var cancelTimerDecision = new CancelTimerDecision(scheduleId);
 
             Decision swfDecision = cancelTimerDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.CancelTimer));
-            Assert.That(swfDecision.CancelTimerDecisionAttributes.TimerId,Is.EqualTo(timerIdentity.Id.ToString()));
+            Assert.That(swfDecision.CancelTimerDecisionAttributes.TimerId,Is.EqualTo(scheduleId.ToString()));
         }
     }
 }

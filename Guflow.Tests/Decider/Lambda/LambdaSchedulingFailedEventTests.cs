@@ -15,7 +15,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var eventGraph = _builder.LambdaSchedulingFailedEventGraph(Identity.Lambda("lambda_name"), "reason");
+            var eventGraph = _builder.LambdaSchedulingFailedEventGraph(Identity.Lambda("lambda_name").ScheduleId(), "reason");
             _event = new LambdaSchedulingFailedEvent(eventGraph);
         }
 

@@ -43,7 +43,7 @@ namespace Guflow.Decider
                 {
                     var attr = historyEvent.StartChildWorkflowExecutionInitiatedEventAttributes;
                     Input = attr.Input;
-                    SwfIdentity = SwfIdentity.Raw(attr.WorkflowId);
+                    ScheduleId = ScheduleId.Raw(attr.WorkflowId);
                     WorkflowName = attr.WorkflowType.Name;
                     WorkflowVersion = attr.WorkflowType.Version;
                     PositionalName = attr.Control.As<ScheduleData>().PN;

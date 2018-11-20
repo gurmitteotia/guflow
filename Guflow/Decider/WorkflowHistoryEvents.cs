@@ -17,9 +17,6 @@ namespace Guflow.Decider
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedLambdaEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedChildWorkflowEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
 
-        private static readonly List<Type> ActivityLastEventFilters = new List<Type>(){typeof(ActivityCancelRequestedEvent), typeof(ActivityCancellationFailedEvent)};
-        private static readonly List<Type> ChildWorkflowLastEventFilters = new List<Type>(){typeof(ExternalWorkflowCancelRequestFailedEvent), typeof(ExternalWorkflowCancellationRequestedEvent)};
-
         //TODO : Get rid of this constructor once the dependent constructor is deleted.
         private WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long previousStartedEventId, long newStartedEventId)
         {
@@ -48,7 +45,7 @@ namespace Guflow.Decider
             WorkflowItemEvent result = null;
             if (_cachedActivityEvents.TryGetValue(activityItem, out result)) return result;
 
-            result = AllActivityEvents(activityItem).FirstOrDefault(e=>!ActivityLastEventFilters.Contains(e.GetType()));
+            result = AllActivityEvents(activityItem).FirstOrDefault(e=>!LastEventFilters.Activity.Contains(e));
            _cachedActivityEvents.Add(activityItem, result);
             return result;
         }
@@ -58,7 +55,7 @@ namespace Guflow.Decider
             WorkflowItemEvent result = null;
             if (_cachedTimerEvents.TryGetValue(timerItem, out result)) return result;
 
-            result = AllTimerEvents(timerItem, includeRescheduleTimerEvents).FirstOrDefault();
+            result = AllTimerEvents(timerItem, includeRescheduleTimerEvents).FirstOrDefault(e => !LastEventFilters.Timer.Contains(e));
             _cachedTimerEvents.Add(timerItem, result);
             return result;
         }
@@ -181,7 +178,7 @@ namespace Guflow.Decider
             WorkflowItemEvent @event = null;
             if (_cachedLambdaEvents.TryGetValue(lambdaItem, out @event))
                 return @event;
-            @event = AllLambdaEvents(lambdaItem).FirstOrDefault();
+            @event = AllLambdaEvents(lambdaItem).FirstOrDefault(e=>!LastEventFilters.Lambda.Contains(e));
             _cachedLambdaEvents.Add(lambdaItem, @event);
             return @event;
         }
@@ -206,7 +203,7 @@ namespace Guflow.Decider
             WorkflowItemEvent @event = null;
             if (_cachedChildWorkflowEvents.TryGetValue(childWorkflowItem, out @event))
                 return @event;
-            @event = AllChildWorkflowEvents(childWorkflowItem).FirstOrDefault(e=>!ChildWorkflowLastEventFilters.Contains(e.GetType()));
+            @event = AllChildWorkflowEvents(childWorkflowItem).FirstOrDefault(e=>!LastEventFilters.ChildWorkflow.Contains(e));
             _cachedChildWorkflowEvents.Add(childWorkflowItem, @event);
             return @event;
         }
@@ -219,5 +216,25 @@ namespace Guflow.Decider
             return timerEvent != null && timerEvent.IsARescheduledTimer;
         }
 
+        private class LastEventFilters
+        {
+            private readonly Type[] _filterOutTypes;
+
+            private LastEventFilters(params Type[] filterOutTypes)
+            {
+                _filterOutTypes = filterOutTypes;
+            }
+            public static readonly LastEventFilters Activity =
+                new LastEventFilters(typeof(ActivityCancelRequestedEvent), typeof(ActivityCancellationFailedEvent), typeof(ActivitySchedulingFailedEvent));
+            public static readonly LastEventFilters ChildWorkflow =
+                new LastEventFilters(typeof(ExternalWorkflowCancelRequestFailedEvent), typeof(ExternalWorkflowCancellationRequestedEvent), typeof(ChildWorkflowStartFailedEvent));
+            public static readonly LastEventFilters Timer =
+                new LastEventFilters(typeof(TimerStartFailedEvent), typeof(TimerCancellationFailedEvent));
+            public static readonly LastEventFilters Lambda =
+                new LastEventFilters(typeof(LambdaSchedulingFailedEvent));
+
+            public bool Contains(WorkflowItemEvent @event)
+                => _filterOutTypes.Contains(@event.GetType());
+        }
     }
 }

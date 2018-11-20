@@ -10,10 +10,10 @@ namespace Guflow.Decider
     /// </summary>
     public abstract class WorkflowItemEvent : WorkflowEvent
     {
-        protected SwfIdentity SwfIdentity;
+        protected ScheduleId ScheduleId;
         internal bool IsFor(WorkflowItem workflowItem)
         {
-            return workflowItem.Has(SwfIdentity);
+            return workflowItem.Has(ScheduleId);
         }
 
         protected WorkflowItemEvent(long eventId)

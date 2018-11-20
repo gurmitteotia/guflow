@@ -1,6 +1,7 @@
 ﻿//Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
@@ -11,15 +12,19 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class LambdaCompletedEventTests
     {
-        private EventGraphBuilder _builder;
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
         private LambdaCompletedEvent _event;
-
+        private IEnumerable<HistoryEvent> _eventGraph;
+        private const string LambdaName = "lambda_name";
+        private const string  PositionalName = "pos_name";
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name", "pos_name"), "input", "result", TimeSpan.FromSeconds(10));
-            _event = new LambdaCompletedEvent(eventGraph.First(), eventGraph);
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
+            _eventGraph = _graphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName, PositionalName).ScheduleId(), "input", "result", TimeSpan.FromSeconds(10));
+            _event = new LambdaCompletedEvent(_eventGraph.First(), _eventGraph);
 
         }
         [Test]
@@ -33,16 +38,19 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Throws_exception_when_lambda_scheduled_event_not_found()
         {
-            var eventGraph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda_name"), "input", "result", TimeSpan.FromSeconds(10));
+            var eventGraph = _graphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "result", TimeSpan.FromSeconds(10));
             Assert.Throws<IncompleteEventGraphException>(()=>_event = new LambdaCompletedEvent(eventGraph.First(), Enumerable.Empty<HistoryEvent>()));
         }
 
         [Test]
         public void Schedule_children()
         {
-            var decisions = _event.Interpret(new WorkflowWithLambda()).Decisions();
+            const string runId = "runid";
+            _builder.AddWorkflowRunId(runId);
+            _builder.AddNewEvents(_eventGraph.ToArray());
+            var decisions = new WorkflowWithLambda().Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name"), TimeSpan.Zero) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name").ScheduleId(), TimeSpan.Zero) }));
         }
 
         [Test]
@@ -57,9 +65,9 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithLambda()
             {
-                ScheduleLambda("lambda_name", "pos_name");
+                ScheduleLambda(LambdaName, PositionalName);
 
-                ScheduleTimer("timer_name").AfterLambda("lambda_name", "pos_name");
+                ScheduleTimer("timer_name").AfterLambda(LambdaName, PositionalName);
             }
         }
 
@@ -67,9 +75,9 @@ namespace Guflow.Tests.Decider
         {
             public WorkflowWithCustomAction(WorkflowAction action)
             {
-                ScheduleLambda("lambda_name", "pos_name").OnCompletion(e=>action);
+                ScheduleLambda(LambdaName, PositionalName).OnCompletion(e=>action);
 
-                ScheduleTimer("timer_name").AfterLambda("lambda_name", "pos_name");
+                ScheduleTimer("timer_name").AfterLambda(LambdaName, PositionalName);
             }
         }
     }

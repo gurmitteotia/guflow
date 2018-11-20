@@ -17,13 +17,12 @@ namespace Guflow.Tests.Decider
         private const string WorkflowName = "workflow";
         private const string WorkflowVersion = "1.0";
         private const string PositionalName = "Pos";
-        private Identity _workflowIdentity;
         [SetUp]
         public void Setup()
         {
             _eventGraphBuilder = new EventGraphBuilder();
-            _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName);
-            var eventGraph = _eventGraphBuilder.ChildWorkflowStartedEventGraph(_workflowIdentity, "runid", "input");
+            var scheduleId = Identity.New(WorkflowName, WorkflowVersion, PositionalName).ScheduleId();
+            var eventGraph = _eventGraphBuilder.ChildWorkflowStartedEventGraph(scheduleId, "runid", "input");
             _completedEvent = new ChildWorkflowStartedEvent(eventGraph.First(), eventGraph);
         }
 

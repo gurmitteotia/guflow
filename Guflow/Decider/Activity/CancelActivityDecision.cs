@@ -6,11 +6,11 @@ namespace Guflow.Decider
 {
     internal sealed class CancelActivityDecision : WorkflowDecision
     {
-        private readonly Identity _identity;
+        private readonly ScheduleId _id;
 
-        public CancelActivityDecision(Identity identity):base(false)
+        public CancelActivityDecision(ScheduleId id):base(false)
         {
-            _identity = identity;
+            _id = id;
         }
 
         internal override Decision SwfDecision()
@@ -20,13 +20,13 @@ namespace Guflow.Decider
                 DecisionType = DecisionType.RequestCancelActivityTask,
                 RequestCancelActivityTaskDecisionAttributes = new RequestCancelActivityTaskDecisionAttributes()
                 {
-                    ActivityId = _identity.Id.ToString(),
+                    ActivityId = _id.ToString(),
                 }
             };
         }
         private bool Equals(CancelActivityDecision other)
         {
-            return _identity.Equals(other._identity);
+            return _id.Equals(other._id);
         }
 
         public override bool Equals(object obj)
@@ -38,12 +38,12 @@ namespace Guflow.Decider
 
         public override int GetHashCode()
         {
-            return _identity.GetHashCode();
+            return _id.GetHashCode();
         }
 
         public override string ToString()
         {
-            return string.Format("{0} for {1}", GetType().Name, _identity);
+            return string.Format("{0} for {1}", GetType().Name, _id);
         }
     }
 }

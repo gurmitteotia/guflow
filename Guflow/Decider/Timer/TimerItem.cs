@@ -6,6 +6,7 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
+    //TODO: Move out RescheduleTimer out of TimerItem. RescheduleTimer can be a decorator on Timer.
     internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer
     {
         private TimeSpan _fireAfter= new TimeSpan();
@@ -18,20 +19,25 @@ namespace Guflow.Decider
         private Func<ITimerItem, WorkflowAction> _timerCancelAction;
         private TimerItem _rescheduleTimer;
 
+        private readonly ScheduleId _defaultScheduleId;
+        private ScheduleId ResetScheduleId => Identity.ScheduleId(WorkflowHistoryEvents.WorkflowRunId + "Reset");
+
         private bool _invokedTimerCancelAction = false;// to avoid recurssion.
 
-        private TimerItem(Identity identity, IWorkflow workflow)
+        private TimerItem(Identity identity, ScheduleId defaultScheduleId, IWorkflow workflow)
                      : base(identity, workflow)
         {
+            _defaultScheduleId = defaultScheduleId;
             _canSchedule = t => true;
             _falseAction = t=>new TriggerActions(this).FirstJoint();
             _timerCancelAction =_=>WorkflowAction.Empty;
             _fireAfterFunc = _ => _fireAfter;
         }
 
-        public static TimerItem Reschedule(WorkflowItem ownerItem, Identity identity, IWorkflow workflow)
+        public static TimerItem Reschedule(WorkflowItem ownerItem, ScheduleId scheduleId, IWorkflow workflow)
         {
-            var timerItem = new TimerItem(identity, workflow);
+            var identity = Identity.New(scheduleId.Name, scheduleId.Version, scheduleId.PositionalName);
+            var timerItem = new TimerItem(identity, scheduleId, workflow);
             timerItem._rescheduleTimer = timerItem;
             timerItem.OnStartFailed(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
             timerItem.OnCancellationFailed(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_CANCELLATION_FAILED", e.Cause));
@@ -40,8 +46,9 @@ namespace Guflow.Decider
         }
         public static TimerItem New(Identity identity, IWorkflow workflow)
         {
-            var timerItem = new TimerItem(identity, workflow);
-            timerItem._rescheduleTimer = Reschedule(timerItem, timerItem.Identity, workflow);
+            var scheduleId = identity.ScheduleId();
+            var timerItem = new TimerItem(identity, scheduleId, workflow);
+            timerItem._rescheduleTimer = Reschedule(timerItem, scheduleId, workflow);
             timerItem.OnStartFailed(e => e.DefaultAction(workflow));
             timerItem.OnCancellationFailed(e => e.DefaultAction(workflow));
             timerItem.OnFired(e => e.DefaultAction(workflow));
@@ -59,6 +66,7 @@ namespace Guflow.Decider
             return this;
         }
 
+        public override bool Has(ScheduleId id) => AllScheduleIds.Contains(id);
         public IFluentTimerItem FireAfter(Func<ITimerItem, TimeSpan> time)
         {
             Ensure.NotNull(time, "time");
@@ -183,7 +191,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return new[] { new ScheduleTimerDecision(Identity, _fireAfterFunc(this), this == _rescheduleTimer) };
+            return new[] { new ScheduleTimerDecision(ScheduleId , _fireAfterFunc(this), this == _rescheduleTimer) };
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
@@ -203,7 +211,7 @@ namespace Guflow.Decider
                     cancelDecisions = _timerCancelAction(this).Decisions();
                 }
 
-                return new []{new CancelTimerDecision(Identity)}.Concat(cancelDecisions);
+                return new []{new CancelTimerDecision(ScheduleId)}.Concat(cancelDecisions);
             }
             finally
             {
@@ -211,5 +219,22 @@ namespace Guflow.Decider
             }
         }
 
+        public WorkflowAction Reset() => RescheduleAction();
+        public WorkflowAction Reschedule(TimeSpan timeout) => RescheduleAction(timeout);
+        private WorkflowAction RescheduleAction(TimeSpan? timeout= null)
+        {
+            if (!IsActive)
+                throw new InvalidOperationException(
+                    $"Can not reschedule the timer {this}. It should be already active for it be reschedule.");
+            var lastTimerEvent = (TimerEvent) LastEvent();
+            var rescheduleId = RescheduleId(lastTimerEvent.Id);
+            return WorkflowAction.Custom(new CancelTimerDecision(lastTimerEvent.Id),
+                new ScheduleTimerDecision(rescheduleId, timeout ?? lastTimerEvent.Timeout));
+        }
+        private ScheduleId RescheduleId(ScheduleId lastScheduleId) => AllScheduleIds.First(id=>id!=lastScheduleId);
+        private ScheduleId[] AllScheduleIds => new[] {_defaultScheduleId, ResetScheduleId};
+
+        private ScheduleId ScheduleId =>
+            LastEvent(true) == null ? _defaultScheduleId : ((TimerEvent) LastEvent(true)).Id;
     }
 }

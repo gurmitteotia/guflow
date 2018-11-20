@@ -128,5 +128,7 @@ namespace Guflow.Decider
             workflowStartedEvent.TagList.ToList().ForEach(tag=>restartWorkflowAction.AddTag(tag));
             return restartWorkflowAction;
         }
+        internal static RestartWorkflowAction RestartWorkflowWithDefaultProperties()
+            => new RestartWorkflowAction();
     }
 }

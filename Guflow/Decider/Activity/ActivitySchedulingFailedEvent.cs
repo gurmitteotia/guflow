@@ -10,7 +10,7 @@ namespace Guflow.Decider
         internal ActivitySchedulingFailedEvent(HistoryEvent schedulingFailedEvent) : base(schedulingFailedEvent.EventId)
         {
             _eventAttributes = schedulingFailedEvent.ScheduleActivityTaskFailedEventAttributes;
-            SwfIdentity = SwfIdentity.Raw(_eventAttributes.ActivityId);
+            ScheduleId = ScheduleId.Raw(_eventAttributes.ActivityId);
         }
         public string Cause { get { return _eventAttributes.Cause; } }
 

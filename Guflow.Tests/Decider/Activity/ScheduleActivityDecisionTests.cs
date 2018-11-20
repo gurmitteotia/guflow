@@ -9,20 +9,20 @@ namespace Guflow.Tests.Decider
     [TestFixture]
     public class ScheduleActivityDecisionTests
     {
-        private Identity _activityIdentity;
+        private ScheduleId _scheduleId;
         private ScheduleActivityDecision _scheduleActivityDecision;
 
         [SetUp]
         public void Setup()
         {
-            _activityIdentity = Identity.New("Download", "1.0", "First");
-            _scheduleActivityDecision = new ScheduleActivityDecision(_activityIdentity);
+            _scheduleId = Identity.New("Download", "1.0", "First").ScheduleId();
+            _scheduleActivityDecision = new ScheduleActivityDecision(_scheduleId);
         }
         [Test]
         public void Equality_tests()
         {
-            Assert.True(new ScheduleActivityDecision(Identity.New("Download","1.0","First")).Equals(new ScheduleActivityDecision(Identity.New("Download","1.0","First"))));
-            Assert.False(new ScheduleActivityDecision(Identity.New("Download", "1.0", "First")).Equals(new ScheduleActivityDecision(Identity.New("Download", "2.0", "First"))));
+            Assert.True(new ScheduleActivityDecision(Identity.New("Download","1.0","First").ScheduleId()).Equals(new ScheduleActivityDecision(Identity.New("Download","1.0","First").ScheduleId())));
+            Assert.False(new ScheduleActivityDecision(Identity.New("Download", "1.0", "First").ScheduleId()).Equals(new ScheduleActivityDecision(Identity.New("Download", "2.0", "First").ScheduleId())));
         }
 
         [Test]
@@ -31,7 +31,7 @@ namespace Guflow.Tests.Decider
             var swfDecision = _scheduleActivityDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.ScheduleActivityTask));
-            Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ActivityId,Is.EqualTo(_activityIdentity.Id.ToString()));
+            Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ActivityId,Is.EqualTo(_scheduleId.ToString()));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ActivityType.Name,Is.EqualTo("Download"));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.ActivityType.Version, Is.EqualTo("1.0"));
             Assert.That(swfDecision.ScheduleActivityTaskDecisionAttributes.Control.As<ScheduleData>().PN, Is.EqualTo("First"));

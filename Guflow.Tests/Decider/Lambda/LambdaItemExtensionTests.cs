@@ -131,18 +131,18 @@ namespace Guflow.Tests.Decider
 
         private LambdaCompletedEvent CompletedEvent(string result)
         {
-            var graph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda"), "input", result);
+            var graph = _builder.LambdaCompletedEventGraph(Identity.Lambda("lambda").ScheduleId(), "input", result);
             return new LambdaCompletedEvent(graph.First(), graph);
         }
 
         private LambdaFailedEvent FailedEvent(string reason, string details)
         {
-            var graph = _builder.LambdaFailedEventGraph(Identity.Lambda("lambda"), "input", reason,details);
+            var graph = _builder.LambdaFailedEventGraph(Identity.Lambda("lambda").ScheduleId(), "input", reason,details);
             return new LambdaFailedEvent(graph.First(), graph);
         }
         private LambdaTimedoutEvent TimedoutEvent(string timeoutType)
         {
-            var graph = _builder.LamdbaTimedoutEventGraph(Identity.Lambda("lambda"), "input", timeoutType);
+            var graph = _builder.LamdbaTimedoutEventGraph(Identity.Lambda("lambda").ScheduleId(), "input", timeoutType);
             return new LambdaTimedoutEvent(graph.First(), graph);
         }
 

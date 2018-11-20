@@ -25,7 +25,7 @@ namespace Guflow.Tests.Decider
             var workflowStartedEvent = new WorkflowStartedEvent(workflowStartedEventGraph);
             _eventsBuilder.AddProcessedEvents(workflowStartedEventGraph);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .ActivityCompletedGraph(Identity.New("activityName", "1.0"), "id", "result").ToArray());
+                .ActivityCompletedGraph(Identity.New("activityName", "1.0").ScheduleId(), "id", "result").ToArray());
 
             var workflow = new WorkflowToRestart();
 
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent("input"));
             _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .ActivityCompletedGraph(Identity.New("activityName", "1.0"), "id", "result").ToArray());
+                .ActivityCompletedGraph(Identity.New("activityName", "1.0").ScheduleId(), "id", "result").ToArray());
 
             var workflow = new WorkflowToRestartWithCustomProperties();
 
@@ -57,6 +57,31 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.ContinueAsNewWorkflowExecution));
             Assert.That(decision.ContinueAsNewWorkflowExecutionDecisionAttributes.LambdaRole, Is.EqualTo("new lambda role"));
+        }
+
+
+        [Test]
+        public void Restart_using_default_properties()
+        {
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder
+                .ActivityCompletedGraph(Identity.New("activityName", "1.0").ScheduleId(), "id", "result").ToArray());
+
+            var workflow = new WorkflowToRestartWithDefault();
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decision = decisions.Single().SwfDecision();
+
+            Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.ContinueAsNewWorkflowExecution));
+            var attr = decision.ContinueAsNewWorkflowExecutionDecisionAttributes;
+            Assert.That(attr.LambdaRole, Is.Null);
+            Assert.That(attr.TaskList, Is.Null);
+            Assert.That(attr.ChildPolicy, Is.Null);
+            Assert.That(attr.ExecutionStartToCloseTimeout, Is.Null);
+            Assert.That(attr.Input, Is.Null);
+            Assert.That(attr.TagList, Is.Empty);
+            Assert.That(attr.TaskPriority, Is.Null);
+            Assert.That(attr.TaskStartToCloseTimeout, Is.Null);
+            Assert.That(attr.WorkflowTypeVersion, Is.Null);
         }
 
         [WorkflowDescription("1.0")]
@@ -79,6 +104,15 @@ namespace Guflow.Tests.Decider
                     action.DefaultLambdaRole = "new lambda role";
                     return action;
                 });
+            }
+        }
+
+        [WorkflowDescription("1.0")]
+        private class WorkflowToRestartWithDefault : Workflow
+        {
+            public WorkflowToRestartWithDefault()
+            {
+                ScheduleActivity("activityName", "1.0").OnCompletion(e => RestartWorkflow(true));
             }
         }
     }

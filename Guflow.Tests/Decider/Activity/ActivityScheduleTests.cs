@@ -36,7 +36,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = LambdaCompletedEventGraph();
             var decision = new ActivityAfterLambdaWorkflow().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         [Test]
@@ -45,7 +45,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = TimerCompletedEventGraph();
             var decision = new ActivityAfterTimerWorkflow().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = ActivityEventGraph();
             var decision = new ActivityAfterActivityWorkflow().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = ChildWorkflowCompletedEventGraph();
             var decision = new ActivityAfterChildWorkflow().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         [Test]
@@ -72,13 +72,13 @@ namespace Guflow.Tests.Decider
             var eventGraph = ChildWorkflowCompletedEventGraph();
             var decision = new ActivityAfterChildWorkflowGenericType().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decision, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         private WorkflowHistoryEvents ActivityEventGraph()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.ActivityCompletedGraph(Identity.New(ParentActivityName, ParentActivityVersion), "id",
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.ActivityCompletedGraph(Identity.New(ParentActivityName, ParentActivityVersion).ScheduleId(), "id",
                 "res").ToArray());
             return _eventsBuilder.Result();
         }
@@ -86,14 +86,14 @@ namespace Guflow.Tests.Decider
         private WorkflowHistoryEvents TimerCompletedEventGraph()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.FromSeconds(2)).ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2)).ToArray());
             return _eventsBuilder.Result();
         }
 
         private WorkflowHistoryEvents LambdaCompletedEventGraph()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "result").ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "result").ToArray());
             return _eventsBuilder.Result();
         }
 
@@ -101,7 +101,7 @@ namespace Guflow.Tests.Decider
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddNewEvents(_eventGraphBuilder
-                .ChildWorkflowCompletedGraph(Identity.New(ChildWorkflowName, ChildWorkflowVersion,ChildWorkflowPosName), "rid", "input",
+                .ChildWorkflowCompletedGraph(Identity.New(ChildWorkflowName, ChildWorkflowVersion,ChildWorkflowPosName).ScheduleId(), "rid", "input",
                     "result")
                 .ToArray());
             return _eventsBuilder.Result();

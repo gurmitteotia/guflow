@@ -220,32 +220,32 @@ namespace Guflow.Tests.Decider
 
         private ActivityCompletedEvent CompletedEvent(string result)
         {
-            var eventGraph = _builder.ActivityCompletedGraph(Identity.New("a1", "v1"), "id",
+            var eventGraph = _builder.ActivityCompletedGraph(Identity.New("a1", "v1").ScheduleId(), "id",
                 result, "input");
             return new ActivityCompletedEvent(eventGraph.First(), eventGraph);
         }
 
         private ActivityFailedEvent FailedEvent(string reason, string detail)
         {
-            var eventGraph = _builder.ActivityFailedGraph(Identity.New("a","v"),"id",reason, detail);
+            var eventGraph = _builder.ActivityFailedGraph(Identity.New("a","v").ScheduleId(),"id",reason, detail);
             return new ActivityFailedEvent(eventGraph.First(), eventGraph);
         }
 
         private ActivityTimedoutEvent TimedoutEvent(string timeoutType, string details)
         {
-            var eventGraph = _builder.ActivityTimedoutGraph(Identity.New("a", "v"), "id", timeoutType, details);
+            var eventGraph = _builder.ActivityTimedoutGraph(Identity.New("a", "v").ScheduleId(), "id", timeoutType, details);
             return new ActivityTimedoutEvent(eventGraph.First(), eventGraph);
         }
 
         private ActivityCancelledEvent CancelledEvent(string details)
         {
-            var eventGraph = _builder.ActivityCancelledGraph(Identity.New("a", "v"), "id", details);
+            var eventGraph = _builder.ActivityCancelledGraph(Identity.New("a", "v").ScheduleId(), "id", details);
             return new ActivityCancelledEvent(eventGraph.First(), eventGraph);
         }
 
         private ActivityStartedEvent StartedEvent()
         {
-            var eventGraph = _builder.ActivityStartedGraph(Identity.New("a", "v"), "id");
+            var eventGraph = _builder.ActivityStartedGraph(Identity.New("a", "v").ScheduleId(), "id");
             return new ActivityStartedEvent(eventGraph.First(), eventGraph);
         }
 

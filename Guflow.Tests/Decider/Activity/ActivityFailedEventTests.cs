@@ -11,28 +11,30 @@ namespace Guflow.Tests.Decider
     public class ActivityFailedEventTests
     {
         private ActivityFailedEvent _activityFailedEvent;
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
-        private const string _positionalName = "First";
-        private const string _identity = "machine name";
-        private const string _reason = "reason";
-        private const string _detail = "detail";
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
+        private const string Identity = "machine name";
+        private const string Reason = "reason";
+        private const string Detail = "detail";
         private EventGraphBuilder _builder;
+        private ScheduleId _scheduleId;
 
         [SetUp]
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var failedActivityEventGraph = _builder.ActivityFailedGraph(Identity.New(_activityName, _activityVersion, _positionalName), _identity, _reason, _detail);
+            _scheduleId = Guflow.Decider.Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
+            var failedActivityEventGraph = _builder.ActivityFailedGraph(_scheduleId, Identity, Reason, Detail);
             _activityFailedEvent = new ActivityFailedEvent(failedActivityEventGraph.First(), failedActivityEventGraph);
         }
             
         [Test]
         public void Populate_event_attributes()
         {
-            Assert.That(_activityFailedEvent.WorkerIdentity,Is.EqualTo(_identity));
-            Assert.That(_activityFailedEvent.Reason,Is.EqualTo(_reason));
-            Assert.That(_activityFailedEvent.Details,Is.EqualTo(_detail));
+            Assert.That(_activityFailedEvent.WorkerIdentity,Is.EqualTo(Identity));
+            Assert.That(_activityFailedEvent.Reason,Is.EqualTo(Reason));
+            Assert.That(_activityFailedEvent.Details,Is.EqualTo(Detail));
             Assert.That(_activityFailedEvent.IsActive,Is.False);
         }
 
@@ -51,7 +53,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = _activityFailedEvent.Interpret(workflow).Decisions();
 
-            Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision(_reason,_detail)}));
+            Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision(Reason,Detail)}));
         }
         [Test]
         public void Can_return_the_custom_workflow_action()
@@ -68,14 +70,14 @@ namespace Guflow.Tests.Decider
         {
             public SingleActivityWorkflow()
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName);
             }
         }
         private class WorkflowWithCustomAction : Workflow
         {
             public WorkflowWithCustomAction(WorkflowAction workflowAction)
             {
-                ScheduleActivity(_activityName, _activityVersion, _positionalName).OnFailure(e => workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnFailure(e => workflowAction);
             }
         }
     }

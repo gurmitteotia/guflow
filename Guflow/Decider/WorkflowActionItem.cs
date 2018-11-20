@@ -35,6 +35,8 @@ namespace Guflow.Decider
         {
             return Enumerable.Empty<WorkflowDecision>();
         }
+
+        public override bool Has(ScheduleId id) => false;
         private static Identity RandomIdentity()
         {
             return Identity.New(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());

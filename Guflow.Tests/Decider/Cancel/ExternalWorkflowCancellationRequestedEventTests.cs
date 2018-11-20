@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
             _workflowIdentity = Identity.New(WorkflowName, WorkflowVersion, PositionalName);
             _eventGraphBuilder = new EventGraphBuilder();
             var eventGraph =
-                _eventGraphBuilder.ChildWorkflowCancellationRequestedEventGraph(_workflowIdentity, "rid", "input").ToArray();
+                _eventGraphBuilder.ChildWorkflowCancellationRequestedEventGraph(_workflowIdentity.ScheduleId(), "rid", "input").ToArray();
             _event = new ExternalWorkflowCancellationRequestedEvent(eventGraph.First());
         }
 

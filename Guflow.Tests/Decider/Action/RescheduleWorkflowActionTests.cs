@@ -18,7 +18,7 @@ namespace Guflow.Tests.Decider
         private const string WorkflowName = "Workflow";
         private const string WorkflowVersion = "1.0";
         private const string ParentWorkflowId = "pid";
-        private Identity _childWorkflowId;
+        private ScheduleId _scheduleId;
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
         
@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
             _eventGraphBuilder = new EventGraphBuilder();
             _eventsBuilder = new HistoryEventsBuilder();
             _eventsBuilder.AddWorkflowRunId(ParentWorkflowId);
-            _childWorkflowId = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowId);
+            _scheduleId = Identity.New(WorkflowName, WorkflowVersion).ScheduleId(ParentWorkflowId);
         }
        
 
@@ -41,7 +41,7 @@ namespace Guflow.Tests.Decider
             
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName))}));
+            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion , PositionalName))}));
+            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion , PositionalName).ScheduleId()) }));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace Guflow.Tests.Decider
           
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.New(ActivityName, ActivityVersion, PositionalName), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(), TimeSpan.FromSeconds(2), true) }));
         }
 
         [Test]
@@ -128,7 +128,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2), true) }));
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2), true) }));
         }
 
 
@@ -165,6 +165,21 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Reschedule_timer_with_reset_id_when_timer_is_fired_with_reset_schedule_id()
+        {
+            const string runId = "runid";
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddWorkflowRunId(runId);
+            var scheduleId = Identity.Timer(TimerName).ScheduleId(runId+"Reset");
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(scheduleId, TimeSpan.Zero).ToArray());
+            var workflow = new WorkflowToRescheduleTimerWithTimerUpToLimit(2);
+
+            var decisions = workflow.Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(scheduleId, TimeSpan.FromSeconds(2), true) }));
+        }
+
+        [Test]
         public void Reschedule_lambda()
         {
             var workflow = new WorkflowToRescheduleLambda();
@@ -173,7 +188,7 @@ namespace Guflow.Tests.Decider
            
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -186,7 +201,7 @@ namespace Guflow.Tests.Decider
            
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -201,7 +216,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName), "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(LambdaName).ScheduleId(), "input") }));
         }
 
         [Test]
@@ -215,7 +230,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         [Test]
@@ -227,7 +242,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(_childWorkflowId, "input") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(_scheduleId, "input") }));
         }
 
         [Test]
@@ -241,7 +256,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new[]
             {
-                new ScheduleTimerDecision(_childWorkflowId, TimeSpan.FromSeconds(2), true)
+                new ScheduleTimerDecision(_scheduleId, TimeSpan.FromSeconds(2), true)
             }));
         }
 
@@ -256,41 +271,41 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion)) }));
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion).ScheduleId()) }));
         }
 
         private HistoryEvent[] ChildWorkflowCompletedEventGraph()
         {
             return _eventGraphBuilder
-                .ChildWorkflowCompletedGraph(_childWorkflowId ,"rid", "input", "result")
+                .ChildWorkflowCompletedGraph(_scheduleId,"rid", "input", "result")
                 .ToArray();
         }
 
         private HistoryEvent[] LambdaCompletedEventGraph()
         {
-            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName), "input", "type").ToArray();
+            return _eventGraphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "type").ToArray();
         }
         private HistoryEvent[] LambdaFailedEventGraph()
         {
-            return _eventGraphBuilder.LambdaFailedEventGraph(Identity.Lambda(LambdaName), "input", "type","details").ToArray();
+            return _eventGraphBuilder.LambdaFailedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "type","details").ToArray();
         }
         private HistoryEvent[] ActivityCompletedEventGraph(string activityName, string activityVersion, string positionalName)
         {
-            return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res").ToArray();
+            return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "res").ToArray();
         }
 
         private HistoryEvent[] ActivityFailedEventGraph(string activityName, string activityVersion, string positionalName)
         {
-            return _eventGraphBuilder.ActivityFailedGraph(Identity.New(activityName, activityVersion, positionalName), "id", "res", "details").ToArray();
+            return _eventGraphBuilder.ActivityFailedGraph(Identity.New(activityName, activityVersion, positionalName).ScheduleId(), "id", "res", "details").ToArray();
         }
         private HistoryEvent[] TimerFiredEventGraph(string timerName, bool rescheduleTimer)
         {
-            return _eventGraphBuilder.TimerFiredGraph(Identity.Timer(timerName), TimeSpan.Zero, rescheduleTimer).ToArray();
+            return _eventGraphBuilder.TimerFiredGraph(Identity.Timer(timerName).ScheduleId(), TimeSpan.Zero, rescheduleTimer).ToArray();
         }
 
         private HistoryEvent[] TimerFailedEventGraph(string timerName)
         {
-            return _eventGraphBuilder.TimerStartFailedGraph(Identity.Timer(timerName), "blah").ToArray();
+            return _eventGraphBuilder.TimerStartFailedGraph(Identity.Timer(timerName).ScheduleId(), "blah").ToArray();
         }
 
         private class WorkflowToRescheduleActivity : Workflow

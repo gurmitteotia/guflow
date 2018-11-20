@@ -9,6 +9,9 @@ namespace Guflow.Tests.Decider
     public class CompleteWorkflowActionTests
     {
         private EventGraphBuilder _builder;
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
 
         [SetUp]
         public void Setup()
@@ -40,7 +43,8 @@ namespace Guflow.Tests.Decider
         public void Can_be_returned_as_custom_action_in_workflow()
         {
             var workflow = new WorkflowReturningCompleteWorkflowAction("result");
-            var completedActivityEventGraph = _builder.ActivityCompletedGraph(Identity.New(WorkflowReturningCompleteWorkflowAction.ActivityName, WorkflowReturningCompleteWorkflowAction.ActivityVersion, WorkflowReturningCompleteWorkflowAction.PositionalName), "id", "res");
+            var activityIdentity = Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
+            var completedActivityEventGraph = _builder.ActivityCompletedGraph(activityIdentity, "id", "res");
             var completedActivityEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
 
             var decisions = completedActivityEvent.Interpret(workflow).Decisions();
@@ -50,9 +54,6 @@ namespace Guflow.Tests.Decider
 
         private class WorkflowReturningCompleteWorkflowAction : Workflow
         {
-            public const string ActivityName = "Download";
-            public const string ActivityVersion = "1.0";
-            public const string PositionalName = "First";
             public WorkflowReturningCompleteWorkflowAction(string result)
             {
                 ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnCompletion(c => CompleteWorkflow(result));

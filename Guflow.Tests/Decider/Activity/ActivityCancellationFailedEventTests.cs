@@ -21,7 +21,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var historyEventGraph = _builder.ActivityCancellationFailedGraph(Identity.New(_activityName,_activityVersion),_cause);
+            var historyEventGraph = _builder.ActivityCancellationFailedGraph(Identity.New(_activityName,_activityVersion).ScheduleId(), _cause);
             _activityCancellationFailedEvent = new ActivityCancellationFailedEvent(historyEventGraph.First());
         }
 

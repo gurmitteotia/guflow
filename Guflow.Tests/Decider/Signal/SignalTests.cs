@@ -55,42 +55,42 @@ namespace Guflow.Tests.Decider
         public void Signal_for_child_workflow()
         {
             var workflow = new SignalChildWorkflow();
-            var identity = Identity.New(WorkflowName,WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
+            var scheduleId = Identity.New(WorkflowName, WorkflowVersion).ScheduleId(ParentWorkflowRunId);
 
-            _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity,"runid","input").ToArray());
-            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName),TimeSpan.Zero).ToArray());
+            _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(scheduleId,"runid","input").ToArray());
+            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(),TimeSpan.Zero).ToArray());
 
             var decisions = workflow.Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new SignalWorkflowDecision(SignalName, SignalInput, identity.Id, "runid") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new SignalWorkflowDecision(SignalName, SignalInput, scheduleId, "runid") }));
         }
 
         [Test]
         public void Signal_for_child_workflow_using_generic_type_api()
         {
             var workflow = new SignalChildWorkflowUsingGenericTypeApi();
-            var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
+            var scheduleId = Identity.New(WorkflowName, WorkflowVersion).ScheduleId(ParentWorkflowRunId);
 
-            _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity, "runid", "input").ToArray());
-            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.Zero).ToArray());
+            _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(scheduleId, "runid", "input").ToArray());
+            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero).ToArray());
 
             var decisions = workflow.Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new SignalWorkflowDecision(SignalName, SignalInput, identity.Id, "runid") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new SignalWorkflowDecision(SignalName, SignalInput, scheduleId, "runid") }));
         }
 
         [Test]
         public void Signal_for_child_workflow_using_child_workflow_query_api()
         {
             var workflow = new SignalChildWorkflowUsingQueryApi();
-            var identity = Identity.New(WorkflowName, WorkflowVersion).ScheduleIdentity(ParentWorkflowRunId);
+            var scheduleId = Identity.New(WorkflowName, WorkflowVersion).ScheduleId(ParentWorkflowRunId);
 
-            _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(identity, "runid", "input").ToArray());
-            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName), TimeSpan.Zero).ToArray());
+            _builder.AddProcessedEvents(_eventGraphBuilder.ChildWorkflowStartedEventGraph(scheduleId, "runid", "input").ToArray());
+            _builder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero).ToArray());
 
             var decisions = workflow.Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new SignalWorkflowDecision(SignalName, SignalInput, identity.Id, "runid") }));
+            Assert.That(decisions, Is.EqualTo(new[] { new SignalWorkflowDecision(SignalName, SignalInput, scheduleId, "runid") }));
         }
 
         private class SignalChildWorkflow : Workflow

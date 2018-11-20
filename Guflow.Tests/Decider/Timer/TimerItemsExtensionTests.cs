@@ -39,7 +39,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void IsFired_when_last_event_is_fired()
         {
-            var completedGraph = _eventGraphBuilder.TimerFiredGraph(Identity.Timer(Timer1), TimeSpan.Zero);
+            var completedGraph = _eventGraphBuilder.TimerFiredGraph(Identity.Timer(Timer1).ScheduleId(), TimeSpan.Zero);
             var timer = CreateTimerItemFor(completedGraph);
 
             Assert.IsTrue(timer.IsFired());
@@ -47,7 +47,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void IsFired_when_last_event_is_started()
         {
-            var completedGraph = _eventGraphBuilder.TimerStartedGraph(Identity.Timer(Timer1), TimeSpan.Zero);
+            var completedGraph = _eventGraphBuilder.TimerStartedGraph(Identity.Timer(Timer1).ScheduleId(), TimeSpan.Zero);
             var timer = CreateTimerItemFor(completedGraph);
 
             Assert.IsFalse(timer.IsFired());
@@ -56,7 +56,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void IsCancelled_when_last_event_is_cancelled()
         {
-            var completedGraph = _eventGraphBuilder.TimerCancelledGraph(Identity.Timer(Timer1), TimeSpan.Zero);
+            var completedGraph = _eventGraphBuilder.TimerCancelledGraph(Identity.Timer(Timer1).ScheduleId(), TimeSpan.Zero);
             var timer = CreateTimerItemFor(completedGraph);
 
             Assert.IsTrue(timer.IsCancelled());
@@ -64,7 +64,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void IsCancelled_when_last_event_is_started()
         {
-            var completedGraph = _eventGraphBuilder.TimerStartedGraph(Identity.Timer(Timer1), TimeSpan.Zero);
+            var completedGraph = _eventGraphBuilder.TimerStartedGraph(Identity.Timer(Timer1).ScheduleId(), TimeSpan.Zero);
             var timer = CreateTimerItemFor(completedGraph);
 
             Assert.IsFalse(timer.IsCancelled());

@@ -9,10 +9,10 @@ namespace Guflow.Tests.Decider
 {
     public class ActivityCancelRequestedEventTests
     {
-        private const string _activityName = "Download";
-        private const string _activityVersion = "1.0";
-        private const string _positionalName = "First";
-        private const string _workerId = "id";
+        private const string ActivityName = "Download";
+        private const string ActivityVersion = "1.0";
+        private const string PositionalName = "First";
+        private const string WorkerId = "id";
         private ActivityCancelRequestedEvent _activityCancelRequestedEvent;
 
         private EventGraphBuilder _builder;
@@ -21,7 +21,8 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _builder = new EventGraphBuilder();
-            var activityCancelRequestedGraph = _builder.ActivityCancelRequestedGraph(Identity.New(_activityName, _activityVersion, _positionalName),_workerId);
+            var scheduleId = Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
+            var activityCancelRequestedGraph = _builder.ActivityCancelRequestedGraph(scheduleId,WorkerId);
             _activityCancelRequestedEvent = new ActivityCancelRequestedEvent(activityCancelRequestedGraph.First());
         }
 

@@ -12,23 +12,23 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Equality_tests()
         {
-            Assert.IsTrue(new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2), true).Equals(new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2), true)));
+            Assert.IsTrue(new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2), true).Equals(new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2), true)));
 
-            Assert.IsFalse(new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2), true).Equals(new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2), false)));
-            Assert.IsFalse(new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2), true).Equals(new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(3), true)));
-            Assert.IsFalse(new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2), true).Equals(new ScheduleTimerDecision(Identity.Timer("timer1"), TimeSpan.FromSeconds(2), true)));
+            Assert.IsFalse(new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2), true).Equals(new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2), false)));
+            Assert.IsFalse(new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2), true).Equals(new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(3), true)));
+            Assert.IsFalse(new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2), true).Equals(new ScheduleTimerDecision(Identity.Timer("timer1").ScheduleId(), TimeSpan.FromSeconds(2), true)));
         }
 
         [Test]
         public void Should_return_aws_decision_to_schedule_timer()
         {
-            var timerIdentity = Identity.Timer("timer");
-            var scheduleTimerDecision = new ScheduleTimerDecision(timerIdentity, TimeSpan.FromSeconds(2),true);
+            var scheduleId = Identity.Timer("timer").ScheduleId();
+            var scheduleTimerDecision = new ScheduleTimerDecision(scheduleId, TimeSpan.FromSeconds(2),true);
 
             var swfDecision = scheduleTimerDecision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType,Is.EqualTo(DecisionType.StartTimer));
-            Assert.That(swfDecision.StartTimerDecisionAttributes.TimerId,Is.EqualTo(timerIdentity.Id.ToString()));
+            Assert.That(swfDecision.StartTimerDecisionAttributes.TimerId,Is.EqualTo(scheduleId.ToString()));
             Assert.That(swfDecision.StartTimerDecisionAttributes.StartToFireTimeout,Is.EqualTo("2"));
             Assert.That(swfDecision.StartTimerDecisionAttributes.Control.As<TimerScheduleData>().IsARescheduleTimer, Is.EqualTo(true));
             Assert.That(swfDecision.StartTimerDecisionAttributes.Control.As<TimerScheduleData>().TimerName, Is.EqualTo("timer"));
@@ -38,7 +38,7 @@ namespace Guflow.Tests.Decider
         public void Should_round_up_time_to_fire_duration()
         {
             
-            var scheduleTimerDecision = new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2.6), true);
+            var scheduleTimerDecision = new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2.6), true);
 
             var swfDecision = scheduleTimerDecision.SwfDecision();
 
@@ -50,7 +50,7 @@ namespace Guflow.Tests.Decider
         public void By_default_it_is_not_reschedulable_timer()
         {
 
-            var scheduleTimerDecision = new ScheduleTimerDecision(Identity.Timer("timer"), TimeSpan.FromSeconds(2.6));
+            var scheduleTimerDecision = new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2.6));
 
             var swfDecision = scheduleTimerDecision.SwfDecision();
 
