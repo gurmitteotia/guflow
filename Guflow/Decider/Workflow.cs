@@ -416,12 +416,15 @@ namespace Guflow.Decider
         {
             return WorkflowAction.CancelWorkflow(details);
         }
+
         /// <summary>
         /// Close the current workflow in Amazon SWF and restart it again.
         /// </summary>
+        /// <param name="defaultProperties">If it is true then default properties, configured when workflow was registered, are used otherwise it will populate the properties from current workflow.</param>
         /// <returns></returns>
-        protected RestartWorkflowAction RestartWorkflow()
+        protected RestartWorkflowAction RestartWorkflow(bool defaultProperties=false)
         {
+            if (defaultProperties) return WorkflowAction.RestartWorkflowWithDefaultProperties();
             IWorkflow workflow = this;
             return WorkflowAction.RestartWorkflow(workflow.WorkflowHistoryEvents);
         }
