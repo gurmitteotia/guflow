@@ -6,6 +6,7 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
+    //TODO: Move out RescheduleTimer out of TimerItem. RescheduleTimer can be a decorator on Timer.
     internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer
     {
         private TimeSpan _fireAfter= new TimeSpan();
@@ -35,7 +36,7 @@ namespace Guflow.Decider
 
         public static TimerItem Reschedule(WorkflowItem ownerItem, ScheduleId scheduleId, IWorkflow workflow)
         {
-            var identity = Decider.Identity.New(scheduleId.Name, scheduleId.Version, scheduleId.PositionalName);
+            var identity = Identity.New(scheduleId.Name, scheduleId.Version, scheduleId.PositionalName);
             var timerItem = new TimerItem(identity, scheduleId, workflow);
             timerItem._rescheduleTimer = timerItem;
             timerItem.OnStartFailed(e => WorkflowAction.FailWorkflow("RESCHEDULE_TIMER_START_FAILED", e.Cause));
