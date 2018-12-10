@@ -18,10 +18,19 @@ namespace Guflow.Tests
             return this;
         }
 
+        public HistoryEventsBuilder AddProcessedEvents(IEnumerable<HistoryEvent> events)
+        {
+            return AddProcessedEvents(events.ToArray());
+        }
+
         public HistoryEventsBuilder AddNewEvents(params HistoryEvent[] events)
         {
             _newEvents.InsertRange(0, events);
             return this;
+        }
+        public HistoryEventsBuilder AddNewEvents(IEnumerable<HistoryEvent> events)
+        {
+            return AddNewEvents(events.ToArray());
         }
 
         public WorkflowHistoryEvents Result()

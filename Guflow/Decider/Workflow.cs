@@ -243,6 +243,11 @@ namespace Guflow.Decider
         {
             return Ignore;
         }
+
+        WorkflowAction IWorkflowDefaultActions.ResumeOnSignal(string signalName)
+        {
+            return Signal(signalName).Resume();
+        }
         internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {
             var completedHandler = Completed;
@@ -652,6 +657,7 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(signalName, "signalName");
             return new Signal(signalName, input, _allWorkflowItems);
         }
+        
         /// <summary>
         /// Return workflow input as dynamic object. If workflow input is JSON data then you can directly access the properties like: Input.Session.
         /// </summary>
@@ -677,6 +683,16 @@ namespace Guflow.Decider
                 IWorkflow workflow = this;
                 return workflow.WorkflowHistoryEvents.WorkflowStartedEvent();
             }
+        }
+
+        /// <summary>
+        /// Expose APIs to work with waiting signals.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        protected WaitingSignal Signal(string signalName)
+        {
+            return new WaitingSignal(signalName);
         }
         IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
         {
@@ -740,15 +756,15 @@ namespace Guflow.Decider
             return CancelWorkflow(details);
         }
         /// <summary>
-        /// Called before executing the new events
+        /// Called before interpreting the new events
         /// </summary>
-        protected internal void BeforeExecution()
+        protected virtual void BeforeExecution()
         {
         }
         /// <summary>
-        /// Called after all the new events are executed.
+        /// Called after all the new events are interepreted.
         /// </summary>
-        protected internal void AfterExecution()
+        protected virtual void AfterExecution()
         {
         }
        

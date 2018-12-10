@@ -564,6 +564,30 @@ namespace Guflow.Tests.Decider
             };
         }
 
+        public HistoryEvent WaitForSignalEvent(ScheduleId id, long eventId, string[] eventNames,
+            SignalWaitType waitType, SignalNextAction nextAction = SignalNextAction.Continue)
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            var details = new WaitForSignalScheduleData()
+            {
+                ScheduleId = id,
+                EventId = eventId,
+                WaitType = waitType,
+                EventNames = eventNames,
+                NextAction = nextAction
+            };
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.MarkerRecorded,
+                MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
+                {
+                    MarkerName = InternalMarkerNames.WaitForSignal,
+                    Details = details.ToJson()
+                }
+            };
+        }
+
         public HistoryEvent RecordMarkerFailedEvent(string markerName, string cause)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
