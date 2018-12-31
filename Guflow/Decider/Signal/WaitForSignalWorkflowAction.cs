@@ -19,7 +19,7 @@ namespace Guflow.Decider
 
         internal override IEnumerable<WorkflowDecision> Decisions()
         {
-            return new[] {new WaitForSignalDecision(_scheduleId, _eventId, _signalName)};
+            return new[] {new WaitForSignalsDecision(_scheduleId, _eventId, _signalName)};
         }
     }
 }

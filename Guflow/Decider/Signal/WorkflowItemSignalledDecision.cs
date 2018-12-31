@@ -7,35 +7,33 @@ using Amazon.SimpleWorkflow;
 
 namespace Guflow.Decider
 {
-    internal class WaitForSignalDecision: WorkflowDecision
+    internal class WorkflowItemSignalledDecision : WorkflowDecision
     {
         private readonly ScheduleId _id;
-        private readonly long _eventId;
+        private readonly long _triggerEventId;
         private readonly string _signalName;
 
-        public WaitForSignalDecision(ScheduleId id, long eventId, string signalName) : base(false)
+        public WorkflowItemSignalledDecision(ScheduleId id, long triggerEventId, string signalName) : base(false)
         {
             _id = id;
-            _eventId = eventId;
+            _triggerEventId = triggerEventId;
             _signalName = signalName;
         }
 
         internal override Decision SwfDecision()
         {
-            var details = new WaitForSignalScheduleData()
+            var details = new WorkflowItemSignalledData()
             {
                 ScheduleId = _id,
-                EventId = _eventId,
-                EventNames = new[] {_signalName},
-                WaitType = SignalWaitType.Any,
-                NextAction = SignalNextAction.Continue
+                TriggerEventId = _triggerEventId,
+                SignalName = _signalName
             };
-            return new Decision()
+            return new Decision
             {
                 DecisionType = DecisionType.RecordMarker,
                 RecordMarkerDecisionAttributes = new RecordMarkerDecisionAttributes()
                 {
-                    MarkerName = InternalMarkerNames.WaitForSignal,
+                    MarkerName = InternalMarkerNames.WorkflowItemSignalled,
                     Details = details.ToJson()
                 }
             };
@@ -43,17 +41,17 @@ namespace Guflow.Decider
 
         public override bool Equals(object obj)
         {
-            return obj is WaitForSignalDecision decision &&
+            return obj is WorkflowItemSignalledDecision decision &&
                    EqualityComparer<ScheduleId>.Default.Equals(_id, decision._id) &&
-                   _eventId == decision._eventId &&
+                   _triggerEventId == decision._triggerEventId &&
                    string.Equals(_signalName, decision._signalName, StringComparison.OrdinalIgnoreCase);
         }
 
         public override int GetHashCode()
         {
-            var hashCode = -1394181897;
+            var hashCode = -2131934865;
             hashCode = hashCode * -1521134295 + EqualityComparer<ScheduleId>.Default.GetHashCode(_id);
-            hashCode = hashCode * -1521134295 + _eventId.GetHashCode();
+            hashCode = hashCode * -1521134295 + _triggerEventId.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_signalName.ToLower());
             return hashCode;
         }

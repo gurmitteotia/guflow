@@ -30,12 +30,11 @@ namespace Guflow.Tests.Decider
             var workflow = new UserActivateWorkflow();
             var decision = workflow.Decisions(_builder.Result());
 
-            Assert.That(decision, Is.EqualTo(new[] { new WaitForSignalDecision(_confirmEmailId, graph.First().EventId, "Confirmed") }));
-
+            Assert.That(decision, Is.EqualTo(new[] { new WaitForSignalsDecision(_confirmEmailId, graph.First().EventId, "Confirmed") }));
         }
 
         [Test]
-        public void Continue_the_execution_after_wait_when_signal_is_received()
+        public void Continue_the_execution_and_record_resumed_signal_when_signal_is_received()
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddProcessedEvents(graph);
@@ -45,8 +44,11 @@ namespace Guflow.Tests.Decider
             var workflow = new UserActivateWorkflow();
             var decision = workflow.Decisions(_builder.Result());
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input")}));
-
+            Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed"), 
+            }));
         }
 
         private class UserActivateWorkflow : Workflow

@@ -4,6 +4,7 @@ namespace Guflow.Decider
 {
     internal class InternalMarkerNames
     {
-        public const string WaitForSignal = "WaitForSignals_Guflow_Internal_Marker";
+        public const string WorkflowItemWaitForSignals = "WorkflowItemWaitForSignals_Guflow_Internal_Marker";
+        public const string WorkflowItemSignalled = "WorkflowItemSignalled_Guflow_Internal_Marker";
     }
 }

@@ -1,4 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 
 namespace Guflow.Decider
@@ -51,6 +53,14 @@ namespace Guflow.Decider
         /// </summary>
         /// <returns></returns>
         IEnumerable<WorkflowItemEvent> LastSimilarEvents();
+
+        /// <summary>
+        /// Resume the execution after this workflow item, if it was waiting for given signal. Throws <see cref="InvalidOperationException"/> if this workflow item is not
+        /// waiting for given signal.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        WorkflowAction Resume(string signalName);
     }
 
     internal interface ITimer

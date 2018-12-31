@@ -246,7 +246,7 @@ namespace Guflow.Decider
 
         WorkflowAction IWorkflowDefaultActions.ResumeOnSignal(string signalName)
         {
-            return Signal(signalName).Resume();
+            return WaitingItem(signalName).Resume(signalName);
         }
         internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {
@@ -686,13 +686,14 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Expose APIs to work with waiting signals.
+        /// Returns workflow item waiting for given signal. Returns null if no workflow item is waiting for given signal. 
         /// </summary>
         /// <param name="signalName"></param>
         /// <returns></returns>
-        protected WaitingSignal Signal(string signalName)
+        protected IWorkflowItem WaitingItem(string signalName)
         {
-            return new WaitingSignal(signalName);
+            IWorkflow workflow = this;
+            return workflow.WorkflowHistoryEvents.WaitingItems(_allWorkflowItems.AllItems.ToArray(), signalName).FirstOrDefault();
         }
         IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
         {
@@ -743,14 +744,30 @@ namespace Guflow.Decider
         {
             return DuringCancellation(details);
         }
+        /// <summary>
+        /// Called before completing the workflow.
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
         protected virtual WorkflowAction DuringCompletion(string result)
         {
             return CompleteWorkflow(result);
         }
+        /// <summary>
+        /// Called before failing the workflow.
+        /// </summary>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        /// <returns></returns>
         protected virtual WorkflowAction DuringFailure(string reason, string detail)
         {
             return FailWorkflow(reason, detail);
         }
+        /// <summary>
+        /// Called before cancelling the workflow.
+        /// </summary>
+        /// <param name="details"></param>
+        /// <returns></returns>
         protected virtual WorkflowAction DuringCancellation(string details)
         {
             return CancelWorkflow(details);

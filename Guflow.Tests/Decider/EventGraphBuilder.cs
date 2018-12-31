@@ -571,9 +571,9 @@ namespace Guflow.Tests.Decider
             var details = new WaitForSignalScheduleData()
             {
                 ScheduleId = id,
-                EventId = eventId,
+                TriggerEventId = eventId,
                 WaitType = waitType,
-                EventNames = eventNames,
+                SignalNames = eventNames,
                 NextAction = nextAction
             };
             return new HistoryEvent
@@ -582,7 +582,28 @@ namespace Guflow.Tests.Decider
                 EventType = EventType.MarkerRecorded,
                 MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
                 {
-                    MarkerName = InternalMarkerNames.WaitForSignal,
+                    MarkerName = InternalMarkerNames.WorkflowItemWaitForSignals,
+                    Details = details.ToJson()
+                }
+            };
+        }
+
+        public HistoryEvent SignalResumedEvent(ScheduleId id, int eventId, string eventName)
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            var details = new WorkflowItemSignalledData()
+            {
+                ScheduleId = id,
+                TriggerEventId = eventId,
+                SignalName = eventName,
+            };
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.MarkerRecorded,
+                MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
+                {
+                    MarkerName = InternalMarkerNames.WorkflowItemSignalled,
                     Details = details.ToJson()
                 }
             };

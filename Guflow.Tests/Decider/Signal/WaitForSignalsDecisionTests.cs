@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
-    public class WaitForSignalDecisionTests
+    public class WaitForSignalsDecisionTests
     {
 
         [Test]
@@ -15,29 +15,29 @@ namespace Guflow.Tests.Decider
         {
             var id = Identity.Lambda("a").ScheduleId();
             var id1 = Identity.Lambda("a1").ScheduleId();
-            Assert.IsTrue(new WaitForSignalDecision(id, 1, "s").Equals(new WaitForSignalDecision(id, 1, "s")));
-            Assert.IsTrue(new WaitForSignalDecision(id, 1, "s").Equals(new WaitForSignalDecision(id, 1, "S")));
+            Assert.IsTrue(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "s")));
+            Assert.IsTrue(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "S")));
 
-            Assert.IsFalse(new WaitForSignalDecision(id, 1, "s").Equals(new WaitForSignalDecision(id1, 1, "S")));
-            Assert.IsFalse(new WaitForSignalDecision(id, 1, "s").Equals(new WaitForSignalDecision(id1, 2, "S")));
-            Assert.IsFalse(new WaitForSignalDecision(id, 1, "s").Equals(new WaitForSignalDecision(id, 1, "S1")));
+            Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id1, 1, "S")));
+            Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id1, 2, "S")));
+            Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "S1")));
         }
 
         [Test]
         public void Returns_swf_decision_to_record_the_marker()
         {
             var id = Identity.Lambda("a").ScheduleId();
-            var decision = new WaitForSignalDecision(id, 10, "Signal");
+            var decision = new WaitForSignalsDecision(id, 10, "Signal");
 
             var swfDecision = decision.SwfDecision();
 
             Assert.That(swfDecision.DecisionType, Is.EqualTo(DecisionType.RecordMarker));
             var attr = swfDecision.RecordMarkerDecisionAttributes;
-            Assert.That(attr.MarkerName, Is.EqualTo("WaitForSignals_Guflow_Internal_Marker"));
+            Assert.That(attr.MarkerName, Is.EqualTo("WorkflowItemWaitForSignals_Guflow_Internal_Marker"));
             var data = attr.Details.AsDynamic();
             Assert.That((string)data.ScheduleId, Is.EqualTo(id.ToString()));
-            Assert.That((long)data.EventId, Is.EqualTo(10));
-            Assert.That(data.EventNames.ToObject<string[]>(), Is.EqualTo(new[]{"Signal"}));
+            Assert.That((long)data.TriggerEventId, Is.EqualTo(10));
+            Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(new[]{"Signal"}));
             Assert.That((SignalWaitType)data.WaitType, Is.EqualTo(SignalWaitType.Any));
             Assert.That((SignalNextAction)data.NextAction, Is.EqualTo(SignalNextAction.Continue));
         }

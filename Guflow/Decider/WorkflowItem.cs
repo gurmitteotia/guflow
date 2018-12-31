@@ -46,6 +46,12 @@ namespace Guflow.Decider
             }
         }
 
+        public WorkflowAction Resume(string signalName)
+        {
+            var waitEvent = WorkflowHistoryEvents.SignalWaitEvent(this, signalName);
+            return WorkflowAction.ContinueWorkflow(this) + WorkflowAction.Custom(new WorkflowItemSignalledDecision())
+        }
+
         public abstract WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false);
         public abstract IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false);
 

@@ -30,6 +30,7 @@ namespace Guflow.Decider
             return false;
         }
 
+        internal bool HasSameScheduleId(WorkflowItemEvent other) => ScheduleId == other.ScheduleId;
         /// <summary>
         /// Wait for the signal indefintely
         /// </summary>

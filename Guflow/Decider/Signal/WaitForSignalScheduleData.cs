@@ -3,8 +3,8 @@
     internal class WaitForSignalScheduleData
     {
         public string ScheduleId;
-        public long EventId;
-        public string[] EventNames;
+        public long TriggerEventId;
+        public string[] SignalNames;
         public SignalWaitType WaitType;
         public SignalNextAction NextAction;
     }

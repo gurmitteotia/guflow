@@ -7,7 +7,7 @@ namespace Guflow.Decider
     {
         private readonly string _signalName;
         private readonly string _input;
-        private WorkflowItems _workflowItems;
+        private readonly WorkflowItems _workflowItems;
         internal Signal(string signalName, object input, WorkflowItems workflowItems)
         {
             _signalName = signalName;

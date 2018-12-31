@@ -208,6 +208,19 @@ namespace Guflow.Decider
             return @event;
         }
 
+        public IEnumerable<WorkflowItem> WaitingItems(WorkflowItem[] workflowItems, string signalName)
+        {
+            var waitingItems = new List<WorkflowItem>();
+            foreach (var historyEvent in _allHistoryEvents)
+            {
+                var waitEvent = historyEvent.WaitForSignalsEvent(_allHistoryEvents);
+                if(waitEvent == null || ! waitEvent.IsWaitingForSignal(signalName)) continue;
+                var items = workflowItems.Where(w => waitEvent.IsFor(w));
+                waitingItems.AddRange(items);
+            }
+            return waitingItems;
+        }
+
         public long LatestEventId => _allHistoryEvents.First().EventId;
 
         private bool IsRescheduleTimerEvent(WorkflowItemEvent @event)
