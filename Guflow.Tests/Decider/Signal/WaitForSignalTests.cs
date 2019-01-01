@@ -130,7 +130,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Resume_two_the_waiting_workflow_items_when_two_signals_are_received()
+        public void Resume_two_parallel_waiting_workflow_items_when_two_signals_are_received()
         {
             var l1 = Identity.Lambda("LambdaA1").ScheduleId();
             var l2 = Identity.Lambda("LambdaB1").ScheduleId();
@@ -231,16 +231,91 @@ namespace Guflow.Tests.Decider
             var workflow = new MultipleWorkflowItemsWaitingForSameSignal();
             var decision = workflow.Decisions(_builder.Result());
 
-            Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
+            Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
             {
+                new WaitForSignalsDecision(l1, w1.First().EventId, "Confirmed"),
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
-                new WaitForSignalsDecision(l1, w1.First().EventId, "Confirmed"), 
                 new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed"),
 
-                new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
                 new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
+                new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed"),
             }));
+        }
+
+        [Test]
+        public void Continue_the_executions_of_both_branches_when_one_of_the_signal_is_received_along_with_wait_for_signal_decision()
+        {
+            var l1 = Identity.Lambda("LambdaA1").ScheduleId();
+            var l2 = Identity.Lambda("LambdaB1").ScheduleId();
+            var w1 = _graphBuilder.LambdaCompletedEventGraph(l1, "input", "result");
+            _builder.AddProcessedEvents(w1);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(l1, w1.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
+
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("confirmed", ""));
+
+            var w2 = _graphBuilder.LambdaCompletedEventGraph(l2, "input", "result");
+            _builder.AddNewEvents(w2);
+
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+
+            var workflow = new MultipleWorkflowItemsWaitingForSameSignal();
+            var decision = workflow.Decisions(_builder.Result());
+
+            Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed"),
+
+                new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
+                new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed"),
+            }));
+        }
+
+        [Test]
+        public void Continue_the_execution_when_waiting_item_has_the_history_of_waiting_for_same_signal()
+        {
+            var g1 = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
+            _builder.AddProcessedEvents(g1);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, g1.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(_confirmEmailId, g1.First().EventId, "Confirmed"));
+
+            var g2 = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
+            _builder.AddProcessedEvents(g2);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, g2.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
+
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+
+            var workflow = new UserActivateWorkflow();
+            var decision = workflow.Decisions(_builder.Result());
+
+            Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(_confirmEmailId, g2.First().EventId, "Confirmed"),
+            }));
+        }
+
+        [Test]
+        public void Ignore_the_signal_when_waiting_workflow_item_has_already_been_signalled_multiple_times_in_past()
+        {
+            var g1 = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
+            _builder.AddProcessedEvents(g1);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, g1.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(_confirmEmailId, g1.First().EventId, "Confirmed"));
+
+            var g2 = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
+            _builder.AddProcessedEvents(g2);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, g2.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(_confirmEmailId, g2.First().EventId, "Confirmed"));
+
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+
+            var workflow = new UserActivateWorkflow();
+            var decision = workflow.Decisions(_builder.Result());
+
+            Assert.That(decision, Is.Empty);
         }
 
         private class UserActivateWorkflow : Workflow
