@@ -16,7 +16,7 @@ namespace Guflow.Tests.Decider
         public void Setup()
         {
             _graphBuilder = new EventGraphBuilder();
-            _event = new WorkflowItemSignalledEvent(_graphBuilder.SignalResumedEvent(ScheduleId.Raw("id"), 10, "e1"));
+            _event = new WorkflowItemSignalledEvent(_graphBuilder.WorkflowItemSignalledEvent(ScheduleId.Raw("id"), 10, "e1"));
         }
 
         [Test]

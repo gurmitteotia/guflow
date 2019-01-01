@@ -17,6 +17,7 @@ namespace Guflow.Decider
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedLambdaEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedChildWorkflowEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
 
+        private List<WaitForSignalsEvent> _cachedWaitEvents = null;
         //TODO : Get rid of this constructor once the dependent constructor is deleted.
         private WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long previousStartedEventId, long newStartedEventId)
         {
@@ -211,14 +212,24 @@ namespace Guflow.Decider
         public IEnumerable<WorkflowItem> WaitingItems(WorkflowItem[] workflowItems, string signalName)
         {
             var waitingItems = new List<WorkflowItem>();
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var waitEvent in WaitForSignalsEvents())
             {
-                var waitEvent = historyEvent.WaitForSignalsEvent(_allHistoryEvents);
-                if(waitEvent == null || ! waitEvent.IsWaitingForSignal(signalName)) continue;
+                if(!waitEvent.IsWaitingForSignal(signalName)) continue;
                 var items = workflowItems.Where(w => waitEvent.IsFor(w));
                 waitingItems.AddRange(items);
             }
             return waitingItems;
+        }
+
+        public WaitForSignalsEvent SignalWaitEvent(WorkflowItem workflowItem, string signalName)
+        {
+            foreach (var waitEvent in WaitForSignalsEvents())
+            {
+                if (!waitEvent.IsWaitingForSignal(signalName)) continue;
+                if (waitEvent.IsFor(workflowItem))
+                    return waitEvent;
+            }
+            return null;
         }
 
         public long LatestEventId => _allHistoryEvents.First().EventId;
@@ -227,6 +238,20 @@ namespace Guflow.Decider
         {
             var timerEvent = @event as TimerEvent;
             return timerEvent != null && timerEvent.IsARescheduledTimer;
+        }
+
+        private IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents()
+        {
+            if (_cachedWaitEvents != null) return _cachedWaitEvents;
+            _cachedWaitEvents = new List<WaitForSignalsEvent>();
+            foreach (var historyEvent in _allHistoryEvents.Reverse())
+            {
+                var waitEvent = historyEvent.WaitForSignalsEvent(_allHistoryEvents);
+                if (waitEvent != null)
+                   _cachedWaitEvents.Add(waitEvent);
+            }
+
+            return _cachedWaitEvents;
         }
 
         private class LastEventFilters

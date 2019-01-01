@@ -59,5 +59,10 @@ namespace Guflow.Decider
         public bool IsWaitingForSignal(string signalName) =>
             WaitingSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
 
+        public WorkflowDecision RecordSignal(string signalName)
+        {
+            _resumedSignals.Add(signalName);
+            return new WorkflowItemSignalledDecision(ScheduleId.Raw(_data.ScheduleId), _data.TriggerEventId, signalName);
+        }
     }
 }

@@ -246,7 +246,9 @@ namespace Guflow.Decider
 
         WorkflowAction IWorkflowDefaultActions.ResumeOnSignal(string signalName)
         {
-            return WaitingItem(signalName).Resume(signalName);
+            var item = WaitingItem(signalName);
+            if (item == null) return Ignore;
+            return item.Resume(signalName);
         }
         internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {

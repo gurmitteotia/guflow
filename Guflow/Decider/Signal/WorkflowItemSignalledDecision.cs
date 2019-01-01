@@ -55,5 +55,11 @@ namespace Guflow.Decider
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_signalName.ToLower());
             return hashCode;
         }
+
+        public override string ToString()
+        {
+            return
+                $"{GetType().Name} with ScheduleId {_id}, TriggerEventId {_triggerEventId} and SignalName  {_signalName}";
+        }
     }
 }

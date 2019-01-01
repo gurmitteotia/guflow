@@ -49,7 +49,10 @@ namespace Guflow.Decider
         public WorkflowAction Resume(string signalName)
         {
             var waitEvent = WorkflowHistoryEvents.SignalWaitEvent(this, signalName);
-            return WorkflowAction.ContinueWorkflow(this) + WorkflowAction.Custom(new WorkflowItemSignalledDecision())
+            if(waitEvent==null)
+                throw new SignalResumeException($"Workflow item {Identity} is not waiting for signal {signalName}");
+
+            return WorkflowAction.ContinueWorkflow(this) + WorkflowAction.Custom(waitEvent.RecordSignal(signalName));
         }
 
         public abstract WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false);

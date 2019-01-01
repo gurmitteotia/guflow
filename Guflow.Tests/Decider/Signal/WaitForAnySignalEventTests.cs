@@ -17,7 +17,7 @@ namespace Guflow.Tests.Decider
         public void No_more_waits_when_first_signal_is_received()
         {
             var w = _graphBuilder.WaitForSignalEvent(ScheduleId.Raw("id"), 10, new[] {"e1", "e2"}, SignalWaitType.Any);
-            var r = _graphBuilder.SignalResumedEvent(ScheduleId.Raw("id"), 10, "e1");
+            var r = _graphBuilder.WorkflowItemSignalledEvent(ScheduleId.Raw("id"), 10, "e1");
 
             var @event = new WaitForSignalsEvent(w, new []{r, w});
 
@@ -30,7 +30,7 @@ namespace Guflow.Tests.Decider
         public void No_more_waits_when_second_signal_is_received()
         {
             var w = _graphBuilder.WaitForSignalEvent(ScheduleId.Raw("id"), 10, new[] { "e1", "e2" }, SignalWaitType.Any);
-            var r = _graphBuilder.SignalResumedEvent(ScheduleId.Raw("id"), 10, "e2");
+            var r = _graphBuilder.WorkflowItemSignalledEvent(ScheduleId.Raw("id"), 10, "e2");
 
             var @event = new WaitForSignalsEvent(w, new[] { r, w });
 
@@ -42,7 +42,7 @@ namespace Guflow.Tests.Decider
         public void Keep_waiting_when_resumed_signal_is_for_differnt_schedule_id()
         {
             var w = _graphBuilder.WaitForSignalEvent(ScheduleId.Raw("id"), 10, new[] { "e1", "e2" }, SignalWaitType.Any);
-            var r = _graphBuilder.SignalResumedEvent(ScheduleId.Raw("id1"), 10, "e2");
+            var r = _graphBuilder.WorkflowItemSignalledEvent(ScheduleId.Raw("id1"), 10, "e2");
 
             var @event = new WaitForSignalsEvent(w, new[] { r, w });
 
@@ -54,7 +54,7 @@ namespace Guflow.Tests.Decider
         public void Keep_waiting_when_resumed_signal_is_for_differnt_trigger_event_id()
         {
             var w = _graphBuilder.WaitForSignalEvent(ScheduleId.Raw("id"), 10, new[] { "e1", "e2" }, SignalWaitType.Any);
-            var r = _graphBuilder.SignalResumedEvent(ScheduleId.Raw("id"), 11, "e2");
+            var r = _graphBuilder.WorkflowItemSignalledEvent(ScheduleId.Raw("id"), 11, "e2");
 
             var @event = new WaitForSignalsEvent(w, new[] { r, w });
 

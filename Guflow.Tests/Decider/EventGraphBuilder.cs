@@ -588,7 +588,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public HistoryEvent SignalResumedEvent(ScheduleId id, int eventId, string eventName)
+        public HistoryEvent WorkflowItemSignalledEvent(ScheduleId id, long eventId, string eventName)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             var details = new WorkflowItemSignalledData()
