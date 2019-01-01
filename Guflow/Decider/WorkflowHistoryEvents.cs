@@ -208,28 +208,18 @@ namespace Guflow.Decider
             _cachedChildWorkflowEvents.Add(childWorkflowItem, @event);
             return @event;
         }
-
-        public IEnumerable<WorkflowItem> WaitingItems(WorkflowItem[] workflowItems, string signalName)
+        public IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents()
         {
-            var waitingItems = new List<WorkflowItem>();
-            foreach (var waitEvent in WaitForSignalsEvents())
+            if (_cachedWaitEvents != null) return _cachedWaitEvents;
+            _cachedWaitEvents = new List<WaitForSignalsEvent>();
+            foreach (var historyEvent in _allHistoryEvents.Reverse())
             {
-                if(!waitEvent.IsWaitingForSignal(signalName)) continue;
-                var items = workflowItems.Where(w => waitEvent.IsFor(w));
-                waitingItems.AddRange(items);
+                var waitEvent = historyEvent.WaitForSignalsEvent(_allHistoryEvents);
+                if (waitEvent != null)
+                    _cachedWaitEvents.Add(waitEvent);
             }
-            return waitingItems;
-        }
 
-        public WaitForSignalsEvent SignalWaitEvent(WorkflowItem workflowItem, string signalName)
-        {
-            foreach (var waitEvent in WaitForSignalsEvents())
-            {
-                if (!waitEvent.IsWaitingForSignal(signalName)) continue;
-                if (waitEvent.IsFor(workflowItem))
-                    return waitEvent;
-            }
-            return null;
+            return _cachedWaitEvents;
         }
 
         public long LatestEventId => _allHistoryEvents.First().EventId;
@@ -238,20 +228,6 @@ namespace Guflow.Decider
         {
             var timerEvent = @event as TimerEvent;
             return timerEvent != null && timerEvent.IsARescheduledTimer;
-        }
-
-        private IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents()
-        {
-            if (_cachedWaitEvents != null) return _cachedWaitEvents;
-            _cachedWaitEvents = new List<WaitForSignalsEvent>();
-            foreach (var historyEvent in _allHistoryEvents.Reverse())
-            {
-                var waitEvent = historyEvent.WaitForSignalsEvent(_allHistoryEvents);
-                if (waitEvent != null)
-                   _cachedWaitEvents.Add(waitEvent);
-            }
-
-            return _cachedWaitEvents;
         }
 
         private class LastEventFilters

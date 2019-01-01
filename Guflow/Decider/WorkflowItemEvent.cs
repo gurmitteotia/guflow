@@ -36,9 +36,9 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="signalName">Signal name. Cases are ignored when comparing the signal names.</param>
         /// <returns></returns>
-        public WaitForSignalWorkflowAction WaitForSignal(string signalName)
+        public WaitForSignalsWorkflowAction WaitForSignal(string signalName)
         {
-            return new WaitForSignalWorkflowAction(ScheduleId, EventId, signalName);
+            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, signalName);
         }
     }
 }

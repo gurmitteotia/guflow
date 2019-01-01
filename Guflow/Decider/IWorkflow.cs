@@ -7,8 +7,8 @@ namespace Guflow.Decider
     {
         IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem workflowItem);
         WorkflowItem FindWorkflowItemBy(Identity identity);
-        void SetCurrentExecutingEvent(WorkflowEvent workflowEvent);
         IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
+        IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents { get; } 
         WorkflowAction WorkflowAction(WorkflowStartedEvent workflowStartedEvent);
         WorkflowAction WorkflowAction(ActivityCompletedEvent activityCompletedEvent);
         WorkflowAction WorkflowAction(ActivityFailedEvent activityFailedEvent);

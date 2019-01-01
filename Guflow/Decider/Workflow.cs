@@ -17,6 +17,7 @@ namespace Guflow.Decider
         private readonly WorkflowEventMethods _workflowEventMethods;
         private WorkflowAction _startupAction;
         private WorkflowEvent _currentExecutingEvent;
+        private WorkflowActions _generatedActions;
         protected Workflow()
         {
             _workflowEventMethods = WorkflowEventMethods.For(this);
@@ -695,7 +696,7 @@ namespace Guflow.Decider
         protected IWorkflowItem WaitingItem(string signalName)
         {
             IWorkflow workflow = this;
-            return workflow.WorkflowHistoryEvents.WaitingItems(_allWorkflowItems.AllItems.ToArray(), signalName).FirstOrDefault();
+            return workflow.WaitForSignalsEvents.WaitingItems(_allWorkflowItems.AllItems.ToArray(), signalName).FirstOrDefault();
         }
         IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
         {
@@ -705,10 +706,6 @@ namespace Guflow.Decider
         WorkflowItem IWorkflow.FindWorkflowItemBy(Identity identity)
         {
             return _allWorkflowItems.WorkflowItem(identity);
-        }
-        void IWorkflow.SetCurrentExecutingEvent(WorkflowEvent workflowEvent)
-        {
-            _currentExecutingEvent = workflowEvent;
         }
         private WorkflowItem CurrentExecutingItem
         {
@@ -728,6 +725,16 @@ namespace Guflow.Decider
                 if (_currentWorkflowHistoryEvents == null)
                     throw new InvalidOperationException("Current history events can be accessed only when workflow is executing.");
                 return _currentWorkflowHistoryEvents;
+            }
+        }
+
+        IEnumerable<WaitForSignalsEvent> IWorkflow.WaitForSignalsEvents
+        {
+            get
+            {
+                IWorkflow workflow = this;
+                return workflow.WorkflowHistoryEvents.WaitForSignalsEvents()
+                    .Concat(_generatedActions.WaitForSignalsEvents());
             }
         }
         internal WorkflowAction StartupAction => _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems));
@@ -789,7 +796,7 @@ namespace Guflow.Decider
        
         internal IEnumerable<WorkflowDecision> Decisions(IWorkflowHistoryEvents historyEvents)
         {
-            var result = new List<WorkflowAction>();
+            _generatedActions = new WorkflowActions();
             try
             {
                 _currentWorkflowHistoryEvents = historyEvents;
@@ -797,10 +804,9 @@ namespace Guflow.Decider
                 foreach (var workflowEvent in historyEvents.NewEvents())
                 {
                     _currentExecutingEvent = workflowEvent;
-                    result.Add(workflowEvent.Interpret(this));
+                    _generatedActions.Add(workflowEvent.Interpret(this));
                 }
-                var decisions = result.Where(w => w != null).SelectMany(a => a.Decisions()).Distinct();
-                return decisions.CompatibleDecisions(this).Where(d => d != WorkflowDecision.Empty).ToArray(); ;
+                return _generatedActions.CompatibleDecisions(this);
             }
             finally
             {   

@@ -21,7 +21,6 @@ namespace Guflow.Decider
         WorkflowItemEvent LastLambdaEvent(LambdaItem lambdaItem);
         IEnumerable<WorkflowItemEvent> AllChildWorkflowEvents(ChildWorkflowItem childWorkflowItem);
         WorkflowItemEvent LastChildWorkflowEvent(ChildWorkflowItem childWorkflowItem);
-        IEnumerable<WorkflowItem> WaitingItems(WorkflowItem[] workflowItems, string signalName);
-        WaitForSignalsEvent SignalWaitEvent(WorkflowItem workflowItem, string signalName);
+        IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents();
     }
 }
