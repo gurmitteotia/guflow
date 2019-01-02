@@ -746,6 +746,9 @@ namespace Guflow.Decider
                     .Concat(_generatedActions.WaitForSignalsEvents());
             }
         }
+
+        WorkflowEvent IWorkflow.CurrentlyExecutingEvent => _currentExecutingEvent;
+
         internal WorkflowAction StartupAction => _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems));
 
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
@@ -821,6 +824,7 @@ namespace Guflow.Decider
             {   
                 AfterExecution();
                 _currentWorkflowHistoryEvents = null;
+                _currentExecutingEvent = null;
             }
         }
     }

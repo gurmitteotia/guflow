@@ -42,7 +42,8 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, graph.First().EventId, new[] {"Confirmed"}, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new UserActivateWorkflow();
             var decision = workflow.Decisions(_builder.Result());
@@ -50,7 +51,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed"), 
+                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId), 
             }));
         }
 
@@ -120,7 +121,8 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(l2, w2.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
 
 
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new MultipleWorkflowItemsWaitingForSameSignal();
             var decision = workflow.Decisions(_builder.Result());
@@ -128,7 +130,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed", s.EventId),
             }));
         }
 
@@ -146,8 +148,10 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(l2, w2.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
 
 
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s1 = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s1);
+            var s2 = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s2);
 
             var workflow = new MultipleWorkflowItemsWaitingForSameSignal();
             var decision = workflow.Decisions(_builder.Result());
@@ -155,9 +159,9 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed",s1.EventId),
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed", s2.EventId),
             }));
         }
 
@@ -167,7 +171,8 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, graph.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s1 = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s1);
             _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
 
             var workflow = new UserActivateWorkflow();
@@ -176,7 +181,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s1.EventId),
             }));
         }
 
@@ -185,7 +190,8 @@ namespace Guflow.Tests.Decider
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddNewEvents(graph);
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new UserActivateWorkflow();
             var decision = workflow.Decisions(_builder.Result());
@@ -194,7 +200,7 @@ namespace Guflow.Tests.Decider
             {
                 new WaitForSignalsDecision(_confirmEmailId, graph.First().EventId, "Confirmed"),
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed")
+                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId)
             }));
         }
 
@@ -203,7 +209,8 @@ namespace Guflow.Tests.Decider
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddNewEvents(graph);
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s);
             _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
 
             var workflow = new UserActivateWorkflow();
@@ -213,7 +220,7 @@ namespace Guflow.Tests.Decider
             {
                 new WaitForSignalsDecision(_confirmEmailId, graph.First().EventId, "Confirmed"),
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed")
+                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId)
             }));
         }
 
@@ -224,12 +231,14 @@ namespace Guflow.Tests.Decider
             var l2 = Identity.Lambda("LambdaB1").ScheduleId();
             var w1 = _graphBuilder.LambdaCompletedEventGraph(l1, "input", "result");
             _builder.AddNewEvents(w1);
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s1 = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s1);
 
             var w2 = _graphBuilder.LambdaCompletedEventGraph(l2, "input", "result");
             _builder.AddNewEvents(w2);
 
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s2 = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s2);
 
             var workflow = new MultipleWorkflowItemsWaitingForSameSignal();
             var decision = workflow.Decisions(_builder.Result());
@@ -238,11 +247,11 @@ namespace Guflow.Tests.Decider
             {
                 new WaitForSignalsDecision(l1, w1.First().EventId, "Confirmed"),
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed", s1.EventId),
 
                 new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed", s2.EventId),
             }));
         }
 
@@ -255,12 +264,14 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(w1);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(l1, w1.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
 
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("confirmed", ""));
+            var s1 = _graphBuilder.WorkflowSignaledEvent("confirmed", "");
+            _builder.AddNewEvents(s1);
 
             var w2 = _graphBuilder.LambdaCompletedEventGraph(l2, "input", "result");
             _builder.AddNewEvents(w2);
 
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s2 = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s2);
 
             var workflow = new MultipleWorkflowItemsWaitingForSameSignal();
             var decision = workflow.Decisions(_builder.Result());
@@ -268,11 +279,11 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed", s1.EventId),
 
                 new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed", s2.EventId),
             }));
         }
 
@@ -288,7 +299,8 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(g2);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, g2.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
 
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new UserActivateWorkflow();
             var decision = workflow.Decisions(_builder.Result());
@@ -296,7 +308,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_confirmEmailId, g2.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(_confirmEmailId, g2.First().EventId, "Confirmed", s.EventId),
             }));
         }
 
@@ -326,7 +338,8 @@ namespace Guflow.Tests.Decider
         {
             var g1 = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddNewEvents(g1);
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new UserActivateWorkflowWithCompositeAction();
             var decision = workflow.Decisions(_builder.Result());
@@ -336,7 +349,7 @@ namespace Guflow.Tests.Decider
                 new WaitForSignalsDecision(_confirmEmailId, g1.First().EventId,"Confirmed"),
                 new RecordMarkerWorkflowDecision("Marker1", "details"),
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_confirmEmailId, g1.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(_confirmEmailId, g1.First().EventId, "Confirmed", s.EventId),
             }));
         }
 
@@ -346,7 +359,8 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, graph.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new UserActivateWorkflowWithCustomResume();
             var decision = workflow.Decisions(_builder.Result());
@@ -354,7 +368,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId),
             }));
         }
 
@@ -368,7 +382,8 @@ namespace Guflow.Tests.Decider
             var w2 = _graphBuilder.LambdaCompletedEventGraph(l2, "input", "result");
             _builder.AddNewEvents(w2);
 
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new ResumeMultipleWokflowItemsUsingSameSignal();
             var decision = workflow.Decisions(_builder.Result());
@@ -379,10 +394,10 @@ namespace Guflow.Tests.Decider
                 new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
 
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed", s.EventId),
 
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed"),
+                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed", s.EventId),
             }));
         }
 

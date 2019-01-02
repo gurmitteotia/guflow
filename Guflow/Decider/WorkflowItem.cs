@@ -54,8 +54,8 @@ namespace Guflow.Decider
             var waitEvent = WaitForSignalsEvent(signalName);
             if (waitEvent == null)
                 throw new SignalResumeException($"Workflow item {Identity} is not waiting for signal {signalName}");
-
-            return WorkflowAction.ContinueWorkflow(this) + WorkflowAction.Custom(waitEvent.RecordSignal(signalName));
+            
+            return WorkflowAction.ContinueWorkflow(this) + WorkflowAction.Custom(waitEvent.RecordSignal(signalName, SignalEventId()));
         }
 
         public bool IsSignalled(string signalName)
@@ -176,6 +176,12 @@ namespace Guflow.Decider
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
             return _workflow.WaitForSignalsEvents.FirstOrDefault(this, signalName);
+        }
+
+        private long SignalEventId()
+        {
+            var e = _workflow.CurrentlyExecutingEvent as WorkflowSignaledEvent;
+            return e != null ? e.EventId : 0;
         }
     }
 }

@@ -7,5 +7,6 @@ namespace Guflow.Decider
         public string ScheduleId;
         public long TriggerEventId;
         public string SignalName;
+        public long SignalEventId;
     }
 }

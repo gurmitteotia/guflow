@@ -43,7 +43,8 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_sendForApprovalId, graph.First().EventId, new[] { "Approved", "Rejected" }, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Approved", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Approved", "");
+            _builder.AddNewEvents(s);
 
 
             var workflow = new ExpenseWorkflowToSendEmail();
@@ -52,7 +53,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("SendEmail").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved") 
+                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved", s.EventId) 
             }));
         }
 
@@ -62,7 +63,8 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_sendForApprovalId, graph.First().EventId, new[] { "Approved", "Rejected" }, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Approved", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Approved", "");
+            _builder.AddNewEvents(s);
             _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Rejected", ""));
 
 
@@ -72,7 +74,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("SendEmail").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved")
+                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved", s.EventId)
             }));
         }
 
@@ -83,7 +85,8 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_sendForApprovalId, graph.First().EventId, new[] { "Approved", "Rejected" }, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Approved", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Approved", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new ExpenseWorkflow();
             var decisions = workflow.Decisions(_builder.Result());
@@ -91,7 +94,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("SendToAccount").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved")
+                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved", s.EventId)
             }));
         }
 
@@ -102,7 +105,8 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_sendForApprovalId, graph.First().EventId, new[] { "Approved", "Rejected" }, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Rejected", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Rejected", "");
+            _builder.AddNewEvents(s);
 
             var workflow = new ExpenseWorkflow();
             var decisions = workflow.Decisions(_builder.Result());
@@ -110,7 +114,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("SendRejectEmail").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Rejected")
+                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Rejected", s.EventId)
             }));
         }
 
@@ -120,7 +124,8 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_sendForApprovalId, graph.First().EventId, new[] { "Approved", "Rejected" }, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Approved", ""));
+            var s = _graphBuilder.WorkflowSignaledEvent("Approved", "");
+            _builder.AddNewEvents(s);
             _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Rejected", ""));
 
             var workflow = new ExpenseWorkflow();
@@ -129,7 +134,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new ScheduleLambdaDecision(Identity.Lambda("SendToAccount").ScheduleId(), "input"),
-                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved")
+                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved", s.EventId)
             }));
         }
 

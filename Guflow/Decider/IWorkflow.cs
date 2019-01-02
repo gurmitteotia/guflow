@@ -9,6 +9,8 @@ namespace Guflow.Decider
         WorkflowItem FindWorkflowItemBy(Identity identity);
         IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
         IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents { get; } 
+        WorkflowEvent CurrentlyExecutingEvent { get; }
+
         WorkflowAction WorkflowAction(WorkflowStartedEvent workflowStartedEvent);
         WorkflowAction WorkflowAction(ActivityCompletedEvent activityCompletedEvent);
         WorkflowAction WorkflowAction(ActivityFailedEvent activityFailedEvent);

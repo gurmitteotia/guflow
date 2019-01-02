@@ -23,8 +23,7 @@ namespace Guflow.Decider
         {
             throw new NotSupportedException($"DefaultAction is not supported {this.GetType().Name}.");
         }
-
-        protected long EventId { get; }
+        internal long EventId { get; }
         public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();
     
         public int CompareTo(WorkflowEvent other)

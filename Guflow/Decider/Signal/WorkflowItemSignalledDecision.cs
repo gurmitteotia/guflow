@@ -12,12 +12,13 @@ namespace Guflow.Decider
         private readonly ScheduleId _id;
         private readonly long _triggerEventId;
         private readonly string _signalName;
-
-        public WorkflowItemSignalledDecision(ScheduleId id, long triggerEventId, string signalName) : base(false)
+        private readonly long _signalEventId;
+        public WorkflowItemSignalledDecision(ScheduleId id, long triggerEventId, string signalName, long signalEventId=0) : base(false)
         {
             _id = id;
             _triggerEventId = triggerEventId;
             _signalName = signalName;
+            _signalEventId = signalEventId;
         }
 
         internal override Decision SwfDecision()
@@ -26,7 +27,8 @@ namespace Guflow.Decider
             {
                 ScheduleId = _id,
                 TriggerEventId = _triggerEventId,
-                SignalName = _signalName
+                SignalName = _signalName,
+                SignalEventId = _signalEventId
             };
             return new Decision
             {
@@ -44,6 +46,7 @@ namespace Guflow.Decider
             return obj is WorkflowItemSignalledDecision decision &&
                    EqualityComparer<ScheduleId>.Default.Equals(_id, decision._id) &&
                    _triggerEventId == decision._triggerEventId &&
+                   _signalEventId == decision._signalEventId &&
                    string.Equals(_signalName, decision._signalName, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -52,6 +55,7 @@ namespace Guflow.Decider
             var hashCode = -2131934865;
             hashCode = hashCode * -1521134295 + EqualityComparer<ScheduleId>.Default.GetHashCode(_id);
             hashCode = hashCode * -1521134295 + _triggerEventId.GetHashCode();
+            hashCode = hashCode * -1521134295 + _signalEventId.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_signalName.ToLower());
             return hashCode;
         }
@@ -59,7 +63,7 @@ namespace Guflow.Decider
         public override string ToString()
         {
             return
-                $"{GetType().Name} with ScheduleId {_id}, TriggerEventId {_triggerEventId} and SignalName  {_signalName}";
+                $"{GetType().Name} with ScheduleId {_id}, TriggerEventId {_triggerEventId} and SignalName  {_signalName} SignalEventId {_signalEventId}";
         }
     }
 }
