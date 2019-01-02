@@ -15,12 +15,11 @@ namespace Guflow.Tests.Decider
         {
             var id = Identity.Lambda("a").ScheduleId();
             var id1 = Identity.Lambda("a1").ScheduleId();
+            Assert.IsTrue(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "s1")));
             Assert.IsTrue(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "s")));
-            Assert.IsTrue(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "S")));
 
             Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id1, 1, "S")));
-            Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id1, 2, "S")));
-            Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "S1")));
+            Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 2, "S")));
         }
 
         [Test]

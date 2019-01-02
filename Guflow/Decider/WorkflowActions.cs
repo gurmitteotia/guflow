@@ -16,11 +16,11 @@ namespace Guflow.Decider
             return decisions.CompatibleDecisions(workflow).Where(d => d != WorkflowDecision.Empty).ToArray(); ;
         }
 
-        public IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents()
+        public IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents(Workflow workflow)
         {
-            foreach (var action in _actions.OfType<WaitForSignalsWorkflowAction>())
+            foreach (var decision in CompatibleDecisions(workflow).OfType<WaitForSignalsDecision>())
             {
-                var @event = action.WaitForSignalsEvent();
+                var @event = decision.WaitForSignalsEvent();
                 if(!_signalEvents.Contains(@event))
                     _signalEvents.Add(@event);
             }

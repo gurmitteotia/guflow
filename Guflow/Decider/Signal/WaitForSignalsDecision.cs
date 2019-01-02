@@ -1,60 +1,71 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
-using System;
 using Amazon.SimpleWorkflow.Model;
 using System.Collections.Generic;
+using System.Linq;
 using Amazon.SimpleWorkflow;
 
 namespace Guflow.Decider
 {
     internal class WaitForSignalsDecision: WorkflowDecision
     {
-        private readonly ScheduleId _id;
-        private readonly long _eventId;
-        private readonly string _signalName;
-
+     
+        private readonly WaitForSignalScheduleData _data;
         public WaitForSignalsDecision(ScheduleId id, long eventId, string signalName) : base(false)
         {
-            _id = id;
-            _eventId = eventId;
-            _signalName = signalName;
+            _data = new WaitForSignalScheduleData()
+            {
+                ScheduleId = id,
+                TriggerEventId = eventId,
+                SignalNames = new[] { signalName },
+                WaitType = SignalWaitType.Any,
+                NextAction = SignalNextAction.Continue
+            };
         }
 
         internal override Decision SwfDecision()
         {
-            var details = new WaitForSignalScheduleData()
-            {
-                ScheduleId = _id,
-                TriggerEventId = _eventId,
-                SignalNames = new[] {_signalName},
-                WaitType = SignalWaitType.Any,
-                NextAction = SignalNextAction.Continue
-            };
             return new Decision()
             {
                 DecisionType = DecisionType.RecordMarker,
                 RecordMarkerDecisionAttributes = new RecordMarkerDecisionAttributes()
                 {
                     MarkerName = InternalMarkerNames.WorkflowItemWaitForSignals,
-                    Details = details.ToJson()
+                    Details = _data.ToJson()
                 }
             };
+        }
+
+        internal WaitForSignalsEvent WaitForSignalsEvent()
+        {
+            var historyEvent = SimulatedHistoryEvent();
+            return new WaitForSignalsEvent(historyEvent, Enumerable.Empty<HistoryEvent>());
+        }
+
+        private HistoryEvent SimulatedHistoryEvent()
+        {
+            var historyEvent = new HistoryEvent();
+            historyEvent.EventId = long.MaxValue - _data.TriggerEventId;
+            historyEvent.EventType = EventType.MarkerRecorded;
+            var attr = new MarkerRecordedEventAttributes();
+            attr.MarkerName = InternalMarkerNames.WorkflowItemWaitForSignals;
+            attr.Details = _data.ToJson();
+            historyEvent.MarkerRecordedEventAttributes = attr;
+            return historyEvent;
         }
 
         public override bool Equals(object obj)
         {
             return obj is WaitForSignalsDecision decision &&
-                   EqualityComparer<ScheduleId>.Default.Equals(_id, decision._id) &&
-                   _eventId == decision._eventId &&
-                   string.Equals(_signalName, decision._signalName, StringComparison.OrdinalIgnoreCase);
+                   string.Equals(_data.ScheduleId, decision._data.ScheduleId) &&
+                   _data.TriggerEventId == decision._data.TriggerEventId;
         }
 
         public override int GetHashCode()
         {
             var hashCode = -1394181897;
-            hashCode = hashCode * -1521134295 + EqualityComparer<ScheduleId>.Default.GetHashCode(_id);
-            hashCode = hashCode * -1521134295 + _eventId.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_signalName.ToLower());
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_data.ScheduleId);
+            hashCode = hashCode * -1521134295 + _data.TriggerEventId.GetHashCode();
             return hashCode;
         }
     }

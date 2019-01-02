@@ -318,12 +318,41 @@ namespace Guflow.Tests.Decider
             Assert.That(decision, Is.Empty);
         }
 
+        [Test]
+        public void Continue_the_execution_when_signal_received_along_with_composite_wait_for_signal_action()
+        {
+            var g1 = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
+            _builder.AddNewEvents(g1);
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+
+            var workflow = new UserActivateWorkflowWithCompositeAction();
+            var decision = workflow.Decisions(_builder.Result());
+
+            Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
+            {
+                new WaitForSignalsDecision(_confirmEmailId, g1.First().EventId,"Confirmed"),
+                new RecordMarkerWorkflowDecision("Marker1", "details"),
+                new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(_confirmEmailId, g1.First().EventId, "Confirmed"),
+            }));
+        }
+
         private class UserActivateWorkflow : Workflow
         {
             public UserActivateWorkflow()
             {
                 ScheduleLambda("ConfirmEmail")
                     .OnCompletion(e => e.WaitForSignal("Confirmed"));
+                ScheduleLambda("ActivateUser").AfterLambda("ConfirmEmail");
+            }
+        }
+
+        private class UserActivateWorkflowWithCompositeAction : Workflow
+        {
+            public UserActivateWorkflowWithCompositeAction()
+            {
+                ScheduleLambda("ConfirmEmail")
+                    .OnCompletion(e => e.WaitForSignal("Confirmed") + RecordMarker("Marker1", "details"));
                 ScheduleLambda("ActivateUser").AfterLambda("ConfirmEmail");
             }
         }

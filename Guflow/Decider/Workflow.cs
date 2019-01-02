@@ -734,7 +734,7 @@ namespace Guflow.Decider
             {
                 IWorkflow workflow = this;
                 return workflow.WorkflowHistoryEvents.WaitForSignalsEvents()
-                    .Concat(_generatedActions.WaitForSignalsEvents());
+                    .Concat(_generatedActions.WaitForSignalsEvents(this));
             }
         }
         internal WorkflowAction StartupAction => _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems));
