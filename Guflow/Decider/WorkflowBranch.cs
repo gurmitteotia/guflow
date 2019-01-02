@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
+    //TODO: Refactor this class to make methods semnatically sensible.
     internal class WorkflowBranch
     {
         private readonly List<WorkflowItem> _workflowItems = new List<WorkflowItem>();

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Guflow.Decider
 {
@@ -38,7 +39,20 @@ namespace Guflow.Decider
         /// <returns></returns>
         public WaitForSignalsWorkflowAction WaitForSignal(string signalName)
         {
-            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, signalName);
+            Ensure.NotNullAndEmpty(signalName,nameof(signalName));
+            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.Any, signalName);
+        }
+
+        /// <summary>
+        /// Wait for any signal indefinitly
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <param name="signalNames"></param>
+        /// <returns></returns>
+        public WaitForSignalsWorkflowAction WaitForAnySignal(string signalName, params string[] signalNames)
+        {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.Any, new []{signalName}.Concat(signalNames).ToArray());
         }
     }
 }

@@ -46,13 +46,24 @@ namespace Guflow.Decider
             }
         }
 
+        public bool IsWaitingForSignal(string signalName) => WaitForSignalsEvent(signalName) != null;
+
         public WorkflowAction Resume(string signalName)
         {
-            var waitEvent = _workflow.WaitForSignalsEvents.FirstOrDefault(this, signalName);
-            if(waitEvent==null)
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            var waitEvent = WaitForSignalsEvent(signalName);
+            if (waitEvent == null)
                 throw new SignalResumeException($"Workflow item {Identity} is not waiting for signal {signalName}");
 
             return WorkflowAction.ContinueWorkflow(this) + WorkflowAction.Custom(waitEvent.RecordSignal(signalName));
+        }
+
+        public bool IsSignalled(string signalName)
+        {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            var waitEvent = _workflow.WaitForSignalsEvents.Reverse().FirstOrDefault(this);
+            if (waitEvent == null) return false;
+            return waitEvent.HasReceivedSignal(signalName);
         }
 
         public abstract WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false);
@@ -83,12 +94,12 @@ namespace Guflow.Decider
         public abstract IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout);
         public abstract IEnumerable<WorkflowDecision> CancelDecisions();
         public abstract bool Has(ScheduleId id);
-        
+
         public bool Has(Identity identity)
         {
             return Identity.Equals(identity);
         }
-      
+
         public override bool Equals(object other)
         {
             var otherItem = other as WorkflowItem;
@@ -108,7 +119,7 @@ namespace Guflow.Decider
 
         public bool AreAllParentBranchesInactive(WorkflowItem exceptBranchOf)
         {
-            var parentBranches = ParentBranches().Where(p=>!p.Has(exceptBranchOf)).ToArray();
+            var parentBranches = ParentBranches().Where(p => !p.Has(exceptBranchOf)).ToArray();
             foreach (var parentBranch in parentBranches)
             {
                 if (parentBranch.IsActive(parentBranches))
@@ -159,6 +170,12 @@ namespace Guflow.Decider
         public WorkflowAction DefaultActionOnLastEvent()
         {
             return LastEvent().DefaultAction(_workflow);
+        }
+
+        private WaitForSignalsEvent WaitForSignalsEvent(string signalName)
+        {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            return _workflow.WaitForSignalsEvents.FirstOrDefault(this, signalName);
         }
     }
 }

@@ -61,6 +61,20 @@ namespace Guflow.Decider
         /// <param name="signalName"></param>
         /// <returns></returns>
         WorkflowAction Resume(string signalName);
+
+        /// <summary>
+        /// Returns true if this workflow item has received the given signal.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        bool IsSignalled(string signalName);
+
+        /// <summary>
+        /// Returns true if this workflow item is waiting for given signal.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        bool IsWaitingForSignal(string signalName);
     }
 
     internal interface ITimer

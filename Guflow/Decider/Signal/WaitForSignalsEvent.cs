@@ -64,5 +64,10 @@ namespace Guflow.Decider
             _resumedSignals.Add(signalName);
             return new WorkflowItemSignalledDecision(ScheduleId.Raw(_data.ScheduleId), _data.TriggerEventId, signalName);
         }
+
+        public bool HasReceivedSignal(string signalName)
+        {
+            return _resumedSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
+        }
     }
 }

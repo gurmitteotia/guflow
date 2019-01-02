@@ -28,6 +28,16 @@ namespace Guflow.Decider
             return null;
         }
 
+        public static WaitForSignalsEvent FirstOrDefault(this IEnumerable<WaitForSignalsEvent> events, WorkflowItem workflowItem)
+        {
+            foreach (var waitEvent in events)
+            {
+                if (waitEvent.IsFor(workflowItem))
+                    return waitEvent;
+            }
+
+            return null;
+        }
         private static bool IsFor(this WaitForSignalsEvent @event, WorkflowItem item, string signalName)
         {
             return @event.IsWaitingForSignal(signalName) && @event.IsFor(item);

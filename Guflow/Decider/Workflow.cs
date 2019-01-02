@@ -693,11 +693,20 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="signalName"></param>
         /// <returns></returns>
-        protected IWorkflowItem WaitingItem(string signalName)
+        protected IWorkflowItem WaitingItem(string signalName)=> WaitingItems(signalName).FirstOrDefault();
+
+        /// <summary>
+        /// Returns all the workflow items waiting for given signal. Mutlitple workflow items in parallel branches can wait for same signal.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        protected IEnumerable<IWorkflowItem> WaitingItems(string signalName)
         {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
             IWorkflow workflow = this;
-            return workflow.WaitForSignalsEvents.WaitingItems(_allWorkflowItems.AllItems.ToArray(), signalName).FirstOrDefault();
+            return workflow.WaitForSignalsEvents.WaitingItems(_allWorkflowItems.AllItems.ToArray(), signalName);
         }
+
         IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
         {
             return _allWorkflowItems.Childeren(workflowItem);
@@ -734,7 +743,7 @@ namespace Guflow.Decider
             {
                 IWorkflow workflow = this;
                 return workflow.WorkflowHistoryEvents.WaitForSignalsEvents()
-                    .Concat(_generatedActions.WaitForSignalsEvents(this));
+                    .Concat(_generatedActions.WaitForSignalsEvents());
             }
         }
         internal WorkflowAction StartupAction => _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems));

@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
-    public class WaitForSignalTests
+    public class WaitForSignalActionTests
     {
         private HistoryEventsBuilder _builder;
         private EventGraphBuilder _graphBuilder;
@@ -30,7 +30,10 @@ namespace Guflow.Tests.Decider
             var workflow = new UserActivateWorkflow();
             var decision = workflow.Decisions(_builder.Result());
 
-            Assert.That(decision, Is.EqualTo(new[] { new WaitForSignalsDecision(_confirmEmailId, graph.First().EventId, "Confirmed") }));
+            Assert.That(decision, Is.EqualTo(new[]
+            {
+                new WaitForSignalsDecision(_confirmEmailId, graph.First().EventId, "Confirmed")
+            }));
         }
 
         [Test]
@@ -337,6 +340,52 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+        [Test]
+        public void Can_resume_the_signal_using_custom_logic()
+        {
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
+            _builder.AddProcessedEvents(graph);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, graph.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+
+            var workflow = new UserActivateWorkflowWithCustomResume();
+            var decision = workflow.Decisions(_builder.Result());
+
+            Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed"),
+            }));
+        }
+
+        [Test]
+        public void Resume_all_waiting_items_in_parallel_branches_using_one_signal()
+        {
+            var l1 = Identity.Lambda("LambdaA1").ScheduleId();
+            var l2 = Identity.Lambda("LambdaB1").ScheduleId();
+            var w1 = _graphBuilder.LambdaCompletedEventGraph(l1, "input", "result");
+            _builder.AddNewEvents(w1);
+            var w2 = _graphBuilder.LambdaCompletedEventGraph(l2, "input", "result");
+            _builder.AddNewEvents(w2);
+
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+
+            var workflow = new ResumeMultipleWokflowItemsUsingSameSignal();
+            var decision = workflow.Decisions(_builder.Result());
+
+            Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
+            {
+                new WaitForSignalsDecision(l1, w1.First().EventId, "Confirmed"),
+                new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
+
+                new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed"),
+
+                new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed"),
+            }));
+        }
+
         private class UserActivateWorkflow : Workflow
         {
             public UserActivateWorkflow()
@@ -382,6 +431,23 @@ namespace Guflow.Tests.Decider
             [SignalEvent]
             public WorkflowAction Confirmed(string signalName) => Lambda("ConfirmEmail").Resume(signalName);
         }
+        private class UserActivateWorkflowWithCustomResume : Workflow
+        {
+            public UserActivateWorkflowWithCustomResume()
+            {
+                ScheduleLambda("ConfirmEmail")
+                    .OnCompletion(e => e.WaitForSignal("Confirmed"));
+                ScheduleLambda("ActivateUser").AfterLambda("ConfirmEmail");
+            }
+
+            [SignalEvent]
+            public WorkflowAction Confirmed(string signalName)
+            {
+                if (Lambda("ConfirmEmail").IsWaitingForSignal(signalName))
+                    return Lambda("ConfirmEmail").Resume(signalName);
+                return Ignore;
+            }
+        }
 
         private class MultipleWorkflowItemsWaitingForSameSignal : Workflow
         {
@@ -395,6 +461,32 @@ namespace Guflow.Tests.Decider
                     .OnCompletion(e => e.WaitForSignal("Confirmed"));
                 ScheduleLambda("LambdaB2").AfterLambda("LambdaB1");
 
+            }
+        }
+
+        private class ResumeMultipleWokflowItemsUsingSameSignal : Workflow
+        {
+            public ResumeMultipleWokflowItemsUsingSameSignal()
+            {
+                ScheduleLambda("LambdaA1")
+                    .OnCompletion(e => e.WaitForSignal("Confirmed"));
+                ScheduleLambda("LambdaA2").AfterLambda("LambdaA1");
+
+                ScheduleLambda("LambdaB1")
+                    .OnCompletion(e => e.WaitForSignal("Confirmed"));
+                ScheduleLambda("LambdaB2").AfterLambda("LambdaB1");
+            }
+
+            [SignalEvent]
+            public WorkflowAction Confirmed(string signalName)
+            {
+                WorkflowAction result = Ignore;
+                foreach (var item in WaitingItems(signalName))
+                {
+                    result += item.Resume(signalName);
+                }
+
+                return result;
             }
         }
     }

@@ -11,13 +11,13 @@ namespace Guflow.Decider
     {
      
         private readonly WaitForSignalScheduleData _data;
-        public WaitForSignalsDecision(ScheduleId id, long eventId, string signalName) : base(false)
+        public WaitForSignalsDecision(ScheduleId id, long eventId, params string[] signalNames) : base(false)
         {
             _data = new WaitForSignalScheduleData()
             {
                 ScheduleId = id,
+                SignalNames = signalNames,
                 TriggerEventId = eventId,
-                SignalNames = new[] { signalName },
                 WaitType = SignalWaitType.Any,
                 NextAction = SignalNextAction.Continue
             };
@@ -34,24 +34,6 @@ namespace Guflow.Decider
                     Details = _data.ToJson()
                 }
             };
-        }
-
-        internal WaitForSignalsEvent WaitForSignalsEvent()
-        {
-            var historyEvent = SimulatedHistoryEvent();
-            return new WaitForSignalsEvent(historyEvent, Enumerable.Empty<HistoryEvent>());
-        }
-
-        private HistoryEvent SimulatedHistoryEvent()
-        {
-            var historyEvent = new HistoryEvent();
-            historyEvent.EventId = long.MaxValue - _data.TriggerEventId;
-            historyEvent.EventType = EventType.MarkerRecorded;
-            var attr = new MarkerRecordedEventAttributes();
-            attr.MarkerName = InternalMarkerNames.WorkflowItemWaitForSignals;
-            attr.Details = _data.ToJson();
-            historyEvent.MarkerRecordedEventAttributes = attr;
-            return historyEvent;
         }
 
         public override bool Equals(object obj)

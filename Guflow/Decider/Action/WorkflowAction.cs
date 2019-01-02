@@ -33,6 +33,8 @@ namespace Guflow.Decider
         {
              return Decisions().Any(d => workflowItems.Any(d.IsFor));
         }
+
+        internal virtual IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent() => Enumerable.Empty<WaitForSignalsEvent>();
         
         /// <summary>
         /// Combine two workflow actions togather. Useful if multiple workflow actions needs to be returned in response of an event.

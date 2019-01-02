@@ -24,5 +24,10 @@ namespace Guflow.Decider
         {
             return _left.Decisions().Concat(_right.Decisions());
         }
+
+        internal override IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent()
+        {
+            return _left.WaitForSignalsEvent().Concat(_right.WaitForSignalsEvent());
+        }
     }
 }
