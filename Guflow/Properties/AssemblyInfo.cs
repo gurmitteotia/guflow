@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Guflow")]
-[assembly: AssemblyCopyright("Gurmit Singh Teotia, Copyright ©  2018")]
+[assembly: AssemblyCopyright("Gurmit Singh Teotia, Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -11,14 +11,16 @@ namespace Guflow.Tests.Decider
     {
         private WorkflowSignaledEvent _workflowSignaledEvent;
 
-        private EventGraphBuilder _builder;
-
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
-            var signaledEvent = _builder.WorkflowSignaledEvent("name", "input", "externalWorkflowRunid", "externalWorkflowRunid");
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
+            var signaledEvent = _graphBuilder.WorkflowSignaledEvent("name", "input", "externalWorkflowRunid", "externalWorkflowRunid");
             _workflowSignaledEvent = new WorkflowSignaledEvent(signaledEvent);
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
         }
         [Test]
         public void Populates_properties_from_signaled_event()
@@ -33,7 +35,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_populate_external_workflow_properties_when_not_signed_by_external_workflow()
         {
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("name", "input"));
             Assert.That(workflowSignaledEvent.SignalName, Is.EqualTo("name"));
             Assert.That(workflowSignaledEvent.Input, Is.EqualTo("input"));
             Assert.That(workflowSignaledEvent.ExternalWorkflowRunid, Is.Null);
@@ -43,17 +45,15 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_returns_workflow_ignore_action()
         {
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input"));
-
-            var workflowAction = workflowSignaledEvent.Interpret(new EmptyWorkflow());
-
-            Assert.That(workflowAction.Decisions(),Is.Empty);
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("name", "input"));
+            var decisions = new EmptyWorkflow().Decisions(_builder.Result());
+            Assert.That(decisions, Is.Empty);
         }
         [Test]
         public void Can_return_custom_workflow_action_using_generic_handler()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("name", "input"));
 
             var workflowAction = workflowSignaledEvent.Interpret(new WorkflowWithCustomActionOnSignal(expectedAction));
 
@@ -64,7 +64,7 @@ namespace Guflow.Tests.Decider
         public void Signal_can_be_handled_using_matching_signal_method()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("signal1", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("signal1", "input"));
 
             var workflowAction = workflowSignaledEvent.Interpret(new WorkflowWithSignalAttribute(expectedAction));
 
@@ -75,7 +75,7 @@ namespace Guflow.Tests.Decider
         public void Signal_can_be_handled_by_signal_method_by_giving_a_signal_name_property()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("signal1", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("signal1", "input"));
 
             var workflowAction = workflowSignaledEvent.Interpret(new WorkflowWithSignalName(expectedAction));
 
@@ -86,7 +86,7 @@ namespace Guflow.Tests.Decider
         public void Signal_method_with_a_signal_name_takes_priority_over_matching_signal_method()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("signal1", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("signal1", "input"));
 
             var workflowAction = workflowSignaledEvent.Interpret(new WorkflowWithMatchingSignalMethodAndName(expectedAction));
 
@@ -97,7 +97,7 @@ namespace Guflow.Tests.Decider
         public void Fall_back_to_generic_workflow_event_handler_when_signal_name_does_not_match()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("signal1", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("signal1", "input"));
 
             var workflowAction = workflowSignaledEvent.Interpret(new WorkflowWithNotMatchingSignalMethod(expectedAction));
 
@@ -108,7 +108,7 @@ namespace Guflow.Tests.Decider
         public void Throws_exception_when_two_signal_method_exists_with_same_name()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("signal1", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("signal1", "input"));
 
             Assert.Throws<AmbiguousWorkflowMethodException>(()=> workflowSignaledEvent.Interpret(new WorkflowWithTwoSignalMethodsForSameSignal(expectedAction)));
         }
@@ -116,7 +116,7 @@ namespace Guflow.Tests.Decider
         public void Throws_exception_when_two_signal_method_exists_for_same_signal_name_property()
         {
             var expectedAction = new Mock<WorkflowAction>().Object;
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("signal1", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("signal1", "input"));
 
             Assert.Throws<AmbiguousWorkflowMethodException>(() => workflowSignaledEvent.Interpret(new WorkflowWithTwoSignalMethodsForSameSignalName(expectedAction)));
         }
@@ -124,7 +124,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Workflow_can_reply_to_signal_event()
         {
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input","runid","wid"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("name", "input","runid","wid"));
 
             var decisions = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput")).Decisions();
 
@@ -134,7 +134,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Reply_to_signal_event_not_sent_by_a_workflow_generate_exception()
         {
-            var workflowSignaledEvent = new WorkflowSignaledEvent(_builder.WorkflowSignaledEvent("name", "input"));
+            var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("name", "input"));
 
             Assert.Throws<SignalException>(()=> workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal", "newInput")));
         }
