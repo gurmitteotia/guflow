@@ -280,7 +280,7 @@ namespace Guflow.Tests.Decider
         public void Throws_exception_when_accessing_the_history_events_afer_execution()
         {
             _workflowEvents.Setup(w => w.NewEvents()).Returns(Enumerable.Empty<WorkflowEvent>());
-            var workflow  = new WorkflowToAccesHistoryEvents();
+            var workflow = new WorkflowToAccesHistoryEvents();
             workflow.Decisions(_workflowEvents.Object);
             Assert.Throws<InvalidOperationException>(() => workflow.AccessEvents());
         }
@@ -292,6 +292,19 @@ namespace Guflow.Tests.Decider
 
             Assert.That(workflow.AllLambdaItems.Count(), Is.EqualTo(2));
             Assert.That(workflow.LambdaItem("Lambda2").Name, Is.EqualTo("Lambda2"));
+        }
+
+        [Test]
+        public void Read_workflow_id_and_runid()
+        {
+            _builder.AddNewEvents(_graphBuilder.WorkflowStartedEvent());
+            _builder.AddWorkflowRunId("runid");
+            _builder.AddWorkflowId("wid");
+            var w = new WorkflowToReadIds();
+            w.Decisions(_builder.Result());
+
+            Assert.That(w.WorkflowId, Is.EqualTo("wid"));
+            Assert.That(w.WorkflowRunId, Is.EqualTo("runid"));
         }
 
 
@@ -307,8 +320,8 @@ namespace Guflow.Tests.Decider
                 new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2)),
                 new CancelActivityDecision(Identity.New("newid", "1.0").ScheduleId()),
                 new CancelTimerDecision(Identity.Timer("first").ScheduleId()),
-                new ScheduleLambdaDecision(Identity.Lambda("name").ScheduleId(),"input" ), 
-                new ScheduleChildWorkflowDecision(Identity.New("w","v").ScheduleId(), "input"), 
+                new ScheduleLambdaDecision(Identity.Lambda("name").ScheduleId(),"input" ),
+                new ScheduleChildWorkflowDecision(Identity.New("w","v").ScheduleId(), "input"),
             };
         }
 
@@ -472,6 +485,20 @@ namespace Guflow.Tests.Decider
         private class WorkflowToAccesHistoryEvents : Workflow
         {
             public bool AccessEvents() => HasActiveEvent;
+        }
+
+        private class WorkflowToReadIds : Workflow
+        {
+            [WorkflowEvent(EventName.WorkflowStarted)]
+            public WorkflowAction Started()
+            {
+                WorkflowId = Id;
+                WorkflowRunId = RunId;
+                return Ignore;
+            }
+
+            public string WorkflowId;
+            public string WorkflowRunId;
         }
     }
 

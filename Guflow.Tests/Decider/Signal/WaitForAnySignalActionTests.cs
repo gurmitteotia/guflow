@@ -103,7 +103,6 @@ namespace Guflow.Tests.Decider
             }));
         }
 
-
         [Test]
         public void Second_signal_is_received_signal_and_can_be_used_in_scheduling_the_specific_children()
         {
@@ -143,6 +142,27 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+        [Test]
+        public void Ignore_null_and_empty_signal_names()
+        {
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
+            _builder.AddNewEvents(graph);
+            var workflow = new ExpenseWorkflowWithNullEndEmptySignalNames();
+            var decisions = workflow.Decisions(_builder.Result());
+
+            var signalData = new WaitForSignalData
+            {
+                ScheduleId = _sendForApprovalId,
+                TriggerEventId = graph.First().EventId
+            };
+            Assert.That(decisions, Is.EqualTo(new[] { new WaitForSignalsDecision(signalData) }));
+            var attr = decisions.First().SwfDecision().RecordMarkerDecisionAttributes;
+            var data = attr.Details.AsDynamic();
+            Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(new[] { "Approved", "Rejected" }));
+            Assert.That((SignalWaitType)data.WaitType, Is.EqualTo(SignalWaitType.Any));
+            Assert.That((SignalNextAction)data.NextAction, Is.EqualTo(SignalNextAction.Continue));
+        }
+
         private class ExpenseWorkflowToSendEmail : Workflow
         {
             public ExpenseWorkflowToSendEmail()
@@ -164,6 +184,16 @@ namespace Guflow.Tests.Decider
 
                 ScheduleLambda("SendRejectEmail").AfterLambda("SendForApproval")
                     .When(l => l.ParentLambda().IsSignalled("Rejected"));
+            }
+        }
+
+        private class ExpenseWorkflowWithNullEndEmptySignalNames : Workflow
+        {
+            public ExpenseWorkflowWithNullEndEmptySignalNames()
+            {
+                ScheduleLambda("SendForApproval").OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected", null, ""));
+
+                ScheduleLambda("SendEmail").AfterLambda("SendForApproval");
             }
         }
     }

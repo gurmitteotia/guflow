@@ -67,6 +67,7 @@ namespace Guflow.Decider
             return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.All, ValidEventNames(signalName, signalNames));
         }
 
-        private static string[] ValidEventNames(string name,params string[] names) => new[]{ name }.Concat(names).ToArray();
+        private static string[] ValidEventNames(string name,params string[] names)
+            => new[]{ name }.Concat(names).Where(n=>!string.IsNullOrEmpty(n)).ToArray();
     }
 }

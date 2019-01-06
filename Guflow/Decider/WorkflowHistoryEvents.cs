@@ -32,6 +32,7 @@ namespace Guflow.Decider
             _previousStartedEventId = decisionTask.PreviousStartedEventId;
             _newStartedEventId = decisionTask.StartedEventId;
             WorkflowRunId = decisionTask.WorkflowExecution.RunId;
+            WorkflowId = decisionTask.WorkflowExecution.WorkflowId;
         }
 
         //TODO: Get rid of this constructor.
@@ -99,6 +100,7 @@ namespace Guflow.Decider
         }
 
         public string WorkflowRunId { get; }
+        public string WorkflowId { get; }
 
         public IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem)
         {

@@ -650,6 +650,17 @@ namespace Guflow.Decider
         protected long LatestEventId
             => ((IWorkflow) this).WorkflowHistoryEvents.LatestEventId;
         /// <summary>
+        /// Returns the workflow id.
+        /// </summary>
+        protected string Id
+        => ((IWorkflow)this).WorkflowHistoryEvents.WorkflowId;
+        /// <summary>
+        /// Return the workflow run id.
+        /// </summary>
+        protected string RunId
+            => ((IWorkflow)this).WorkflowHistoryEvents.WorkflowRunId;
+
+        /// <summary>
         /// Supports sending signal to other workflows.
         /// </summary>
         /// <param name="signalName"></param>

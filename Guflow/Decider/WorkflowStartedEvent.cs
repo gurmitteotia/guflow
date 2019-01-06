@@ -5,6 +5,9 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Raised when workflow is started.
+    /// </summary>
     public class WorkflowStartedEvent : WorkflowEvent
     {
         private readonly WorkflowExecutionStartedEventAttributes _workflowStartedAttributes;
@@ -15,25 +18,40 @@ namespace Guflow.Decider
             _workflowStartedAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
         }
 
-        public string ChildPolicy
-        {
-            get
-            {
-                return _workflowStartedAttributes.ChildPolicy == null ? string.Empty : _workflowStartedAttributes.ChildPolicy.Value;
-            }
-        }
+        /// <summary>
+        /// Returns the child policy.  Child policy determine the fate of child workflow when parent workflow is terminated. 
+        /// </summary>
+        public string ChildPolicy => _workflowStartedAttributes.ChildPolicy == null ? string.Empty : _workflowStartedAttributes.ChildPolicy.Value;
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
         {
             return defaultActions.StartWorkflow();
         }
+        /// <summary>
+        /// Run ID of the previous workflow, if this workflow was started as result of <see cref="RestartWorkflowAction"/>
+        /// </summary>
+        public string ContinuedExecutionRunId => _workflowStartedAttributes.ContinuedExecutionRunId;
+        /// <summary>
+        /// Returns the maximum duration this workflow should complete its execution.
+        /// </summary>
+        public TimeSpan ExecutionStartToCloseTimeout => TimeSpan.FromSeconds(Convert.ToInt32(_workflowStartedAttributes.ExecutionStartToCloseTimeout));
+        /// <summary>
+        /// Returns the workflow input in raw form
+        /// </summary>
+        public string Input => _workflowStartedAttributes.Input;
+        /// <summary>
+        /// Returns the lambda role this workflow is assigned to. Lambda role is needed by workflow to invoke the lambda functions.
+        /// </summary>
+        public string LambdaRole => _workflowStartedAttributes.LambdaRole;
 
-        public string ContinuedExecutionRunId { get { return _workflowStartedAttributes.ContinuedExecutionRunId; } }
-        public TimeSpan ExecutionStartToCloseTimeout { get { return TimeSpan.FromSeconds(Convert.ToInt32(_workflowStartedAttributes.ExecutionStartToCloseTimeout)); } }
-        public string Input { get { return _workflowStartedAttributes.Input; } }
-        public string LambdaRole { get { return _workflowStartedAttributes.LambdaRole; } }
-        public long ParentInitiatedEventId { get { return _workflowStartedAttributes.ParentInitiatedEventId; } }
+        /// <summary>
+        /// 
+        /// </summary>
+        public long ParentInitiatedEventId => _workflowStartedAttributes.ParentInitiatedEventId;
 
+        /// <summary>
+        /// Returns parent workflow run id if this workflow was started as child workflow otherwise empty string is returned.
+        /// </summary>
         public string ParentWorkflowRunId
         {
             get
@@ -43,6 +61,9 @@ namespace Guflow.Decider
                 return string.Empty;
             }
         }
+        /// <summary>
+        /// Returns parent workflow id if this workflow was started as child workflow otherwise empty string is returned.
+        /// </summary>
         public string ParentWorkflowId
         {
             get
@@ -52,15 +73,17 @@ namespace Guflow.Decider
                 return string.Empty;
             }
         }
-        public IEnumerable<string> TagList
-        {
-            get { return _workflowStartedAttributes.TagList; }
-        }
-        public string TaskList
-        {
-            get { return _workflowStartedAttributes.TaskList.Name; }
-        }
-
+        /// <summary>
+        /// Returns the tags assigned to this workflow.
+        /// </summary>
+        public IEnumerable<string> TagList => _workflowStartedAttributes.TagList;
+        /// <summary>
+        /// Returns the task list this workflow is started on.
+        /// </summary>
+        public string TaskList => _workflowStartedAttributes.TaskList.Name;
+        /// <summary>
+        /// Returns the priority this workflow is started with in Amazon SWF.
+        /// </summary>
         public int? TaskPriority
         {
             get
@@ -72,10 +95,10 @@ namespace Guflow.Decider
             }
         }
 
-        public TimeSpan TaskStartToCloseTimeout
-        {
-            get { return TimeSpan.FromSeconds(Convert.ToInt32(_workflowStartedAttributes.TaskStartToCloseTimeout)); }
-        }
+        /// <summary>
+        /// Returns the maximum duration of decision tasks for this workflow. In other words workflow should return its decisions to Amazon SWF during this timeout.
+        /// </summary>
+        public TimeSpan TaskStartToCloseTimeout => TimeSpan.FromSeconds(Convert.ToInt32(_workflowStartedAttributes.TaskStartToCloseTimeout));
 
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
