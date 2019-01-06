@@ -57,7 +57,8 @@ namespace Guflow.Decider
             var recordedAction = WorkflowAction.Custom(waitEvent.RecordSignal(signalName, SignalEventId()));
             if (waitEvent.IsExpectingSignals)
                 return recordedAction;
-            return WorkflowAction.ContinueWorkflow(this) + recordedAction;
+            
+            return waitEvent.NextAction(this) + recordedAction;
         }
 
         public bool IsSignalled(string signalName)

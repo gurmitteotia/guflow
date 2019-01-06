@@ -54,5 +54,11 @@ namespace Guflow.Decider
         {
             return _resumedSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
         }
+
+        public WorkflowAction NextAction(WorkflowItem workflowItem)
+        {
+            if (_data.NextAction == SignalNextAction.Continue) return WorkflowAction.ContinueWorkflow(workflowItem);
+            return WorkflowAction.Schedule(workflowItem);
+        }
     }
 }

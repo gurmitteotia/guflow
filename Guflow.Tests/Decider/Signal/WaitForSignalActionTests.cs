@@ -406,6 +406,45 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+        [Test]
+        public void Can_wait_to_reschedule_on_signal()
+        {
+            var id = Identity.Lambda("ReserveOrder").ScheduleId();
+            var graph = _graphBuilder.LambdaFailedEventGraph(id, "input", "r", "d");
+            _builder.AddNewEvents(graph);
+
+            var workflow = new OrderWorkflow();
+            var decision = workflow.Decisions(_builder.Result());
+
+            Assert.That(decision, Is.EquivalentTo(new []
+            {
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = id, TriggerEventId = graph.First().EventId}), 
+            }));
+            var swfData = decision.First().SwfDecision().RecordMarkerDecisionAttributes.Details.AsDynamic();
+            Assert.That((SignalNextAction)swfData.NextAction, Is.EqualTo(SignalNextAction.Reschedule));
+        }
+
+
+        [Test]
+        public void Reschedule_the_waiting_item_on_signal()
+        {
+            var id = Identity.Lambda("ReserveOrder").ScheduleId();
+            var graph = _graphBuilder.LambdaCompletedEventGraph(id, "input", "result");
+            _builder.AddProcessedEvents(graph);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(id, graph.First().EventId, new[] { "ItemsArrived" }, SignalWaitType.Any,SignalNextAction.Reschedule));
+            var s = _graphBuilder.WorkflowSignaledEvent("ItemsArrived", "");
+            _builder.AddNewEvents(s);
+
+            var workflow = new OrderWorkflow();
+            var decision = workflow.Decisions(_builder.Result());
+
+            Assert.That(decision, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(id, "input"),
+                new WorkflowItemSignalledDecision(id, graph.First().EventId, "ItemsArrived", s.EventId),
+            }));
+        }
+
         private class UserActivateWorkflow : Workflow
         {
             public UserActivateWorkflow()
@@ -507,6 +546,16 @@ namespace Guflow.Tests.Decider
                 }
 
                 return result;
+            }
+        }
+
+        private class OrderWorkflow : Workflow
+        {
+            public OrderWorkflow()
+            {
+                ScheduleLambda("ReserveOrder")
+                    .OnFailure(e => e.WaitForSignal("ItemsArrived").ToReschedule());
+                ScheduleLambda("ShipOrder").AfterLambda("ReserveOrder");
             }
         }
     }

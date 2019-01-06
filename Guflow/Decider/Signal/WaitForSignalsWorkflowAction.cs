@@ -49,5 +49,14 @@ namespace Guflow.Decider
             return historyEvent;
         }
 
+        /// <summary>
+        /// Reschedule the waiting item on receiving the necessary signals.
+        /// </summary>
+        /// <returns></returns>
+        public WaitForSignalsWorkflowAction ToReschedule()
+        {
+            _data.NextAction = SignalNextAction.Reschedule;
+            return this;
+        }
     }
 }
