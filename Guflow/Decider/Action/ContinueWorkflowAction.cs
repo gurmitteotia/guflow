@@ -34,9 +34,6 @@ namespace Guflow.Decider
             return schedulableChildItems.SelectMany(f => f.ScheduleDecisions());
         }
 
-        internal override bool ReadyToScheduleChildren
-        {
-            get { return true; }
-        }
+        internal override bool ReadyToScheduleChildren => true;
     }
 }

@@ -620,6 +620,62 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+        [Test]
+        public void Does_not_schedule_joint_item_when_one_of_the_branch_remains_active_by_waiting_for_signals()
+        {
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            var bf = LambdaCompletedGraph(BookFlightLambda);
+            _eventsBuilder.AddNewEvents(bf);
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+
+            var decisions = new ActiveBranchBecauseOfWaitSignalAction().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[]
+            {
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = Identity.Lambda(BookFlightLambda).ScheduleId(), TriggerEventId = bf.First().EventId})
+            }));
+        }
+
+        [Test]
+        public void Does_not_schedule_joint_item_when_the_immediate_parent_of_other_branch_remains_active_by_waiting_for_signals()
+        {
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            var cs = LambdaCompletedGraph(ChooseSeatLambda);
+            _eventsBuilder.AddNewEvents(cs);
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+
+            var decisions = new ImmediateParentWaitForSignal().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[]
+            {
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = Identity.Lambda(ChooseSeatLambda).ScheduleId(), TriggerEventId = cs.First().EventId})
+            }));
+        }
+
+        [Test]
+        public void Schedule_joint_item_when_current_is_continued_by_signal_and_other_branch_is_inactive()
+        {
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _eventsBuilder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            var cs = LambdaCompletedGraph(ChooseSeatLambda);
+            _eventsBuilder.AddNewEvents(cs);
+            _eventsBuilder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            var s = _eventGraphBuilder.WorkflowSignaledEvent("SeatConfirmed","");
+            _eventsBuilder.AddNewEvents(s);
+
+            var decisions = new ImmediateParentWaitForSignal().Decisions(_eventsBuilder.Result());
+
+            var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
+            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = csId, TriggerEventId = cs.First().EventId}),
+                new WorkflowItemSignalledDecision(csId, cs.First().EventId,"SeatConfirmed", s.EventId),
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input")
+            }));
+        }
+
+
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
         {
             return _eventGraphBuilder.ActivityCompletedGraph(Identity.New(activityName, Version).ScheduleId(), "id", "result").ToArray();
@@ -1154,6 +1210,34 @@ namespace Guflow.Tests.Decider
                 ScheduleActivity(BookFlightActivity, Version);
                 ScheduleLambda(ChooseSeatLambda).AfterActivity(BookFlightActivity, Version)
                     .OnCompletion(_ => Jump.ToActivity(BookFlightActivity, Version));
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+            }
+        }
+
+        private class ActiveBranchBecauseOfWaitSignalAction : Workflow
+        {
+            public ActiveBranchBecauseOfWaitSignalAction()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed"));
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+            }
+        }
+
+        private class ImmediateParentWaitForSignal : Workflow
+        {
+            public ImmediateParentWaitForSignal()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("SeatConfirmed"));
 
                 ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
             }

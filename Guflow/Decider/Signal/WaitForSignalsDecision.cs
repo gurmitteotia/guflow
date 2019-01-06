@@ -2,23 +2,23 @@
 
 using Amazon.SimpleWorkflow.Model;
 using System.Collections.Generic;
-using System.Linq;
 using Amazon.SimpleWorkflow;
 
 namespace Guflow.Decider
 {
     internal class WaitForSignalsDecision: WorkflowDecision
     {
-     
         private readonly WaitForSignalData _data;
+        private readonly ScheduleId _id;
         public WaitForSignalsDecision(WaitForSignalData data) : base(false)
         {
             _data = data;
+            _id= ScheduleId.Raw(data.ScheduleId);
         }
 
         internal override Decision SwfDecision()
         {
-            return new Decision()
+            return new Decision
             {
                 DecisionType = DecisionType.RecordMarker,
                 RecordMarkerDecisionAttributes = new RecordMarkerDecisionAttributes()
@@ -28,6 +28,9 @@ namespace Guflow.Decider
                 }
             };
         }
+
+        internal override bool IsFor(WorkflowItem workflowItem)
+            => workflowItem.Has(_id);
 
         public override bool Equals(object obj)
         {
