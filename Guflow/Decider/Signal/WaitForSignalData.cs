@@ -1,6 +1,6 @@
 ﻿namespace Guflow.Decider
 {
-    internal class WaitForSignalScheduleData
+    internal class WaitForSignalData
     {
         public string ScheduleId;
         public long TriggerEventId;

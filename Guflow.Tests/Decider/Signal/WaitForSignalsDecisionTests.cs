@@ -15,18 +15,28 @@ namespace Guflow.Tests.Decider
         {
             var id = Identity.Lambda("a").ScheduleId();
             var id1 = Identity.Lambda("a1").ScheduleId();
-            Assert.IsTrue(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "s1")));
-            Assert.IsTrue(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 1, "s")));
+            Assert.IsTrue(new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = id, TriggerEventId = 1})
+                    .Equals(new WaitForSignalsDecision(new WaitForSignalData { ScheduleId = id, TriggerEventId = 1 })));
 
-            Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id1, 1, "S")));
-            Assert.IsFalse(new WaitForSignalsDecision(id, 1, "s").Equals(new WaitForSignalsDecision(id, 2, "S")));
+            Assert.IsFalse(new WaitForSignalsDecision(new WaitForSignalData { ScheduleId = id, TriggerEventId = 1})
+                .Equals(new WaitForSignalsDecision(new WaitForSignalData { ScheduleId = id1, TriggerEventId = 1})));
+            Assert.IsFalse(new WaitForSignalsDecision(new WaitForSignalData { ScheduleId = id, TriggerEventId = 1})
+                .Equals(new WaitForSignalsDecision(new WaitForSignalData { ScheduleId = id, TriggerEventId = 2})));
         }
 
         [Test]
         public void Returns_swf_decision_to_record_the_marker()
         {
             var id = Identity.Lambda("a").ScheduleId();
-            var decision = new WaitForSignalsDecision(id, 10, "Signal");
+            var d = new WaitForSignalData()
+            {
+                ScheduleId = id,
+                TriggerEventId = 10,
+                WaitType = SignalWaitType.Any,
+                NextAction = SignalNextAction.Continue,
+                SignalNames = new[] {"Signal"}
+            };
+            var decision = new WaitForSignalsDecision(d);
 
             var swfDecision = decision.SwfDecision();
 

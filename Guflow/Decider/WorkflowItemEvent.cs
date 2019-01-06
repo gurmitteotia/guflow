@@ -52,7 +52,21 @@ namespace Guflow.Decider
         public WaitForSignalsWorkflowAction WaitForAnySignal(string signalName, params string[] signalNames)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.Any, new []{signalName}.Concat(signalNames).ToArray());
+            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.Any, ValidEventNames(signalName, signalNames));
         }
+
+        /// <summary>
+        /// Wait for all signals indefinitly
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <param name="signalNames"></param>
+        /// <returns></returns>
+        public WaitForSignalsWorkflowAction WaitForAllSignals(string signalName, params string[] signalNames)
+        {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.All, ValidEventNames(signalName, signalNames));
+        }
+
+        private static string[] ValidEventNames(string name,params string[] names) => new[]{ name }.Concat(names).ToArray();
     }
 }

@@ -568,7 +568,7 @@ namespace Guflow.Tests.Decider
             SignalWaitType waitType, SignalNextAction nextAction = SignalNextAction.Continue)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
-            var details = new WaitForSignalScheduleData()
+            var details = new WaitForSignalData()
             {
                 ScheduleId = id,
                 TriggerEventId = eventId,

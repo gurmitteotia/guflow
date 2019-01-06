@@ -22,7 +22,7 @@ namespace Guflow.Tests.Decider
             var @event = new WaitForSignalsEvent(w, new[] { r, w });
 
             Assert.That(@event.WaitingSignals, Is.EqualTo(new[]{"e2"}));
-            Assert.That(@event.IsExpectingSignal, Is.True);
+            Assert.That(@event.IsExpectingSignals, Is.True);
         }
 
         [Test]
@@ -34,7 +34,7 @@ namespace Guflow.Tests.Decider
             var @event = new WaitForSignalsEvent(w, new[] { r, w });
 
             Assert.That(@event.WaitingSignals, Is.EqualTo(new[] { "e1" }));
-            Assert.That(@event.IsExpectingSignal, Is.True);
+            Assert.That(@event.IsExpectingSignals, Is.True);
         }
 
 
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
             var @event = new WaitForSignalsEvent(w, new[] {r1, r, w });
 
             Assert.That(@event.WaitingSignals, Is.Empty);
-            Assert.That(@event.IsExpectingSignal, Is.False);
+            Assert.That(@event.IsExpectingSignals, Is.False);
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace Guflow.Tests.Decider
             var @event = new WaitForSignalsEvent(w, new[] {r1, r, w });
 
             Assert.That(@event.WaitingSignals, Is.EqualTo(new[] { "e1", "e2" }));
-            Assert.That(@event.IsExpectingSignal, Is.True);
+            Assert.That(@event.IsExpectingSignals, Is.True);
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace Guflow.Tests.Decider
             var @event = new WaitForSignalsEvent(w, new[] {r1, r, w });
 
             Assert.That(@event.WaitingSignals, Is.EqualTo(new[] { "e1", "e2" }));
-            Assert.That(@event.IsExpectingSignal, Is.True);
+            Assert.That(@event.IsExpectingSignals, Is.True);
         }
     }
 }

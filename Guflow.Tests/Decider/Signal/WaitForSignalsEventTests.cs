@@ -28,7 +28,7 @@ namespace Guflow.Tests.Decider
             Assert.That(_event.TriggerEventId, Is.EqualTo(_event.TriggerEventId));
             Assert.That(_event.IsActive, Is.False);
             Assert.That(_event.WaitingSignals, Is.EqualTo(new []{"e1", "e2"}));
-            Assert.That(_event.IsExpectingSignal, Is.True);
+            Assert.That(_event.IsExpectingSignals, Is.True);
 
             Assert.IsTrue(_event.IsWaitingForSignal("e1"));
             Assert.IsTrue(_event.IsWaitingForSignal("E1"));

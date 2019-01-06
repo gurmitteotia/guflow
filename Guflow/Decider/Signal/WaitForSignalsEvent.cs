@@ -9,12 +9,12 @@ namespace Guflow.Decider
 {
     internal class WaitForSignalsEvent : WorkflowItemEvent
     {
-        private readonly WaitForSignalScheduleData _data;
+        private readonly WaitForSignalData _data;
         private readonly List<string> _resumedSignals = new List<string>();
 
         public WaitForSignalsEvent(HistoryEvent @event, IEnumerable<HistoryEvent> allEvents) : base(@event.EventId)
         {
-            _data = @event.MarkerRecordedEventAttributes.Details.As<WaitForSignalScheduleData>();
+            _data = @event.MarkerRecordedEventAttributes.Details.As<WaitForSignalData>();
             ScheduleId = ScheduleId.Raw(_data.ScheduleId);
             PopulateResumedSignals(allEvents);
         }
@@ -30,32 +30,17 @@ namespace Guflow.Decider
                     _resumedSignals.Add(signalResumedEvent.SignalName);
             }
         }
-
         public long TriggerEventId => _data.TriggerEventId;
-
-        /// <summary>
-        /// Returns the names of signals it is currently waiting for. 
-        /// </summary>
         public IEnumerable<string> WaitingSignals
         {
             get
             {
                 if (_data.WaitType == SignalWaitType.Any)
                     return _resumedSignals.Any() ? Enumerable.Empty<string>() : _data.SignalNames;
-                return _data.SignalNames.Except(_resumedSignals);
+                return _data.SignalNames.Except(_resumedSignals, StringComparer.OrdinalIgnoreCase);
             }
         }
-
-        /// <summary>
-        /// Return true if it waiting for more signals.
-        /// </summary>
-        public bool IsExpectingSignal => WaitingSignals.Any();
-
-        /// <summary>
-        /// Returns true if waiting for given signal.
-        /// </summary>
-        /// <param name="signalName"></param>
-        /// <returns></returns>
+        public bool IsExpectingSignals => WaitingSignals.Any();
         public bool IsWaitingForSignal(string signalName) =>
             WaitingSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
 

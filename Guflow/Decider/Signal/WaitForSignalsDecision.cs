@@ -10,17 +10,10 @@ namespace Guflow.Decider
     internal class WaitForSignalsDecision: WorkflowDecision
     {
      
-        private readonly WaitForSignalScheduleData _data;
-        public WaitForSignalsDecision(ScheduleId id, long eventId, params string[] signalNames) : base(false)
+        private readonly WaitForSignalData _data;
+        public WaitForSignalsDecision(WaitForSignalData data) : base(false)
         {
-            _data = new WaitForSignalScheduleData()
-            {
-                ScheduleId = id,
-                SignalNames = signalNames,
-                TriggerEventId = eventId,
-                WaitType = SignalWaitType.Any,
-                NextAction = SignalNextAction.Continue
-            };
+            _data = data;
         }
 
         internal override Decision SwfDecision()

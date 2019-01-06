@@ -1,4 +1,4 @@
-﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
+﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the _conproject root folder for license information.
 
 using System.Linq;
 using Guflow.Decider;
@@ -31,9 +31,14 @@ namespace Guflow.Tests.Decider
             var decision = workflow.Decisions(_builder.Result());
 
             Assert.That(decision, Is.EqualTo(new[]
-            {
-                new WaitForSignalsDecision(_confirmEmailId, graph.First().EventId, "Confirmed")
+            { 
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId, TriggerEventId = graph.First().EventId})
             }));
+            var swfDecision = decision.First().SwfDecision();
+            var data = swfDecision.RecordMarkerDecisionAttributes.Details.AsDynamic();
+            Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(new[]{ "Confirmed" }));
+            Assert.That((SignalWaitType)data.WaitType, Is.EqualTo(SignalWaitType.Any));
+            Assert.That((SignalNextAction)data.NextAction, Is.EqualTo(SignalNextAction.Continue));
         }
 
         [Test]
@@ -198,7 +203,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
             {
-                new WaitForSignalsDecision(_confirmEmailId, graph.First().EventId, "Confirmed"),
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId, TriggerEventId = graph.First().EventId}),
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId)
             }));
@@ -215,10 +220,10 @@ namespace Guflow.Tests.Decider
 
             var workflow = new UserActivateWorkflow();
             var decision = workflow.Decisions(_builder.Result());
-
+            var d = new WaitForSignalData() {ScheduleId = _confirmEmailId, TriggerEventId = graph.First().EventId};
             Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
             {
-                new WaitForSignalsDecision(_confirmEmailId, graph.First().EventId, "Confirmed"),
+                new WaitForSignalsDecision(d),
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId)
             }));
@@ -245,11 +250,11 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
             {
-                new WaitForSignalsDecision(l1, w1.First().EventId, "Confirmed"),
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = l1, TriggerEventId = w1.First().EventId}),
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed", s1.EventId),
 
-                new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = l2, TriggerEventId = w2.First().EventId}),
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed", s2.EventId),
             }));
@@ -281,7 +286,7 @@ namespace Guflow.Tests.Decider
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed", s1.EventId),
 
-                new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = l2, TriggerEventId = w2.First().EventId}),
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaB2").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(l2, w2.First().EventId, "Confirmed", s2.EventId),
             }));
@@ -346,7 +351,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
             {
-                new WaitForSignalsDecision(_confirmEmailId, g1.First().EventId,"Confirmed"),
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId,TriggerEventId = g1.First().EventId}),
                 new RecordMarkerWorkflowDecision("Marker1", "details"),
                 new ScheduleLambdaDecision(Identity.Lambda("ActivateUser").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(_confirmEmailId, g1.First().EventId, "Confirmed", s.EventId),
@@ -390,8 +395,8 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
             {
-                new WaitForSignalsDecision(l1, w1.First().EventId, "Confirmed"),
-                new WaitForSignalsDecision(l2, w2.First().EventId, "Confirmed"),
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = l1, TriggerEventId = w1.First().EventId}),
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = l2, TriggerEventId = w2.First().EventId}),
 
                 new ScheduleLambdaDecision(Identity.Lambda("LambdaA2").ScheduleId(), "input"),
                 new WorkflowItemSignalledDecision(l1, w1.First().EventId, "Confirmed", s.EventId),

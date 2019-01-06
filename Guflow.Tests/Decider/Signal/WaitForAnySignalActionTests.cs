@@ -29,7 +29,12 @@ namespace Guflow.Tests.Decider
             var workflow = new ExpenseWorkflowToSendEmail();
             var decisions = workflow.Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new WaitForSignalsDecision(_sendForApprovalId, graph.First().EventId ) }));
+            var signalData = new WaitForSignalData
+            {
+                ScheduleId = _sendForApprovalId,
+                TriggerEventId = graph.First().EventId
+            };
+            Assert.That(decisions, Is.EqualTo(new[] { new WaitForSignalsDecision(signalData) }));
             var attr = decisions.First().SwfDecision().RecordMarkerDecisionAttributes;
             var data = attr.Details.AsDynamic();
             Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(new[] { "Approved", "Rejected" }));
