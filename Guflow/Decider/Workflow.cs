@@ -666,10 +666,10 @@ namespace Guflow.Decider
         /// <param name="signalName"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        protected Signal Signal(string signalName, object input)
+        protected Signal Signal(string signalName, object input=null)
         {
             Ensure.NotNullAndEmpty(signalName, "signalName");
-            return new Signal(signalName, input, _allWorkflowItems);
+            return new Signal(signalName, input, this);
         }
         
         /// <summary>
@@ -718,15 +718,13 @@ namespace Guflow.Decider
             return workflow.WaitForSignalsEvents.WaitingItems(_allWorkflowItems.AllItems.ToArray(), signalName);
         }
 
-        IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
-        {
-            return _allWorkflowItems.Childeren(workflowItem);
-        }
+        IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)=> _allWorkflowItems.Childeren(workflowItem);
+        WorkflowItem IWorkflow.WorkflowItem(Identity identity)=> _allWorkflowItems.WorkflowItem(identity);
 
-        WorkflowItem IWorkflow.FindWorkflowItemBy(Identity identity)
-        {
-            return _allWorkflowItems.WorkflowItem(identity);
-        }
+        ChildWorkflowItem IWorkflow.ChildWorkflowItem(Identity identity) =>
+            _allWorkflowItems.ChildWorkflowItem(identity);
+       
+
         private WorkflowItem CurrentExecutingItem
         {
             get

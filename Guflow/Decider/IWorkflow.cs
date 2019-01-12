@@ -6,7 +6,8 @@ namespace Guflow.Decider
     internal interface IWorkflow : IWorkflowDefaultActions
     {
         IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem workflowItem);
-        WorkflowItem FindWorkflowItemBy(Identity identity);
+        WorkflowItem WorkflowItem(Identity identity);
+        ChildWorkflowItem ChildWorkflowItem(Identity identity);
         IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
         IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents { get; } 
         WorkflowEvent CurrentlyExecutingEvent { get; }
@@ -41,5 +42,6 @@ namespace Guflow.Decider
         WorkflowAction WorkflowAction(ChildWorkflowTimedoutEvent timedoutEvent);
         WorkflowAction WorkflowAction(ChildWorkflowStartFailedEvent startFailed);
         WorkflowAction WorkflowAction(WorkflowRestartFailedEvent failedEvent);
+ 
     }
 }

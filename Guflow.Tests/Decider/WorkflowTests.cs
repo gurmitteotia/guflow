@@ -307,6 +307,36 @@ namespace Guflow.Tests.Decider
             Assert.That(w.WorkflowRunId, Is.EqualTo("runid"));
         }
 
+        [Test]
+        public void Signal_IsReceived_is_true()
+        {
+            _builder.AddNewEvents(_graphBuilder.WorkflowStartedEvent());
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("S1", "input"));
+            var w = new WorkflowIsSignalReceivedAPI("s1");
+            w.Decisions(_builder.Result());
+
+            Assert.That(w.IsSignalReceived, Is.True);
+        }
+
+        [Test]
+        public void Signal_IsReceived_is_false()
+        {
+            _builder.AddNewEvents(_graphBuilder.WorkflowStartedEvent());
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("S1", "input"));
+            var w = new WorkflowIsSignalReceivedAPI("s2");
+            w.Decisions(_builder.Result());
+
+            Assert.That(w.IsSignalReceived, Is.False);
+        }
+        [Test]
+        public void Workflow_execution_order()
+        {
+            _builder.AddNewEvents(_graphBuilder.WorkflowStartedEvent());
+            var w = new WorkflowExecutionOrder();
+            w.Decisions(_builder.Result());
+
+            Assert.That(w.Orders, Is.EqualTo(new []{"BeforeExecution", "Execution", "AfterExecution"}));
+        }
 
         private IEnumerable<WorkflowEvent> Events(params WorkflowDecision[] decisions)
             => decisions.Select(d => new TestEvent(d));
@@ -499,6 +529,45 @@ namespace Guflow.Tests.Decider
 
             public string WorkflowId;
             public string WorkflowRunId;
+        }
+
+        private class WorkflowIsSignalReceivedAPI : Workflow
+        {
+            private readonly string _signalName;
+            public WorkflowIsSignalReceivedAPI(string signalName)
+            {
+                _signalName = signalName;
+            }
+            [WorkflowEvent(EventName.WorkflowStarted)]
+            public WorkflowAction Started()
+            {
+                IsSignalReceived = Signal(_signalName).IsReceived();
+                return Ignore;
+            }
+
+            public bool IsSignalReceived;
+        }
+
+        private class WorkflowExecutionOrder : Workflow
+        {
+            public List<string> Orders = new List<string>();
+
+            [WorkflowEvent(EventName.WorkflowStarted)]
+            public WorkflowAction OnStarted()
+            {
+                Orders.Add("Execution");
+                return Ignore;
+            }
+
+            protected override void BeforeExecution()
+            {
+                Orders.Add("BeforeExecution");
+            }
+
+            protected override void AfterExecution()
+            {
+                Orders.Add("AfterExecution");
+            }
         }
     }
 

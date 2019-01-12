@@ -161,7 +161,7 @@ namespace Guflow.Decider
         }
         protected void AddParent(Identity identity)
         {
-            var parentItem = _workflow.FindWorkflowItemBy(identity);
+            var parentItem = _workflow.WorkflowItem(identity);
             if (parentItem == null)
                 throw new ParentItemMissingException(string.Format(Resources.Schedulable_item_missing, identity));
             if (Equals(parentItem))

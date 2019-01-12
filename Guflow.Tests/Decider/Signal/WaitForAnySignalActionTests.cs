@@ -85,7 +85,7 @@ namespace Guflow.Tests.Decider
 
 
         [Test]
-        public void First_signal_is_received_signal_and_can_be_used_in_scheduling_the_specific_children()
+        public void First_signal_is_received_and_can_be_used_in_scheduling_the_specific_children_using_IsSignalled_API()
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
             _builder.AddProcessedEvents(graph);
@@ -103,8 +103,28 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+
         [Test]
-        public void Second_signal_is_received_signal_and_can_be_used_in_scheduling_the_specific_children()
+        public void First_signal_is_received_and_can_be_used_in_scheduling_the_specific_children_using_IsTriggered_API()
+        {
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
+            _builder.AddProcessedEvents(graph);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_sendForApprovalId, graph.First().EventId, new[] { "Approved", "Rejected" }, SignalWaitType.Any));
+            var s = _graphBuilder.WorkflowSignaledEvent("Approved", "");
+            _builder.AddNewEvents(s);
+
+            var workflow = new ExpenseWorkflowWithSignalTrigger();
+            var decisions = workflow.Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda("SendToAccount").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Approved", s.EventId)
+            }));
+        }
+
+        [Test]
+        public void Second_signal_is_received_and_can_be_used_in_scheduling_the_specific_children_using_IsSiganlled_API()
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
             _builder.AddProcessedEvents(graph);
@@ -113,6 +133,25 @@ namespace Guflow.Tests.Decider
             _builder.AddNewEvents(s);
 
             var workflow = new ExpenseWorkflow();
+            var decisions = workflow.Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda("SendRejectEmail").ScheduleId(), "input"),
+                new WorkflowItemSignalledDecision(_sendForApprovalId, graph.First().EventId, "Rejected", s.EventId)
+            }));
+        }
+
+        [Test]
+        public void Second_signal_is_received_and_can_be_used_in_scheduling_the_specific_children_using_IsTriggered_API()
+        {
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_sendForApprovalId, "input", "result");
+            _builder.AddProcessedEvents(graph);
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_sendForApprovalId, graph.First().EventId, new[] { "Approved", "Rejected" }, SignalWaitType.Any));
+            var s = _graphBuilder.WorkflowSignaledEvent("Rejected", "");
+            _builder.AddNewEvents(s);
+
+            var workflow = new ExpenseWorkflowWithSignalTrigger();
             var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
@@ -184,6 +223,20 @@ namespace Guflow.Tests.Decider
 
                 ScheduleLambda("SendRejectEmail").AfterLambda("SendForApproval")
                     .When(l => l.ParentLambda().IsSignalled("Rejected"));
+            }
+        }
+
+        private class ExpenseWorkflowWithSignalTrigger : Workflow
+        {
+            public ExpenseWorkflowWithSignalTrigger()
+            {
+                ScheduleLambda("SendForApproval").OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected"));
+
+                ScheduleLambda("SendToAccount").AfterLambda("SendForApproval")
+                    .When(l => Signal("Approved").IsTriggered());
+
+                ScheduleLambda("SendRejectEmail").AfterLambda("SendForApproval")
+                    .When(l => Signal("Rejected").IsTriggered());
             }
         }
 

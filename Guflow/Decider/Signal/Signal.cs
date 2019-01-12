@@ -1,4 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System;
 using Guflow.Properties;
 
 namespace Guflow.Decider
@@ -7,11 +9,11 @@ namespace Guflow.Decider
     {
         private readonly string _signalName;
         private readonly string _input;
-        private readonly WorkflowItems _workflowItems;
-        internal Signal(string signalName, object input, WorkflowItems workflowItems)
+        private readonly IWorkflow _workflow;
+        internal Signal(string signalName, object input, IWorkflow workflow)
         {
             _signalName = signalName;
-            _workflowItems = workflowItems;
+            _workflow = workflow;
             _input = input.ToAwsString();
         }
        
@@ -52,7 +54,7 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(name, nameof(name));
             Ensure.NotNull(version, nameof(version));
-            var item = _workflowItems.ChildWorkflowItem(Identity.New(name, version, positionalName));
+            var item = _workflow.ChildWorkflowItem(Identity.New(name, version, positionalName));
             return item.SignalAction(_signalName, _input);
         }
 
@@ -76,6 +78,33 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(childWorkflow, nameof(childWorkflow));
             return ForChildWorkflow(childWorkflow.Name, childWorkflow.Version, childWorkflow.PositionalName);
+        }
+
+        /// <summary>
+        /// Return true if the current execution is triggered by the specific signal.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsTriggered()
+        {
+            var signaledEvent = _workflow.CurrentlyExecutingEvent as WorkflowSignaledEvent;
+            if (signaledEvent == null) return false;
+            return string.Equals(signaledEvent.SignalName, _signalName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Returns true if the specific signal is received by this workflow. It will search entire workflow execution history. It will ignore the the case when looking for this signal.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsReceived()
+        {
+            var historyEvents = _workflow.WorkflowHistoryEvents;
+            foreach (var signalEvent in historyEvents.AllSignalEvents())
+            {
+                if (string.Equals(_signalName, signalEvent.SignalName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
