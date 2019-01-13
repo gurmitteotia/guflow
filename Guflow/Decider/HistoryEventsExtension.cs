@@ -218,6 +218,8 @@ namespace Guflow.Decider
                 return new ActivityCancelledEvent(historyEvent, allHistoryEvents);
             if (historyEvent.IsActivityCancellationFailedEvent())
                 return new ActivityCancellationFailedEvent(historyEvent);
+            if (historyEvent.IsActivitySchedulingFailedEvent())
+                return new ActivitySchedulingFailedEvent(historyEvent);
             if(historyEvent.IsWorkflowStartedEvent())
                 return new WorkflowStartedEvent(historyEvent);
             if(historyEvent.IsTimerFiredEvent())
@@ -264,6 +266,8 @@ namespace Guflow.Decider
                 return new ChildWorkflowStartFailedEvent(historyEvent, allHistoryEvents);
             if(historyEvent.IsWorkflowRestartFailedEvent())
                 return new WorkflowRestartFailedEvent(historyEvent);
+            if(historyEvent.IsChildWorkflowStartedEvent())
+                return new ChildWorkflowStartedEvent(historyEvent, allHistoryEvents);
             return null;
         }
 

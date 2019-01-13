@@ -26,13 +26,17 @@ namespace Guflow.Decider
         public string RunId { get; private set; }
 
         /// <summary>
+        /// Returns the WorkflowId assigned to child workflow.
+        /// </summary>
+        public string WorkflowId { get; private set; }
+
+        /// <summary>
         /// Internal method. Library user should not care about it.
         /// </summary>
         /// <param name="runid"></param>
         /// <param name="initiatedEventId"></param>
         /// <param name="allEvents"></param>
-        protected void PopulateProperties(string runid, long initiatedEventId,
-            IEnumerable<HistoryEvent> allEvents)
+        protected void PopulateProperties(string runid, long initiatedEventId, IEnumerable<HistoryEvent> allEvents)
         {
             RunId = runid;
             _initiatedEventId = initiatedEventId;
@@ -43,6 +47,7 @@ namespace Guflow.Decider
                 {
                     var attr = historyEvent.StartChildWorkflowExecutionInitiatedEventAttributes;
                     Input = attr.Input;
+                    WorkflowId = attr.WorkflowId;
                     ScheduleId = ScheduleId.Raw(attr.WorkflowId);
                     WorkflowName = attr.WorkflowType.Name;
                     WorkflowVersion = attr.WorkflowType.Version;

@@ -1,5 +1,8 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -14,14 +17,20 @@ namespace Guflow.Tests.Decider
         private const string ActivityVersion = "1.0";
         private const string PositionalName = "First";
         private const string _cause = "detail";
-        private EventGraphBuilder _builder;
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
+        private HistoryEvent[] _eventGraph;
 
         [SetUp]
         public void Setup()
         {
-            _builder = new EventGraphBuilder();
-            var schedulingFailedEventGraph = _builder.ActivitySchedulingFailedGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(),_cause);
-            _activitySchedulingFailedEvent = new ActivitySchedulingFailedEvent(schedulingFailedEventGraph.First());
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
+            _eventGraph = _graphBuilder
+                .ActivitySchedulingFailedGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(),
+                    _cause).ToArray();
+            _activitySchedulingFailedEvent = new ActivitySchedulingFailedEvent(_eventGraph.First());
+            _builder.AddNewEvents(_eventGraph);
         }
 
         [Test]
@@ -36,7 +45,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
 
-            var decisions = _activitySchedulingFailedEvent.Interpret(workflow).Decisions();
+            var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions,Is.EqualTo(new[]{new FailWorkflowDecision("ACTIVITY_SCHEDULING_FAILED",_cause)}));
         }
@@ -44,11 +53,10 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_return_custom_workflow_action()
         {
-            var expectedAction = new Mock<WorkflowAction>().Object;
-            
-            var workflowAction = _activitySchedulingFailedEvent.Interpret(new WorkflowWithCustomAction(expectedAction));
+            var workflow = new WorkflowWithCustomAction("result");
+            var decisions = workflow.Decisions(_builder.Result());
 
-            Assert.That(workflowAction,Is.EqualTo(workflowAction));
+            Assert.That(decisions,Is.EqualTo(new[]{new CompleteWorkflowDecision("result")}));
         }
 
         private class SingleActivityWorkflow : Workflow
@@ -61,9 +69,9 @@ namespace Guflow.Tests.Decider
 
         private class WorkflowWithCustomAction : Workflow
         {
-            public WorkflowWithCustomAction(WorkflowAction workflowAction)
+            public WorkflowWithCustomAction(string result)
             {
-                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnSchedulingFailed(e => workflowAction);
+                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).OnSchedulingFailed(e => CompleteWorkflow(result));
             }
         }
     }
