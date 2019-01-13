@@ -667,17 +667,26 @@ namespace Guflow.Decider
             => ((IWorkflow)this).WorkflowHistoryEvents.WorkflowRunId;
 
         /// <summary>
-        /// Supports sending signal to other workflows.
+        /// APIs to send signal to other workflows(child/non-child).
         /// </summary>
         /// <param name="signalName"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        protected Signal Signal(string signalName, object input=null)
+        protected Signal Signal(string signalName, object input)
         {
-            Ensure.NotNullAndEmpty(signalName, "signalName");
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
             return new Signal(signalName, input, this);
         }
-        
+        /// <summary>
+        /// Represent the incoming signal.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        protected InwardSignal Signal(string signalName)
+        {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            return new InwardSignal(signalName, this);
+        }
         /// <summary>
         /// Return workflow input as dynamic object. If workflow input is JSON data then you can directly access the properties like: Input.Session.
         /// </summary>

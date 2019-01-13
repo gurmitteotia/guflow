@@ -10,11 +10,11 @@ namespace Guflow.Decider
     /// <summary>
     /// Cause the workflow item to wait for given signals.
     /// </summary>
-    public class WaitForSignalsWorkflowAction : WorkflowAction
+    public class WorkflowItemWaitAction : WorkflowAction
     {
         private readonly WaitForSignalData _data;
 
-        internal WaitForSignalsWorkflowAction(ScheduleId scheduleId, long triggerEventId, SignalWaitType waitType, params string[] signalNames)
+        internal WorkflowItemWaitAction(ScheduleId scheduleId, long triggerEventId, SignalWaitType waitType, params string[] signalNames)
         {
             _data = new WaitForSignalData
             {
@@ -53,7 +53,7 @@ namespace Guflow.Decider
         /// Reschedule the waiting item on receiving the necessary signals.
         /// </summary>
         /// <returns></returns>
-        public WaitForSignalsWorkflowAction ToReschedule()
+        public WorkflowItemWaitAction ToReschedule()
         {
             _data.NextAction = SignalNextAction.Reschedule;
             return this;

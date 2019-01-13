@@ -5,6 +5,10 @@ using Guflow.Properties;
 
 namespace Guflow.Decider
 {
+
+    /// <summary>
+    /// Represent the outgoing signal from workflow.
+    /// </summary>
     public class Signal
     {
         private readonly string _signalName;
@@ -80,31 +84,5 @@ namespace Guflow.Decider
             return ForChildWorkflow(childWorkflow.Name, childWorkflow.Version, childWorkflow.PositionalName);
         }
 
-        /// <summary>
-        /// Return true if the current execution is triggered by the specific signal.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsTriggered()
-        {
-            var signaledEvent = _workflow.CurrentlyExecutingEvent as WorkflowSignaledEvent;
-            if (signaledEvent == null) return false;
-            return string.Equals(signaledEvent.SignalName, _signalName, StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// Returns true if the specific signal is received by this workflow. It will search entire workflow execution history. It will ignore the the case when looking for this signal.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsReceived()
-        {
-            var historyEvents = _workflow.WorkflowHistoryEvents;
-            foreach (var signalEvent in historyEvents.AllSignalEvents())
-            {
-                if (string.Equals(_signalName, signalEvent.SignalName, StringComparison.OrdinalIgnoreCase))
-                    return true;
-            }
-
-            return false;
-        }
     }
 }

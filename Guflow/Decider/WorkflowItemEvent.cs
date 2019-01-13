@@ -37,10 +37,10 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="signalName">Signal name. Cases are ignored when comparing the signal names.</param>
         /// <returns></returns>
-        public WaitForSignalsWorkflowAction WaitForSignal(string signalName)
+        public WorkflowItemWaitAction WaitForSignal(string signalName)
         {
             Ensure.NotNullAndEmpty(signalName,nameof(signalName));
-            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.Any, signalName);
+            return new WorkflowItemWaitAction(ScheduleId, EventId, SignalWaitType.Any, signalName);
         }
 
         /// <summary>
@@ -49,10 +49,10 @@ namespace Guflow.Decider
         /// <param name="signalName"></param>
         /// <param name="signalNames"></param>
         /// <returns></returns>
-        public WaitForSignalsWorkflowAction WaitForAnySignal(string signalName, params string[] signalNames)
+        public WorkflowItemWaitAction WaitForAnySignal(string signalName, params string[] signalNames)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.Any, ValidEventNames(signalName, signalNames));
+            return new WorkflowItemWaitAction(ScheduleId, EventId, SignalWaitType.Any, ValidEventNames(signalName, signalNames));
         }
 
         /// <summary>
@@ -61,10 +61,10 @@ namespace Guflow.Decider
         /// <param name="signalName"></param>
         /// <param name="signalNames"></param>
         /// <returns></returns>
-        public WaitForSignalsWorkflowAction WaitForAllSignals(string signalName, params string[] signalNames)
+        public WorkflowItemWaitAction WaitForAllSignals(string signalName, params string[] signalNames)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            return new WaitForSignalsWorkflowAction(ScheduleId, EventId, SignalWaitType.All, ValidEventNames(signalName, signalNames));
+            return new WorkflowItemWaitAction(ScheduleId, EventId, SignalWaitType.All, ValidEventNames(signalName, signalNames));
         }
 
         private static string[] ValidEventNames(string name,params string[] names)
