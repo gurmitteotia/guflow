@@ -60,11 +60,22 @@ namespace Guflow.Decider
             
             return waitEvent.NextAction(this) + recordedAction;
         }
+        public bool IsWaitingForAnySignal()
+        {
+            var @event = LatestWaitForSignalsEvent();
+            if (@event == null) return false;
+            return @event.WaitingSignals.Any();
+        }
+        public WorkflowAction SignalResumedAction()
+        {
+            var @event = LatestWaitForSignalsEvent();
+            return @event.NextAction(this);
+        }
 
         public bool IsSignalled(string signalName)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            var waitEvent = _workflow.WaitForSignalsEvents.Reverse().FirstOrDefault(this);
+            var waitEvent = LatestWaitForSignalsEvent();
             if (waitEvent == null) return false;
             return waitEvent.HasReceivedSignal(signalName);
         }
@@ -133,31 +144,12 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowBranch> ParentBranches()
         {
-            return _parentItems.SelectMany(WorkflowBranch.ParentBranches);
+            return _parentItems.SelectMany(i=>WorkflowBranch.ParentBranches(i, _workflow));
         }
 
         public IEnumerable<WorkflowBranch> ChildBranches()
         {
-            return WorkflowBranch.ChildBranches(this);
-        }
-
-        public bool IsReadyToScheduleChildren()
-        {
-            var lastEvent = LastEvent(true);
-            if (lastEvent == null || lastEvent.IsActive)
-                return false;
-            var lastEventAction = lastEvent.Interpret(_workflow);
-            return lastEventAction.ReadyToScheduleChildren;
-        }
-        public bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
-        {
-            var lastEvent = LastEvent(true);
-            if (lastEvent == null)
-                return false;
-            if (lastEvent.IsActive)
-                return true;
-            var lastEventAction = lastEvent.Interpret(_workflow);
-            return lastEventAction.CanScheduleAny(workflowItems);
+            return WorkflowBranch.ChildBranches(this, _workflow);
         }
         protected void AddParent(Identity identity)
         {
@@ -170,6 +162,10 @@ namespace Guflow.Decider
         }
         protected IWorkflowHistoryEvents WorkflowHistoryEvents => _workflow.WorkflowHistoryEvents;
         protected TimerItem RescheduleTimer(ScheduleId identity) => TimerItem.Reschedule(this, identity, _workflow);
+
+        protected IEnumerable<WorkflowDecision> WorkflowDecisionsOnFalseWhen(WorkflowAction action) =>
+            action.WithTriggeredItem(this).Decisions();
+
         public WorkflowAction DefaultActionOnLastEvent()
         {
             return LastEvent().DefaultAction(_workflow);
@@ -179,6 +175,11 @@ namespace Guflow.Decider
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
             return _workflow.WaitForSignalsEvents.FirstOrDefault(this, signalName);
+        }
+
+        private WaitForSignalsEvent LatestWaitForSignalsEvent()
+        {
+            return _workflow.WaitForSignalsEvents.Reverse().FirstOrDefault(this);
         }
 
         private long SignalEventId()

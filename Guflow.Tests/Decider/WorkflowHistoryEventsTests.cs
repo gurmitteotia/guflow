@@ -248,51 +248,70 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Child_workflow_completed_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowCompletedGraph(_childWorkflow.ScheduleId(), "rid","i","result");
+            var eventGraph = _builder.ChildWorkflowCompletedGraph(_childWorkflow.ScheduleId(), "rid","i","result").ToArray();
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
-            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowCompletedEvent(eventGraph.First(), eventGraph) }));
+            Assert.That(newEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ChildWorkflowStartedEvent(eventGraph.Skip(1).First(), eventGraph),
+                new ChildWorkflowCompletedEvent(eventGraph.First(), eventGraph)
+            }));
         }
 
         [Test]
         public void Child_workflow_failed_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowFailedEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "reason", "details");
+            var eventGraph = _builder.ChildWorkflowFailedEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "reason", "details").ToArray();
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
-            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowFailedEvent(eventGraph.First(), eventGraph) }));
+            Assert.That(newEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ChildWorkflowStartedEvent(eventGraph.Skip(1).First(), eventGraph),
+                new ChildWorkflowFailedEvent(eventGraph.First(), eventGraph)
+            }));
         }
 
         [Test]
         public void Child_workflow_cancelled_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "details");
+            var eventGraph = _builder.ChildWorkflowCancelledEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "details").ToArray();
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
-            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowCancelledEvent(eventGraph.First(), eventGraph) }));
+            Assert.That(newEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {   new ChildWorkflowStartedEvent(eventGraph.Skip(3).First(), eventGraph),
+                new ChildWorkflowCancelledEvent(eventGraph.First(), eventGraph)
+            }));
         }
 
         [Test]
         public void Child_workflow_timedout_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowTimedoutEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "details");
+            var eventGraph = _builder.ChildWorkflowTimedoutEventGraph(_childWorkflow.ScheduleId(), "rid", "i", "details").ToArray();
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
-            Assert.That(newEvents, Is.EqualTo(new[] { new ChildWorkflowTimedoutEvent(eventGraph.First(), eventGraph) }));
+            Assert.That(newEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ChildWorkflowStartedEvent(eventGraph.Skip(1).First(), eventGraph),
+                new ChildWorkflowTimedoutEvent(eventGraph.First(), eventGraph)
+            }));
         }
 
         [Test]
         public void Child_workflow_terminated_event_is_interpreted()
         {
-            var eventGraph = _builder.ChildWorkflowTerminatedEventGraph(_childWorkflow.ScheduleId(), "rid", "i");
+            var eventGraph = _builder.ChildWorkflowTerminatedEventGraph(_childWorkflow.ScheduleId(), "rid", "i").ToArray();
             var events = new WorkflowHistoryEvents(eventGraph);
             var newEvents = events.NewEvents();
 
-            Assert.That(newEvents, Is.EqualTo(new[] { new  ChildWorkflowTerminatedEvent(eventGraph.First(), eventGraph) }));
+            Assert.That(newEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new ChildWorkflowStartedEvent(eventGraph.Skip(1).First(), eventGraph),
+                new  ChildWorkflowTerminatedEvent(eventGraph.First(), eventGraph)
+            }));
         }
 
         [Test]

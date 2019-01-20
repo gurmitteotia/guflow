@@ -95,7 +95,7 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowDecision> ScheduleDecisions()
         {
             if (!_when(this))
-                return _onWhenFalseAction(this).Decisions();
+                return WorkflowDecisionsOnFalseWhen(_onWhenFalseAction(this));
 
             return ScheduleDecisionsByIgnoringWhen();
         }

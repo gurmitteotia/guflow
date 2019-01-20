@@ -8,7 +8,7 @@ namespace Guflow.Decider
 {
     internal class TriggerWorkflowAction : WorkflowAction
     {
-        private readonly WorkflowItem _triggeringItem;
+        private WorkflowItem _triggeringItem;
         private Func<WorkflowBranch, WorkflowItem> _findFirstJointItem = b => b.FindFirstJointItem();
         public TriggerWorkflowAction(WorkflowItem triggeringItem)
         {
@@ -31,6 +31,12 @@ namespace Guflow.Decider
                     triggeredDecisions.AddRange(joinWorkflowItem.ScheduleDecisions());
             }
             return triggeredDecisions;
+        }
+
+        internal override WorkflowAction WithTriggeredItem(WorkflowItem item)
+        {
+            _triggeringItem = item;
+            return this;
         }
 
         private void ValidateJump(WorkflowItem jumpedItem)

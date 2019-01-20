@@ -58,5 +58,11 @@ namespace Guflow.Decider
             _data.NextAction = SignalNextAction.Reschedule;
             return this;
         }
+
+        internal override WorkflowAction TriggeredAction(WorkflowItem item)
+        {
+            if (item.IsWaitingForAnySignal()) return this;
+            return item.SignalResumedAction();
+        }
     }
 }

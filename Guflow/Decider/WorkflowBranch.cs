@@ -4,21 +4,22 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
-    //TODO: Refactor this class to make methods semnatically sensible.
+    //TODO: Refactor this class.
     internal class WorkflowBranch
     {
         private readonly List<WorkflowItem> _workflowItems = new List<WorkflowItem>();
-
-        private WorkflowBranch(params WorkflowItem[] branchItems)
+        private readonly IWorkflow _workflow;
+        private WorkflowBranch(IWorkflow workflow, params WorkflowItem[] branchItems)
         {
+            _workflow = workflow;
             _workflowItems.AddRange(branchItems);
         }
 
-        public static IEnumerable<WorkflowBranch> ParentBranches(WorkflowItem startItem)
+        public static IEnumerable<WorkflowBranch> ParentBranches(WorkflowItem startItem, IWorkflow workflow)
         {
             var allBranches = new List<WorkflowBranch>();
 
-            var parentBranch = new WorkflowBranch(startItem);
+            var parentBranch = new WorkflowBranch(workflow, startItem);
             if (parentBranch.Parents().Any())
                 foreach (var parent in parentBranch.Parents())
                     allBranches.Add(parentBranch.Add(parent));
@@ -28,11 +29,11 @@ namespace Guflow.Decider
             return allBranches;
         }
 
-        public static IEnumerable<WorkflowBranch> ChildBranches(WorkflowItem startItem)
+        public static IEnumerable<WorkflowBranch> ChildBranches(WorkflowItem startItem, IWorkflow workflow)
         {
             var allBranches = new List<WorkflowBranch>();
 
-            var childBranch = new WorkflowBranch(startItem);
+            var childBranch = new WorkflowBranch(workflow, startItem);
             if (childBranch.Childs().Any())
                 foreach (var child in childBranch.Childs())
                     allBranches.Add(childBranch.Add(child));
@@ -45,37 +46,40 @@ namespace Guflow.Decider
         private IEnumerable<WorkflowBranch> Parents()
         {
             return _workflowItems.Last().Parents()
-                .SelectMany(ParentBranches);
+                .SelectMany(p=>ParentBranches(p,_workflow));
         }
 
         private IEnumerable<WorkflowBranch> Childs()
         {
             return _workflowItems.Last().Children()
-                .SelectMany(ChildBranches);
+                .SelectMany(i=>ChildBranches(i,_workflow));
         }
 
         private WorkflowBranch Add(WorkflowBranch workflowBranch)
         {
-            return new WorkflowBranch(_workflowItems.Concat(workflowBranch._workflowItems).ToArray());
+            return new WorkflowBranch(_workflow, _workflowItems.Concat(workflowBranch._workflowItems).ToArray());
         }
 
         public bool IsActive(IEnumerable<WorkflowBranch> parentBranches)
         {
             var lastWorkflowEvents = _workflowItems.Select(w => w.LastEvent(true));
-            var sortedLastEvents = lastWorkflowEvents.OrderByDescending(e => e, WorkflowEvent.IdComparer);
+            var sortedLastEvents = lastWorkflowEvents.OrderByDescending(e => e, WorkflowEvent.IdComparer).ToArray();
             if (sortedLastEvents.Any(e => e!=null && e.IsActive))
                 return true;
             if (sortedLastEvents.All(e => e == null))
                 return false;
-            var immediateParent = _workflowItems.First();
             var latestEvent = sortedLastEvents.First();
-            if (latestEvent.IsFor(immediateParent) && immediateParent.IsReadyToScheduleChildren())
-                return false;
 
             var latestEventItem = _workflowItems.First(i => latestEvent.IsFor(i));
-            var parentItems = parentBranches.SelectMany(b => b._workflowItems);
+            var action = latestEvent.Interpret(_workflow);
+            var triggeredAction = action.TriggeredAction(latestEventItem);
 
-            return latestEventItem.CanScheduleAny(parentItems);
+            var immediateParent = _workflowItems.First();
+            if (latestEvent.IsFor(immediateParent) && triggeredAction.ReadyToScheduleChildren)
+                return false;
+
+            var parentItems = parentBranches.SelectMany(b => b._workflowItems);
+            return triggeredAction.CanScheduleAny(parentItems);
         }
 
         public WorkflowItem FindFirstJointItem(WorkflowItem beforeItem)

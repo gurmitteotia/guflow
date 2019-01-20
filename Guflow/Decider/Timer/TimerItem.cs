@@ -183,8 +183,8 @@ namespace Guflow.Decider
         {
             if (!_canSchedule(this))
                 return IsStartupItem()
-                    ? Enumerable.Empty<WorkflowDecision>() 
-                    : _falseAction(this).Decisions();
+                    ? Enumerable.Empty<WorkflowDecision>()
+                    : WorkflowDecisionsOnFalseWhen(_falseAction(this));
 
             return ScheduleDecisionsByIgnoringWhen();
         }
