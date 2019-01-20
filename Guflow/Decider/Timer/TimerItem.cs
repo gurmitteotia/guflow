@@ -29,7 +29,7 @@ namespace Guflow.Decider
         {
             _defaultScheduleId = defaultScheduleId;
             _canSchedule = t => true;
-            _falseAction = t=>new TriggerActions(this).FirstJoint();
+            _falseAction = _ => IsStartupItem() ? WorkflowAction.Empty : new TriggerActions(this).FirstJoint();
             _timerCancelAction =_=>WorkflowAction.Empty;
             _fireAfterFunc = _ => _fireAfter;
         }
@@ -182,9 +182,7 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowDecision> ScheduleDecisions()
         {
             if (!_canSchedule(this))
-                return IsStartupItem()
-                    ? Enumerable.Empty<WorkflowDecision>()
-                    : WorkflowDecisionsOnFalseWhen(_falseAction(this));
+               return WorkflowDecisionsOnFalseWhen(_falseAction(this));
 
             return ScheduleDecisionsByIgnoringWhen();
         }

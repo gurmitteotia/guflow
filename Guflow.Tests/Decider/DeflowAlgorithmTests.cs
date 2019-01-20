@@ -376,6 +376,22 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Schedule_custom_actions_when_the_startup_items_cannot_be_scheduled_becauses_of_false_when_clause()
+        {
+            _builder.AddNewEvents(_graph.WorkflowStartedEvent());
+            var workflow = new CustomActionOnNonSchedulableStartupItem();
+            var decisions = workflow.Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new []
+            {
+                new RecordMarkerWorkflowDecision("marker1", "1"), 
+                new RecordMarkerWorkflowDecision("marker2", "2"), 
+                new RecordMarkerWorkflowDecision("marker3", "3"), 
+                new RecordMarkerWorkflowDecision("marker4", "4"), 
+            }));
+        }
+
+        [Test]
         public void Schedule_first_joint_item_when_the_branch_is_made_inactive_by_ignore_action()
         {
             _builder.AddProcessedEvents(ActivityCompletedGraph(BookHotelActivity));
@@ -1163,6 +1179,17 @@ namespace Guflow.Tests.Decider
             }
         }
 
+        [WorkflowDescription("1.0")]
+        public class CustomActionOnNonSchedulableStartupItem : Workflow
+        {
+            public CustomActionOnNonSchedulableStartupItem()
+            {
+                ScheduleActivity(BookHotelActivity, Version).When(_ => false, _=>RecordMarker("marker1", "1"));
+                ScheduleTimer(TimerName).When(_ => false, _ => RecordMarker("marker2", "2"));
+                ScheduleLambda(BookHotelLambda).When(_ => false, _ => RecordMarker("marker3", "3"));
+                ScheduleChildWorkflow(BookFlightWorkflow,Version).When(_ => false, _ => RecordMarker("marker4", "4"));
+            }
+        }
 
         [WorkflowDescription("1.0")]
         private class WorkflowWithBranchBecomingInActiveByIgnoreAction : Workflow
