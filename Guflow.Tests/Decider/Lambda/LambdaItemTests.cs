@@ -70,6 +70,20 @@ namespace Guflow.Tests.Decider
             Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo("\""+workflowInput+"\""));
         }
 
+        [Test]
+        public void Does_not_put_json_string_in_quotes()
+        {
+            var workflow = new Mock<IWorkflow>();
+            const string workflowInput = "{\"Id\":\"10\"}";
+            workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(_builder.WorkflowStartedGraph(workflowInput)));
+            var lambdaItem = new LambdaItem(_lambdaIdentity, workflow.Object);
+
+            var decisions = lambdaItem.ScheduleDecisions();
+            var swfDecision = decisions.Single().SwfDecision();
+
+            Assert.That(swfDecision.ScheduleLambdaFunctionDecisionAttributes.Input, Is.EqualTo(workflowInput));
+        }
+
 
         [Test]
         public void Does_not_put_non_string_in_quotes()
