@@ -11,6 +11,7 @@ namespace Guflow.Decider
         private readonly IWorkflow _workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
         protected readonly Identity Identity;
+        public readonly Stack<WorkflowItem> _continueItems = new Stack<WorkflowItem>();
         protected WorkflowItem(Identity identity, IWorkflow workflow)
         {
             Identity = identity;
@@ -101,7 +102,6 @@ namespace Guflow.Decider
         {
             return _parentItems;
         }
-
         public abstract IEnumerable<WorkflowDecision> ScheduleDecisions();
 
         public abstract IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen();
@@ -149,7 +149,7 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowBranch> ChildBranches()
         {
-            return WorkflowBranch.ChildBranches(this, _workflow);
+            return Children().SelectMany(c=>WorkflowBranch.ChildBranches(c, _workflow));
         }
         protected void AddParent(Identity identity)
         {
@@ -187,5 +187,12 @@ namespace Guflow.Decider
             var e = _workflow.CurrentlyExecutingEvent as WorkflowSignaledEvent;
             return e != null ? e.EventId : 0;
         }
+
+        public bool HasContinueItem(WorkflowItem item) => _continueItems.Contains(item);
+
+        public void PushContinueItem(WorkflowItem item) => _continueItems.Push(item);
+
+        public void PopContinueItem() => _continueItems.Pop();
+
     }
 }

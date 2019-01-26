@@ -22,13 +22,10 @@ namespace Guflow.Decider
             return  new TriggerWorkflowAction(_triggeringItem);
         }
 
-        internal WorkflowAction FirstJoint(IWorkflowItem beforeItem)
+        internal WorkflowAction FirstJoint(WorkflowItem jumptedItem)
         {
-            var workflowItem = beforeItem as WorkflowItem;
-            Ensure.NotNull(workflowItem, nameof(beforeItem));
-
             var trigger = new TriggerWorkflowAction(_triggeringItem);
-            trigger.SetJumpedItem(workflowItem);
+            trigger.SetJumpedItem(jumptedItem);
             return trigger;
         }
     }

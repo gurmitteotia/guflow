@@ -20,11 +20,13 @@ namespace Guflow.Tests.Decider
         private const string TimerName = "DelayTimer";
         private const string Version = "1.0";
         private const string BookHotelLambda = "BookHotel";
-        private const string AddDinnerLambda = "AddDinnerLambda";
+        private const string BookHotelDinnerLambda = "AddDinnerLambda";
         private const string BookFlightLambda = "BookFlightLambda";
         private const string ChooseSeatLambda = "ChooseSeatLambda";
         private const string ChargeCustomerLambda = "ChargeCustomerLambda";
         private const string SendEmailLambda = "SendEmailLambda";
+        private const string BookAirportTaxyLambda = "BookAirportTaxyLambda";
+        private const string BookSubwayTicketLambda = "BookSubwayTicketLambda";
 
         private const string InvoiceCustomerWorkflow = "InvoiceCustomer";
         private const string ChooseSeatWorkflow = "ChoosSeat";
@@ -422,7 +424,7 @@ namespace Guflow.Tests.Decider
         public void Does_not_schedule_a_child_item_when_one_of_the_lambda_in_its_parent_branch_is_active()
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
-            _builder.AddProcessedEvents(LambdaStartedGraph(AddDinnerLambda));
+            _builder.AddProcessedEvents(LambdaStartedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(ActivityCompletedGraph(ChooseSeatActivity));
 
             var decisions = new LambdaWorkflow().Decisions(_builder.Result());
@@ -436,7 +438,7 @@ namespace Guflow.Tests.Decider
         {
             _builder.AddProcessedEvents(_graph.WorkflowStartedEvent());
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new LambdaWorkflow().Decisions(_builder.Result());
 
@@ -448,7 +450,7 @@ namespace Guflow.Tests.Decider
         {
             _builder.AddProcessedEvents(_graph.WorkflowStartedEvent());
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new JumpToLambdaWorkflow().Decisions(_builder.Result());
 
@@ -465,7 +467,7 @@ namespace Guflow.Tests.Decider
             _builder = new HistoryEventsBuilder();
             _builder.AddProcessedEvents(_graph.WorkflowStartedEvent(new {ChooseSeat = false}));
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
-            _builder.AddProcessedEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(BookFlightLambda));
 
             var decisions = new LambdaWithConditionWorkflow().Decisions(_builder.Result());
@@ -496,7 +498,7 @@ namespace Guflow.Tests.Decider
             _builder = new HistoryEventsBuilder();
             _builder.AddProcessedEvents(_graph.WorkflowStartedEvent(new { ChooseSeat = false }));
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
-            _builder.AddProcessedEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(BookFlightLambda));
 
             var decisions = new WorkflowWithCustomTrigger().Decisions(_builder.Result());
@@ -511,7 +513,7 @@ namespace Guflow.Tests.Decider
         public void Schedule_the_first_joint_item_when_jumping_down_to_child_workflow()
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
-            _builder.AddProcessedEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
 
@@ -529,7 +531,7 @@ namespace Guflow.Tests.Decider
         public void Trigger_the_scheduling_of_first_joint_item_when_child_workflow_when_clause_evaluated_to_false()
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
-            _builder.AddProcessedEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(BookFlightLambda));
 
             var decisions = new ChildWorkflowWithFalseWhen().Decisions(_builder.Result());
@@ -560,7 +562,7 @@ namespace Guflow.Tests.Decider
         public void Provide_custom_action_when_child_workflows_when_clause_evaluated_to_false()
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
-            _builder.AddProcessedEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(BookFlightLambda));
 
             var decisions = new ChildWorkflowWithCustomActionOnFalseWhen(WorkflowAction.CompleteWorkflow("result")).Decisions(_builder.Result());
@@ -577,7 +579,7 @@ namespace Guflow.Tests.Decider
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
 
             var decisions = new JumpToParentLambdaToKeepBranchActive().Decisions(_builder.Result());
@@ -593,7 +595,7 @@ namespace Guflow.Tests.Decider
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
 
             var decisions = new JumpToParentTimerToKeepBranchActive().Decisions(_builder.Result());
@@ -609,7 +611,7 @@ namespace Guflow.Tests.Decider
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
             _builder.AddProcessedEvents(ChildWorkflowCompletedGraph(BookFlightWorkflow, Version));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
 
             var decisions = new JumpToParentChildWorkflowToKeepBranchActive().Decisions(_builder.Result());
@@ -625,7 +627,7 @@ namespace Guflow.Tests.Decider
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
             _builder.AddProcessedEvents(ActivityCompletedGraph(BookFlightActivity));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
 
             var decisions = new JumpToParentActivityToKeepBranchActive().Decisions(_builder.Result());
@@ -641,7 +643,7 @@ namespace Guflow.Tests.Decider
         {
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new BranchBecomeInactiveOnFalseWhenClause().Decisions(_builder.Result());
 
@@ -657,7 +659,7 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
             var bf = LambdaCompletedGraph(BookFlightLambda);
             _builder.AddNewEvents(bf);
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new ActiveBranchBecauseOfWaitSignalAction().Decisions(_builder.Result());
 
@@ -674,7 +676,7 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
             var cs = LambdaCompletedGraph(ChooseSeatLambda);
             _builder.AddNewEvents(cs);
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new ImmediateParentWaitForSignal().Decisions(_builder.Result());
 
@@ -691,7 +693,7 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
             var cs = LambdaCompletedGraph(ChooseSeatLambda);
             _builder.AddNewEvents(cs);
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "");
             _builder.AddNewEvents(s);
 
@@ -717,7 +719,7 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(sg);
             var s = _graph.WorkflowSignaledEvent("FlightConfirmed", "");
             _builder.AddNewEvents(s);
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new BranchBecomeInactiveUsingIgnoreActionAfterSignal().Decisions(_builder.Result());
 
@@ -738,7 +740,7 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graph.WaitForSignalEvent(bfId, bf.First().EventId, new[] { "FlightConfirmed" }, SignalWaitType.Any));
             _builder.AddProcessedEvents(_graph.WorkflowSignaledEvent("FlightConfirmed", ""));
             _builder.AddProcessedEvents(_graph.WorkflowItemSignalledEvent(bfId, bf.First().EventId, "FlightConfirmed"));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new BranchBecomeInactiveUsingIgnoreActionAfterCompositeSignalAction().Decisions(_builder.Result());
 
@@ -758,7 +760,7 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graph.WaitForSignalEvent(bfId, bf.First().EventId, new[] { "FlightConfirmed" }, SignalWaitType.Any));
             _builder.AddProcessedEvents(_graph.WorkflowSignaledEvent("FlightConfirmed", ""));
             _builder.AddProcessedEvents(_graph.WorkflowItemSignalledEvent(bfId, bf.First().EventId, "FlightConfirmed"));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new BranchBecomeInactiveUsingCompositeIgnoreActionAfterSignal().Decisions(_builder.Result());
 
@@ -779,7 +781,7 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" }, SignalWaitType.Any, SignalNextAction.Reschedule));
             var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "");
             _builder.AddNewEvents(s);
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new ImmediateParentWaitRescheduleOnSignal().Decisions(_builder.Result());
 
@@ -801,7 +803,7 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(sg);
             var s = _graph.WorkflowSignaledEvent("FlightConfirmed", "");
             _builder.AddNewEvents(s);
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new BranchBecomeInactiveUsingJumpActionAfterSignal().Decisions(_builder.Result());
 
@@ -823,11 +825,11 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graph.WaitForSignalEvent(bfId, bf.First().EventId, new[] { "FlightConfirmed" }, SignalWaitType.Any));
             _builder.AddProcessedEvents(_graph.WorkflowSignaledEvent("FlightConfirmed", ""));
             _builder.AddProcessedEvents(_graph.WorkflowItemSignalledEvent(bfId, bf.First().EventId, "FlightConfirmed"));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new BranchBecomeInactiveUsingIgnoreActionForActivityAfterSignal().Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
+            Assert.That(decisions, Is.EqualTo(new []
             {
                 new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input")
             }));
@@ -843,11 +845,11 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graph.WaitForSignalEvent(bfId, bf.First().EventId, new[] { "FlightConfirmed" }, SignalWaitType.Any));
             _builder.AddProcessedEvents(_graph.WorkflowSignaledEvent("FlightConfirmed", ""));
             _builder.AddProcessedEvents(_graph.WorkflowItemSignalledEvent(bfId, bf.First().EventId, "FlightConfirmed"));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new BranchBecomeInactiveUsingIgnoreActionFoTimerAfterSignal().Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
+            Assert.That(decisions, Is.EqualTo(new []
             {
                 new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input")
             }));
@@ -863,16 +865,88 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graph.WaitForSignalEvent(bfId, bf.First().EventId, new[] { "FlightConfirmed" }, SignalWaitType.Any));
             _builder.AddProcessedEvents(_graph.WorkflowSignaledEvent("FlightConfirmed", ""));
             _builder.AddProcessedEvents(_graph.WorkflowItemSignalledEvent(bfId, bf.First().EventId, "FlightConfirmed"));
-            _builder.AddNewEvents(LambdaCompletedGraph(AddDinnerLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
             var decisions = new BranchBecomeInactiveUsingIgnoreActionForChildWorkflowAfterSignal().Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
+            Assert.That(decisions, Is.EqualTo(new []{new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input")}));
+        }
+
+        [Test]
+        public void Schedule_only_one_of_the_child_of_multiple_parents()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelLambda));
+
+            var decisions = new OneOfTheChildOfMultipleParentsDoesNotScheduleWorkflow().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new []{new ScheduleLambdaDecision(Identity.Lambda(BookHotelDinnerLambda).ScheduleId(), "input")}));
+        }
+
+        [Test]
+        public void Schedule_only_one_of_two_children_of_multiple_parents_and_children_have_joint_item()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelLambda));
+
+            var decisions = new OneOfTheChildOfMultipleParentsDoesNotScheduleAndItHasChildJointItem().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(BookHotelDinnerLambda).ScheduleId(), "input") }));
+        }
+
+        [Test]
+        public void Schedule_only_one_of_three_children_of_multiple_parents_and_children_have_joint_item()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelLambda));
+
+            var decisions = new TwoOfTheChildrenOfMultipleParentsDoesNotScheduleAndTheyHaveChildJointItem().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(BookHotelDinnerLambda).ScheduleId(), "input") }));
+        }
+
+        [Test]
+        public void Schedule_two_of_three_children_of_multiple_parents_and_children_have_joint_item()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelLambda));
+
+            var decisions = new TwoOfTheChildrenOfMultipleParentsScheduleAndTheyHaveChildJointItem().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[]
             {
-                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input")
+                new ScheduleLambdaDecision(Identity.Lambda(BookHotelDinnerLambda).ScheduleId(), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(BookAirportTaxyLambda).ScheduleId(), "input"),
+
             }));
         }
 
+        [Test]
+        public void Schedule_only_one_of_two_children_of_multiple_parents_when_one_parent_branch_is_inacive_and_children_have_joint_item()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new OneParentBranchBecomeInactiveAndOnlyOneOfTheChildrenIsScheduled().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(BookAirportTaxyLambda).ScheduleId(), "input") }));
+        }
+
+        [Test]
+        public void Reset_the_continued_item_states_after_execution()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var workflow = new OneOfTheChildrenOfMultipleParentsThrowsExceptionAndTheyHaveChildJointItem() { Throw = true};
+            Assert.Throws<InvalidOperationException>(() => workflow.Decisions(_builder.Result()));
+            workflow.Throw = false;
+            var decisions = workflow.Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(BookAirportTaxyLambda).ScheduleId(), "input") }));
+        }
 
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
         {
@@ -1235,12 +1309,12 @@ namespace Guflow.Tests.Decider
             public LambdaWorkflow()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleActivity(BookFlightActivity, Version);
                 ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
             }
         }
 
@@ -1250,13 +1324,13 @@ namespace Guflow.Tests.Decider
             public JumpToLambdaWorkflow()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda)
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda)
                     .OnCompletion(e => Jump.ToLambda(SendEmailLambda));
 
                 ScheduleActivity(BookFlightActivity, Version);
                 ScheduleActivity(ChooseSeatActivity, Version).AfterActivity(BookFlightActivity, Version);
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
 
                 ScheduleLambda(SendEmailLambda).AfterLambda(ChargeCustomerLambda);
             }
@@ -1268,12 +1342,12 @@ namespace Guflow.Tests.Decider
             public LambdaWithConditionWorkflow()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).When(_ => Input.BookFlight);
                 ScheduleLambda(ChooseSeatLambda).When(_ => Input.ChooseSeat).AfterLambda(BookFlightLambda);
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1283,12 +1357,12 @@ namespace Guflow.Tests.Decider
             public WorkflowWithCustomTrigger()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).When(_ => Input.BookFlight);
                 ScheduleLambda(ChooseSeatLambda).When(_ => Input.ChooseSeat, _=>CompleteWorkflow("finished")).AfterLambda(BookFlightLambda);
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1298,13 +1372,13 @@ namespace Guflow.Tests.Decider
             public WorkflowWithJumpToChildWorkflow()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
                 ScheduleLambda(ChooseSeatLambda)
                     .OnCompletion(_ => Jump.ToChildWorkflow(InvoiceCustomerWorkflow, Version));
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
 
                 ScheduleChildWorkflow(InvoiceCustomerWorkflow, Version).AfterLambda(ChargeCustomerLambda);
             }
@@ -1316,12 +1390,12 @@ namespace Guflow.Tests.Decider
             public ChildWorkflowWithFalseWhen()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
                 ScheduleChildWorkflow(ChooseSeatWorkflow,Version).When(_ => false).AfterLambda(BookFlightLambda);
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda)
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda)
                     .AfterChildWorkflow(ChooseSeatWorkflow, Version);
             }
         }
@@ -1332,12 +1406,12 @@ namespace Guflow.Tests.Decider
             public ChildWorkflowWithCustomActionOnFalseWhen(WorkflowAction action)
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
                 ScheduleChildWorkflow(ChooseSeatWorkflow, Version).When(_ => false, _=>action).AfterLambda(BookFlightLambda);
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda)
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda)
                     .AfterChildWorkflow(ChooseSeatWorkflow, Version);
             }
         }
@@ -1348,12 +1422,12 @@ namespace Guflow.Tests.Decider
             public StartupChildWorkflowWithFalseWhen()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleChildWorkflow(BookFlightWorkflow, Version).When(_ => false);
                 ScheduleChildWorkflow(ChooseSeatWorkflow, Version).AfterChildWorkflow(BookFlightWorkflow,Version);
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda)
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda)
                     .AfterChildWorkflow(ChooseSeatWorkflow, Version);
             }
         }
@@ -1364,13 +1438,13 @@ namespace Guflow.Tests.Decider
             public JumpToParentLambdaToKeepBranchActive()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda)
                     .OnCompletion(_ => Jump.ToLambda(BookFlightLambda));
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1380,14 +1454,14 @@ namespace Guflow.Tests.Decider
             public JumpToParentTimerToKeepBranchActive()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
                 ScheduleTimer(TimerName).AfterLambda(BookFlightLambda);
                 ScheduleLambda(ChooseSeatLambda).AfterTimer(TimerName)
                     .OnCompletion(_ => Jump.ToTimer(TimerName));
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1397,13 +1471,13 @@ namespace Guflow.Tests.Decider
             public JumpToParentChildWorkflowToKeepBranchActive()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleChildWorkflow(BookFlightWorkflow, Version);
                 ScheduleLambda(ChooseSeatLambda).AfterChildWorkflow(BookFlightWorkflow, Version)
                     .OnCompletion(_ => Jump.ToChildWorkflow(BookFlightWorkflow, Version));
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1414,13 +1488,13 @@ namespace Guflow.Tests.Decider
             public JumpToParentActivityToKeepBranchActive()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleActivity(BookFlightActivity, Version);
                 ScheduleLambda(ChooseSeatLambda).AfterActivity(BookFlightActivity, Version)
                     .OnCompletion(_ => Jump.ToActivity(BookFlightActivity, Version));
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
         private class BranchBecomeInactiveOnFalseWhenClause : Workflow
@@ -1428,12 +1502,12 @@ namespace Guflow.Tests.Decider
             public BranchBecomeInactiveOnFalseWhenClause()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false, _ => Ignore.MakeBranchInactive());
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1442,12 +1516,12 @@ namespace Guflow.Tests.Decider
             public ActiveBranchBecauseOfWaitSignalAction()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed"));
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda);
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1456,12 +1530,12 @@ namespace Guflow.Tests.Decider
             public ImmediateParentWaitForSignal()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("SeatConfirmed"));
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
         private class BranchBecomeInactiveUsingIgnoreActionAfterSignal : Workflow
@@ -1469,12 +1543,12 @@ namespace Guflow.Tests.Decider
             public BranchBecomeInactiveUsingIgnoreActionAfterSignal()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed"));
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false, _=>Ignore.MakeBranchInactive());
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1483,12 +1557,12 @@ namespace Guflow.Tests.Decider
             public BranchBecomeInactiveUsingIgnoreActionAfterCompositeSignalAction()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed")+RecordMarker("marker", "detail"));
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false, _ => Ignore.MakeBranchInactive());
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1497,12 +1571,12 @@ namespace Guflow.Tests.Decider
             public BranchBecomeInactiveUsingCompositeIgnoreActionAfterSignal()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed"));
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false, _ => Ignore.MakeBranchInactive() + RecordMarker("marker", "m"));
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1511,12 +1585,12 @@ namespace Guflow.Tests.Decider
             public BranchBecomeInactiveUsingJumpActionAfterSignal()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed"));
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false, _ => Jump.ToLambda(SendEmailLambda));
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
                 ScheduleLambda(SendEmailLambda).AfterLambda(ChargeCustomerLambda);
             }
         }
@@ -1526,12 +1600,12 @@ namespace Guflow.Tests.Decider
             public ImmediateParentWaitRescheduleOnSignal()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
                 ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("SeatConfirmed").ToReschedule());
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
             }
         }
 
@@ -1540,12 +1614,12 @@ namespace Guflow.Tests.Decider
             public BranchBecomeInactiveUsingIgnoreActionForActivityAfterSignal()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed"));
                 ScheduleActivity(ChooseSeatActivity,Version).AfterLambda(BookFlightLambda).When(_ => false, _ => Ignore.MakeBranchInactive());
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterActivity(ChooseSeatActivity, Version);
             }
         }
 
@@ -1554,12 +1628,12 @@ namespace Guflow.Tests.Decider
             public BranchBecomeInactiveUsingIgnoreActionFoTimerAfterSignal()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed"));
                 ScheduleTimer(TimerName).AfterLambda(BookFlightLambda).When(_ => false, _ => Ignore.MakeBranchInactive());
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterTimer(TimerName);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterTimer(TimerName);
             }
         }
 
@@ -1568,12 +1642,109 @@ namespace Guflow.Tests.Decider
             public BranchBecomeInactiveUsingIgnoreActionForChildWorkflowAfterSignal()
             {
                 ScheduleLambda(BookHotelLambda);
-                ScheduleLambda(AddDinnerLambda).AfterLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda).OnCompletion(e => e.WaitForSignal("FlightConfirmed"));
                 ScheduleChildWorkflow(ChooseSeatWorkflow, Version).AfterLambda(BookFlightLambda).When(_ => false, _ => Ignore.MakeBranchInactive());
 
-                ScheduleLambda(ChargeCustomerLambda).AfterLambda(AddDinnerLambda).AfterChildWorkflow(ChooseSeatWorkflow, Version);
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterChildWorkflow(ChooseSeatWorkflow, Version);
+            }
+        }
+
+        private class OneOfTheChildOfMultipleParentsDoesNotScheduleWorkflow : Workflow
+        {
+            public OneOfTheChildOfMultipleParentsDoesNotScheduleWorkflow()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(BookFlightLambda);
+
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda).When(_ => false);
+            }
+        }
+
+        private class OneOfTheChildOfMultipleParentsDoesNotScheduleAndItHasChildJointItem : Workflow
+        {
+            public OneOfTheChildOfMultipleParentsDoesNotScheduleAndItHasChildJointItem()
+            {
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(BookHotelLambda);
+
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda).When(_ => false);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
+            }
+        }
+
+        private class TwoOfTheChildrenOfMultipleParentsDoesNotScheduleAndTheyHaveChildJointItem : Workflow
+        {
+            public TwoOfTheChildrenOfMultipleParentsDoesNotScheduleAndTheyHaveChildJointItem()
+            {
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(BookHotelLambda);
+
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda).When(_ => false);
+                ScheduleLambda(BookAirportTaxyLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda).When(_ => false);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .AfterLambda(BookAirportTaxyLambda);
+            }
+        }
+
+        private class TwoOfTheChildrenOfMultipleParentsScheduleAndTheyHaveChildJointItem : Workflow
+        {
+            public TwoOfTheChildrenOfMultipleParentsScheduleAndTheyHaveChildJointItem()
+            {
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(BookHotelLambda);
+
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda).When(_ => false);
+                ScheduleLambda(BookAirportTaxyLambda).AfterLambda(BookHotelLambda).AfterLambda(BookFlightLambda);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .AfterLambda(BookAirportTaxyLambda);
+            }
+        }
+
+        private class OneParentBranchBecomeInactiveAndOnlyOneOfTheChildrenIsScheduled : Workflow
+        {
+            public OneParentBranchBecomeInactiveAndOnlyOneOfTheChildrenIsScheduled()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false);
+
+                ScheduleLambda(BookAirportTaxyLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(BookSubwayTicketLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .When(_ => false);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookAirportTaxyLambda)
+                    .AfterLambda(BookSubwayTicketLambda);
+            }
+        }
+
+        private class OneOfTheChildrenOfMultipleParentsThrowsExceptionAndTheyHaveChildJointItem : Workflow
+        {
+            public bool Throw;
+            public OneOfTheChildrenOfMultipleParentsThrowsExceptionAndTheyHaveChildJointItem()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false);
+
+                ScheduleLambda(BookAirportTaxyLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(BookSubwayTicketLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .When(_ => false, i => Throw ? throw new InvalidOperationException("msg") : Trigger(i).FirstJoint());
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookAirportTaxyLambda)
+                    .AfterLambda(BookSubwayTicketLambda);
             }
         }
 

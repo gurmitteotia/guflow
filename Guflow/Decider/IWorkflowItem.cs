@@ -75,6 +75,12 @@ namespace Guflow.Decider
         /// <param name="signalName"></param>
         /// <returns></returns>
         bool IsWaitingForSignal(string signalName);
+
+        /// <summary>
+        /// Returns true if this workflow item is waiting for any signal.
+        /// </summary>
+        /// <returns></returns>
+        bool IsWaitingForAnySignal();
     }
 
     internal interface ITimer
