@@ -8,7 +8,8 @@ namespace Guflow.Decider
 {
     internal class TriggerWorkflowAction : WorkflowAction
     {
-        private readonly WorkflowItem _triggeringItem;
+        private WorkflowItem _triggeringItem;
+        private WorkflowItem _jumpedItem;
         private Func<WorkflowBranch, WorkflowItem> _findFirstJointItem = b => b.FindFirstJointItem();
         public TriggerWorkflowAction(WorkflowItem triggeringItem)
         {
@@ -16,12 +17,13 @@ namespace Guflow.Decider
         }
         public void SetJumpedItem(WorkflowItem jumpedItem)
         {
-            ValidateJump(jumpedItem);
+            _jumpedItem = jumpedItem;
             _findFirstJointItem = b => b.FindFirstJointItem(jumpedItem);
         }
 
         internal override IEnumerable<WorkflowDecision> Decisions()
         {
+            ValidateJump();
             var triggeredDecisions = new List<WorkflowDecision>();
             var childBranches = _triggeringItem.ChildBranches();
             foreach (var childBranch in childBranches)
@@ -33,12 +35,20 @@ namespace Guflow.Decider
             return triggeredDecisions;
         }
 
-        private void ValidateJump(WorkflowItem jumpedItem)
+        internal override WorkflowAction WithTriggeredItem(WorkflowItem item)
         {
+            _triggeringItem = item;
+            return this;
+        }
+
+        private void ValidateJump()
+        {
+            if (_jumpedItem == null) return;
+            if (_triggeringItem.Equals(_jumpedItem)) return;
             var triggeringItemBranches = _triggeringItem.ParentBranches().Concat(_triggeringItem.ChildBranches());
 
-            if (!triggeringItemBranches.Any(b => b.Has(jumpedItem)))
-                throw new OutOfBranchJumpException(string.Format(Resources.Invalid_jump, jumpedItem, _triggeringItem));
+            if (!triggeringItemBranches.Any(b => b.Has(_jumpedItem)))
+                throw new OutOfBranchJumpException(string.Format(Resources.Invalid_jump, _jumpedItem, _triggeringItem));
         }
     }
 }

@@ -62,6 +62,18 @@ namespace Guflow.IntegrationTests
                 public const string Name = "OrderItem";
                 public const string Version = "1.0";
             }
+
+            public static class EmailConfirm
+            {
+                public const string Name = "EmailConfirm";
+                public const string Version = "1.0";
+            }
+
+            public static class ActivateUser
+            {
+                public const string Name = "ActivateUser";
+                public const string Version = "1.0";
+            }
         }
 
         public static class Workflow

@@ -17,6 +17,7 @@ namespace Guflow.Decider
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedLambdaEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedChildWorkflowEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
 
+        private List<WaitForSignalsEvent> _cachedWaitEvents = null;
         //TODO : Get rid of this constructor once the dependent constructor is deleted.
         private WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long previousStartedEventId, long newStartedEventId)
         {
@@ -31,6 +32,7 @@ namespace Guflow.Decider
             _previousStartedEventId = decisionTask.PreviousStartedEventId;
             _newStartedEventId = decisionTask.StartedEventId;
             WorkflowRunId = decisionTask.WorkflowExecution.RunId;
+            WorkflowId = decisionTask.WorkflowExecution.WorkflowId;
         }
 
         //TODO: Get rid of this constructor.
@@ -98,6 +100,7 @@ namespace Guflow.Decider
         }
 
         public string WorkflowRunId { get; }
+        public string WorkflowId { get; }
 
         public IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem)
         {
@@ -206,6 +209,19 @@ namespace Guflow.Decider
             @event = AllChildWorkflowEvents(childWorkflowItem).FirstOrDefault(e=>!LastEventFilters.ChildWorkflow.Contains(e));
             _cachedChildWorkflowEvents.Add(childWorkflowItem, @event);
             return @event;
+        }
+        public IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents()
+        {
+            if (_cachedWaitEvents != null) return _cachedWaitEvents;
+            _cachedWaitEvents = new List<WaitForSignalsEvent>();
+            foreach (var historyEvent in _allHistoryEvents.Reverse())
+            {
+                var waitEvent = historyEvent.WaitForSignalsEvent(_allHistoryEvents);
+                if (waitEvent != null)
+                    _cachedWaitEvents.Add(waitEvent);
+            }
+
+            return _cachedWaitEvents;
         }
 
         public long LatestEventId => _allHistoryEvents.First().EventId;

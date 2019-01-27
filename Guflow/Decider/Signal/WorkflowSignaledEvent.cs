@@ -47,7 +47,7 @@ namespace Guflow.Decider
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
         {
-            return defaultActions.Ignore();
+            return defaultActions.ResumeOnSignal(SignalName);
         }
     }
 }

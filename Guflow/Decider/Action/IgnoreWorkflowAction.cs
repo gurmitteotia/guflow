@@ -8,13 +8,13 @@ namespace Guflow.Decider
     /// </summary>
     public sealed class IgnoreWorkflowAction : WorkflowAction
     {
-        private readonly WorkflowItem _triggeringItem;
+        private WorkflowItem _triggeringItem;
         private WorkflowAction _triggerAction = Empty;
         private bool _keepBranchActive;
         internal IgnoreWorkflowAction(WorkflowItem triggeringItem)
         {
             _triggeringItem = triggeringItem;
-            _keepBranchActive = triggeringItem!=null;
+            _keepBranchActive = _triggeringItem != null;
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Guflow.Decider
         public WorkflowAction MakeBranchInactive()
         {
             _keepBranchActive = false;
-            if(_triggeringItem!=null)
+            if(_triggeringItem != null)
                 _triggerAction = new TriggerActions(_triggeringItem).FirstJoint();
             return this;
         }
@@ -53,6 +53,13 @@ namespace Guflow.Decider
         }
 
         internal override bool ReadyToScheduleChildren => !_keepBranchActive;
+
+        internal override WorkflowAction WithTriggeredItem(WorkflowItem item)
+        {
+            _triggeringItem = item;
+            _triggerAction.WithTriggeredItem(item);
+            return this;
+        }
 
         private bool Equals(IgnoreWorkflowAction other)
         {

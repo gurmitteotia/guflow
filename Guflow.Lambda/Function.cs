@@ -1,22 +1,36 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+
 using Amazon.Lambda.Core;
+using Amazon.Lambda.APIGatewayEvents;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
 namespace Guflow.Lambda
 {
-    public class Function
+    public class Functions
     {
-        
         /// <summary>
-        /// A simple function that takes a string return predefined result.
+        /// Default constructor that Lambda will invoke.
         /// </summary>
-        /// <param name="input"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public string BookHotelLambda(string input, ILambdaContext context)
+        public Functions()
         {
-            return "hotelbooked";
         }
+
+        public string BookHotelLambda(Input input, ILambdaContext context)
+        {
+            return $"hotelbooked-{input.Id}-{input.Age}";
+        }
+
+        public class Input
+        {
+            public int Id;
+            public int Age;
+        }
+
     }
 }

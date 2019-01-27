@@ -7,22 +7,22 @@ namespace Guflow.Decider
     public sealed class JumpActions
     {
         private readonly WorkflowItems _workflowItems;
-        private readonly Func<WorkflowItem, WorkflowAction> _triggeringAction;
+        private readonly WorkflowItem _triggerItem;
 
-        private JumpActions(WorkflowItems workflowItems, Func<WorkflowItem, WorkflowAction> triggeringAction)
+        private JumpActions(WorkflowItems workflowItems, WorkflowItem triggerItem)
         {
             _workflowItems = workflowItems;
-            _triggeringAction = triggeringAction;
+            _triggerItem = triggerItem;
         }
 
-        internal static JumpActions FromWorkflowItem(WorkflowItems workflowItems, WorkflowItem workflowItem)
+        internal static JumpActions FromWorkflowItem(WorkflowItems workflowItems, WorkflowItem triggerItem)
         {
-            return new JumpActions(workflowItems, jumpItem=>new TriggerActions(workflowItem).FirstJoint(jumpItem));
+            return new JumpActions(workflowItems, triggerItem);
         }
 
         internal static JumpActions FromWorkflowEvent(WorkflowItems workflowItems)
         {
-            return new JumpActions(workflowItems, jumpItem => WorkflowAction.Empty);
+            return new JumpActions(workflowItems, null);
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(version, "version");
 
             var activityItem = _workflowItems.ActivityItem(Identity.New(name, version, positionalName));
-            return WorkflowAction.JumpTo(activityItem).WithTriggerAction(_triggeringAction(activityItem));
+            return WorkflowAction.JumpTo(_triggerItem,activityItem);
         }
         /// <summary>
         /// Jump to an activity. Cause the workflow to fail if target activity is already active. It reads activity name and version
@@ -60,7 +60,7 @@ namespace Guflow.Decider
         {
             Ensure.NotNullAndEmpty(name, "name");
             var timerItem = _workflowItems.TimerItem(Identity.Timer(name));
-            return WorkflowAction.JumpTo(timerItem).WithTriggerAction(_triggeringAction(timerItem));
+            return WorkflowAction.JumpTo(_triggerItem, timerItem);
         }
 
         /// <summary>
@@ -69,11 +69,11 @@ namespace Guflow.Decider
         /// <param name="name">Lambda name.</param>
         /// <param name="postionalName">Lambda's postional name</param>
         /// <returns></returns>
-        public WorkflowAction ToLambda(string name, string postionalName = "")
+        public JumpWorkflowAction ToLambda(string name, string postionalName = "")
         {
             Ensure.NotNullAndEmpty(name, nameof(name));
             var lambdaItem = _workflowItems.LambdaItem(Identity.Lambda(name, postionalName));
-            return WorkflowAction.JumpTo(lambdaItem).WithTriggerAction(_triggeringAction(lambdaItem));
+            return WorkflowAction.JumpTo(_triggerItem, lambdaItem);
         }
 
         /// <summary>
@@ -83,12 +83,12 @@ namespace Guflow.Decider
         /// <param name="version"></param>
         /// <param name="positionalName"></param>
         /// <returns></returns>
-        public WorkflowAction ToChildWorkflow(string name, string version, string positionalName ="")
+        public JumpWorkflowAction ToChildWorkflow(string name, string version, string positionalName ="")
         {
             Ensure.NotNull(name, nameof(name));
             Ensure.NotNull(version, nameof(version));
             var item = _workflowItems.ChildWorkflowItem(Identity.New(name, version, positionalName));
-            return WorkflowAction.JumpTo(item).WithTriggerAction(_triggeringAction(item));
+            return WorkflowAction.JumpTo(_triggerItem, item);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Guflow.Decider
         /// <typeparam name="TWorkflow"></typeparam>
         /// <param name="positionalName"></param>
         /// <returns></returns>
-        internal WorkflowAction ToChildWorkflow<TWorkflow>(string positionalName = "") where TWorkflow :Workflow
+        internal JumpWorkflowAction ToChildWorkflow<TWorkflow>(string positionalName = "") where TWorkflow :Workflow
         {
             var desc = WorkflowDescription.FindOn<TWorkflow>();
             return ToChildWorkflow(desc.Name, desc.Version, positionalName);

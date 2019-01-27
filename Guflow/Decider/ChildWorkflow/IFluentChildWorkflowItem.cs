@@ -126,5 +126,12 @@ namespace Guflow.Decider
         /// <param name="workflowAction"></param>
         /// <returns></returns>
         IFluentChildWorkflowItem OnCancellationFailed(Func<ExternalWorkflowCancelRequestFailedEvent, WorkflowAction> workflowAction);
+
+        /// <summary>
+        /// Configure the handler to return the <see cref="WorkflowAction"/> on <see cref="ChildWorkflowStartedEvent"/>. By default this event is ignored.
+        /// </summary>
+        /// <param name="workflowAction"></param>
+        /// <returns></returns>
+        IFluentChildWorkflowItem OnStarted(Func<ChildWorkflowStartedEvent, WorkflowAction> workflowAction);
     }
 }

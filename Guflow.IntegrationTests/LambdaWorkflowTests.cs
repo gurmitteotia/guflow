@@ -16,7 +16,7 @@ namespace Guflow.IntegrationTests
         private static string _taskListName;
         private Configuration _configuration;
         [SetUp]
-        public async Task Setup()
+        public void Setup()
         {
             Log.Register(Log.ConsoleLogger);
             _domain = new TestDomain();
@@ -41,10 +41,10 @@ namespace Guflow.IntegrationTests
             workflow.Completed += (s, e) => result = e.Result;
             _workflowHost = await HostAsync(workflow);
             
-            await _domain.StartWorkflow<ScheduleLambdaWorkflow>("input", _taskListName, _configuration["LambdaRole"]);
+            await _domain.StartWorkflow<ScheduleLambdaWorkflow>(new {Id=10, Age=20}, _taskListName, _configuration["LambdaRole"]);
             @event.WaitOne();
 
-            Assert.That(result, Is.EqualTo("\"hotelbooked\""));
+            Assert.That(result, Is.EqualTo("\"hotelbooked-10-20\""));
         }
 
         private async Task<WorkflowHost> HostAsync(params Workflow[] workflows)

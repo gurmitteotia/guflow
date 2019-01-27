@@ -24,5 +24,20 @@ namespace Guflow.Decider
         {
             return _left.Decisions().Concat(_right.Decisions());
         }
+
+        internal override IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent()
+        {
+            return _left.WaitForSignalsEvent().Concat(_right.WaitForSignalsEvent());
+        }
+
+        internal override WorkflowAction TriggeredAction(WorkflowItem item)
+        {
+            return _left.TriggeredAction(item) + _right.TriggeredAction(item);
+        }
+
+        internal override WorkflowAction WithTriggeredItem(WorkflowItem item)
+        {
+            return _left.WithTriggeredItem(item) + _right.WithTriggeredItem(item);
+        }
     }
 }

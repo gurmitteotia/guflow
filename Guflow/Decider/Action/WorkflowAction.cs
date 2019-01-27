@@ -29,10 +29,16 @@ namespace Guflow.Decider
         }
         internal virtual bool ReadyToScheduleChildren => false;
 
+        internal virtual WorkflowAction TriggeredAction(WorkflowItem item) => this;
+
+        internal virtual WorkflowAction WithTriggeredItem(WorkflowItem item) => this;
+
         internal virtual bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
         {
              return Decisions().Any(d => workflowItems.Any(d.IsFor));
         }
+
+        internal virtual IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent() => Enumerable.Empty<WaitForSignalsEvent>();
         
         /// <summary>
         /// Combine two workflow actions togather. Useful if multiple workflow actions needs to be returned in response of an event.
@@ -78,9 +84,9 @@ namespace Guflow.Decider
         {
             return ScheduleWorkflowItemAction.ScheduleByConsideringWhen(workflowItem);
         }
-        internal static JumpWorkflowAction JumpTo(WorkflowItem workflowItem)
+        internal static JumpWorkflowAction JumpTo(WorkflowItem triggerItem, WorkflowItem jumpItem)
         {
-            return new JumpWorkflowAction(workflowItem);
+            return new JumpWorkflowAction(triggerItem, jumpItem);
         }
         internal static WorkflowAction ContinueWorkflow(WorkflowItem workflowItem)
         {
@@ -130,5 +136,6 @@ namespace Guflow.Decider
         }
         internal static RestartWorkflowAction RestartWorkflowWithDefaultProperties()
             => new RestartWorkflowAction();
+       
     }
 }

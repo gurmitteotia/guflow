@@ -37,7 +37,7 @@ namespace Guflow.Tests.Decider
         public void Returns_the_scheduling_decision_for_workflow_item()
         {
             var workflowItem = TimerItem.New(Identity.Timer("Somename"), _workflow.Object);
-            var workflowAction = WorkflowAction.JumpTo(workflowItem);
+            var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
             var decisions = workflowAction.Decisions();
 
@@ -49,7 +49,7 @@ namespace Guflow.Tests.Decider
         {
             var identity = Identity.Timer("Somename");
             var workflowItem = TimerItem.New(identity, _workflow.Object);
-            var workflowAction = WorkflowAction.JumpTo(workflowItem);
+            var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
             var decisions = workflowAction.Decisions();
 
@@ -67,7 +67,7 @@ namespace Guflow.Tests.Decider
             _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(_builder.Result());
 
             var workflowItem = TimerItem.New(identity, _workflow.Object);
-            var workflowAction = WorkflowAction.JumpTo(workflowItem);
+            var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
             var decisions = workflowAction.Decisions();
 
@@ -78,7 +78,7 @@ namespace Guflow.Tests.Decider
         public void Returns_timer_decision_when_jumped_after_a_timeout()
         {
             var workflowItem = new ActivityItem(Identity.New("name", "ver", "pos"), _workflow.Object);
-            var workflowAction = WorkflowAction.JumpTo(workflowItem).After(TimeSpan.FromSeconds(2));
+            var workflowAction = WorkflowAction.JumpTo(null, workflowItem).After(TimeSpan.FromSeconds(2));
 
             var decisions = workflowAction.Decisions();
 

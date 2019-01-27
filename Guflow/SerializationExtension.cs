@@ -51,15 +51,22 @@ namespace Guflow
             var strValue = value as string;
             if (string.IsNullOrWhiteSpace(strValue))
                 return false;
-            try
+            strValue = strValue.Trim();
+            if ((strValue.StartsWith("{") && strValue.EndsWith("}")) || //For object
+                (strValue.StartsWith("[") && strValue.EndsWith("]"))) //For array
             {
-                JObject.Parse(strValue);
-                return true;
+                try
+                {
+                    JToken.Parse(strValue);
+                    return true;
+                }
+                catch (JsonReaderException)
+                {
+                    return false;
+                }
             }
-            catch (JsonReaderException)
-            {
-                return false;
-            }
+
+            return false;
         }
 
         private static bool TryToParse(this object value, out JObject result)
@@ -94,7 +101,7 @@ namespace Guflow
             if (instance == null)
                 return null;
             if (instance is string strInput)
-                return EnsureEnclosedInQuotes(strInput);
+                return strInput.IsValidJson()? strInput: EnsureEnclosedInQuotes(strInput);
             if (Primitive(instance))
                 return instance.ToString();
 

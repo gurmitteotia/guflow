@@ -1,17 +1,23 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System;
 using Guflow.Properties;
 
 namespace Guflow.Decider
 {
+
+    /// <summary>
+    /// Represent the outgoing signal from workflow.
+    /// </summary>
     public class Signal
     {
         private readonly string _signalName;
         private readonly string _input;
-        private WorkflowItems _workflowItems;
-        internal Signal(string signalName, object input, WorkflowItems workflowItems)
+        private readonly IWorkflow _workflow;
+        internal Signal(string signalName, object input, IWorkflow workflow)
         {
             _signalName = signalName;
-            _workflowItems = workflowItems;
+            _workflow = workflow;
             _input = input.ToAwsString();
         }
        
@@ -52,7 +58,7 @@ namespace Guflow.Decider
         {
             Ensure.NotNull(name, nameof(name));
             Ensure.NotNull(version, nameof(version));
-            var item = _workflowItems.ChildWorkflowItem(Identity.New(name, version, positionalName));
+            var item = _workflow.ChildWorkflowItem(Identity.New(name, version, positionalName));
             return item.SignalAction(_signalName, _input);
         }
 
@@ -77,5 +83,6 @@ namespace Guflow.Decider
             Ensure.NotNull(childWorkflow, nameof(childWorkflow));
             return ForChildWorkflow(childWorkflow.Name, childWorkflow.Version, childWorkflow.PositionalName);
         }
+
     }
 }

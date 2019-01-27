@@ -26,17 +26,29 @@ namespace Guflow.Decider
         }
         internal override IEnumerable<WorkflowDecision> Decisions()
         {
-            var childItems = _completedWorkflowItem.Children();
+            var decisions = new List<WorkflowDecision>();
+            var childItems = _completedWorkflowItem.Children().ToArray();
             if (!childItems.Any())
                 return new[] { new CompleteWorkflowDecision(DefaultWorkflowCompletedResult, true) };
 
             var schedulableChildItems = childItems.Where(s => s.AreAllParentBranchesInactive(exceptBranchOf: _completedWorkflowItem));
-            return schedulableChildItems.SelectMany(f => f.ScheduleDecisions());
+            //Current continue item is tracked to avoid recursion. Need to better represent the intention.
+            foreach (var childItem in schedulableChildItems)
+            {
+                if (_completedWorkflowItem.HasContinueItem(childItem)) continue;
+                _completedWorkflowItem.PushContinueItem(childItem);
+                try
+                {
+                    decisions.AddRange(childItem.ScheduleDecisions());
+                }
+                finally
+                {
+                    _completedWorkflowItem.PopContinueItem();
+                }
+            }
+            return decisions;
         }
 
-        internal override bool ReadyToScheduleChildren
-        {
-            get { return true; }
-        }
+        internal override bool ReadyToScheduleChildren => true;
     }
 }

@@ -20,7 +20,7 @@ namespace Guflow.Decider
         //It is ignored for now. However based on user feedback we can allow user to take custom action.
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
-            return WorkflowAction.Empty;
+            return workflow.WorkflowAction(this);
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

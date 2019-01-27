@@ -16,6 +16,7 @@ namespace Guflow.Decider
         private Func<ChildWorkflowTimedoutEvent, WorkflowAction> _timedoutAction;
         private Func<ChildWorkflowStartFailedEvent, WorkflowAction> _startFailedAction;
         private Func<ExternalWorkflowCancelRequestFailedEvent, WorkflowAction> _cancelRequestFailedAction;
+        private Func<ChildWorkflowStartedEvent, WorkflowAction> _startedAction;
         private Func<IChildWorkflowItem, object> _input;
         private Func<IChildWorkflowItem, string> _childPolicy;
         private Func<IChildWorkflowItem, int?> _taskPriority;
@@ -60,6 +61,7 @@ namespace Guflow.Decider
             _terminatedAction = w => w.DefaultAction(workflow);
             _timedoutAction = w => w.DefaultAction(workflow);
             _startFailedAction = w => w.DefaultAction(workflow);
+            _startedAction = _ => WorkflowAction.Empty;
             _input = w => workflow.WorkflowHistoryEvents.WorkflowStartedEvent().Input;
             _tags = _ => Enumerable.Empty<string>();
             _when = _ => true;
@@ -93,7 +95,7 @@ namespace Guflow.Decider
         public override IEnumerable<WorkflowDecision> ScheduleDecisions()
         {
             if (!_when(this))
-                return _onWhenFalseAction(this).Decisions();
+                return WorkflowDecisionsOnFalseWhen(_onWhenFalseAction(this));
 
             return ScheduleDecisionsByIgnoringWhen();
         }
@@ -286,6 +288,13 @@ namespace Guflow.Decider
             return this;
         }
 
+        public IFluentChildWorkflowItem OnStarted(Func<ChildWorkflowStartedEvent, WorkflowAction> workflowAction)
+        {
+            Ensure.NotNull(workflowAction, nameof(workflowAction));
+            _startedAction = workflowAction;
+            return this;
+        }
+
         public WorkflowAction CompletedAction(ChildWorkflowCompletedEvent completedEvent)
         {
             return _completedAction(completedEvent);
@@ -343,6 +352,11 @@ namespace Guflow.Decider
         public WorkflowAction CancelRequestFailedAction(ExternalWorkflowCancelRequestFailedEvent @event)
         {
             return _cancelRequestFailedAction(@event);
+        }
+
+        public WorkflowAction StartedAction(ChildWorkflowStartedEvent startedEvent)
+        {
+            return _startedAction(startedEvent);
         }
     }
 }

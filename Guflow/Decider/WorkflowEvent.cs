@@ -9,10 +9,9 @@ namespace Guflow.Decider
     /// </summary>
     public abstract class WorkflowEvent : IComparable<WorkflowEvent>
     {
-        private readonly long _eventId;
         protected WorkflowEvent(long eventId)
         {
-            _eventId = eventId;
+            EventId = eventId;
         }
 
         internal virtual WorkflowAction Interpret(IWorkflow workflow)
@@ -24,22 +23,23 @@ namespace Guflow.Decider
         {
             throw new NotSupportedException($"DefaultAction is not supported {this.GetType().Name}.");
         }
+        internal long EventId { get; }
         public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();
     
         public int CompareTo(WorkflowEvent other)
         {
             if (other == null)
                 return 1;
-            return _eventId.CompareTo(other._eventId);
+            return EventId.CompareTo(other.EventId);
         }
 
         public override string ToString()
         {
-            return $"{GetType().Name} with event id {_eventId}";
+            return $"{GetType().Name} with event id {EventId}";
         }
         private bool Equals(WorkflowEvent other)
         {
-            return _eventId == other?._eventId;
+            return EventId == other?.EventId;
         }
 
         public override bool Equals(object other)
@@ -52,7 +52,7 @@ namespace Guflow.Decider
 
         public override int GetHashCode()
         {
-            return _eventId.GetHashCode();
+            return EventId.GetHashCode();
         }
 
         public static bool operator ==(WorkflowEvent left, WorkflowEvent right)

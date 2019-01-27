@@ -24,6 +24,14 @@ namespace Guflow.Decider
         /// </summary>
         /// <param name="timeout"></param>
         /// <returns></returns>
+        [Obsolete("Please use Reset method with timeout argument.", false)]
         WorkflowAction Reschedule(TimeSpan timeout);
+
+        /// <summary>
+        /// Cancel the already scheduled timer and schedule it again with new timeout. Throws exception if timer is not already active.
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        WorkflowAction Reset(TimeSpan timeout);
     }
 }

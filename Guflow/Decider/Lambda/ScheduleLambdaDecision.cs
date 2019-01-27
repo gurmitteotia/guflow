@@ -50,5 +50,9 @@ namespace Guflow.Decider
             return -1493283476 + _id.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return $"{GetType().Name} with schedule id{_id}";
+        }
     }
 }

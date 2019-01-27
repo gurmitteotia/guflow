@@ -1,35 +1,32 @@
-# AWS Lambda Empty Function Project
+# Empty AWS Serverless Application Project
 
 This starter project consists of:
-* Function.cs - class file containing a class with a single function handler method
+* serverless.template - an AWS CloudFormation Serverless Application Model template file for declaring your Serverless functions and other AWS resources
+* Function.cs - class file containing the C# method mapped to the single function declared in the template file
 * aws-lambda-tools-defaults.json - default argument settings for use with Visual Studio and command line deployment tools for AWS
 
 You may also have a test project depending on the options selected.
 
-The generated function handler is a simple method accepting a string argument that returns the uppercase equivalent of the input string. Replace the body of this method, and parameters, to suit your needs. 
+The generated project contains a Serverless template declaration for a single AWS Lambda function that will be exposed through Amazon API Gateway as a HTTP *Get* operation. Edit the template to customize the function or add more functions and other resources needed by your application, and edit the function code in Function.cs. You can then deploy your Serverless application.
 
 ## Here are some steps to follow from Visual Studio:
 
-To deploy your function to AWS Lambda, right click the project in Solution Explorer and select *Publish to AWS Lambda*.
+To deploy your Serverless application, right click the project in Solution Explorer and select *Publish to AWS Lambda*.
 
-To view your deployed function open its Function View window by double-clicking the function name shown beneath the AWS Lambda node in the AWS Explorer tree.
-
-To perform testing against your deployed function use the Test Invoke tab in the opened Function View window.
-
-To configure event sources for your deployed function, for example to have your function invoked when an object is created in an Amazon S3 bucket, use the Event Sources tab in the opened Function View window.
-
-To update the runtime configuration of your deployed function use the Configuration tab in the opened Function View window.
-
-To view execution logs of invocations of your function use the Logs tab in the opened Function View window.
+To view your deployed application open the Stack View window by double-clicking the stack name shown beneath the AWS CloudFormation node in the AWS Explorer tree. The Stack View also displays the root URL to your published application.
 
 ## Here are some steps to follow to get started from the command line:
 
-Once you have edited your function you can use the following command lines to build, test and deploy your function to AWS Lambda from the command line (these examples assume the project name is *EmptyFunction*):
+Once you have edited your template and code you can deploy your application using the [Amazon.Lambda.Tools Global Tool](https://github.com/aws/aws-extensions-for-dotnet-cli#aws-lambda-amazonlambdatools) from the command line.
 
-Restore dependencies
+Install Amazon.Lambda.Tools Global Tools if not already installed.
 ```
-    cd "Guflow.Lambda"
-    dotnet restore
+    dotnet tool install -g Amazon.Lambda.Tools
+```
+
+If already installed check if new version is available.
+```
+    dotnet tool update -g Amazon.Lambda.Tools
 ```
 
 Execute unit tests
@@ -38,8 +35,8 @@ Execute unit tests
     dotnet test
 ```
 
-Deploy function to AWS Lambda
+Deploy application
 ```
     cd "Guflow.Lambda/src/Guflow.Lambda"
-    dotnet lambda deploy-function
+    dotnet lambda deploy-serverless
 ```

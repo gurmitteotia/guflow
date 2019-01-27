@@ -1,0 +1,97 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Transform" : "AWS::Serverless-2016-10-31",
+  "Description" : "An AWS Serverless Application.",
+
+  "Resources" : {
+
+    "BookHotelLambda" : {
+      "Type" : "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "Guflow.Lambda::Guflow.Lambda.Functions::BookHotelLambda",
+        "Runtime": "dotnetcore2.1",
+        "MemorySize": 256,
+        "Timeout": 30,
+		"FunctionName" : "BookHotelLambda",
+        "Role"    : {"Fn::GetAtt" : [ "LambdaRole", "Arn"]}
+      }
+    },
+
+	
+    "ExpenseApproval" : {
+        "Type" : "AWS::Lambda::Function",
+        "Properties" : {
+            "Handler" : "Guflow.Lambda::Guflow.Lambda.ExpenseLambdaFunctions::ExpenseApproval",
+            "Role"    : {"Fn::GetAtt" : [ "LambdaRole", "Arn"]},
+            "Runtime" : "dotnetcore2.1",
+			"FunctionName" : "ExpenseApproval",
+            "MemorySize" : 256,
+            "Timeout" : 30,
+            "Code" : {
+                "S3Bucket" : "",
+                "S3Key" : ""
+            }
+        }
+    },
+
+    "SubmitToAccount" : {
+        "Type" : "AWS::Lambda::Function",
+        "Properties" : {
+            "Handler" : "Guflow.Lambda::Guflow.Lambda.ExpenseLambdaFunctions::SubmitToAccount",            
+            "Role"    : {"Fn::GetAtt" : [ "LambdaRole", "Arn"]},
+            "Runtime" : "dotnetcore2.1",
+            "MemorySize" : 256,
+			"FunctionName" : "SubmitToAccount",
+            "Timeout" : 30,
+            "Code" : {
+                "S3Bucket" : "",
+                "S3Key" : ""
+            }
+        }
+    },
+
+   "ExpenseRejected" : {
+        "Type" : "AWS::Lambda::Function",
+        "Properties" : {
+            "Handler" : "Guflow.Lambda::Guflow.Lambda.ExpenseLambdaFunctions::ExpenseRejected",            
+            "Role"    : {"Fn::GetAtt" : [ "LambdaRole", "Arn"]},
+            "Runtime" : "dotnetcore2.1",
+			"FunctionName" : "ExpenseRejected",
+            "MemorySize" : 256,
+            "Timeout" : 30,
+            "Code" : {
+                "S3Bucket" : "",
+                "S3Key" : ""
+            }
+        }
+    },
+
+	"LambdaRole" : {
+        "Type" : "AWS::IAM::Role",
+        "Properties" : {
+            "AssumeRolePolicyDocument" : {
+                "Version" : "2012-10-17",
+                "Statement" : [
+                    {
+                        "Action" : [
+                            "sts:AssumeRole"
+                        ],
+                        "Effect" : "Allow",
+                        "Principal" : {
+                            "Service" : [
+                                "lambda.amazonaws.com"
+                            ]
+                        }
+                    }
+                ]
+            },
+            "ManagedPolicyArns" : [
+                "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+            ]
+       }
+    }
+  },
+
+  "Outputs" : {
+  }
+}

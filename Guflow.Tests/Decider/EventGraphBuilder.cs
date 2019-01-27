@@ -564,6 +564,51 @@ namespace Guflow.Tests.Decider
             };
         }
 
+        public HistoryEvent WaitForSignalEvent(ScheduleId id, long eventId, string[] eventNames,
+            SignalWaitType waitType, SignalNextAction nextAction = SignalNextAction.Continue)
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            var details = new WaitForSignalData()
+            {
+                ScheduleId = id,
+                TriggerEventId = eventId,
+                WaitType = waitType,
+                SignalNames = eventNames,
+                NextAction = nextAction
+            };
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.MarkerRecorded,
+                MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
+                {
+                    MarkerName = InternalMarkerNames.WorkflowItemWaitForSignals,
+                    Details = details.ToJson()
+                }
+            };
+        }
+
+        public HistoryEvent WorkflowItemSignalledEvent(ScheduleId id, long eventId, string eventName)
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            var details = new WorkflowItemSignalledData()
+            {
+                ScheduleId = id,
+                TriggerEventId = eventId,
+                SignalName = eventName,
+            };
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.MarkerRecorded,
+                MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
+                {
+                    MarkerName = InternalMarkerNames.WorkflowItemSignalled,
+                    Details = details.ToJson()
+                }
+            };
+        }
+
         public HistoryEvent RecordMarkerFailedEvent(string markerName, string cause)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);

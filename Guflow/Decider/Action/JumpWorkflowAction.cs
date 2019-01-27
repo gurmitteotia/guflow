@@ -10,25 +10,28 @@ namespace Guflow.Decider
     /// </summary>
     public sealed class JumpWorkflowAction : WorkflowAction
     {
-        private WorkflowAction _triggeredAction = Empty;
+        private readonly WorkflowItem _jumpToItem;
+        private WorkflowAction _triggeredAction;
         private readonly ScheduleWorkflowItemAction _scheduleAction;
-        internal JumpWorkflowAction(WorkflowItem jumpToItem)
+        private WorkflowItem _triggerItem;
+        
+
+        internal JumpWorkflowAction(WorkflowItem triggerItem, WorkflowItem jumpToItem)
         {
+            _triggerItem = triggerItem;
+            _jumpToItem = jumpToItem;
             _scheduleAction = ScheduleWorkflowItemAction.ScheduleByIgnoringWhen(jumpToItem);
+            _triggeredAction = Default();
         }
         internal override IEnumerable<WorkflowDecision> Decisions()
         {
             return _scheduleAction.Decisions().Concat(_triggeredAction.Decisions());
         }
 
-        /// <summary>
-        /// Provide a custom trigger action for first joint items when jumping down the executing branch.
-        /// </summary>
-        /// <param name="triggerAction"></param>
-        /// <returns></returns>
-        internal JumpWorkflowAction WithTriggerAction(WorkflowAction triggerAction)
+        internal override WorkflowAction WithTriggeredItem(WorkflowItem item)
         {
-            _triggeredAction = triggerAction;
+            _triggerItem = item;
+            _triggeredAction.WithTriggeredItem(_triggerItem);
             return this;
         }
         /// <summary>
@@ -54,6 +57,11 @@ namespace Guflow.Decider
         private bool Equals(JumpWorkflowAction other)
         {
             return _scheduleAction.Equals(other._scheduleAction);
+        }
+
+        private WorkflowAction Default()
+        {
+            return _triggerItem != null ? new TriggerActions(_triggerItem).FirstJoint(_jumpToItem) : Empty;
         }
 
         public override bool Equals(object obj)

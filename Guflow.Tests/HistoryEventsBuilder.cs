@@ -12,16 +12,27 @@ namespace Guflow.Tests
         private readonly List<HistoryEvent> _processedEvents = new List<HistoryEvent>();
         private readonly List<HistoryEvent> _newEvents = new List<HistoryEvent>();
         private string _workflowRunId;
+        private string _workflowId;
+
         public HistoryEventsBuilder AddProcessedEvents(params HistoryEvent[] events)
         {
             _processedEvents.InsertRange(0, events);
             return this;
         }
 
+        public HistoryEventsBuilder AddProcessedEvents(IEnumerable<HistoryEvent> events)
+        {
+            return AddProcessedEvents(events.ToArray());
+        }
+
         public HistoryEventsBuilder AddNewEvents(params HistoryEvent[] events)
         {
             _newEvents.InsertRange(0, events);
             return this;
+        }
+        public HistoryEventsBuilder AddNewEvents(IEnumerable<HistoryEvent> events)
+        {
+            return AddNewEvents(events.ToArray());
         }
 
         public WorkflowHistoryEvents Result()
@@ -30,7 +41,7 @@ namespace Guflow.Tests
             var decisionTask = new DecisionTask()
             {
                 Events = totalEvents,
-                WorkflowExecution = new WorkflowExecution() { RunId = _workflowRunId}
+                WorkflowExecution = new WorkflowExecution() { RunId = _workflowRunId, WorkflowId = _workflowId}
             };
             if (_newEvents.Count > 0)
             {
@@ -40,9 +51,15 @@ namespace Guflow.Tests
             return new WorkflowHistoryEvents(decisionTask);
         }
 
-        public HistoryEventsBuilder AddWorkflowRunId(string workflowId)
+        public HistoryEventsBuilder AddWorkflowRunId(string runId)
         {
-            _workflowRunId = workflowId;
+            _workflowRunId = runId;
+            return this;
+        }
+
+        public HistoryEventsBuilder AddWorkflowId(string id)
+        {
+            _workflowId = id;
             return this;
         }
     }

@@ -17,6 +17,7 @@ namespace Guflow.Decider
         private readonly WorkflowEventMethods _workflowEventMethods;
         private WorkflowAction _startupAction;
         private WorkflowEvent _currentExecutingEvent;
+        private WorkflowActions _generatedActions;
         protected Workflow()
         {
             _workflowEventMethods = WorkflowEventMethods.For(this);
@@ -216,6 +217,12 @@ namespace Guflow.Decider
             return Handle(EventName.RestartFailed, failedEvent);
         }
 
+        WorkflowAction IWorkflow.WorkflowAction(ChildWorkflowStartedEvent startedEvent)
+        {
+            var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(startedEvent);
+            return childWorkflowItem.StartedAction(startedEvent);
+        }
+
         private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)
         {
             var workflowEventMethod = _workflowEventMethods.EventMethod(eventName);
@@ -242,6 +249,13 @@ namespace Guflow.Decider
         WorkflowAction IWorkflowDefaultActions.Ignore()
         {
             return Ignore;
+        }
+
+        WorkflowAction IWorkflowDefaultActions.ResumeOnSignal(string signalName)
+        {
+            var item = WaitingItem(signalName);
+            if (item == null) return Ignore;
+            return item.Resume(signalName);
         }
         internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {
@@ -642,15 +656,36 @@ namespace Guflow.Decider
         protected long LatestEventId
             => ((IWorkflow) this).WorkflowHistoryEvents.LatestEventId;
         /// <summary>
-        /// Supports sending signal to other workflows.
+        /// Returns the workflow id.
+        /// </summary>
+        protected string Id
+        => ((IWorkflow)this).WorkflowHistoryEvents.WorkflowId;
+        /// <summary>
+        /// Return the workflow run id.
+        /// </summary>
+        protected string RunId
+            => ((IWorkflow)this).WorkflowHistoryEvents.WorkflowRunId;
+
+        /// <summary>
+        /// APIs to send signal to other workflows(child/non-child).
         /// </summary>
         /// <param name="signalName"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         protected Signal Signal(string signalName, object input)
         {
-            Ensure.NotNullAndEmpty(signalName, "signalName");
-            return new Signal(signalName, input, _allWorkflowItems);
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            return new Signal(signalName, input, this);
+        }
+        /// <summary>
+        /// Represent the incoming signal.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        protected InwardSignal Signal(string signalName)
+        {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            return new InwardSignal(signalName, this);
         }
         /// <summary>
         /// Return workflow input as dynamic object. If workflow input is JSON data then you can directly access the properties like: Input.Session.
@@ -678,19 +713,33 @@ namespace Guflow.Decider
                 return workflow.WorkflowHistoryEvents.WorkflowStartedEvent();
             }
         }
-        IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)
+
+        /// <summary>
+        /// Returns workflow item waiting for given signal. Returns null if no workflow item is waiting for given signal. 
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        protected IWorkflowItem WaitingItem(string signalName)=> WaitingItems(signalName).FirstOrDefault();
+
+        /// <summary>
+        /// Returns all the workflow items waiting for given signal. Mutlitple workflow items in parallel branches can wait for same signal.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        protected IEnumerable<IWorkflowItem> WaitingItems(string signalName)
         {
-            return _allWorkflowItems.Childeren(workflowItem);
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            IWorkflow workflow = this;
+            return workflow.WaitForSignalsEvents.WaitingItems(_allWorkflowItems.AllItems.ToArray(), signalName);
         }
 
-        WorkflowItem IWorkflow.FindWorkflowItemBy(Identity identity)
-        {
-            return _allWorkflowItems.WorkflowItem(identity);
-        }
-        void IWorkflow.SetCurrentExecutingEvent(WorkflowEvent workflowEvent)
-        {
-            _currentExecutingEvent = workflowEvent;
-        }
+        IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)=> _allWorkflowItems.Childeren(workflowItem);
+        WorkflowItem IWorkflow.WorkflowItem(Identity identity)=> _allWorkflowItems.WorkflowItem(identity);
+
+        ChildWorkflowItem IWorkflow.ChildWorkflowItem(Identity identity) =>
+            _allWorkflowItems.ChildWorkflowItem(identity);
+       
+
         private WorkflowItem CurrentExecutingItem
         {
             get
@@ -711,6 +760,19 @@ namespace Guflow.Decider
                 return _currentWorkflowHistoryEvents;
             }
         }
+
+        IEnumerable<WaitForSignalsEvent> IWorkflow.WaitForSignalsEvents
+        {
+            get
+            {
+                IWorkflow workflow = this;
+                return workflow.WorkflowHistoryEvents.WaitForSignalsEvents()
+                    .Concat(_generatedActions.WaitForSignalsEvents());
+            }
+        }
+
+        WorkflowEvent IWorkflow.CurrentlyExecutingEvent => _currentExecutingEvent;
+
         internal WorkflowAction StartupAction => _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems));
 
         WorkflowAction IWorkflowClosingActions.OnCompletion(string result, bool proposal)
@@ -727,34 +789,50 @@ namespace Guflow.Decider
         {
             return DuringCancellation(details);
         }
+        /// <summary>
+        /// Called before completing the workflow.
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
         protected virtual WorkflowAction DuringCompletion(string result)
         {
             return CompleteWorkflow(result);
         }
+        /// <summary>
+        /// Called before failing the workflow.
+        /// </summary>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        /// <returns></returns>
         protected virtual WorkflowAction DuringFailure(string reason, string detail)
         {
             return FailWorkflow(reason, detail);
         }
+        /// <summary>
+        /// Called before cancelling the workflow.
+        /// </summary>
+        /// <param name="details"></param>
+        /// <returns></returns>
         protected virtual WorkflowAction DuringCancellation(string details)
         {
             return CancelWorkflow(details);
         }
         /// <summary>
-        /// Called before executing the new events
+        /// Called before interpreting the new events
         /// </summary>
-        protected internal void BeforeExecution()
+        protected virtual void BeforeExecution()
         {
         }
         /// <summary>
-        /// Called after all the new events are executed.
+        /// Called after all the new events are interepreted.
         /// </summary>
-        protected internal void AfterExecution()
+        protected virtual void AfterExecution()
         {
         }
        
         internal IEnumerable<WorkflowDecision> Decisions(IWorkflowHistoryEvents historyEvents)
         {
-            var result = new List<WorkflowAction>();
+            _generatedActions = new WorkflowActions();
             try
             {
                 _currentWorkflowHistoryEvents = historyEvents;
@@ -762,15 +840,18 @@ namespace Guflow.Decider
                 foreach (var workflowEvent in historyEvents.NewEvents())
                 {
                     _currentExecutingEvent = workflowEvent;
-                    result.Add(workflowEvent.Interpret(this));
+                    _generatedActions.Add(workflowEvent.Interpret(this));
                 }
-                var decisions = result.Where(w => w != null).SelectMany(a => a.Decisions()).Distinct();
-                return decisions.CompatibleDecisions(this).Where(d => d != WorkflowDecision.Empty).ToArray(); ;
+                return _generatedActions.CompatibleDecisions(this);
             }
             finally
             {   
+                //TODO: Following line I'm writing because probably I'm bit paranoid. I could not come up with test to write following line. Cleanup
+                //is handled very well before reaching this point. So this line may not be required. I will come back to again.
+                _allWorkflowItems.ResetContinueItems();
                 AfterExecution();
                 _currentWorkflowHistoryEvents = null;
+                _currentExecutingEvent = null;
             }
         }
     }

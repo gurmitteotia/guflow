@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
-    public class TimerRescheduleTests
+    public class TimerResetTests
     {
         private const string TimerName = "Timer1";
         private const string LambdaName = "LambdaName";
@@ -49,7 +49,25 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
-            var decisions = new TimerRescheduleWorkflow().Decisions(_eventsBuilder.Result());
+            var decisions = new TimerResetWithTimeoutWithOldApiWorkflow().Decisions(_eventsBuilder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+            {
+                new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId()),
+                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset"), TimeSpan.FromMinutes(10))
+            }));
+        }
+
+        [Test]
+        public void Current_timer_is_cancelled_and_is_scheduled_with_new_scheduled_id_and_timeout_on_reset()
+        {
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
+                .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4)).ToArray());
+            _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
+
+            var decisions = new TimerResetWithTimeoutWithNewApiWorkflow().Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
@@ -85,7 +103,7 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
-            var decisions = new TimerRescheduleWorkflow().Decisions(_eventsBuilder.Result());
+            var decisions = new TimerResetWithTimeoutWithNewApiWorkflow().Decisions(_eventsBuilder.Result());
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
@@ -111,7 +129,7 @@ namespace Guflow.Tests.Decider
                _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
-            Assert.Throws<InvalidOperationException>(() => new TimerRescheduleWorkflow().Decisions(_eventsBuilder.Result()));
+            Assert.Throws<InvalidOperationException>(() => new TimerResetWithTimeoutWithNewApiWorkflow().Decisions(_eventsBuilder.Result()));
         }
 
         private class TimerResetWorkflow : Workflow
@@ -127,9 +145,9 @@ namespace Guflow.Tests.Decider
            public WorkflowAction ChangeTimer() => Timer(TimerName).Reset();
         }
 
-        private class TimerRescheduleWorkflow : Workflow
+        private class TimerResetWithTimeoutWithOldApiWorkflow : Workflow
         {
-            public TimerRescheduleWorkflow()
+            public TimerResetWithTimeoutWithOldApiWorkflow()
             {
                 ScheduleTimer(TimerName).FireAfter(TimeSpan.FromMinutes(2));
 
@@ -138,6 +156,19 @@ namespace Guflow.Tests.Decider
 
             [SignalEvent]
             public WorkflowAction ChangeTimer() => Timer(TimerName).Reschedule(TimeSpan.FromMinutes(10));
+        }
+
+        private class TimerResetWithTimeoutWithNewApiWorkflow : Workflow
+        {
+            public TimerResetWithTimeoutWithNewApiWorkflow()
+            {
+                ScheduleTimer(TimerName).FireAfter(TimeSpan.FromMinutes(2));
+
+                ScheduleLambda(LambdaName).AfterTimer(TimerName);
+            }
+
+            [SignalEvent]
+            public WorkflowAction ChangeTimer() => Timer(TimerName).Reset(TimeSpan.FromMinutes(10));
         }
     }
 }

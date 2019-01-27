@@ -26,12 +26,12 @@ namespace Guflow.Decider
         }
         internal override IEnumerable<WorkflowDecision> Decisions()
         {
-            var startupWorkflowItems = _workflowItems.StartupItems();
+            var startupWorkflowItems = _workflowItems.StartupItems().ToArray();
 
             if (!startupWorkflowItems.Any())
                 return new[] { new CompleteWorkflowDecision(DefaultCompleteResult) };
 
-            return startupWorkflowItems.SelectMany(s => s.ScheduleDecisions());
+            return startupWorkflowItems.SelectMany(s => s.ScheduleDecisions()).ToArray();
         }
     }
 }

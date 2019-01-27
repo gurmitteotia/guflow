@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -22,7 +23,7 @@ namespace Guflow.Tests.Decider
         [SetUp]
         public void Setup()
         {
-            _signal = new Signal(SignalName, SignalInput, new WorkflowItems());
+            _signal = new Signal(SignalName, SignalInput, Mock.Of<IWorkflow>());
             _eventGraphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder().AddWorkflowRunId(ParentWorkflowRunId);
             _builder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());

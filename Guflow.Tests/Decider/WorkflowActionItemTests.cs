@@ -14,13 +14,14 @@ namespace Guflow.Tests.Decider
         private const string ChildWorkflowName = "Name";
         private const string ChildWorkflowVersion = "1.0";
         private const string ChildWorkflowPosName = "pos";
-        private EventGraphBuilder _eventGraphBuilder;
-        private HistoryEventsBuilder _eventsBuilder;
+        private EventGraphBuilder _graphBuilder;
+        private HistoryEventsBuilder _builder;
         [SetUp]
         public void Setup()
         {
-            _eventGraphBuilder = new EventGraphBuilder();
-            _eventsBuilder = new HistoryEventsBuilder();
+            _graphBuilder = new EventGraphBuilder();
+            _builder = new HistoryEventsBuilder();
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
         }
         [Test]
         public void Can_be_scheduled_after_child_workflow()
@@ -57,15 +58,37 @@ namespace Guflow.Tests.Decider
             Assert.Throws<ArgumentException>(() => workflowActionItem.AfterTimer(null));
         }
 
+        [Test]
+        public void Schedule_the_first_workflow_action_conditionally()
+        {
+            var id = Identity.Lambda("StartLambda").ScheduleId();
+            _builder.AddNewEvents(_graphBuilder.LambdaCompletedEventGraph(id, "i", "r"));
+            var w = new ConditionalWorflowAction();
+            var decisions = w.Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[]{new CompleteWorkflowDecision("Success") }));
+        }
+
+        [Test]
+        public void Schedule_the_second_workflow_action_conditionally()
+        {
+            var id = Identity.Lambda("StartLambda").ScheduleId();
+            _builder.AddNewEvents(_graphBuilder.LambdaFailedEventGraph(id, "i", "r","d"));
+            var w = new ConditionalWorflowAction();
+            var decisions = w.Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("Failure") }));
+        }
+
         private WorkflowHistoryEvents ChildWorkflowCompletedEventGraph()
         {
-            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
             var scheduleId = Identity.New(ChildWorkflowName, ChildWorkflowVersion, ChildWorkflowPosName).ScheduleId();
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder
+            _builder.AddNewEvents(_graphBuilder
                 .ChildWorkflowCompletedGraph(scheduleId, "rid", "input",
                     "result")
                 .ToArray());
-            return _eventsBuilder.Result();
+            return _builder.Result();
 
         }
 
@@ -93,6 +116,24 @@ namespace Guflow.Tests.Decider
         {
             public ChildWorkflow()
             {
+            }
+        }
+
+        private class ConditionalWorflowAction : Workflow
+        {
+            public ConditionalWorflowAction()
+            {
+                ScheduleLambda("StartLambda")
+                    .OnFailure(Continue);
+
+                ScheduleAction(a => CompleteWorkflow("Success"))
+                    .AfterLambda("StartLambda")
+                    .When(a => a.ParentLambda().HasCompleted());
+
+                ScheduleAction(a => CompleteWorkflow("Failure"))
+                    .AfterLambda("StartLambda")
+                    .When(a => a.ParentLambda().HasFailed());
+
             }
         }
     }

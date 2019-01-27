@@ -61,13 +61,13 @@ namespace Guflow
             await RegisterWorkflowAsync(typeof (TWorkflow));
         }
         /// <summary>
-        /// Register the TWorkflow with Amazon SWF if not already registered. It will use the information from WorkflowDescriptionAttribute.
+        /// Register the workflow type with Amazon SWF if not already registered. It will use the information from WorkflowDescriptionAttribute.
         /// </summary>
         /// <param name="workflowType">Workflow type to be registerd.</param>
         /// <returns></returns>
         public async Task RegisterWorkflowAsync(Type workflowType)
         {
-            Ensure.NotNull(workflowType, "activityType");
+            Ensure.NotNull(workflowType, nameof(workflowType));
             await RegisterWorkflowAsync(WorkflowDescription.FindOn(workflowType));
         }
         private async Task RegisterWorkflowAsync(WorkflowDescription workflowDescription)
@@ -189,7 +189,7 @@ namespace Guflow
             return new ActivityHost(this, activitiesTypes, instanceCreator);
         }
         /// <summary>
-        /// Create the host for activities. It expect activity to have parameterless constructure.
+        /// Create the host for activities. It expect activities to have parameterless constructor.
         /// </summary>
         /// <param name="activitiesTypes">List of activities to host.</param>
         /// <returns></returns>
@@ -204,7 +204,7 @@ namespace Guflow
         /// <returns></returns>
         public async Task CancelWorkflowAsync(CancelWorkflowRequest cancelRequest)
         {
-            Ensure.NotNull(cancelRequest, "cancelRequest");
+            Ensure.NotNull(cancelRequest, nameof(cancelRequest));
             await _simpleWorkflowClient.RequestCancelWorkflowExecutionAsync(cancelRequest.SwfFormat(_name));
         }
         /// <summary>
@@ -214,7 +214,7 @@ namespace Guflow
         /// <returns></returns>
         public async Task<string> StartWorkflowAsync(StartWorkflowRequest startRequest)
         {
-            Ensure.NotNull(startRequest, "startRequest");
+            Ensure.NotNull(startRequest, nameof(startRequest));
             var response = await _simpleWorkflowClient.StartWorkflowExecutionAsync(startRequest.SwfFormat(_name));
             return response.Run.RunId;
         }
@@ -225,7 +225,7 @@ namespace Guflow
         /// <returns></returns>
         public async Task SignalWorkflowAsync(SignalWorkflowRequest signalRequest)
         {
-            Ensure.NotNull(signalRequest, "signalRequest");
+            Ensure.NotNull(signalRequest, nameof(signalRequest));
 
             await _simpleWorkflowClient.SignalWorkflowExecutionAsync(signalRequest.SwfFormat(_name));
         }
@@ -280,9 +280,6 @@ namespace Guflow
             var response = await _simpleWorkflowClient.ListActivityTypesAsync(listRequest);
             return response.ActivityTypeInfos.TypeInfos;
         }
-        public override string ToString()
-        {
-            return $"Domain {_name}";
-        }
+        public override string ToString() => $"Domain {_name}";
     }
 }

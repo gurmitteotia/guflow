@@ -12,6 +12,7 @@ namespace Guflow.Decider
         bool HasActiveEvent();
         long LatestEventId { get; }
         string WorkflowRunId { get; }
+        string WorkflowId { get;}
         IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem);
         IEnumerable<WorkflowItemEvent> AllTimerEvents(TimerItem timerItem, bool includeRescheduleTimerEvents);
         IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents();
@@ -21,5 +22,6 @@ namespace Guflow.Decider
         WorkflowItemEvent LastLambdaEvent(LambdaItem lambdaItem);
         IEnumerable<WorkflowItemEvent> AllChildWorkflowEvents(ChildWorkflowItem childWorkflowItem);
         WorkflowItemEvent LastChildWorkflowEvent(ChildWorkflowItem childWorkflowItem);
+        IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents();
     }
 }
