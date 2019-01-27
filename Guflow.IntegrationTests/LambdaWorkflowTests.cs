@@ -16,7 +16,7 @@ namespace Guflow.IntegrationTests
         private static string _taskListName;
         private Configuration _configuration;
         [SetUp]
-        public async Task Setup()
+        public void Setup()
         {
             Log.Register(Log.ConsoleLogger);
             _domain = new TestDomain();

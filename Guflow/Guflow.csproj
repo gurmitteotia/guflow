@@ -23,8 +23,8 @@
     <DocumentationFile>.\bin\Release\Guflow.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleWorkflow" Version="3.3.0.45" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="AWSSDK.SimpleWorkflow" Version="3.3.0.75" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
