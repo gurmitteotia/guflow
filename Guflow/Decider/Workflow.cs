@@ -846,6 +846,9 @@ namespace Guflow.Decider
             }
             finally
             {   
+                //TODO: Following line I'm writing because probably I'm bit paranoid. I could not come up with test to write following line. Cleanup
+                //is handled very well before reaching this point. So this line may not be required. I will come back to again.
+                _allWorkflowItems.ResetContinueItems();
                 AfterExecution();
                 _currentWorkflowHistoryEvents = null;
                 _currentExecutingEvent = null;

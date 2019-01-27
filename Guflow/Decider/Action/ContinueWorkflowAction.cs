@@ -8,7 +8,6 @@ namespace Guflow.Decider
     {
         private readonly WorkflowItem _completedWorkflowItem;
         private const string DefaultWorkflowCompletedResult = "Workflow is completed.";
-        private static readonly ILog Log = Guflow.Log.GetLogger<ContinueWorkflowAction>();
         public ContinueWorkflowAction(WorkflowItem completedWorkflowItem)
         {
             _completedWorkflowItem = completedWorkflowItem;
@@ -28,13 +27,12 @@ namespace Guflow.Decider
         internal override IEnumerable<WorkflowDecision> Decisions()
         {
             var decisions = new List<WorkflowDecision>();
-            Log.Debug($"Generating the continue decisions after {_completedWorkflowItem}");
             var childItems = _completedWorkflowItem.Children().ToArray();
             if (!childItems.Any())
                 return new[] { new CompleteWorkflowDecision(DefaultWorkflowCompletedResult, true) };
 
             var schedulableChildItems = childItems.Where(s => s.AreAllParentBranchesInactive(exceptBranchOf: _completedWorkflowItem));
-            //Current continue item is tracked to avoid recursion.
+            //Current continue item is tracked to avoid recursion. Need to better represent the intention.
             foreach (var childItem in schedulableChildItems)
             {
                 if (_completedWorkflowItem.HasContinueItem(childItem)) continue;
@@ -48,7 +46,6 @@ namespace Guflow.Decider
                     _completedWorkflowItem.PopContinueItem();
                 }
             }
-
             return decisions;
         }
 

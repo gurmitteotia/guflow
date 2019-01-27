@@ -11,7 +11,7 @@ namespace Guflow.Decider
         private readonly IWorkflow _workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
         protected readonly Identity Identity;
-        public readonly Stack<WorkflowItem> _continueItems = new Stack<WorkflowItem>();
+        private readonly Stack<WorkflowItem> _continueItems = new Stack<WorkflowItem>();
         protected WorkflowItem(Identity identity, IWorkflow workflow)
         {
             Identity = identity;
@@ -189,10 +189,8 @@ namespace Guflow.Decider
         }
 
         public bool HasContinueItem(WorkflowItem item) => _continueItems.Contains(item);
-
         public void PushContinueItem(WorkflowItem item) => _continueItems.Push(item);
-
-        public void PopContinueItem() => _continueItems.Pop();
-
+        public void PopContinueItem()=> _continueItems.Pop();
+        public void ResetContinueItems() => _continueItems.Clear();
     }
 }

@@ -23,8 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{DF72CFE0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Guflow.Lambda", "Guflow.Lambda\Guflow.Lambda.csproj", "{FC8F1797-CF22-475A-96C1-385A07BB9FD7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerlessManualApproval", "..\guflow-samples\ServerlessManualApproval\ServerlessManualApproval.csproj", "{B07F4879-67A2-41C3-B372-5CFE9A8495E2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,10 +45,6 @@ Global
 		{FC8F1797-CF22-475A-96C1-385A07BB9FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC8F1797-CF22-475A-96C1-385A07BB9FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC8F1797-CF22-475A-96C1-385A07BB9FD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B07F4879-67A2-41C3-B372-5CFE9A8495E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B07F4879-67A2-41C3-B372-5CFE9A8495E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B07F4879-67A2-41C3-B372-5CFE9A8495E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B07F4879-67A2-41C3-B372-5CFE9A8495E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,7 +53,6 @@ Global
 		{000EEEC7-6C28-41DA-898C-B963C6AF7F41} = {80621396-EE32-492A-8727-89CB7420FFC9}
 		{E5B6F451-82BA-4A30-88AE-B0E14C4A38D7} = {80621396-EE32-492A-8727-89CB7420FFC9}
 		{FC8F1797-CF22-475A-96C1-385A07BB9FD7} = {80621396-EE32-492A-8727-89CB7420FFC9}
-		{B07F4879-67A2-41C3-B372-5CFE9A8495E2} = {80621396-EE32-492A-8727-89CB7420FFC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D76585F9-C4A8-4A78-A94A-6E035C57587C}

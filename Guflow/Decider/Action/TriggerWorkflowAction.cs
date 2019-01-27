@@ -11,7 +11,6 @@ namespace Guflow.Decider
         private WorkflowItem _triggeringItem;
         private WorkflowItem _jumpedItem;
         private Func<WorkflowBranch, WorkflowItem> _findFirstJointItem = b => b.FindFirstJointItem();
-        private ILog _log = Log.GetLogger<TriggerWorkflowAction>();
         public TriggerWorkflowAction(WorkflowItem triggeringItem)
         {
             _triggeringItem = triggeringItem;
@@ -19,13 +18,12 @@ namespace Guflow.Decider
         public void SetJumpedItem(WorkflowItem jumpedItem)
         {
             _jumpedItem = jumpedItem;
-            ValidateJump();
             _findFirstJointItem = b => b.FindFirstJointItem(jumpedItem);
         }
 
         internal override IEnumerable<WorkflowDecision> Decisions()
         {
-            _log.Debug($"Generating trigger decisions with trigger item {_triggeringItem} and jump to item {_jumpedItem}");
+            ValidateJump();
             var triggeredDecisions = new List<WorkflowDecision>();
             var childBranches = _triggeringItem.ChildBranches();
             foreach (var childBranch in childBranches)
@@ -45,6 +43,7 @@ namespace Guflow.Decider
 
         private void ValidateJump()
         {
+            if (_jumpedItem == null) return;
             if (_triggeringItem.Equals(_jumpedItem)) return;
             var triggeringItemBranches = _triggeringItem.ParentBranches().Concat(_triggeringItem.ChildBranches());
 

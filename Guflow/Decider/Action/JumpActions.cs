@@ -69,7 +69,7 @@ namespace Guflow.Decider
         /// <param name="name">Lambda name.</param>
         /// <param name="postionalName">Lambda's postional name</param>
         /// <returns></returns>
-        public WorkflowAction ToLambda(string name, string postionalName = "")
+        public JumpWorkflowAction ToLambda(string name, string postionalName = "")
         {
             Ensure.NotNullAndEmpty(name, nameof(name));
             var lambdaItem = _workflowItems.LambdaItem(Identity.Lambda(name, postionalName));
@@ -83,7 +83,7 @@ namespace Guflow.Decider
         /// <param name="version"></param>
         /// <param name="positionalName"></param>
         /// <returns></returns>
-        public WorkflowAction ToChildWorkflow(string name, string version, string positionalName ="")
+        public JumpWorkflowAction ToChildWorkflow(string name, string version, string positionalName ="")
         {
             Ensure.NotNull(name, nameof(name));
             Ensure.NotNull(version, nameof(version));
@@ -97,7 +97,7 @@ namespace Guflow.Decider
         /// <typeparam name="TWorkflow"></typeparam>
         /// <param name="positionalName"></param>
         /// <returns></returns>
-        internal WorkflowAction ToChildWorkflow<TWorkflow>(string positionalName = "") where TWorkflow :Workflow
+        internal JumpWorkflowAction ToChildWorkflow<TWorkflow>(string positionalName = "") where TWorkflow :Workflow
         {
             var desc = WorkflowDescription.FindOn<TWorkflow>();
             return ToChildWorkflow(desc.Name, desc.Version, positionalName);

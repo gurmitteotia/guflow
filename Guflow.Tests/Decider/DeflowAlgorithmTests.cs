@@ -940,12 +940,25 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
 
-            var workflow = new OneOfTheChildrenOfMultipleParentsThrowsExceptionAndTheyHaveChildJointItem() { Throw = true};
+            var workflow = new OneOfTheChildrenOfMultipleParentsThrowsExceptionAndTheyHaveChildJointItem() {Limit = 2};
             Assert.Throws<InvalidOperationException>(() => workflow.Decisions(_builder.Result()));
-            workflow.Throw = false;
+            workflow.Limit = 20;
             var decisions = workflow.Decisions(_builder.Result());
 
             Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(BookAirportTaxyLambda).ScheduleId(), "input") }));
+        }
+
+        [Test]
+        public void Does_not_schedule_children_when_other_parent_branch_is_active_jumping_up_to_parents_in_false_when_expression()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var workflow = new InOneParentBranchJumpToParentOnFalseWhenClause(); 
+            var decisions = workflow.Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.Empty);
         }
 
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
@@ -1730,18 +1743,38 @@ namespace Guflow.Tests.Decider
 
         private class OneOfTheChildrenOfMultipleParentsThrowsExceptionAndTheyHaveChildJointItem : Workflow
         {
-            public bool Throw;
+            public int Count;
+            public int Limit;
             public OneOfTheChildrenOfMultipleParentsThrowsExceptionAndTheyHaveChildJointItem()
             {
                 ScheduleLambda(BookHotelLambda);
                 ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
 
                 ScheduleLambda(BookFlightLambda);
-                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false, i => ++Count==Limit ? throw new InvalidOperationException("msg") : Trigger(i).FirstJoint());
 
                 ScheduleLambda(BookAirportTaxyLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
                 ScheduleLambda(BookSubwayTicketLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
-                    .When(_ => false, i => Throw ? throw new InvalidOperationException("msg") : Trigger(i).FirstJoint());
+                    .When(_ => false);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookAirportTaxyLambda)
+                    .AfterLambda(BookSubwayTicketLambda);
+            }
+        }
+
+        private class InOneParentBranchJumpToParentOnFalseWhenClause : Workflow
+        {
+            public InOneParentBranchJumpToParentOnFalseWhenClause()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda).When(_ => false, _=> Jump.ToLambda(BookFlightLambda));
+
+                ScheduleLambda(BookAirportTaxyLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
+                ScheduleLambda(BookSubwayTicketLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .When(_ => false);
 
                 ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookAirportTaxyLambda)
                     .AfterLambda(BookSubwayTicketLambda);

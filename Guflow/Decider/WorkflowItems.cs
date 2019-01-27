@@ -141,5 +141,9 @@ namespace Guflow.Decider
         public bool HasItemFor(WorkflowItemEvent @event)
             => AllItems.Any(@event.IsFor);
 
+        public void ResetContinueItems()
+        {
+            foreach (var item in _workflowItems) item.ResetContinueItems();
+        }
     }
 }
