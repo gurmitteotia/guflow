@@ -13,6 +13,7 @@
     <Copyright>Gurmit Teotia, Copyright ©  2018</Copyright>
     <IsPackable>true</IsPackable>
     <PackageReleaseNotes>https://github.com/gurmitteotia/guflow/releases</PackageReleaseNotes>
+    <PackageIconUrl>https://github.com/gurmitteotia/guflow/blob/master/logo.jpg</PackageIconUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>.\bin\Debug</OutputPath>
