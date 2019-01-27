@@ -13,20 +13,20 @@ A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Wo
 * Workflows to orchestrate the scheduling of AWS lambda functions, activities, child workflows and timers
 * Activities to carry out the task.
 
-Guflow, supporting all the relevant features of [Amazon SWF](https://aws.amazon.com/swf/), is an alternative to Amazon Step functions and the Amazon Flow framework and it provides simplicity and flexbility in one place.
+Guflow, supporting all the features of [Amazon SWF](https://aws.amazon.com/swf/), is an alternative to Amazon Step functions and the Amazon Flow framework and it provides simplicity and flexbility in one place.
 
 ### Features:
 Guflow:
 * Allows you to create complex workflows with ease and flexibility
-* Use async task for polling for new decisions and activity tasks
+* Supports parallel execution of lambda functions, activities, child workflow and timers in the workflow
+* Supports fork and join of workflow branches
+* Supports recursion around an individual item(lambda function, activity, child workflow and timer) or whole execution branch
 * Provide equal supports for scheduling the activities written in other framework/language
+* Provide robust [signal APIs](https://github.com/gurmitteotia/guflow/wiki/Workflow-signals) to easily implement manual approvals using serverless lambda functions.
 * Supports async/sync activity method
 * Supports activity throttling
-* Supports parallel execution of lambda, activities and timers in workflow
-* Supports fork and join of workflow branches
-* Supports loop around an individual item(lambda, activity, child workflow and timer) or whole execution branch
 * Supported by behavioural unit tests and continuously released.
-* Supports all the relevant features of Amazon SWF:
+* Supports all the features of Amazon SWF:
   * Lambda
   * Activity
   * Timer
@@ -38,8 +38,8 @@ Guflow:
   * Handling of all error events.
 
 
-### Example
-Following example shows BookHolidays workflow using AwsLambda:
+### Example 1
+Following example shows BookHolidays workflow using Aws Lambda functions:
      
 ```cs
         BookFlight          BookHotel
@@ -91,6 +91,74 @@ Above workflow has four possible execution scenarios:
 
 You can implement the above workflow using SWF activities with same ease. You can also mix activities, lambdas or timers in a workflow. 
 
+### Example 2
+In following example, workflow execution pause on executing ApproveExpense lambda function and continue when either of Accepted or Rejected signal is received.
+```cs
+             ApproveExpense          
+                  |
+                  |
+                  v
+         |````````````````````|
+    <Accepted>            <Rejected>
+         |                    |
+         |                    |
+         v                    v
+    SubmitToAccount     SendRejectEmail              
+            
+              
+    [WorkflowDescription("1.0")]
+    public class ExpenseWorkflow : Workflow
+    {
+        public BookHolidaysWorkflow()
+        {
+            ScheduleLambda("ApproveExpense")
+              .OnCompletion(e=>e.WaitForAnySignal("Accepted", "Rejected"))
+              .WithInput(_=>new{Id});  //Send workflow id to lambda functions to send signals to this workflow.
+         
+            ScheduleLambda("SubmitToAccount").AfterLambda("ApproveExpense")
+              .When(_=>Signal("Accepted").IsTriggered());
+
+            ScheduleLambda("SendRejectEmail").AfterLambda("ApproveExpense")
+              .When(_=>Signal("Accepted").IsTriggered());
+        }
+    }             
+          
+```
+
+
+### Example 3
+In following example, workflow execution pause and wait for signal when "ReserveItem" is failed with "NotAvailable" reason and on receiving the signals reschedule the item.
+```cs
+             ReserveItem <----------------Reschedule         
+                  |                        |
+                  |                 <InvenetoryUpdated>
+                  v                        |
+         |````````````````````|            |
+    <Success>               <Fail>-------NotAvailable
+         |                    |       
+         |                    |
+         v                    v
+    ChargeCustomer      FailWorkflow(all reasons)              
+            
+              
+    [WorkflowDescription("1.0")]
+    public class OrderWorkflow : Workflow
+    {
+        public BookHolidaysWorkflow()
+        {
+            ScheduleLambda("ReserveItem")
+              .OnFailure(e=>e.Reason=="NotAvailable"
+                           ?e.WaitForSignal("InventoryUpdated").ToReschedule()
+                           :e.DefaultAction())
+              .WithInput(_=>new{Id});//Send workflow id to lambda functions to send signals to this workflow.
+         
+            ScheduleLambda("ChargeCustomer").AfterLambda("ReserveItem");
+          
+            ScheduleLambda("ShipItem").AfterLambda("ChargeCustomer");
+    }             
+          
+```
+You can read about signal APIs [here](https://github.com/gurmitteotia/guflow/wiki/Workflow-signals) and find more examples about manual approvals in [sample](https://github.com/gurmitteotia/guflow-samples/tree/master/ServerlessManualApproval) project.
 
 To understand the scheduling of lambda functions, activities, child workflows and timers in a workflow, please read about [Delflow algorithm](https://github.com/gurmitteotia/guflow/wiki/Deflow-algorithm) and [workflow branches](https://github.com/gurmitteotia/guflow/wiki/Execution-branches). Default implementation will good enough for majority of complex scenarios, however you have flexibility to customize every aspect of it.
 
