@@ -217,9 +217,11 @@ namespace Guflow.Decider
             }
         }
 
-        public WorkflowAction Reset() => RescheduleAction();
-        public WorkflowAction Reschedule(TimeSpan timeout) => RescheduleAction(timeout);
-        private WorkflowAction RescheduleAction(TimeSpan? timeout= null)
+        public WorkflowAction Reset() => ResetAction();
+        public WorkflowAction Reschedule(TimeSpan timeout) => Reset(timeout);
+        public WorkflowAction Reset(TimeSpan timeout) => ResetAction(timeout);
+
+        private WorkflowAction ResetAction(TimeSpan? timeout= null)
         {
             if (!IsActive)
                 throw new InvalidOperationException(
