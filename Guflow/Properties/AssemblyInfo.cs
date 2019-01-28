@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Guflow")]
-[assembly: AssemblyDescription("A lightweight fluent API based C# library to let you easily program all the features of Amazon SWF (Simple Workflow Service)")]
+[assembly: AssemblyDescription("C#.Net library to program all features of Amazon SWF (Simple Workflow Service)")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Guflow")]

@@ -9,8 +9,8 @@
     <Authors>Gurmit Teotia</Authors>
     <PackageTags>Amazon SWF C# Guflow .Net Simple Workflow Service</PackageTags>
     <RepositoryUrl>https://github.com/gurmitteotia/guflow</RepositoryUrl>
-    <Description>A fluent API based C#.NET library to program Amazon SWF (Simple Workflow Service).</Description>
-    <Copyright>Gurmit Teotia, Copyright ©  2018</Copyright>
+    <Description>A lightweight C#.Net library to lets you easily program all the features of Amazon SWF (Simple Workflow Service).</Description>
+    <Copyright>Gurmit Teotia, Copyright ©  2019</Copyright>
     <IsPackable>true</IsPackable>
     <PackageReleaseNotes>https://github.com/gurmitteotia/guflow/releases</PackageReleaseNotes>
     <PackageIconUrl>https://github.com/gurmitteotia/guflow/blob/master/logo.jpg</PackageIconUrl>

@@ -27,7 +27,7 @@ Guflow:
 * Supports activity throttling
 * Supported by behavioural unit tests and continuously released.
 * Supports all the features of Amazon SWF:
-  * Lambda
+  * Lambda function
   * Activity
   * Timer
   * Child workflows
@@ -173,4 +173,4 @@ Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tu
 dotnet standard 1.3 onwards
 
 ### Getting help
-Please raise [issue](https://github.com/gurmitteotia/guflow/issues) in github
+Enable the [logging](https://github.com/gurmitteotia/guflow/wiki/Logging) to look for any obvious error and if problem persist then please raise an [issue](https://github.com/gurmitteotia/guflow/issues) in github
