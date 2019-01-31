@@ -109,7 +109,7 @@ In following example, workflow execution pause on executing ApproveExpense lambd
     [WorkflowDescription("1.0")]
     public class ExpenseWorkflow : Workflow
     {
-        public BookHolidaysWorkflow()
+        public ExpenseWorkflow()
         {
             ScheduleLambda("ApproveExpense")
               .OnCompletion(e=>e.WaitForAnySignal("Accepted", "Rejected"))
@@ -144,7 +144,7 @@ In following example, workflow execution pause and wait for signal when "Reserve
     [WorkflowDescription("1.0")]
     public class OrderWorkflow : Workflow
     {
-        public BookHolidaysWorkflow()
+        public OrderWorkflow()
         {
             ScheduleLambda("ReserveItem")
               .OnFailure(e=>e.Reason=="NotAvailable"
