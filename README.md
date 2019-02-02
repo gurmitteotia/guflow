@@ -127,7 +127,7 @@ In following example, workflow execution pause on executing ApproveExpense lambd
 
 
 ### Example 3
-In following example, workflow execution pause and wait for signal when "ReserveItem" is failed with "NotAvailable" reason and on receiving the signals reschedule the item.
+In following example, workflow execution pause and wait for signal when "ReserveItem" is failed with "NotAvailable" reason and on receiving the signals reschedule the lambda function.
 ```cs
              ReserveItem <----------------Reschedule         
                   |                        |
@@ -138,7 +138,7 @@ In following example, workflow execution pause and wait for signal when "Reserve
          |                    |       
          |                    |
          v                    v
-    ChargeCustomer      FailWorkflow(all reasons)              
+    ChargeCustomer      FailWorkflow(on all other reasons)              
             
               
     [WorkflowDescription("1.0")]
