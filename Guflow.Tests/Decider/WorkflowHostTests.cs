@@ -38,8 +38,8 @@ namespace Guflow.Tests.Decider
             var hostedWorkflow2 = new TestWorkflow2();
             var hostedWorkflows = new WorkflowHost(_domain, new Workflow[] { hostedWorkflow1, hostedWorkflow2 });
 
-            Assert.That(hostedWorkflows.FindBy("TestWorkflow1", "2.0"), Is.EqualTo(hostedWorkflow1));
-            Assert.That(hostedWorkflows.FindBy("TestWorkflow2", "1.0"), Is.EqualTo(hostedWorkflow2));
+            Assert.That(hostedWorkflows.Workflow("TestWorkflow1", "2.0"), Is.EqualTo(hostedWorkflow1));
+            Assert.That(hostedWorkflows.Workflow("TestWorkflow2", "1.0"), Is.EqualTo(hostedWorkflow2));
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace Guflow.Tests.Decider
             var hostedWorkflow = new TestWorkflow1();
             var hostedWorkflows = new WorkflowHost(_domain, new[] { hostedWorkflow });
 
-            Assert.Throws<WorkflowNotHostedException>(() => hostedWorkflows.FindBy("TestWorkflow2", "2.0"));
+            Assert.Throws<WorkflowNotHostedException>(() => hostedWorkflows.Workflow("TestWorkflow2", "2.0"));
         }
 
         [Test]

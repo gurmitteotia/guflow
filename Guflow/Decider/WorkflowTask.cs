@@ -28,12 +28,12 @@ namespace Guflow.Decider
 
         public static readonly WorkflowTask Empty = new WorkflowTask();
 
-        public static WorkflowTask CreateFor(DecisionTask decisionTask, Domain domain)
+        public static WorkflowTask Create(DecisionTask decisionTask)
         {
             return new WorkflowTask(decisionTask);
         }
 
-        public async Task ExecuteForAsync(WorkflowHost workflowHost, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ExecuteAsync(WorkflowHost workflowHost, CancellationToken cancellationToken = default(CancellationToken))
         {
             await _actionToExecute(workflowHost, cancellationToken);
         }
@@ -44,7 +44,7 @@ namespace Guflow.Decider
         private async Task ExecuteTasks(WorkflowHost workflowHost, CancellationToken cancellationToken)
         {
             var workflowType = _decisionTask.WorkflowType;
-            var workflow = workflowHost.FindBy(workflowType.Name, workflowType.Version);
+            var workflow = workflowHost.Workflow(workflowType.Name, workflowType.Version);
             var historyEvents = new WorkflowHistoryEvents(_decisionTask);
 
             var decisions = Perform(() => workflow.Decisions(historyEvents));

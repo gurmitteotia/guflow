@@ -43,7 +43,7 @@ namespace Guflow.Decider
             OnResponseError(e=>ErrorAction.Unhandled);
         }
 
-        internal Workflow FindBy(string name, string version)
+        internal Workflow Workflow(string name, string version)
         {
             return _hostedWorkflows.FindBy(name, version);
         }
@@ -155,7 +155,7 @@ namespace Guflow.Decider
                 while (!_disposed)
                 {
                     var workflowTask = await PollForTaskAsync(taskList, domain, pollingIdentity);
-                    await workflowTask.ExecuteForAsync(this, _cancellationTokenSource.Token);
+                    await workflowTask.ExecuteAsync(this, _cancellationTokenSource.Token);
                 }
                 Status = HostStatus.Stopped;
             }

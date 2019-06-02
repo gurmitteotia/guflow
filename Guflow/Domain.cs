@@ -153,6 +153,14 @@ namespace Guflow
             return response?.ActivityTask;
         }
 
+        /// <summary>
+        /// Poll for workflow decision task on AWS.
+        /// </summary>
+        /// <param name="taskList">Task list to poll on for new decision tasks.</param>
+        /// <param name="pollingIdentity">Identity of workflow-host/decider.</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <param name="nextPageToken">Next page token</param>
+        /// <returns></returns>
         public async Task<DecisionTask> PollForDecisionTaskAsync(TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken = null)
         {
             Ensure.NotNull(taskList, "taskList");

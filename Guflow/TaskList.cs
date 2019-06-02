@@ -25,11 +25,11 @@ namespace Guflow
         /// </summary>
         public static readonly ReadHistoryEvents ReadFirstPage = (d,q,p,t) => ReadFirstPageAsync(d, q, p,t);
         private readonly ILog _log = Log.GetLogger<TaskList>();
+
         /// <summary>
         /// Create a new instance of TaskList.
         /// </summary>
         /// <param name="taskListName"></param>
-        /// <param name="pollingIdentity"></param>
         public TaskList(string taskListName)
         {
             Ensure.NotNullAndEmpty(taskListName,()=>new ArgumentException(Resources.TaskListName_required, nameof(taskListName)));
@@ -57,7 +57,7 @@ namespace Guflow
             _log.Debug($"Polling for new decisions on {this} under {domain}");
             var decisionTask = await ReadStrategy(domain, this, pollingIdentity, token);
             if (AreDecisionsReturned(decisionTask))
-                return WorkflowTask.CreateFor(decisionTask, domain);
+                return WorkflowTask.Create(decisionTask);
 
             _log.Debug($"No new decisions are returned on {this} under {domain}");
             return WorkflowTask.Empty;
