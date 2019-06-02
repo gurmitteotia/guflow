@@ -172,5 +172,8 @@ Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tu
 ### Supported .NET frameworks:
 dotnet standard 1.3 onwards
 
+### Backward compatibility: 
+Any released version will be backward compatible with the running workflows started with previous releases. You are encouraged to upgrade to latest version to get access to new features and bug fixes. However sometime, to keep APIs simple or to support new feature, breaking changes can be introduced in APIs but such changes can easily detected and can fixed during compilation. Please refer to the [release notes](https://github.com/gurmitteotia/guflow/releases) for more information.
+
 ### Getting help
 Enable the [logging](https://github.com/gurmitteotia/guflow/wiki/Logging) to look for any obvious error and if problem persist then please raise an [issue](https://github.com/gurmitteotia/guflow/issues) in github
