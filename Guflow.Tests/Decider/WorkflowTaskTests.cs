@@ -13,6 +13,58 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
+
+    public class NonEmptyWorkflowTests
+    {
+        private WorkflowTask _workflowTask;
+
+        [SetUp]
+        public void Setup()
+        {
+            var decisionTask = new DecisionTask() { Events = new List<HistoryEvent>(), TaskToken = "token" };
+            decisionTask.WorkflowExecution = new WorkflowExecution() { WorkflowId = "wid", RunId = "rid" };
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 5 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 4 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 3 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 2 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 1 });
+            decisionTask.PreviousStartedEventId = 2;
+            decisionTask.StartedEventId = 5;
+
+            _workflowTask = WorkflowTask.Create(decisionTask);
+        }
+
+        [Test]
+        public void Returns_events_in_descending_order()
+        {
+            var allEvents = _workflowTask.AllEvents.ToArray();
+            Assert.That(allEvents.Length, Is.EqualTo(5));
+            Assert.That(allEvents[0].EventId, Is.EqualTo(5));
+            Assert.That(allEvents[1].EventId, Is.EqualTo(4));
+            Assert.That(allEvents[2].EventId, Is.EqualTo(3));
+            Assert.That(allEvents[3].EventId, Is.EqualTo(2));
+            Assert.That(allEvents[4].EventId, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Returns_new_events_in_ascending_order()
+        {
+            var allEvents = _workflowTask.NewEvents.ToArray();
+            Assert.That(allEvents.Length, Is.EqualTo(3));
+            Assert.That(allEvents[0].EventId, Is.EqualTo(3));
+            Assert.That(allEvents[1].EventId, Is.EqualTo(4));
+            Assert.That(allEvents[2].EventId, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void WorkflowId_and_runid_are_non_empty()
+        {
+            Assert.That(_workflowTask.RunId, Is.EqualTo("rid"));
+            Assert.That(_workflowTask.WorkflowId, Is.EqualTo("wid"));
+        }
+    }
+
+    [TestFixture]
     public class WorkflowTaskTests
     {
         private Mock<IAmazonSimpleWorkflow> _amazonWorkflowClient;
@@ -28,14 +80,43 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void Empty_workflow_task_test()
+        {
+            var emptyTask = WorkflowTask.Empty;
+
+            Assert.That(emptyTask.AllEvents, Is.Empty);
+            Assert.That(emptyTask.NewEvents, Is.Empty);
+            Assert.That(emptyTask.WorkflowId, Is.Empty);
+            Assert.That(emptyTask.RunId, Is.Empty);
+        }
+
+        [Test]
+        public void Non_empty_workflow_task_test()
+        {
+            var decisionTask = new DecisionTask() { Events = new List<HistoryEvent>(), TaskToken = "token" };
+            decisionTask.WorkflowExecution = new WorkflowExecution() { WorkflowId = "wid", RunId = "rid" };
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 5 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 4 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 3 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 2 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 1 });
+            decisionTask.PreviousStartedEventId = 2;
+            decisionTask.StartedEventId = 5;
+
+            var task = WorkflowTask.Create(decisionTask);
+
+
+        }
+
+        [Test]
         public async Task On_execution_send_decisions_to_amazon_swf()
         {
             var hostedWorkflows = new WorkflowHost(_domain, new[] { new WorkflowCompleteOnSignal("result") });
             var workflowTasks = WorkflowTask.Create(DecisionTasksWithSignalEvents("token"));
 
-             await workflowTasks.ExecuteAsync(hostedWorkflows);
+            await workflowTasks.ExecuteAsync(hostedWorkflows);
 
-             AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token", Times.Once());
+            AssertThatInterpretedDecisionsAreSentOverWorkflowClient("token", Times.Once());
         }
 
         [Test]
@@ -54,7 +135,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowTasks = WorkflowTask.Empty;
 
-            await workflowTasks.ExecuteAsync(new WorkflowHost(_domain, new[] {new WorkflowCompleteOnSignal("result")}));
+            await workflowTasks.ExecuteAsync(new WorkflowHost(_domain, new[] { new WorkflowCompleteOnSignal("result") }));
 
             _amazonWorkflowClient.Verify(w => w.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),
                                                                                It.IsAny<CancellationToken>()), Times.Never);
@@ -93,7 +174,7 @@ namespace Guflow.Tests.Decider
         public async Task Raise_workflow_failed_event_when_workflow_failed_decision_is_delivered_to_amazon_swf()
         {
             WorkflowFailedEventArgs eventArgs = null;
-            var workflow = new WorkflowFailOnSignal("reason","detail");
+            var workflow = new WorkflowFailOnSignal("reason", "detail");
             workflow.Failed += (s, e) => { eventArgs = e; };
 
             await ExecuteWorkflowOnSignalEvent(workflow, "wid", "runid");
@@ -178,15 +259,15 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public async Task  By_default_response_exception_are_unhandled()
+        public async Task By_default_response_exception_are_unhandled()
         {
-            _amazonWorkflowClient.Setup(c=>c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
+            _amazonWorkflowClient.Setup(c => c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
                                  .Throws(new UnknownResourceException("msg"));
 
             await ExecuteWorkflowOnSignalEvent(new WorkflowCompleteOnSignal(), "wid", "rid");
 
-            _amazonWorkflowClient.Verify(c=>c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),
-                It.IsAny<CancellationToken>()),Times.Once);
+            _amazonWorkflowClient.Verify(c => c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]
@@ -195,9 +276,9 @@ namespace Guflow.Tests.Decider
             _amazonWorkflowClient.SetupSequence(c => c.RespondDecisionTaskCompletedAsync(It.IsAny<RespondDecisionTaskCompletedRequest>(), It.IsAny<CancellationToken>()))
                                 .Throws(new UnknownResourceException("msg"))
                                 .Returns(Task.FromResult(new RespondDecisionTaskCompletedResponse()));
-            var hostedWorkflows = new WorkflowHost(_domain, new[] {new WorkflowCompleteOnSignal()});
+            var hostedWorkflows = new WorkflowHost(_domain, new[] { new WorkflowCompleteOnSignal() });
             hostedWorkflows.OnResponseError(e => ErrorAction.Retry);
-            
+
             var workflowTasks = WorkflowTask.Create(DecisionTasksWithSignalEvents("token"));
 
             await workflowTasks.ExecuteAsync(hostedWorkflows);
@@ -226,8 +307,8 @@ namespace Guflow.Tests.Decider
         {
             var workflowTasks = WorkflowTask.Create(DecisionTasksWithSignalEvents("token"));
             var hostedWorkflows = new WorkflowHost(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new Exception("")) });
-            
-            Assert.ThrowsAsync<Exception>(async ()=>await workflowTasks.ExecuteAsync(hostedWorkflows));
+
+            Assert.ThrowsAsync<Exception>(async () => await workflowTasks.ExecuteAsync(hostedWorkflows));
         }
 
         [Test]
@@ -235,7 +316,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowTasks = WorkflowTask.Create(DecisionTasksWithSignalEvents("token"));
             var hostedWorkflows = new WorkflowHost(_domain, new[] { new WorkflowThrowsExceptionOnSignal(new Exception("")) });
-            workflowTasks.OnExecutionError(ErrorHandler.Default(e=>ErrorAction.Retry));
+            workflowTasks.OnExecutionError(ErrorHandler.Default(e => ErrorAction.Retry));
 
             await workflowTasks.ExecuteAsync(hostedWorkflows);
 
@@ -244,7 +325,7 @@ namespace Guflow.Tests.Decider
 
         private async Task ExecuteWorkflowOnSignalEvent(Workflow workflow, string workflowId, string runId)
         {
-            var hostedWorkflows = new WorkflowHost(_domain, new[] {workflow});
+            var hostedWorkflows = new WorkflowHost(_domain, new[] { workflow });
             var workflowTasks = WorkflowTask.Create(DecisionTasksWithSignalEvents(workflowId, runId));
             await workflowTasks.ExecuteAsync(hostedWorkflows);
         }
@@ -253,14 +334,14 @@ namespace Guflow.Tests.Decider
         {
             Func<RespondDecisionTaskCompletedRequest, bool> decisions = (r) =>
             {
-                Assert.That(r.TaskToken,Is.EqualTo(token));
+                Assert.That(r.TaskToken, Is.EqualTo(token));
                 var d = r.Decisions;
                 Assert.That(d.Count, Is.EqualTo(1));
                 var decision = d.First();
-                Assert.That(decision.DecisionType,Is.EqualTo(DecisionType.CompleteWorkflowExecution));
+                Assert.That(decision.DecisionType, Is.EqualTo(DecisionType.CompleteWorkflowExecution));
                 return true;
             };
-            _amazonWorkflowClient.Verify(w=>w.RespondDecisionTaskCompletedAsync(It.Is<RespondDecisionTaskCompletedRequest>(r=>decisions(r)),
+            _amazonWorkflowClient.Verify(w => w.RespondDecisionTaskCompletedAsync(It.Is<RespondDecisionTaskCompletedRequest>(r => decisions(r)),
                                                                                 It.IsAny<CancellationToken>()), times);
         }
 
@@ -270,12 +351,12 @@ namespace Guflow.Tests.Decider
             return new DecisionTask
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
-                Events = new List<HistoryEvent>(){ historyEvent},
+                Events = new List<HistoryEvent>() { historyEvent },
                 PreviousStartedEventId = 0,
                 StartedEventId = historyEvent.EventId,
                 TaskToken = token,
-                WorkflowExecution = new WorkflowExecution() { RunId = "rid", WorkflowId = "wid"}
-            }; 
+                WorkflowExecution = new WorkflowExecution() { RunId = "rid", WorkflowId = "wid" }
+            };
         }
 
         private DecisionTask DecisionTasksWithSignalEvents(string workflowId, string runId)
@@ -289,12 +370,12 @@ namespace Guflow.Tests.Decider
                 PreviousStartedEventId = 0,
                 StartedEventId = historyEvent.EventId,
                 TaskToken = "token",
-                WorkflowExecution = new WorkflowExecution() {  WorkflowId = workflowId, RunId = runId}
+                WorkflowExecution = new WorkflowExecution() { WorkflowId = workflowId, RunId = runId }
             };
         }
 
         [WorkflowDescription("1.0", Name = "TestWorkflow")]
-        private class WorkflowCompleteOnSignal:Workflow
+        private class WorkflowCompleteOnSignal : Workflow
         {
             private readonly string _completeResult;
 
@@ -355,7 +436,7 @@ namespace Guflow.Tests.Decider
             {
                 return RestartWorkflow();
             }
-           
+
         }
         [WorkflowDescription("1.0", Name = "TestWorkflow")]
         private class WorkflowThrowsExceptionOnSignal : Workflow

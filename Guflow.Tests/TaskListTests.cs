@@ -41,6 +41,7 @@ namespace Guflow.Tests
             var workflowTasks = await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity, _cancellationTokenSource.Token);
 
             Assert.That(workflowTasks, Is.EqualTo(WorkflowTask.Empty));
+            Assert.That(workflowTasks.AllEvents, Is.Empty);
         }
 
         [Test]
@@ -116,11 +117,15 @@ namespace Guflow.Tests
             var decision3 = new DecisionTask { TaskToken = "t,", Events = new List<HistoryEvent> { new HistoryEvent { EventId = 3 } } };
             AmazonSwfReturnsDecisionTask(decision1, decision2, decision3);
 
-            var decisionTask =
+            var workflowTask =
                 await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity, _cancellationTokenSource.Token);
 
-            Assert.That(decisionTask, Is.Not.EqualTo(WorkflowTask.Empty));
-            _amazonWorkflowClient.Verify(c=>c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()),Times.Exactly(3));
+            Assert.That(workflowTask, Is.Not.EqualTo(WorkflowTask.Empty));
+            var events = workflowTask.AllEvents.ToArray();
+            Assert.That(events.Length, Is.EqualTo(3));
+            Assert.That(events[0].EventId, Is.EqualTo(1));
+            Assert.That(events[1].EventId, Is.EqualTo(2));
+            Assert.That(events[2].EventId, Is.EqualTo(3));
         }
 
 
@@ -134,11 +139,12 @@ namespace Guflow.Tests
 
             _taskList.ReadStrategy = TaskList.ReadFirstPage;
 
-            var decisionTask = await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity, _cancellationTokenSource.Token);
+            var workflowTask = await _taskList.PollForWorkflowTaskAsync(_domain, _pollingIdentity, _cancellationTokenSource.Token);
 
-            Assert.That(decisionTask, Is.Not.EqualTo(WorkflowTask.Empty));
-            _amazonWorkflowClient.Verify(c => c.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
-
+            Assert.That(workflowTask, Is.Not.EqualTo(WorkflowTask.Empty));
+            var events = workflowTask.AllEvents.ToArray();
+            Assert.That(events.Length, Is.EqualTo(1));
+            Assert.That(events[0].EventId, Is.EqualTo(1));
         }
 
 

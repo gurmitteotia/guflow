@@ -17,23 +17,24 @@ namespace Guflow.Decider
         private readonly Func<WorkflowHost, CancellationToken, Task> _actionToExecute;
         private IErrorHandler _executionErrorHandler = ErrorHandler.NotHandled;
         private static readonly WorkflowDecision[] EmptyDecisions = new WorkflowDecision[0];
-
         private WorkflowTask(DecisionTask decisionTask)
         {
             _decisionTask = decisionTask;
             _actionToExecute = ExecuteTasks;
         }
 
-        private WorkflowTask()
-        {
-            _actionToExecute = async (w, c) => { await Task.Yield(); };
-        }
-
         /// <summary>
         /// Represent Decision task with no new events. Execution of empty <see cref="WorkflowTask"/> does not generate any decisions.
         /// </summary>
-        public static readonly WorkflowTask Empty = new WorkflowTask();
+        public static readonly WorkflowTask Empty = new WorkflowTask(EmptyDecisionTask);
 
+        internal IEnumerable<HistoryEvent> AllEvents => _decisionTask.Events;
+        internal IEnumerable<HistoryEvent> NewEvents {
+            get { return AllEvents.TakeWhile(h => h.EventId > _decisionTask.PreviousStartedEventId).Reverse(); }
+    }
+        internal string WorkflowId => _decisionTask.WorkflowExecution.WorkflowId;
+        internal string RunId => _decisionTask.WorkflowExecution.RunId;
+       
         /// <summary>
         /// Create the instance from Amazon SWF DecisionTask.
         /// </summary>
@@ -55,6 +56,14 @@ namespace Guflow.Decider
             _decisionTask.Events.AddRange(other._decisionTask.Events);
         }
 
+        private static DecisionTask EmptyDecisionTask =>
+            new DecisionTask
+            {
+                Events = new List<HistoryEvent>(),
+                PreviousStartedEventId = 0,
+                StartedEventId = 0,
+                WorkflowExecution = new WorkflowExecution {RunId = string.Empty, WorkflowId = string.Empty}
+            };
 
         private static bool HasNewEvents(DecisionTask decision)
         {
@@ -90,5 +99,8 @@ namespace Guflow.Decider
             var workflowClosingDecisions = workflowDecisions.OfType<WorkflowClosingDecision>().ToList();
             workflowClosingDecisions.ForEach(d => d.Raise(postExecutionEvents));
         }
+
+
+        
     }
 }
