@@ -26,7 +26,7 @@ namespace Guflow.Decider
         private WorkflowTask()
         {
             _decisionTask = EmptyDecisionTask;
-            _actionToExecute = (t, c) => Task.CompletedTask;
+            _actionToExecute = async (t, c) => await Task.Yield();
         }
 
         /// <summary>
