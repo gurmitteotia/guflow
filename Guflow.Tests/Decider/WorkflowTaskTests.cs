@@ -89,25 +89,7 @@ namespace Guflow.Tests.Decider
             Assert.That(emptyTask.WorkflowId, Is.Empty);
             Assert.That(emptyTask.RunId, Is.Empty);
         }
-
-        [Test]
-        public void Non_empty_workflow_task_test()
-        {
-            var decisionTask = new DecisionTask() { Events = new List<HistoryEvent>(), TaskToken = "token" };
-            decisionTask.WorkflowExecution = new WorkflowExecution() { WorkflowId = "wid", RunId = "rid" };
-            decisionTask.Events.Add(new HistoryEvent() { EventId = 5 });
-            decisionTask.Events.Add(new HistoryEvent() { EventId = 4 });
-            decisionTask.Events.Add(new HistoryEvent() { EventId = 3 });
-            decisionTask.Events.Add(new HistoryEvent() { EventId = 2 });
-            decisionTask.Events.Add(new HistoryEvent() { EventId = 1 });
-            decisionTask.PreviousStartedEventId = 2;
-            decisionTask.StartedEventId = 5;
-
-            var task = WorkflowTask.Create(decisionTask);
-
-
-        }
-
+       
         [Test]
         public async Task On_execution_send_decisions_to_amazon_swf()
         {

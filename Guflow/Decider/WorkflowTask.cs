@@ -9,7 +9,7 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Represent the new decision task in Amazon SWF.
+    /// Represent the decision task in Amazon SWF.
     /// </summary>
     public class WorkflowTask
     {
@@ -23,10 +23,16 @@ namespace Guflow.Decider
             _actionToExecute = ExecuteTasks;
         }
 
+        private WorkflowTask()
+        {
+            _decisionTask = EmptyDecisionTask;
+            _actionToExecute = (t, c) => Task.CompletedTask;
+        }
+
         /// <summary>
-        /// Represent Decision task with no new events. Execution of empty <see cref="WorkflowTask"/> does not generate any decisions.
+        /// Returns empty workflow task. Execution of empty <see cref="WorkflowTask"/> does not generate any decisions.
         /// </summary>
-        public static readonly WorkflowTask Empty = new WorkflowTask(EmptyDecisionTask);
+        public static readonly WorkflowTask Empty = new WorkflowTask();
 
         internal IEnumerable<HistoryEvent> AllEvents => _decisionTask.Events;
         internal IEnumerable<HistoryEvent> NewEvents {
@@ -99,8 +105,5 @@ namespace Guflow.Decider
             var workflowClosingDecisions = workflowDecisions.OfType<WorkflowClosingDecision>().ToList();
             workflowClosingDecisions.ForEach(d => d.Raise(postExecutionEvents));
         }
-
-
-        
     }
 }
