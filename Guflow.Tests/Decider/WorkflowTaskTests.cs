@@ -89,7 +89,13 @@ namespace Guflow.Tests.Decider
             Assert.That(emptyTask.WorkflowId, Is.Empty);
             Assert.That(emptyTask.RunId, Is.Empty);
         }
-       
+
+        [Test]
+        public void Invalid_argument_in_append()
+        {
+            Assert.Throws<ArgumentNullException>(() => WorkflowTask.Empty.Append(null));
+        }
+
         [Test]
         public async Task On_execution_send_decisions_to_amazon_swf()
         {

@@ -59,6 +59,7 @@ namespace Guflow.Decider
         /// <param name="other"></param>
         public void Append(WorkflowTask other)
         {
+            Ensure.NotNull(other, nameof(other));
             _decisionTask.Events.AddRange(other._decisionTask.Events);
         }
 
