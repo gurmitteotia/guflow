@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
+using Guflow.Properties;
 
 namespace Guflow.Decider
 {
@@ -49,8 +51,17 @@ namespace Guflow.Decider
         public static WorkflowTask Create(DecisionTask decisionTask)
         {
             if(HasNewEvents(decisionTask))
-                return new WorkflowTask(decisionTask);
+                return ValidatedWorkflowTask(decisionTask);
             return Empty;
+        }
+
+        private static WorkflowTask ValidatedWorkflowTask(DecisionTask decisionTask)
+        {
+            if (decisionTask.Events == null|| decisionTask.Events.Count==0)
+                throw new ArgumentException("", "decisionTask.Events");
+            if(decisionTask.Events[0].EventType!=EventType.DecisionTaskStarted)
+                throw new ArgumentException(Resources.DecisionTaskStarted_event_is_missing);
+            return new WorkflowTask(decisionTask);
         }
 
         /// <summary>

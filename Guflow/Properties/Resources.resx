@@ -267,4 +267,7 @@
   <data name="Multiple_signal_event_method" xml:space="preserve">
     <value>Multiple signal event methods are found for signal {0}. Please provide only one method.</value>
   </data>
+  <data name="DecisionTaskStarted_event_is_missing" xml:space="preserve">
+    <value>DecisionTaskStarted event is missing.</value>
+  </data>
 </root>

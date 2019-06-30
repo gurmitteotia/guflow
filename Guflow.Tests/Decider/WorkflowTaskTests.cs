@@ -23,7 +23,7 @@ namespace Guflow.Tests.Decider
         {
             var decisionTask = new DecisionTask() { Events = new List<HistoryEvent>(), TaskToken = "token" };
             decisionTask.WorkflowExecution = new WorkflowExecution() { WorkflowId = "wid", RunId = "rid" };
-            decisionTask.Events.Add(new HistoryEvent() { EventId = 5 });
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 5 , EventType = EventType.DecisionTaskStarted});
             decisionTask.Events.Add(new HistoryEvent() { EventId = 4 });
             decisionTask.Events.Add(new HistoryEvent() { EventId = 3 });
             decisionTask.Events.Add(new HistoryEvent() { EventId = 2 });
@@ -94,6 +94,25 @@ namespace Guflow.Tests.Decider
         public void Invalid_argument_in_append()
         {
             Assert.Throws<ArgumentNullException>(() => WorkflowTask.Empty.Append(null));
+        }
+
+        [Test]
+        public void Throws_exception_when_first_event_is_not_decision_task_started_event()
+        {
+            var decisionTask = new DecisionTask() { Events = new List<HistoryEvent>(), TaskToken = "token" };
+            decisionTask.WorkflowExecution = new WorkflowExecution() { WorkflowId = "wid", RunId = "rid" };
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 5 });
+
+            Assert.Throws<ArgumentException>(() => WorkflowTask.Create(decisionTask));
+        }
+
+        [Test]
+        public void Invalid_history_events_tests()
+        {
+            var decisionTask = new DecisionTask() { Events = new List<HistoryEvent>(), TaskToken = "token" };
+            Assert.Throws<ArgumentException>(() => WorkflowTask.Create(decisionTask));
+            decisionTask.Events =  new List<HistoryEvent>();
+            Assert.Throws<ArgumentException>(() => WorkflowTask.Create(decisionTask));
         }
 
         [Test]
