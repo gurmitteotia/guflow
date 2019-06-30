@@ -9,9 +9,7 @@ namespace Guflow.Decider
 {
     internal class WorkflowHistoryEvents : IWorkflowHistoryEvents
     {
-        private readonly IEnumerable<HistoryEvent> _allHistoryEvents;
-        private readonly long _previousStartedEventId;
-        private readonly long _newStartedEventId;
+        private readonly WorkflowTask _workflowTask;
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedActivityEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedTimerEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
         private readonly Dictionary<WorkflowItem,WorkflowItemEvent> _cachedLambdaEvents = new Dictionary<WorkflowItem, WorkflowItemEvent>();
@@ -19,27 +17,31 @@ namespace Guflow.Decider
 
         private List<WaitForSignalsEvent> _cachedWaitEvents = null;
         //TODO : Get rid of this constructor once the dependent constructor is deleted.
-        private WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long previousStartedEventId, long newStartedEventId)
+        private WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, long previousStartedEventId,
+            long newStartedEventId, string workflowRunId)
         {
-            _allHistoryEvents = allHistoryEvents;
-            _previousStartedEventId = previousStartedEventId;
-            _newStartedEventId = newStartedEventId;
+            var decision = new DecisionTask()
+            {
+                PreviousStartedEventId = previousStartedEventId, StartedEventId = newStartedEventId, WorkflowExecution =
+                    new WorkflowExecution()
+                    {
+                        RunId = workflowRunId
+                    }
+            };
+            decision.Events = allHistoryEvents.ToList();
+            decision.TaskToken = "dummy";
+            _workflowTask = WorkflowTask.Create(decision);
         }
 
-        public WorkflowHistoryEvents(DecisionTask decisionTask)
+        public WorkflowHistoryEvents(WorkflowTask workflowTask)
         {
-            _allHistoryEvents = decisionTask.Events;
-            _previousStartedEventId = decisionTask.PreviousStartedEventId;
-            _newStartedEventId = decisionTask.StartedEventId;
-            WorkflowRunId = decisionTask.WorkflowExecution.RunId;
-            WorkflowId = decisionTask.WorkflowExecution.WorkflowId;
+            _workflowTask = workflowTask;
         }
 
         //TODO: Get rid of this constructor.
         public WorkflowHistoryEvents(IEnumerable<HistoryEvent> allHistoryEvents, string workflowRunId="")
-            :this(allHistoryEvents,allHistoryEvents.Last().EventId-1, allHistoryEvents.First().EventId)
+            :this(allHistoryEvents,allHistoryEvents.Last().EventId-1, allHistoryEvents.First().EventId, workflowRunId)
         {
-            WorkflowRunId = workflowRunId;
         }
 
         public WorkflowItemEvent LastActivityEvent(ActivityItem activityItem)
@@ -64,10 +66,9 @@ namespace Guflow.Decider
         public IEnumerable<WorkflowEvent> NewEvents()
         {
             var events = new List<WorkflowEvent>();
-            for (var eventId = _previousStartedEventId + 1; eventId <= _newStartedEventId; eventId++)
+            foreach (var historyEvent in _workflowTask.NewEvents)
             {
-                var historyEvent = _allHistoryEvents.First(h => h.EventId == eventId);
-                var workflowEvent = historyEvent.CreateInterpretableEvent(_allHistoryEvents);
+                var workflowEvent = historyEvent.CreateInterpretableEvent(_workflowTask.AllEvents);
                 if (workflowEvent == null)
                     continue;
                 events.Add(workflowEvent);
@@ -77,7 +78,7 @@ namespace Guflow.Decider
 
         public WorkflowStartedEvent WorkflowStartedEvent()
         {
-            foreach (var historyEvent in _allHistoryEvents.Reverse())
+            foreach (var historyEvent in _workflowTask.AllEvents.Reverse())
             {
                 if(historyEvent.IsWorkflowStartedEvent())
                     return new WorkflowStartedEvent(historyEvent);
@@ -88,9 +89,9 @@ namespace Guflow.Decider
         public bool HasActiveEvent()
         {
             var allEvents = new List<WorkflowItemEvent>();
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var historyEvent in _workflowTask.AllEvents)
             {
-                var workflowItemEvent = historyEvent.CreateWorkflowItemEventFor(_allHistoryEvents);
+                var workflowItemEvent = historyEvent.CreateWorkflowItemEventFor(_workflowTask.AllEvents);
                 if(workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsActive && !workflowItemEvent.InChainOf(allEvents))
                     return true;
@@ -99,15 +100,15 @@ namespace Guflow.Decider
             return false;
         }
 
-        public string WorkflowRunId { get; }
-        public string WorkflowId { get; }
+        public string WorkflowRunId => _workflowTask.RunId;
+        public string WorkflowId => _workflowTask.WorkflowId;
 
         public IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem)
         {
             var allEvents = new List<WorkflowItemEvent>();
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var historyEvent in _workflowTask.AllEvents)
             {
-                var workflowItemEvent = historyEvent.ActivityEvent(_allHistoryEvents);
+                var workflowItemEvent = historyEvent.ActivityEvent(_workflowTask.AllEvents);
                 if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(activityItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
@@ -120,9 +121,9 @@ namespace Guflow.Decider
         public IEnumerable<WorkflowItemEvent> AllTimerEvents(TimerItem timerItem, bool includeRescheduleTimerEvents)
         {
             var allEvents = new List<WorkflowItemEvent>();
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var historyEvent in _workflowTask.AllEvents)
             {
-                var workflowItemEvent = historyEvent.TimerEvent(_allHistoryEvents);
+                var workflowItemEvent = historyEvent.TimerEvent(_workflowTask.AllEvents);
                 if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
@@ -136,7 +137,7 @@ namespace Guflow.Decider
 
         public IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents()
         {
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var historyEvent in _workflowTask.AllEvents)
             {
                 if(historyEvent.IsMarkerRecordedEvent())
                     yield return new MarkerRecordedEvent(historyEvent);
@@ -145,7 +146,7 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowSignaledEvent> AllSignalEvents()
         {
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var historyEvent in _workflowTask.AllEvents)
             {
                 if(historyEvent.IsWorkflowSignaledEvent())
                     yield return new WorkflowSignaledEvent(historyEvent);
@@ -154,7 +155,7 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowCancellationRequestedEvent> AllWorkflowCancellationRequestedEvents()
         {
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var historyEvent in _workflowTask.AllEvents)
             {
                 if (historyEvent.IsWorkflowCancellationRequestedEvent())
                     yield return new WorkflowCancellationRequestedEvent(historyEvent);
@@ -164,9 +165,9 @@ namespace Guflow.Decider
         public IEnumerable<WorkflowItemEvent> AllLambdaEvents(LambdaItem lambdaItem)
         {
             var allEvents = new List<WorkflowItemEvent>();
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var historyEvent in _workflowTask.AllEvents)
             {
-                var lambdaEvent = historyEvent.LambdaEvent(_allHistoryEvents);
+                var lambdaEvent = historyEvent.LambdaEvent(_workflowTask.AllEvents);
                 if(lambdaEvent == null) continue;
                 if (lambdaEvent.IsFor(lambdaItem) && !lambdaEvent.InChainOf(allEvents))
                 {
@@ -189,9 +190,9 @@ namespace Guflow.Decider
         public IEnumerable<WorkflowItemEvent> AllChildWorkflowEvents(ChildWorkflowItem childWorkflowItem)
         {
             var allEvents = new List<WorkflowItemEvent>();
-            foreach (var historyEvent in _allHistoryEvents)
+            foreach (var historyEvent in _workflowTask.AllEvents)
             {
-                var childWorkflowEvent = historyEvent.ChildWorkflowEvent(_allHistoryEvents);
+                var childWorkflowEvent = historyEvent.ChildWorkflowEvent(_workflowTask.AllEvents);
                 if (childWorkflowEvent == null) continue;
                 if (childWorkflowEvent.IsFor(childWorkflowItem) && !childWorkflowEvent.InChainOf(allEvents))
                 {
@@ -214,9 +215,9 @@ namespace Guflow.Decider
         {
             if (_cachedWaitEvents != null) return _cachedWaitEvents;
             _cachedWaitEvents = new List<WaitForSignalsEvent>();
-            foreach (var historyEvent in _allHistoryEvents.Reverse())
+            foreach (var historyEvent in _workflowTask.AllEvents.Reverse())
             {
-                var waitEvent = historyEvent.WaitForSignalsEvent(_allHistoryEvents);
+                var waitEvent = historyEvent.WaitForSignalsEvent(_workflowTask.AllEvents);
                 if (waitEvent != null)
                     _cachedWaitEvents.Add(waitEvent);
             }
@@ -224,7 +225,7 @@ namespace Guflow.Decider
             return _cachedWaitEvents;
         }
 
-        public long LatestEventId => _allHistoryEvents.First().EventId;
+        public long LatestEventId => _workflowTask.AllEvents.First().EventId;
 
         private bool IsRescheduleTimerEvent(WorkflowItemEvent @event)
         {
