@@ -16,12 +16,15 @@ namespace Guflow.Decider
     public class WorkflowTask
     {
         private readonly DecisionTask _decisionTask;
+        private readonly double _downloadFactor;
         private readonly Func<WorkflowHost, CancellationToken, Task> _actionToExecute;
         private IErrorHandler _executionErrorHandler = ErrorHandler.NotHandled;
         private static readonly WorkflowDecision[] EmptyDecisions = new WorkflowDecision[0];
-        private WorkflowTask(DecisionTask decisionTask)
+        private readonly DateTime _creationTime = DateTime.UtcNow;
+        private WorkflowTask(DecisionTask decisionTask, double downloadFactor)
         {
             _decisionTask = decisionTask;
+            _downloadFactor = downloadFactor;
             _actionToExecute = ExecuteTasks;
         }
 
@@ -42,26 +45,27 @@ namespace Guflow.Decider
     }
         internal string WorkflowId => _decisionTask.WorkflowExecution.WorkflowId;
         internal string RunId => _decisionTask.WorkflowExecution.RunId;
-       
+
         /// <summary>
         /// Create the instance from Amazon SWF DecisionTask.
         /// </summary>
         /// <param name="decisionTask"></param>
+        /// <param name="downloadFactor">Indicate how much time it will take in milliseconds to download an event. By default it assumes it will take 500 ms to download 1000 events.</param>
         /// <returns></returns>
-        public static WorkflowTask Create(DecisionTask decisionTask)
+        public static WorkflowTask Create(DecisionTask decisionTask, double downloadFactor=.5)
         {
             if(HasNewEvents(decisionTask))
-                return ValidatedWorkflowTask(decisionTask);
+                return ValidatedWorkflowTask(decisionTask, downloadFactor);
             return Empty;
         }
 
-        private static WorkflowTask ValidatedWorkflowTask(DecisionTask decisionTask)
+        private static WorkflowTask ValidatedWorkflowTask(DecisionTask decisionTask, double downloadFactor)
         {
             if (decisionTask.Events == null|| decisionTask.Events.Count==0)
                 throw new ArgumentException("", "decisionTask.Events");
             if(decisionTask.Events[0].EventType!=EventType.DecisionTaskStarted)
                 throw new ArgumentException(Resources.DecisionTaskStarted_event_is_missing);
-            return new WorkflowTask(decisionTask);
+            return new WorkflowTask(decisionTask, downloadFactor);
         }
 
         /// <summary>
@@ -82,6 +86,13 @@ namespace Guflow.Decider
                 StartedEventId = 0,
                 WorkflowExecution = new WorkflowExecution {RunId = string.Empty, WorkflowId = string.Empty}
             };
+
+        internal DateTime ServerTimeUtc=> DecisionTaskStartTime + (DateTime.UtcNow - _creationTime);
+
+        private DateTime DecisionTaskStartTime 
+            => this==Empty
+               ? DateTime.UtcNow
+               : _decisionTask.Events[0].EventTimestamp + TimeSpan.FromMilliseconds(_downloadFactor * _decisionTask.Events.Count);
 
         private static bool HasNewEvents(DecisionTask decision)
         {

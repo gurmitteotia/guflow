@@ -17,7 +17,7 @@ namespace Guflow.Tests.Decider
     public class NonEmptyWorkflowTests
     {
         private WorkflowTask _workflowTask;
-
+       
         [SetUp]
         public void Setup()
         {
@@ -61,6 +61,56 @@ namespace Guflow.Tests.Decider
         {
             Assert.That(_workflowTask.RunId, Is.EqualTo("rid"));
             Assert.That(_workflowTask.WorkflowId, Is.EqualTo("wid"));
+        }
+
+       
+    }
+
+
+    [TestFixture]
+    public class ServerTimeTests
+    {
+        [Test]
+        public void Server_time_is_decision_task_start_time_plus_elapsed_time_plus_download_time()
+        {
+            var decisionTaskStartTime = DateTime.UtcNow.AddHours(-2);
+            var workflowTask = WorkflowTaskWithEvents(decisionTaskStartTime, 1);
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+            Assert.That((workflowTask.ServerTimeUtc - decisionTaskStartTime), Is.GreaterThan(TimeSpan.FromMilliseconds(1900)));
+        }
+
+        [Test]
+        public void Default_download_factor()
+        {
+            var decisionTaskStartTime = DateTime.UtcNow.AddHours(-2);
+            var workflowTask = WorkflowTaskWithEvents(decisionTaskStartTime);
+            Assert.That((workflowTask.ServerTimeUtc - decisionTaskStartTime), Is.GreaterThan(TimeSpan.FromMilliseconds(400)));
+        }
+
+        [Test]
+        public void Empty_workflow_task_server_time_is_local_pc_utc_time()
+        {
+            Assert.That((WorkflowTask.Empty.ServerTimeUtc - DateTime.UtcNow), Is.LessThan(TimeSpan.FromMilliseconds(100)));
+        }
+
+        private WorkflowTask WorkflowTaskWithEvents(DateTime decisionTaskTime, double downloadFactor)
+        {
+            return WorkflowTask.Create(BuildDecisionTask(decisionTaskTime), downloadFactor);
+        }
+
+        private WorkflowTask WorkflowTaskWithEvents(DateTime decisionTaskTime)
+        {
+            return WorkflowTask.Create(BuildDecisionTask(decisionTaskTime));
+        }
+
+        private DecisionTask BuildDecisionTask(DateTime decisionTaskTime)
+        {
+            var decisionTask = new DecisionTask() { Events = new List<HistoryEvent>(), TaskToken = "token" };
+            decisionTask.WorkflowExecution = new WorkflowExecution() { WorkflowId = "wid", RunId = "rid" };
+            decisionTask.Events.Add(new HistoryEvent() { EventId = 1001, EventType = EventType.DecisionTaskStarted, EventTimestamp = decisionTaskTime });
+            for (int i = 1000; i > 0; i--)
+                decisionTask.Events.Add(new HistoryEvent() { EventId = i });
+            return decisionTask;
         }
     }
 
