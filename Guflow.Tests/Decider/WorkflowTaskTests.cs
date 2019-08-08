@@ -62,8 +62,6 @@ namespace Guflow.Tests.Decider
             Assert.That(_workflowTask.RunId, Is.EqualTo("rid"));
             Assert.That(_workflowTask.WorkflowId, Is.EqualTo("wid"));
         }
-
-       
     }
 
 

@@ -50,7 +50,7 @@ namespace Guflow.Decider
         /// Create the instance from Amazon SWF DecisionTask.
         /// </summary>
         /// <param name="decisionTask"></param>
-        /// <param name="downloadFactor">Indicate how much time it will take in milliseconds to download an event. By default it assumes it will take 500 ms to download 1000 events.</param>
+        /// <param name="downloadFactor">Indicate how much time it will take in milliseconds to download a history event. By default it assumes it will take 500 ms to download 1000 events.</param>
         /// <returns></returns>
         public static WorkflowTask Create(DecisionTask decisionTask, double downloadFactor=.5)
         {
