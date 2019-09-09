@@ -163,7 +163,7 @@ namespace Guflow.Decider
 
         WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
-            if (timerFiredEvent.IsARescheduledTimer)
+            if (timerFiredEvent.TimerType==TimerType.Reschedule)
                 return _rescheduleTimer._firedAction(timerFiredEvent);
 
             return _firedAction(timerFiredEvent);

@@ -227,10 +227,10 @@ namespace Guflow.Decider
 
         public long LatestEventId => _workflowTask.AllEvents.First().EventId;
 
-        private bool IsRescheduleTimerEvent(WorkflowItemEvent @event)
+        private static bool IsRescheduleTimerEvent(WorkflowItemEvent @event)
         {
             var timerEvent = @event as TimerEvent;
-            return timerEvent != null && timerEvent.IsARescheduledTimer;
+            return timerEvent != null && timerEvent.TimerType==TimerType.Reschedule;
         }
 
         private class LastEventFilters

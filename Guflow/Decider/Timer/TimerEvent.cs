@@ -9,10 +9,9 @@ namespace Guflow.Decider
     public abstract class TimerEvent : WorkflowItemEvent
     {
         private string _timerName;
-        private TimeSpan _firedAfter;
+        private TimeSpan _timeout;
         private long _timerStartedEventId;
-        internal bool IsARescheduledTimer { get; private set; }
-
+        internal TimerType TimerType { get; private set; }
         protected TimerEvent(long eventId)
             : base(eventId)
         {
@@ -25,10 +24,10 @@ namespace Guflow.Decider
             {
                 if (historyEvent.IsTimerStartedEvent(timerStartedEventId))
                 {
-                    _firedAfter = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
+                    _timeout = TimeSpan.FromSeconds(int.Parse(historyEvent.TimerStartedEventAttributes.StartToFireTimeout));
                     ScheduleId = ScheduleId.Raw(historyEvent.TimerStartedEventAttributes.TimerId);
                     var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.As<TimerScheduleData>();
-                    IsARescheduledTimer = timerScheduleData.IsARescheduleTimer;
+                    TimerType = timerScheduleData.TimerType;
                     _timerName = timerScheduleData.TimerName;
                     foundTimerStartedEvent = true;
                     break;
@@ -54,10 +53,10 @@ namespace Guflow.Decider
         }
 
         internal ScheduleId Id => ScheduleId;
-        internal TimeSpan Timeout => _firedAfter;
+        internal TimeSpan Timeout => _timeout;
         public override string ToString()
         {
-            return string.Format("{0} for timer {1}, fired after {2}",GetType().Name,_timerName,_firedAfter);
+            return $"{GetType().Name} for timer {_timerName}, fired after {_timeout}";
         }
     }
 }
