@@ -53,7 +53,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[]{new ScheduleTimerDecision(identity.ScheduleId(),TimeSpan.Zero) }));
+            Assert.That(decisions, Is.EquivalentTo(new[]{ScheduleTimerDecision.WorkflowItem(identity.ScheduleId(),TimeSpan.Zero) }));
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(scheduleId, TimeSpan.Zero) }));
+            Assert.That(decisions, Is.EquivalentTo(new[] {ScheduleTimerDecision.WorkflowItem(scheduleId, TimeSpan.Zero) }));
         }
 
         [Test]
@@ -82,7 +82,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.New("name", "ver", "pos").ScheduleId(), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { ScheduleTimerDecision.RescheduleTimer(Identity.New("name", "ver", "pos").ScheduleId(), TimeSpan.FromSeconds(2)) }));
         }
 
         [Test]
@@ -104,7 +104,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleTimerDecision(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0))}));
+            Assert.That(decisions, Is.EqualTo(new []{ ScheduleTimerDecision.WorkflowItem(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0))}));
         }
 
         [Test]
@@ -115,7 +115,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.WorkflowItem(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0)) }));
         }
 
         [Test]

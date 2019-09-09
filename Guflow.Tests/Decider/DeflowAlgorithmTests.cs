@@ -602,7 +602,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
-                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero),
+                ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero),
             }));
         }
 

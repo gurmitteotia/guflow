@@ -156,7 +156,7 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(childTimer).ScheduleId(), childTimeout) }));
+            Assert.That(decisions, Is.EquivalentTo(new[] { ScheduleTimerDecision.WorkflowItem(Identity.Timer(childTimer).ScheduleId(), childTimeout) }));
         }
 
         [Test]
@@ -179,7 +179,7 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion, _positionalName));
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(timerName).ScheduleId(),new TimeSpan())}));
+            Assert.That(decisions, Is.EquivalentTo(new[] { ScheduleTimerDecision.WorkflowItem(Identity.Timer(timerName).ScheduleId(),new TimeSpan())}));
         }
 
         [Test]

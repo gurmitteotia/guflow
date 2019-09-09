@@ -22,7 +22,7 @@ namespace Guflow.Decider
         private readonly ScheduleId _defaultScheduleId;
         private ScheduleId ResetScheduleId => Identity.ScheduleId(WorkflowHistoryEvents.WorkflowRunId + "Reset");
 
-        private bool _invokedTimerCancelAction = false;// to avoid recurssion.
+        private bool _invokedTimerCancelAction = false;// to avoid recursion.
 
         private TimerItem(Identity identity, ScheduleId defaultScheduleId, IWorkflow workflow)
                      : base(identity, workflow)
@@ -189,7 +189,10 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return new[] { new ScheduleTimerDecision(ScheduleId , _fireAfterFunc(this), this == _rescheduleTimer) };
+            if(this==_rescheduleTimer)
+                return new[] { ScheduleTimerDecision.RescheduleTimer(ScheduleId , _fireAfterFunc(this)) };
+
+            return new[] { ScheduleTimerDecision.WorkflowItem(ScheduleId , _fireAfterFunc(this)) };
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
@@ -229,7 +232,7 @@ namespace Guflow.Decider
             var lastTimerEvent = (TimerEvent) LastEvent();
             var rescheduleId = RescheduleId(lastTimerEvent.Id);
             return WorkflowAction.Custom(new CancelTimerDecision(lastTimerEvent.Id),
-                new ScheduleTimerDecision(rescheduleId, timeout ?? lastTimerEvent.Timeout));
+                 ScheduleTimerDecision.WorkflowItem(rescheduleId, timeout ?? lastTimerEvent.Timeout));
         }
         private ScheduleId RescheduleId(ScheduleId lastScheduleId) => AllScheduleIds.First(id=>id!=lastScheduleId);
         private ScheduleId[] AllScheduleIds => new[] {_defaultScheduleId, ResetScheduleId};

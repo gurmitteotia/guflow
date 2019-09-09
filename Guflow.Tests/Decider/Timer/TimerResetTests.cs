@@ -36,7 +36,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId()),
-                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset"), TimeSpan.FromMinutes(4))
+                ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset"), TimeSpan.FromMinutes(4))
             }));
         }
 
@@ -54,7 +54,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId()),
-                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset"), TimeSpan.FromMinutes(10))
+                ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset"), TimeSpan.FromMinutes(10))
             }));
         }
 
@@ -72,7 +72,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId()),
-                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset"), TimeSpan.FromMinutes(10))
+                ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset"), TimeSpan.FromMinutes(10))
             }));
         }
 
@@ -90,7 +90,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId + "Reset")),
-                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4))
+                ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4))
             }));
         }
 
@@ -108,7 +108,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId+"Reset")),
-                new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(10))
+                ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(10))
             }));
         }
 

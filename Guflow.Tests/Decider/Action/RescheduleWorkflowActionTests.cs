@@ -100,7 +100,7 @@ namespace Guflow.Tests.Decider
           
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(), TimeSpan.FromSeconds(2)) }));
         }
 
         [Test]
@@ -128,7 +128,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2)) }));
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2)) }));
         }
 
 
@@ -176,7 +176,7 @@ namespace Guflow.Tests.Decider
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(scheduleId, TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(scheduleId, TimeSpan.FromSeconds(2)) }));
         }
 
         [Test]
@@ -256,7 +256,7 @@ namespace Guflow.Tests.Decider
 
             Assert.That(decisions, Is.EqualTo(new[]
             {
-                new ScheduleTimerDecision(_scheduleId, TimeSpan.FromSeconds(2), true)
+                ScheduleTimerDecision.RescheduleTimer(_scheduleId, TimeSpan.FromSeconds(2))
             }));
         }
 

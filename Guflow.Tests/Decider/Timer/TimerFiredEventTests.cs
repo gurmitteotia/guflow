@@ -126,7 +126,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflow.Decisions(_builder.Result());
 
-            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero) }));
+            Assert.That(workflowAction, Is.EqualTo(new []{ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero) }));
         }
 
         [Test]
@@ -137,7 +137,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = workflow.Decisions(_builder.Result());
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero) }));
+            Assert.That(workflowAction, Is.EqualTo(new[] {ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero) }));
         }
 
         [Test]

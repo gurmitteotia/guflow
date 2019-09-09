@@ -33,7 +33,7 @@ namespace Guflow.Tests.Decider
 
             var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision,Is.EqualTo(new []{new ScheduleTimerDecision(_timerIdentity.ScheduleId(), new TimeSpan())}));
+            Assert.That(decision,Is.EqualTo(new []{ScheduleTimerDecision.WorkflowItem(_timerIdentity.ScheduleId(), new TimeSpan())}));
         }
 
         [Test]
@@ -43,7 +43,7 @@ namespace Guflow.Tests.Decider
             timerItem.FireAfter(TimeSpan.FromSeconds(3));
             var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(new []{new ScheduleTimerDecision(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3))}));
+            Assert.That(decision, Is.EqualTo(new []{ ScheduleTimerDecision.WorkflowItem(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3))}));
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace Guflow.Tests.Decider
             timerItem.FireAfter(_=>TimeSpan.FromSeconds(4));
             var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(4)) }));
+            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(4)) }));
         }
 
         [Test]
@@ -63,20 +63,8 @@ namespace Guflow.Tests.Decider
             timerItem.FireAfter(_ => TimeSpan.FromSeconds(3)).FireAfter(TimeSpan.FromSeconds(4));
             var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3)) }));
+            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3)) }));
         }
-
-        //[Test]
-        //public void Schedule_the_timer_with_schedule_id_of_last_event_when_it_already_scheduled()
-        //{
-        //    _builder.AddProcessedEvents(_graphBuilder.a)
-        //    var timerItem = TimerItem.New(_timerIdentity, null);
-
-        //    var decision = timerItem.ScheduleDecisions();
-
-        //    Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(_timerIdentity.ScheduleId(), new TimeSpan()) }));
-        //}
-
         [Test]
         public void Return_empty_when_when_condition_is_evaluated_to_false()
         {

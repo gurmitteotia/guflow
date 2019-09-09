@@ -50,7 +50,7 @@ namespace Guflow.Tests.Decider
             _builder.AddNewEvents(_eventGraph.ToArray());
             var decisions = new WorkflowWithLambda().Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name").ScheduleId(), TimeSpan.Zero) }));
+            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.WorkflowItem(Identity.Timer("timer_name").ScheduleId(), TimeSpan.Zero) }));
         }
 
         [Test]

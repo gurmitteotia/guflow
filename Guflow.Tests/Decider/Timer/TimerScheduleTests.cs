@@ -35,7 +35,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = ActivityEventGraph();
             var decision = new TimerAfterActivityWorkflow().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = TimerCompletedEventGraph();
             var decision = new TimerAfterTimerWorkflow().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = LambdaCompletedEventGraph();
             var decision = new TimerAfterLambdaWorkflow().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
         }
 
 
@@ -63,7 +63,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = ChildWorkflowCompletedEventGraph();
             var decision = new TimerAfterChildWorkflow().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
         }
 
 
@@ -73,7 +73,7 @@ namespace Guflow.Tests.Decider
             var eventGraph = ChildWorkflowCompletedEventGraph();
             var decision = new TimerAfterChildWorkflowUsingGenericApi().Decisions(eventGraph);
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
         }
 
         private WorkflowHistoryEvents ActivityEventGraph()

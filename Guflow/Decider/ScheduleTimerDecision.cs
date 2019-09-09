@@ -1,6 +1,5 @@
 // Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
-using System.Threading;
 using Amazon.SimpleWorkflow;
 using Amazon.SimpleWorkflow.Model;
 
@@ -10,17 +9,9 @@ namespace Guflow.Decider
     {
         private readonly ScheduleId _id;
         private readonly TimeSpan _timeout;
-        private readonly bool _isRescheduleTimer;
         private readonly TimerType _timerType;
 
-        public ScheduleTimerDecision(ScheduleId id, TimeSpan timeout, bool isRescheduleTimer = false) : base(false)
-        {
-            _id = id;
-            _timeout = timeout;
-            _isRescheduleTimer = isRescheduleTimer;
-        }
-
-        public ScheduleTimerDecision(ScheduleId id, TimeSpan timeout, TimerType timerType) : base(false)
+        private ScheduleTimerDecision(ScheduleId id, TimeSpan timeout, TimerType timerType) : base(false)
         {
             _id = id;
             _timeout = timeout;

@@ -155,7 +155,7 @@ namespace Guflow.Tests.Decider
         {
             var lambdaItem = new LambdaItem(_lambdaIdentity, _workflow.Object);
             var decision = lambdaItem.RescheduleDecisions(TimeSpan.FromSeconds(10));
-            Assert.That(decision, Is.EqualTo(new []{new ScheduleTimerDecision(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(10), true)}));
+            Assert.That(decision, Is.EqualTo(new []{ScheduleTimerDecision.RescheduleTimer(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(10))}));
         }
 
         [Test]
