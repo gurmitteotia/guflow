@@ -16,20 +16,21 @@ namespace Guflow.Decider
     public class WorkflowTask
     {
         private readonly DecisionTask _decisionTask;
-        private readonly double _downloadFactor;
         private readonly Func<WorkflowHost, CancellationToken, Task> _actionToExecute;
         private IErrorHandler _executionErrorHandler = ErrorHandler.NotHandled;
         private static readonly WorkflowDecision[] EmptyDecisions = new WorkflowDecision[0];
         private readonly DateTime _creationTime = DateTime.UtcNow;
-        private WorkflowTask(DecisionTask decisionTask, double downloadFactor)
+        private readonly TimeSpan _timeToDownloadEvents;
+        private WorkflowTask(DecisionTask decisionTask, TimeSpan timeToDownloadEvents)
         {
             _decisionTask = decisionTask;
-            _downloadFactor = downloadFactor;
+            _timeToDownloadEvents = timeToDownloadEvents;
             _actionToExecute = ExecuteTasks;
         }
 
         private WorkflowTask()
         {
+            _timeToDownloadEvents = TimeSpan.Zero;
             _decisionTask = EmptyDecisionTask;
             _actionToExecute = async (t, c) => await Task.Yield();
         }
@@ -63,9 +64,7 @@ namespace Guflow.Decider
         {
             if (decisionTask.Events == null|| decisionTask.Events.Count==0)
                 throw new ArgumentException("", "decisionTask.Events");
-            if(decisionTask.Events[0].EventType!=EventType.DecisionTaskStarted)
-                throw new ArgumentException(Resources.DecisionTaskStarted_event_is_missing);
-            return new WorkflowTask(decisionTask, downloadFactor);
+            return new WorkflowTask(decisionTask, TimeSpan.FromMilliseconds(downloadFactor * decisionTask.Events.Count));
         }
 
         /// <summary>
@@ -92,7 +91,7 @@ namespace Guflow.Decider
         private DateTime DecisionTaskStartTime 
             => this==Empty
                ? DateTime.UtcNow
-               : _decisionTask.Events[0].EventTimestamp + TimeSpan.FromMilliseconds(_downloadFactor * _decisionTask.Events.Count);
+               : _decisionTask.Events[0].EventTimestamp + _timeToDownloadEvents;
 
         private static bool HasNewEvents(DecisionTask decision)
         {
@@ -127,6 +126,13 @@ namespace Guflow.Decider
             var postExecutionEvents = new PostExecutionEvents(workflow, _decisionTask.WorkflowExecution.WorkflowId, _decisionTask.WorkflowExecution.RunId);
             var workflowClosingDecisions = workflowDecisions.OfType<WorkflowClosingDecision>().ToList();
             workflowClosingDecisions.ForEach(d => d.Raise(postExecutionEvents));
+        }
+
+        internal void Validate()
+        {
+            if (this == Empty) return;
+            if(_decisionTask.Events[0].EventType!=EventType.DecisionTaskStarted)
+                throw new ArgumentException(Resources.DecisionTaskStarted_event_is_missing);
         }
     }
 }

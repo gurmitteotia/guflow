@@ -416,7 +416,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivityStartedGraph(ScheduleId activityIdentity, string identity)
+        public IEnumerable<HistoryEvent> ActivityStartedGraph(ScheduleId scheduleId, string identity)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
@@ -438,9 +438,9 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
-                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
-                    ActivityId = activityIdentity
+                    ActivityType = new ActivityType() { Name = scheduleId.Name, Version = scheduleId.Version },
+                    Control = (new ScheduleData() { PN = scheduleId.PositionalName }).ToJson(),
+                    ActivityId = scheduleId
                 }
             });
             return historyEvents;
@@ -1462,6 +1462,21 @@ namespace Guflow.Tests.Decider
                 ContinueAsNewWorkflowExecutionFailedEventAttributes = new ContinueAsNewWorkflowExecutionFailedEventAttributes()
                 {
                     Cause = cause,
+                }
+            };
+        }
+
+
+        public HistoryEvent DecisionStartedEvent()
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.DecisionTaskStarted,
+                DecisionTaskStartedEventAttributes = new DecisionTaskStartedEventAttributes()
+                {
+                    Identity = "id"
                 }
             };
         }

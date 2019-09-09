@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
 {
-    public class WaitForSignalActionWithTimeoutTests
+    /*public class WaitForSignalActionWithTimeoutTests
     {
         private HistoryEventsBuilder _builder;
         private EventGraphBuilder _graphBuilder;
@@ -49,5 +49,5 @@ namespace Guflow.Tests.Decider
                 ScheduleLambda("ActivateUser").AfterLambda("ConfirmEmail");
             }
         }
-    }
+    }*/
 }

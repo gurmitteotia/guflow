@@ -73,8 +73,12 @@ namespace Guflow.Tests.Decider
         {
             var decisionTaskStartTime = DateTime.UtcNow.AddHours(-2);
             var workflowTask = WorkflowTaskWithEvents(decisionTaskStartTime, 1);
-            Thread.Sleep(TimeSpan.FromSeconds(1));
-            Assert.That((workflowTask.ServerTimeUtc - decisionTaskStartTime), Is.GreaterThan(TimeSpan.FromMilliseconds(1900)));
+            TimeSpan elapsedTime = TimeSpan.FromSeconds(1);
+            TimeSpan downloadTime = TimeSpan.FromSeconds(1);
+
+            Thread.Sleep(elapsedTime);
+
+            Assert.That((workflowTask.ServerTimeUtc - (decisionTaskStartTime+ elapsedTime + downloadTime)), Is.LessThan(TimeSpan.FromMilliseconds(100)));
         }
 
         [Test]
@@ -82,7 +86,10 @@ namespace Guflow.Tests.Decider
         {
             var decisionTaskStartTime = DateTime.UtcNow.AddHours(-2);
             var workflowTask = WorkflowTaskWithEvents(decisionTaskStartTime);
-            Assert.That((workflowTask.ServerTimeUtc - decisionTaskStartTime), Is.GreaterThan(TimeSpan.FromMilliseconds(400)));
+            TimeSpan downloadTime = TimeSpan.FromMilliseconds(500);
+
+            Assert.That((workflowTask.ServerTimeUtc - (decisionTaskStartTime + downloadTime)), Is.LessThan(TimeSpan.FromMilliseconds(100)));
+
         }
 
         [Test]
@@ -143,17 +150,6 @@ namespace Guflow.Tests.Decider
         {
             Assert.Throws<ArgumentNullException>(() => WorkflowTask.Empty.Append(null));
         }
-
-        [Test]
-        public void Throws_exception_when_first_event_is_not_decision_task_started_event()
-        {
-            var decisionTask = new DecisionTask() { Events = new List<HistoryEvent>(), TaskToken = "token" };
-            decisionTask.WorkflowExecution = new WorkflowExecution() { WorkflowId = "wid", RunId = "rid" };
-            decisionTask.Events.Add(new HistoryEvent() { EventId = 5 });
-
-            Assert.Throws<ArgumentException>(() => WorkflowTask.Create(decisionTask));
-        }
-
         [Test]
         public void Invalid_history_events_tests()
         {
@@ -402,13 +398,15 @@ namespace Guflow.Tests.Decider
 
         private DecisionTask DecisionTasksWithSignalEvents(string token)
         {
-            var historyEvent = _builder.WorkflowSignaledEvent("name", "input");
+            var signalEvent = _builder.WorkflowSignaledEvent("name", "input");
+            var decisionStartedEvent = _builder.DecisionStartedEvent();
+
             return new DecisionTask
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
-                Events = new List<HistoryEvent>() { historyEvent },
+                Events = new List<HistoryEvent>() { decisionStartedEvent, signalEvent },
                 PreviousStartedEventId = 0,
-                StartedEventId = historyEvent.EventId,
+                StartedEventId = decisionStartedEvent.EventId,
                 TaskToken = token,
                 WorkflowExecution = new WorkflowExecution() { RunId = "rid", WorkflowId = "wid" }
             };
@@ -418,12 +416,14 @@ namespace Guflow.Tests.Decider
         {
             var workflowStartedEvent = _builder.WorkflowStartedEvent("input");
             var historyEvent = _builder.WorkflowSignaledEvent("name", "input");
+            var decisionStartedEvent = _builder.DecisionStartedEvent();
+
             return new DecisionTask
             {
                 WorkflowType = new WorkflowType() { Name = "TestWorkflow", Version = "1.0" },
-                Events = new List<HistoryEvent>() { historyEvent, workflowStartedEvent },
+                Events = new List<HistoryEvent>() { decisionStartedEvent, historyEvent, workflowStartedEvent },
                 PreviousStartedEventId = 0,
-                StartedEventId = historyEvent.EventId,
+                StartedEventId = decisionStartedEvent.EventId,
                 TaskToken = "token",
                 WorkflowExecution = new WorkflowExecution() { WorkflowId = workflowId, RunId = runId }
             };

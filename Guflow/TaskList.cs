@@ -58,6 +58,7 @@ namespace Guflow
             var workflowTask = await ReadStrategy(domain, this, pollingIdentity, token);
             if(workflowTask==WorkflowTask.Empty)
                 _log.Debug($"No new decisions are returned on {this} under {domain}");
+            workflowTask.Validate();
             return workflowTask;
         }
 
