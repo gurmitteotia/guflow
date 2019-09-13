@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
 {
-    /*public class WaitForSignalActionWithTimeoutTests
+    public class WaitForSignalActionWithTimeoutTests
     {
         private HistoryEventsBuilder _builder;
         private EventGraphBuilder _graphBuilder;
@@ -26,14 +26,14 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddNewEvents(graph);
             var workflow = new UserActivateWorkflow();
-            var decision = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decision, Is.EqualTo(new WorkflowDecision[]
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId, TriggerEventId = graph.First().EventId}),
-                new ScheduleTimerDecision(_confirmEmailId, TimeSpan.FromHours(2),true)
+                ScheduleTimerDecision.SignalTimer(_confirmEmailId, TimeSpan.FromHours(2))
             }));
-            var swfDecision = decision.First().SwfDecision();
+            var swfDecision = decisions.First().SwfDecision();
             var data = swfDecision.RecordMarkerDecisionAttributes.Details.AsDynamic();
             Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(new[] { "Confirmed" }));
             Assert.That((SignalWaitType)data.WaitType, Is.EqualTo(SignalWaitType.Any));
@@ -49,5 +49,5 @@ namespace Guflow.Tests.Decider
                 ScheduleLambda("ActivateUser").AfterLambda("ConfirmEmail");
             }
         }
-    }*/
+    }
 }

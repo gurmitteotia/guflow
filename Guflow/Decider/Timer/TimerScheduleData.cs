@@ -20,6 +20,7 @@ namespace Guflow.Decider
     internal enum TimerType
     {
         WorkflowItem,
-        Reschedule
+        Reschedule,
+        SignalTimer
     }
 }

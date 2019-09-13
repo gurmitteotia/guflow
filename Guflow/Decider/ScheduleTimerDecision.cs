@@ -18,11 +18,15 @@ namespace Guflow.Decider
             _timerType = timerType;
         }
 
-        public static ScheduleTimerDecision RescheduleTimer(ScheduleId scheduleId, TimeSpan duration)
-        => new ScheduleTimerDecision(scheduleId, duration, TimerType.Reschedule);
+        public static ScheduleTimerDecision RescheduleTimer(ScheduleId scheduleId, TimeSpan timeout)
+        => new ScheduleTimerDecision(scheduleId, timeout, TimerType.Reschedule);
 
-        public static ScheduleTimerDecision WorkflowItem(ScheduleId scheduleId, TimeSpan duration)
-            => new ScheduleTimerDecision(scheduleId, duration, TimerType.WorkflowItem);
+        public static ScheduleTimerDecision WorkflowItem(ScheduleId scheduleId, TimeSpan timeout)
+            => new ScheduleTimerDecision(scheduleId, timeout, TimerType.WorkflowItem);
+
+        public static ScheduleTimerDecision SignalTimer(ScheduleId scheduleId, TimeSpan timeout)
+            => new ScheduleTimerDecision(scheduleId, timeout, TimerType.SignalTimer);
+        
 
         internal override bool IsFor(WorkflowItem workflowItem)
         {
@@ -59,7 +63,7 @@ namespace Guflow.Decider
 
         public override string ToString()
         {
-            return string.Format("{0} for {1} and timer type is {2}, interval {3} and id {4}", GetType().Name, _id.Name, _timerType, _timeout, _id);
+            return string.Format("{0} for {1} and timeout type is {2}, interval {3} and id {4}", GetType().Name, _id.Name, _timerType, _timeout, _id);
         }
     }
 }
