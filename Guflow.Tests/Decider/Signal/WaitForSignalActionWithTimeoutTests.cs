@@ -10,6 +10,7 @@ namespace Guflow.Tests.Decider
         private HistoryEventsBuilder _builder;
         private EventGraphBuilder _graphBuilder;
         private ScheduleId _confirmEmailId;
+        private ScheduleId _activateUserId;
 
         [SetUp]
         public void Setup()
@@ -17,6 +18,7 @@ namespace Guflow.Tests.Decider
             _graphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder();
             _confirmEmailId = Identity.Lambda("ConfirmEmail").ScheduleId();
+            _activateUserId = Identity.Lambda("ActivateUser").ScheduleId();
             _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
         }
 
@@ -53,7 +55,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
             {
                 new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId, TriggerEventId = graph.First().EventId}),
-                new ScheduleLambdaDecision(_confirmEmailId, ""),
+                new ScheduleLambdaDecision(_activateUserId, ""),
                 new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId), 
             }));
         }

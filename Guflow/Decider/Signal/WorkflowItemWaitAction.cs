@@ -37,7 +37,15 @@ namespace Guflow.Decider
         internal override IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent()
         {
             var historyEvent = SimulatedHistoryEvent();
-            return new[]{new WaitForSignalsEvent(historyEvent, Enumerable.Empty<HistoryEvent>())};
+            var @event = new WaitForSignalsEvent(historyEvent, Enumerable.Empty<HistoryEvent>());
+            @event.SignalReceived += SignalReceived;
+            return new[]{@event};
+        }
+
+        private void SignalReceived(WaitForSignalsEvent sender, string args)
+        {
+            if(!sender.IsExpectingSignals)
+                _timerDecision =  WorkflowDecision.Empty;
         }
 
         private HistoryEvent SimulatedHistoryEvent()

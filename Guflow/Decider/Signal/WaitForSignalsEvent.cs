@@ -7,11 +7,13 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
+    internal delegate void EventHandler<in TSender, in TEventArgs>(TSender sender, TEventArgs args);
+
     internal class WaitForSignalsEvent : WorkflowItemEvent
     {
         private readonly WaitForSignalData _data;
         private readonly List<string> _resumedSignals = new List<string>();
-
+        public event EventHandler<WaitForSignalsEvent, string> SignalReceived; 
         public WaitForSignalsEvent(HistoryEvent @event, IEnumerable<HistoryEvent> allEvents) : base(@event.EventId)
         {
             _data = @event.MarkerRecordedEventAttributes.Details.As<WaitForSignalData>();
@@ -47,6 +49,7 @@ namespace Guflow.Decider
         public WorkflowDecision RecordSignal(string signalName, long signalEventId)
         {
             _resumedSignals.Add(signalName);
+            SignalReceived?.Invoke(this, signalName);
             return new WorkflowItemSignalledDecision(ScheduleId.Raw(_data.ScheduleId), _data.TriggerEventId, signalName, signalEventId);
         }
 
