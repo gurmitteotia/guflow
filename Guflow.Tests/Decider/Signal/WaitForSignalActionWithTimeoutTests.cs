@@ -40,6 +40,24 @@ namespace Guflow.Tests.Decider
             Assert.That((SignalNextAction)data.NextAction, Is.EqualTo(SignalNextAction.Continue));
         }
 
+        [Test]
+        public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_togather_and_signal_come_before_timeout()
+        {
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp:DateTime.UtcNow.AddMinutes(-20));
+            _builder.AddNewEvents(graph);
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "", DateTime.UtcNow);
+            _builder.AddNewEvents(s);
+            var workflow = new UserActivateWorkflow();
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+            {
+                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId, TriggerEventId = graph.First().EventId}),
+                new ScheduleLambdaDecision(_confirmEmailId, ""),
+                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId), 
+            }));
+        }
+
         private class UserActivateWorkflow : Workflow
         {
             public UserActivateWorkflow()

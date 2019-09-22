@@ -533,13 +533,14 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public HistoryEvent WorkflowSignaledEvent(string signalName, string input)
+        public HistoryEvent WorkflowSignaledEvent(string signalName, string input, DateTime? completedTime=null)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
                 EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.WorkflowExecutionSignaled,
+                EventTimestamp = completedTime??DateTime.UtcNow,
                 WorkflowExecutionSignaledEventAttributes = new WorkflowExecutionSignaledEventAttributes()
                 {
                     SignalName = signalName,
@@ -741,7 +742,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(ScheduleId identity, object input, object result, TimeSpan? startToClose = null)
+        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(ScheduleId identity, object input, object result, TimeSpan? startToClose = null, DateTime? completedStamp=null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -749,6 +750,7 @@ namespace Guflow.Tests.Decider
             {
                 EventId = eventIds.EventId(EventIds.Completion),
                 EventType = EventType.LambdaFunctionCompleted,
+                EventTimestamp = completedStamp ?? DateTime.UtcNow,
                 LambdaFunctionCompletedEventAttributes = new LambdaFunctionCompletedEventAttributes()
                 {
                     Result = result.ToAwsString(),
