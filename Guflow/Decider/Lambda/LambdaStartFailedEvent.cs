@@ -10,7 +10,8 @@ namespace Guflow.Decider
     /// </summary>
     public class LambdaStartFailedEvent : LambdaEvent
     {
-        internal LambdaStartFailedEvent(HistoryEvent failedEvent, IEnumerable<HistoryEvent> allEvents) : base(failedEvent.EventId)
+        internal LambdaStartFailedEvent(HistoryEvent failedEvent, IEnumerable<HistoryEvent> allEvents)
+            : base(failedEvent)
         {
             var attr = failedEvent.StartLambdaFunctionFailedEventAttributes;
             Cause = attr.Cause;

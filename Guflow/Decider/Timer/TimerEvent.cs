@@ -12,8 +12,8 @@ namespace Guflow.Decider
         private TimeSpan _timeout;
         private long _timerStartedEventId;
         internal TimerType TimerType { get; private set; }
-        protected TimerEvent(long eventId)
-            : base(eventId)
+        protected TimerEvent(HistoryEvent historyEvent)
+            : base(historyEvent)
         {
         }
         protected void PopulateProperties(long timerStartedEventId, IEnumerable<HistoryEvent> allHistoryEvents)

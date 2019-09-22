@@ -9,7 +9,8 @@ namespace Guflow.Decider
     /// </summary>
     public class TimerStartedEvent : TimerEvent
     {
-        internal TimerStartedEvent(HistoryEvent timerStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerStartedEvent.EventId)
+        internal TimerStartedEvent(HistoryEvent timerStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+            :base(timerStartedEvent)
         {
             PopulateProperties(timerStartedEvent.EventId,allHistoryEvents);
             IsActive = true;

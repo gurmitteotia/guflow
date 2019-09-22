@@ -10,7 +10,8 @@ namespace Guflow.Decider
     {
         private readonly RequestCancelExternalWorkflowExecutionFailedEventAttributes _eventAttributes;
 
-        internal ExternalWorkflowCancelRequestFailedEvent(HistoryEvent cancelRequestFailedEvent):base(cancelRequestFailedEvent.EventId)
+        internal ExternalWorkflowCancelRequestFailedEvent(HistoryEvent cancelRequestFailedEvent)
+            :base(cancelRequestFailedEvent)
         {
             _eventAttributes = cancelRequestFailedEvent.RequestCancelExternalWorkflowExecutionFailedEventAttributes;
             ScheduleId = ScheduleId.Raw(_eventAttributes.WorkflowId);

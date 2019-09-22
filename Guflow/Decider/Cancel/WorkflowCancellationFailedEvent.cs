@@ -10,7 +10,7 @@ namespace Guflow.Decider
     {
         private readonly CancelWorkflowExecutionFailedEventAttributes _eventAttributes;
         internal WorkflowCancellationFailedEvent(HistoryEvent cancellationFailedEvent)
-            : base(cancellationFailedEvent.EventId)
+            : base(cancellationFailedEvent)
         {
             _eventAttributes = cancellationFailedEvent.CancelWorkflowExecutionFailedEventAttributes;
         }

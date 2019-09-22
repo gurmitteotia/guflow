@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
 using System.Collections.Generic;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
@@ -9,9 +10,9 @@ namespace Guflow.Decider
     /// </summary>
     public abstract class WorkflowEvent : IComparable<WorkflowEvent>
     {
-        protected WorkflowEvent(long eventId)
+        protected WorkflowEvent(HistoryEvent historyEvent)
         {
-            EventId = eventId;
+            EventId = historyEvent.EventId;
         }
 
         internal virtual WorkflowAction Interpret(IWorkflow workflow)

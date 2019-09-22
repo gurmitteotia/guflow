@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -407,7 +408,8 @@ namespace Guflow.Tests.Decider
         {
             private readonly WorkflowDecision _decision;
 
-            public TestEvent(WorkflowDecision decision) : base(0)
+            public TestEvent(WorkflowDecision decision) 
+                : base(new HistoryEvent(){EventId = 0, EventTimestamp = DateTime.UtcNow})
             {
                 _decision = decision;
             }

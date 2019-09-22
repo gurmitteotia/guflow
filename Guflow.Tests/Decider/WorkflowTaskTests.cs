@@ -95,7 +95,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Empty_workflow_task_server_time_is_local_pc_utc_time()
         {
-            Assert.That((WorkflowTask.Empty.ServerTimeUtc - DateTime.UtcNow), Is.LessThan(TimeSpan.FromMilliseconds(100)));
+            var expectedDiff = WorkflowTask.Empty.ServerTimeUtc - DateTime.UtcNow;
+            Assert.That( expectedDiff, Is.LessThan(TimeSpan.FromMilliseconds(100)));
         }
 
         private WorkflowTask WorkflowTaskWithEvents(DateTime decisionTaskTime, double downloadFactor)

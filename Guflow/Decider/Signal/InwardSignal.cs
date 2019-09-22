@@ -60,5 +60,14 @@ namespace Guflow.Decider
             }
             return false;
         }
+
+        /// <summary>
+        /// Returns true if the specific signal is timed out.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsTimedout()
+        {
+            return true;
+        }
     }
 }

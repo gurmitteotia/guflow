@@ -12,7 +12,7 @@ namespace Guflow.Decider
     {
         private readonly StartChildWorkflowExecutionFailedEventAttributes _attr;
         internal ChildWorkflowStartFailedEvent(HistoryEvent startFailedEvent, IEnumerable<HistoryEvent> allEvents)
-            : base(startFailedEvent.EventId)
+            : base(startFailedEvent)
         {
             _attr = startFailedEvent.StartChildWorkflowExecutionFailedEventAttributes;
             PopulateProperties(string.Empty, _attr.InitiatedEventId, allEvents);

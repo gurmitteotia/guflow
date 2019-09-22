@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
@@ -17,8 +18,8 @@ namespace Guflow.Decider
             return workflowItem.Has(ScheduleId);
         }
 
-        protected WorkflowItemEvent(long eventId)
-            : base(eventId)
+        protected WorkflowItemEvent(HistoryEvent historyEvent)
+            : base(historyEvent)
         {
         }
         /// <summary>

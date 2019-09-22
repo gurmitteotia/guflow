@@ -10,7 +10,8 @@ namespace Guflow.Decider
     /// </summary>
     public class LambdaStartedEvent : LambdaEvent
     {
-        internal LambdaStartedEvent(HistoryEvent startedEvent, IEnumerable<HistoryEvent> allEvents) : base(startedEvent.EventId)
+        internal LambdaStartedEvent(HistoryEvent startedEvent, IEnumerable<HistoryEvent> allEvents) 
+            : base(startedEvent)
         {
             IsActive = true;
             PopulateProperties(startedEvent.LambdaFunctionStartedEventAttributes.ScheduledEventId, allEvents);

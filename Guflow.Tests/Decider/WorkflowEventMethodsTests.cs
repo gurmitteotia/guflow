@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Guflow.Tests.TestWorkflows;
 using Moq;
@@ -17,7 +18,7 @@ namespace Guflow.Tests.Decider
         [SetUp]
         public void Setup()
         {
-            _argument = new TestArgument(10);
+            _argument = new TestArgument(10, DateTime.UtcNow);
         }
         [Test]
         public void Can_invoke_the_public_method_with_matching_attribute()
@@ -251,7 +252,7 @@ namespace Guflow.Tests.Decider
         {
             var targetWorkflow = new MethodWithPrimitiveType();
             var workflowMethod = WorkflowEventMethods.For(targetWorkflow).EventMethod(_eventName);
-            var argument = new ArgumentInStringFormat(10)
+            var argument = new ArgumentInStringFormat(10, DateTime.UtcNow)
             {
                 Duration = TimeSpan.FromSeconds(2).ToString(),
                 EventId = 10.ToString(),
@@ -499,7 +500,8 @@ namespace Guflow.Tests.Decider
      
         private class TestArgument : WorkflowEvent
         {
-            public TestArgument(long eventId) : base(eventId)
+            public TestArgument(long eventId, DateTime eventTime) 
+                : base(new HistoryEvent(){EventId = eventId, EventTimestamp = eventTime})
             {
             }
 
@@ -519,8 +521,8 @@ namespace Guflow.Tests.Decider
 
         private class ArgumentInStringFormat : WorkflowEvent
         {
-            public ArgumentInStringFormat(long eventId)
-                : base(eventId)
+            public ArgumentInStringFormat(long eventId, DateTime eventTimeStamp)
+                : base(new HistoryEvent(){EventId = eventId, EventTimestamp = eventTimeStamp})
             {
             }
 

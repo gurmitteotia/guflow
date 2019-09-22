@@ -13,7 +13,7 @@ namespace Guflow.Decider
         private readonly WorkflowExecutionStartedEventAttributes _workflowStartedAttributes;
 
         internal WorkflowStartedEvent(HistoryEvent workflowStartedEvent)
-            : base(workflowStartedEvent.EventId)
+            : base(workflowStartedEvent)
         {
             _workflowStartedAttributes = workflowStartedEvent.WorkflowExecutionStartedEventAttributes;
         }

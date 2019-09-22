@@ -43,7 +43,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_togather_and_signal_come_before_timeout()
+        public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_together_and_signal_come_before_timeout()
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp:DateTime.UtcNow.AddMinutes(-20));
             _builder.AddNewEvents(graph);
@@ -60,13 +60,36 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+        //[Test]
+        //public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_together_and_signal_after_timeout()
+        //{
+        //    var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp: DateTime.UtcNow.AddMinutes(-20));
+        //    _builder.AddNewEvents(graph);
+        //    var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "", DateTime.UtcNow);
+        //    _builder.AddNewEvents(s);
+        //    var workflow = new UserActivateWorkflow();
+        //    var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+        //    Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
+        //    {
+        //        new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId, TriggerEventId = graph.First().EventId}),
+        //        new ScheduleLambdaDecision(_activateUserId, ""),
+        //        new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId),
+        //    }));
+        //}
+
         private class UserActivateWorkflow : Workflow
         {
             public UserActivateWorkflow()
             {
                 ScheduleLambda("ConfirmEmail")
                     .OnCompletion(e => e.WaitForSignal("Confirmed").For(TimeSpan.FromHours(2)));
-                ScheduleLambda("ActivateUser").AfterLambda("ConfirmEmail");
+
+                ScheduleLambda("ActivateUser").AfterLambda("ConfirmEmail")
+                    .When(_ => Signal("Confirmed").IsTriggered());
+
+                //ScheduleLambda("BlockAccount").AfterLambda("ConfirmEmail")
+                //    .When(_ => Signal("Confirmed").IsTimedout());
             }
         }
     }

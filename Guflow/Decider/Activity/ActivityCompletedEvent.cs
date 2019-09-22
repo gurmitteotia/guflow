@@ -10,7 +10,8 @@ namespace Guflow.Decider
     public class ActivityCompletedEvent : ActivityEvent
     {
         private readonly ActivityTaskCompletedEventAttributes _eventAttributes;
-        internal ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(activityCompletedEvent.EventId)
+        internal ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+            :base(activityCompletedEvent)
         {
             _eventAttributes = activityCompletedEvent.ActivityTaskCompletedEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);

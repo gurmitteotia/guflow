@@ -9,7 +9,8 @@ namespace Guflow.Decider
     public class WorkflowSignaledEvent : WorkflowEvent
     {
         private readonly WorkflowExecutionSignaledEventAttributes _eventAttributes;
-        internal WorkflowSignaledEvent(HistoryEvent signaledEvent) : base(signaledEvent.EventId)
+        internal WorkflowSignaledEvent(HistoryEvent signaledEvent) 
+            : base(signaledEvent)
         {
             _eventAttributes = signaledEvent.WorkflowExecutionSignaledEventAttributes;
         }

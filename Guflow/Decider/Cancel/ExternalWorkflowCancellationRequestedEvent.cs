@@ -10,7 +10,7 @@ namespace Guflow.Decider
     public class ExternalWorkflowCancellationRequestedEvent : WorkflowItemEvent
     {
         internal ExternalWorkflowCancellationRequestedEvent(HistoryEvent cancelRequested) 
-            : base(cancelRequested.EventId)
+            : base(cancelRequested)
         {
             var attr = cancelRequested.ExternalWorkflowExecutionCancelRequestedEventAttributes;
             ScheduleId = ScheduleId.Raw(attr.WorkflowExecution.WorkflowId);

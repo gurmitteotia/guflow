@@ -6,7 +6,8 @@ namespace Guflow.Decider
     public class RecordMarkerFailedEvent : WorkflowEvent
     {
         private readonly RecordMarkerFailedEventAttributes _eventAttributes;
-        internal RecordMarkerFailedEvent(HistoryEvent recordMarkerFailedEvent): base(recordMarkerFailedEvent.EventId)
+        internal RecordMarkerFailedEvent(HistoryEvent recordMarkerFailedEvent)
+            : base(recordMarkerFailedEvent)
         {
             _eventAttributes = recordMarkerFailedEvent.RecordMarkerFailedEventAttributes;
         }

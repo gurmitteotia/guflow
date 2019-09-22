@@ -6,7 +6,8 @@ namespace Guflow.Decider
     public class TimerStartFailedEvent : WorkflowItemEvent
     {
         private readonly StartTimerFailedEventAttributes _startTimerFailedAttributes;
-        internal TimerStartFailedEvent(HistoryEvent startTimerFailedEvent) : base(startTimerFailedEvent.EventId)
+        internal TimerStartFailedEvent(HistoryEvent startTimerFailedEvent) 
+            : base(startTimerFailedEvent)
         {
             _startTimerFailedAttributes = startTimerFailedEvent.StartTimerFailedEventAttributes;
             ScheduleId =  ScheduleId.Raw(_startTimerFailedAttributes.TimerId);

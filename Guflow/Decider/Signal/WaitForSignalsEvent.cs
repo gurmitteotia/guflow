@@ -14,7 +14,8 @@ namespace Guflow.Decider
         private readonly WaitForSignalData _data;
         private readonly List<string> _resumedSignals = new List<string>();
         public event EventHandler<WaitForSignalsEvent, string> SignalReceived; 
-        public WaitForSignalsEvent(HistoryEvent @event, IEnumerable<HistoryEvent> allEvents) : base(@event.EventId)
+        public WaitForSignalsEvent(HistoryEvent @event, IEnumerable<HistoryEvent> allEvents)
+            : base(@event)
         {
             _data = @event.MarkerRecordedEventAttributes.Details.As<WaitForSignalData>();
             ScheduleId = ScheduleId.Raw(_data.ScheduleId);

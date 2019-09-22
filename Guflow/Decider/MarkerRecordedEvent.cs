@@ -7,7 +7,8 @@ namespace Guflow.Decider
     public class MarkerRecordedEvent : WorkflowEvent
     {
         private readonly MarkerRecordedEventAttributes _eventAttributes;
-        internal MarkerRecordedEvent(HistoryEvent markerRecordedEvent) : base(markerRecordedEvent.EventId)
+        internal MarkerRecordedEvent(HistoryEvent markerRecordedEvent)
+            : base(markerRecordedEvent)
         {
             _eventAttributes = markerRecordedEvent.MarkerRecordedEventAttributes;
         }

@@ -10,7 +10,8 @@ namespace Guflow.Decider
     /// </summary>
     public class LambdaScheduledEvent : LambdaEvent
     {
-        internal LambdaScheduledEvent(HistoryEvent scheduledEvent) : base(scheduledEvent.EventId)
+        internal LambdaScheduledEvent(HistoryEvent scheduledEvent) 
+            : base(scheduledEvent)
         {
             IsActive = true;
             PopulateProperties(scheduledEvent.EventId, new []{scheduledEvent});

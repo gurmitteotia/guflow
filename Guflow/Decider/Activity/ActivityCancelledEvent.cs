@@ -10,7 +10,8 @@ namespace Guflow.Decider
     public class ActivityCancelledEvent : ActivityEvent
     {
         private readonly ActivityTaskCanceledEventAttributes _eventAttributes;
-        internal ActivityCancelledEvent(HistoryEvent cancelledActivityEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(cancelledActivityEvent.EventId)
+        internal ActivityCancelledEvent(HistoryEvent cancelledActivityEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+            :base(cancelledActivityEvent)
         {
             _eventAttributes = cancelledActivityEvent.ActivityTaskCanceledEventAttributes;
             PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
