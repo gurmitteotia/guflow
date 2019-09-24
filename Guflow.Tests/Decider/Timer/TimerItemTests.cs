@@ -31,9 +31,10 @@ namespace Guflow.Tests.Decider
         {
             var timerItem = TimerItem.New(_timerIdentity, _workflow.Object);
 
-            var decision = timerItem.ScheduleDecisions();
+            var decisions = timerItem.ScheduleDecisions().ToArray();
 
-            Assert.That(decision,Is.EqualTo(new []{ScheduleTimerDecision.WorkflowItem(_timerIdentity.ScheduleId(), new TimeSpan())}));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerIdentity.ScheduleId(), TimeSpan.Zero);
         }
 
         [Test]
@@ -41,9 +42,11 @@ namespace Guflow.Tests.Decider
         {
             var timerItem = TimerItem.New(_timerIdentity, _workflow.Object);
             timerItem.FireAfter(TimeSpan.FromSeconds(3));
-            var decision = timerItem.ScheduleDecisions();
 
-            Assert.That(decision, Is.EqualTo(new []{ ScheduleTimerDecision.WorkflowItem(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3))}));
+            var decisions = timerItem.ScheduleDecisions().ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3));
         }
 
         [Test]
@@ -51,9 +54,10 @@ namespace Guflow.Tests.Decider
         {
             var timerItem = TimerItem.New(_timerIdentity, _workflow.Object);
             timerItem.FireAfter(_=>TimeSpan.FromSeconds(4));
-            var decision = timerItem.ScheduleDecisions();
+            var decisions = timerItem.ScheduleDecisions().ToArray();
 
-            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(4)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(4));
         }
 
         [Test]
@@ -61,9 +65,10 @@ namespace Guflow.Tests.Decider
         {
             var timerItem = TimerItem.New(_timerIdentity, _workflow.Object);
             timerItem.FireAfter(_ => TimeSpan.FromSeconds(3)).FireAfter(TimeSpan.FromSeconds(4));
-            var decision = timerItem.ScheduleDecisions();
+            var decisions = timerItem.ScheduleDecisions().ToArray();
 
-            Assert.That(decision, Is.EqualTo(new[] { ScheduleTimerDecision.WorkflowItem(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(3));
         }
         [Test]
         public void Return_empty_when_when_condition_is_evaluated_to_false()

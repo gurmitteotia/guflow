@@ -98,10 +98,11 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddNewEvents(ActivityCompletedEventGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new WorkflowToRescheduleActivityWithTimerUpToLimit(2);
           
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_eventsBuilder.Result()).ToArray();
 
             var scheduleId = Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
-            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(scheduleId, TimeSpan.FromSeconds(2)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(scheduleId, TimeSpan.FromSeconds(2));
         }
 
         [Test]
@@ -127,9 +128,12 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddNewEvents(TimerFiredEventGraph(TimerName, false));
             var workflow = new WorkflowToRescheduleTimerWithTimerUpToLimit(2);
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_eventsBuilder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2)) }));
+            var scheduleId = Identity.Timer(TimerName).ScheduleId();
+
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(scheduleId, TimeSpan.FromSeconds(2));
         }
 
         [Test]
@@ -143,9 +147,11 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddNewEvents(TimerFiredEventGraph(TimerName, false));
             var workflow = new WorkflowToRescheduleTimerWithTimerUpToLimit(2);
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_eventsBuilder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(2)) }));
+            var scheduleId = Identity.Timer(TimerName).ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(scheduleId, TimeSpan.FromSeconds(2));
         }
 
 
@@ -175,9 +181,10 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.TimerFiredGraph(scheduleId, TimeSpan.Zero).ToArray());
             var workflow = new WorkflowToRescheduleTimerWithTimerUpToLimit(2);
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_eventsBuilder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(scheduleId, TimeSpan.FromSeconds(2)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(scheduleId, TimeSpan.FromSeconds(2));
         }
 
         [Test]
@@ -253,12 +260,11 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent("input"));
             _eventsBuilder.AddNewEvents(ChildWorkflowCompletedEventGraph());
 
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_eventsBuilder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new[]
-            {
-                ScheduleTimerDecision.RescheduleTimer(_scheduleId, TimeSpan.FromSeconds(2))
-            }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(_scheduleId, TimeSpan.FromSeconds(2));
+
         }
 
         [Test]

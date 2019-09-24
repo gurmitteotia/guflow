@@ -39,7 +39,7 @@ namespace Guflow.Decider
 
         private bool Equals(ScheduleTimerDecision other)
         {
-            return _id.Equals(other._id) && _timeout.Equals(other._timeout) && _timerType == other._timerType;
+            return _id.Equals(other._id);
         }
 
         public override bool Equals(object obj)
@@ -49,13 +49,7 @@ namespace Guflow.Decider
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = _id.GetHashCode();
-                hashCode = (hashCode * 397) ^ _timeout.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int)_timerType;
-                return hashCode;
-            }
+            return _id.GetHashCode();
         }
         internal override Decision SwfDecision()
         {

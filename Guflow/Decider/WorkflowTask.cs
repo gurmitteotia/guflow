@@ -86,12 +86,13 @@ namespace Guflow.Decider
                 WorkflowExecution = new WorkflowExecution {RunId = string.Empty, WorkflowId = string.Empty}
             };
 
-        internal DateTime ServerTimeUtc=> DecisionTaskStartTime + (DateTime.UtcNow - _creationTime);
-
-        private DateTime DecisionTaskStartTime 
+        internal DateTime ServerTimeUtc
             => this==Empty
                ? DateTime.UtcNow
-               : _decisionTask.Events[0].EventTimestamp + _timeToDownloadEvents;
+               : DecisionTaskStartTime + (DateTime.UtcNow - _creationTime);
+
+        private DateTime DecisionTaskStartTime 
+            =>  _decisionTask.Events[0].EventTimestamp + _timeToDownloadEvents;
 
         private static bool HasNewEvents(DecisionTask decision)
         {

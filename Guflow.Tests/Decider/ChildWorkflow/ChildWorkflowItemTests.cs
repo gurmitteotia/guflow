@@ -478,9 +478,10 @@ namespace Guflow.Tests.Decider
         public void Reschedule_decision_is_timer_schedule_decision_for_child_workflow_item()
         {
             var item = new ChildWorkflowItem(_identity, _workflow.Object);
-            var decisions = item.RescheduleDecisions(TimeSpan.FromSeconds(20));
+            var decisions = item.RescheduleDecisions(TimeSpan.FromSeconds(20)).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new[]{ScheduleTimerDecision.RescheduleTimer(_scheduleIdentity, TimeSpan.FromSeconds(20))}));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(_scheduleIdentity, TimeSpan.FromSeconds(20));
         }
 
         [Test]

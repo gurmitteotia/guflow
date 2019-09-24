@@ -598,12 +598,11 @@ namespace Guflow.Tests.Decider
             _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             _builder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
 
-            var decisions = new JumpToParentTimerToKeepBranchActive().Decisions(_builder.Result());
+            var decisions = new JumpToParentTimerToKeepBranchActive().Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
-            {
-                ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero),
-            }));
+            var scheduleId = Identity.Timer(TimerName).ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]

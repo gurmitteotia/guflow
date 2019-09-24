@@ -124,9 +124,11 @@ namespace Guflow.Tests.Decider
             var workflow = new WorkflowWithTimer();
             _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(_identity.ScheduleId(), _fireAfter, TimerType.Reschedule).ToArray());
 
-            var workflowAction = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(workflowAction, Is.EqualTo(new []{ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero) }));
+            var scheduleId = Identity.Timer(TimerName).ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]
@@ -135,9 +137,11 @@ namespace Guflow.Tests.Decider
             var workflow = new WorkflowWithTimer();
             _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(_identity.ScheduleId(), _fireAfter, true).ToArray());
 
-            var workflowAction = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(workflowAction, Is.EqualTo(new[] {ScheduleTimerDecision.WorkflowItem(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero) }));
+            var scheduleId = Identity.Timer(TimerName).ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]

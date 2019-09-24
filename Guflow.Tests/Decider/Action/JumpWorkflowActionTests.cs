@@ -51,9 +51,10 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions().ToArray();
 
-            Assert.That(decisions, Is.EquivalentTo(new[]{ScheduleTimerDecision.WorkflowItem(identity.ScheduleId(),TimeSpan.Zero) }));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(identity.ScheduleId(), TimeSpan.Zero);
         }
 
         [Test]
@@ -69,9 +70,10 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions().ToArray();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] {ScheduleTimerDecision.WorkflowItem(scheduleId, TimeSpan.Zero) }));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]
@@ -81,12 +83,10 @@ namespace Guflow.Tests.Decider
             var workflowItem = new ActivityItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem).After(TimeSpan.FromSeconds(2));
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions().ToArray();
 
-            Assert.That(decisions, Is.EquivalentTo(new[]
-            {
-                ScheduleTimerDecision.RescheduleTimer(identity.ScheduleId(), TimeSpan.FromSeconds(2))
-            }));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(identity.ScheduleId(), TimeSpan.FromSeconds(2));
         }
 
         [Test]
@@ -106,9 +106,10 @@ namespace Guflow.Tests.Decider
             _builder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new WorkflowToReturnScheduleTimerAction();
 
-            var decisions = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new []{ ScheduleTimerDecision.WorkflowItem(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0))}));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0));
         }
 
         [Test]
@@ -117,9 +118,10 @@ namespace Guflow.Tests.Decider
             _builder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new JumpToTimerWithItsWhenClauseToBeAlwaysFalse();
 
-            var decisions = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.WorkflowItem(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0));
         }
 
         [Test]

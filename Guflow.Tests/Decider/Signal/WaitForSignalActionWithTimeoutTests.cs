@@ -33,16 +33,10 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
             var lambdaCompletedEventId = graph.First().EventId;
-            Assert.That(decisions, Is.EqualTo(expected: new WorkflowDecision[]
-            {
-                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId, TriggerEventId = lambdaCompletedEventId}),
-                ScheduleTimerDecision.SignalTimer(_confirmEmailId, lambdaCompletedEventId, TimeSpan.FromHours(2))
-            }));
-            var swfDecision = decisions[0].SwfDecision();
-            var data = swfDecision.RecordMarkerDecisionAttributes.Details.AsDynamic();
-            Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(new[] { "Confirmed" }));
-            Assert.That((SignalWaitType)data.WaitType, Is.EqualTo(SignalWaitType.Any));
-            Assert.That((SignalNextAction)data.NextAction, Is.EqualTo(SignalNextAction.Continue));
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            decisions[0].AssertWaitForSignal(_confirmEmailId, lambdaCompletedEventId, SignalWaitType.Any, SignalNextAction.Continue, "Confirmed");
+            decisions[1].AssertSignalTimer(_confirmEmailId, lambdaCompletedEventId, TimeSpan.FromHours(2));
         }
 
         [Test]
@@ -55,12 +49,11 @@ namespace Guflow.Tests.Decider
             var workflow = new UserActivateWorkflow();
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
-            {
-                new WaitForSignalsDecision(new WaitForSignalData{ScheduleId = _confirmEmailId, TriggerEventId = graph.First().EventId}),
-                new ScheduleLambdaDecision(_activateUserId, ""),
-                new WorkflowItemSignalledDecision(_confirmEmailId, graph.First().EventId, "Confirmed", s.EventId), 
-            }));
+            var triggerEventId = graph.First().EventId;
+            Assert.That(decisions.Length, Is.EqualTo(3));
+            decisions[0].AssertWaitForSignal(_confirmEmailId, triggerEventId, SignalWaitType.Any, SignalNextAction.Continue, "Confirmed");
+            Assert.That(decisions[1], Is.EqualTo(new ScheduleLambdaDecision(_activateUserId, "")));
+            Assert.That(decisions[2], Is.EqualTo(new WorkflowItemSignalledDecision(_confirmEmailId, triggerEventId, "Confirmed", s.EventId)));
         }
 
         //[Test]

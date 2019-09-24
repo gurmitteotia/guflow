@@ -48,9 +48,12 @@ namespace Guflow.Tests.Decider
             const string runId = "runid";
             _builder.AddWorkflowRunId(runId);
             _builder.AddNewEvents(_eventGraph.ToArray());
-            var decisions = new WorkflowWithLambda().Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.WorkflowItem(Identity.Timer("timer_name").ScheduleId(), TimeSpan.Zero) }));
+            var decisions = new WorkflowWithLambda().Decisions(_builder.Result()).ToArray();
+
+            var scheduleId = Identity.Timer("timer_name").ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]

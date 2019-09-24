@@ -54,9 +54,11 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_schedule_children()
         {
-            var decisions = new ChildWorkflow().Decisions(_builder.Result());
+            var decisions = new ChildWorkflow().Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new []{ScheduleTimerDecision.WorkflowItem(Identity.Timer("TimerName").ScheduleId(), TimeSpan.Zero)}));
+            var scheduleId = Identity.Timer("TimerName").ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]

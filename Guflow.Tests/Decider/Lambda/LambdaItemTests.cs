@@ -154,8 +154,10 @@ namespace Guflow.Tests.Decider
         public void Reschedule_decision_is_a_timer_decision_for_lambda_item()
         {
             var lambdaItem = new LambdaItem(_lambdaIdentity, _workflow.Object);
-            var decision = lambdaItem.RescheduleDecisions(TimeSpan.FromSeconds(10));
-            Assert.That(decision, Is.EqualTo(new []{ScheduleTimerDecision.RescheduleTimer(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(10))}));
+            var decisions = lambdaItem.RescheduleDecisions(TimeSpan.FromSeconds(10)).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(10));
         }
 
         [Test]
