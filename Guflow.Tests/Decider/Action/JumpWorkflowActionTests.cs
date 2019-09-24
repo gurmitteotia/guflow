@@ -77,12 +77,16 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_timer_decision_when_jumped_after_a_timeout()
         {
-            var workflowItem = new ActivityItem(Identity.New("name", "ver", "pos"), _workflow.Object);
+            var identity = Identity.New("name", "ver", "pos");
+            var workflowItem = new ActivityItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem).After(TimeSpan.FromSeconds(2));
 
             var decisions = workflowAction.Decisions();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { ScheduleTimerDecision.RescheduleTimer(Identity.New("name", "ver", "pos").ScheduleId(), TimeSpan.FromSeconds(2)) }));
+            Assert.That(decisions, Is.EquivalentTo(new[]
+            {
+                ScheduleTimerDecision.RescheduleTimer(identity.ScheduleId(), TimeSpan.FromSeconds(2))
+            }));
         }
 
         [Test]

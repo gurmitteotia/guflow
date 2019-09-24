@@ -12,7 +12,7 @@ namespace Guflow.Decider
     /// </summary>
     public abstract class WorkflowItemEvent : WorkflowEvent
     {
-        protected ScheduleId ScheduleId;
+        protected internal ScheduleId ScheduleId;
         internal bool IsFor(WorkflowItem workflowItem)
         {
             return workflowItem.Has(ScheduleId);
@@ -43,7 +43,7 @@ namespace Guflow.Decider
         public WorkflowItemWaitAction WaitForSignal(string signalName)
         {
             Ensure.NotNullAndEmpty(signalName,nameof(signalName));
-            return new WorkflowItemWaitAction(ScheduleId, EventId, SignalWaitType.Any, signalName);
+            return new WorkflowItemWaitAction(this, SignalWaitType.Any, signalName);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace Guflow.Decider
         public WorkflowItemWaitAction WaitForAnySignal(string signalName, params string[] signalNames)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            return new WorkflowItemWaitAction(ScheduleId, EventId, SignalWaitType.Any, ValidEventNames(signalName, signalNames));
+            return new WorkflowItemWaitAction(this, SignalWaitType.Any, ValidEventNames(signalName, signalNames));
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Guflow.Decider
         public WorkflowItemWaitAction WaitForAllSignals(string signalName, params string[] signalNames)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            return new WorkflowItemWaitAction(ScheduleId, EventId, SignalWaitType.All, ValidEventNames(signalName, signalNames));
+            return new WorkflowItemWaitAction(this, SignalWaitType.All, ValidEventNames(signalName, signalNames));
         }
 
         private static string[] ValidEventNames(string name,params string[] names)

@@ -15,6 +15,7 @@ namespace Guflow.Decider
             get => IsARescheduleTimer ? TimerType.Reschedule : _timerType;
             set => _timerType = value;
         }
+        public long SignalTriggerEventId;
     }
 
     internal enum TimerType

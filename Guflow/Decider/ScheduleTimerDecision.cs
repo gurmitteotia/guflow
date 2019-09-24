@@ -7,15 +7,19 @@ namespace Guflow.Decider
 {
     internal sealed class ScheduleTimerDecision : WorkflowDecision
     {
+       
+
         private readonly ScheduleId _id;
         private readonly TimeSpan _timeout;
         private readonly TimerType _timerType;
+        private readonly long _triggerEventId;
 
-        private ScheduleTimerDecision(ScheduleId id, TimeSpan timeout, TimerType timerType) : base(false)
+        private ScheduleTimerDecision(ScheduleId id, TimeSpan timeout, TimerType timerType, long triggerEventId=0) : base(false)
         {
             _id = id;
             _timeout = timeout;
             _timerType = timerType;
+            _triggerEventId = triggerEventId;
         }
 
         public static ScheduleTimerDecision RescheduleTimer(ScheduleId scheduleId, TimeSpan timeout)
@@ -24,8 +28,8 @@ namespace Guflow.Decider
         public static ScheduleTimerDecision WorkflowItem(ScheduleId scheduleId, TimeSpan timeout)
             => new ScheduleTimerDecision(scheduleId, timeout, TimerType.WorkflowItem);
 
-        public static ScheduleTimerDecision SignalTimer(ScheduleId scheduleId, TimeSpan timeout)
-            => new ScheduleTimerDecision(scheduleId, timeout, TimerType.SignalTimer);
+        public static ScheduleTimerDecision SignalTimer(ScheduleId scheduleId, long triggerEventId ,TimeSpan timeout)
+            => new ScheduleTimerDecision(scheduleId, timeout, TimerType.SignalTimer, triggerEventId);
         
 
         internal override bool IsFor(WorkflowItem workflowItem)
@@ -33,20 +37,26 @@ namespace Guflow.Decider
             return workflowItem.Has(_id);
         }
 
-        public override bool Equals(object other)
+        private bool Equals(ScheduleTimerDecision other)
         {
-            var otherTimer = other as ScheduleTimerDecision;
-            if (otherTimer == null)
-                return false;
-            return string.Equals(_id, otherTimer._id) && _timeout.Equals(otherTimer._timeout)
-                   && _timerType == otherTimer._timerType;
+            return _id.Equals(other._id) && _timeout.Equals(other._timeout) && _timerType == other._timerType;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ReferenceEquals(this, obj) || obj is ScheduleTimerDecision other && Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return _id.GetHashCode();
+            unchecked
+            {
+                var hashCode = _id.GetHashCode();
+                hashCode = (hashCode * 397) ^ _timeout.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int)_timerType;
+                return hashCode;
+            }
         }
-
         internal override Decision SwfDecision()
         {
             return new Decision()
@@ -56,7 +66,7 @@ namespace Guflow.Decider
                 {
                     TimerId = _id.ToString(),
                     StartToFireTimeout = Math.Round(_timeout.TotalSeconds).ToString(),
-                    Control = (new TimerScheduleData() { TimerType = _timerType, TimerName = _id.Name }).ToJson()
+                    Control = (new TimerScheduleData() { TimerType = _timerType, TimerName = _id.Name, SignalTriggerEventId = _triggerEventId}).ToJson()
                 }
             };
         }

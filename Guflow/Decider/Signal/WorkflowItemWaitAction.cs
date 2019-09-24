@@ -9,20 +9,20 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Cause the workflow item to wait for given signals.
+    /// Cause the workflow item to wait for the given signal(s).
     /// </summary>
     public class WorkflowItemWaitAction : WorkflowAction
     {
         private readonly ScheduleId _scheduleId;
         private readonly WaitForSignalData _data;
         private WorkflowDecision _timerDecision = WorkflowDecision.Empty;
-        internal WorkflowItemWaitAction(ScheduleId scheduleId, long triggerEventId, SignalWaitType waitType, params string[] signalNames)
+        internal WorkflowItemWaitAction(WorkflowItemEvent itemEvent, SignalWaitType waitType, params string[] signalNames)
         {
-            _scheduleId = scheduleId;
+            _scheduleId = itemEvent.ScheduleId;
             _data = new WaitForSignalData
             {
-                ScheduleId = scheduleId,
-                TriggerEventId = triggerEventId,
+                ScheduleId = itemEvent.ScheduleId,
+                TriggerEventId = itemEvent.EventId,
                 WaitType = waitType,
                 SignalNames = signalNames,
                 NextAction = SignalNextAction.Continue
@@ -70,14 +70,14 @@ namespace Guflow.Decider
             return this;
         }
         /// <summary>
-        /// Wait for the signal for the provided duration, if signal is not received by the provided duration workflow execution will resume. Signaling APIs can be used to determine if
-        /// workflow execution is resume because of signal or timeout.
+        /// Wait for the signal(s) for the given duration, if the signal(s) is not received by the provided duration workflow execution will resume. Signaling APIs can be used to determine if
+        /// workflow execution is resumed because of signal or timeout.
         /// </summary>
         /// <param name="timeout"></param>
         /// <returns></returns>
         public WorkflowItemWaitAction For(TimeSpan timeout)
         {
-            _timerDecision = ScheduleTimerDecision.SignalTimer(_scheduleId, timeout);
+            _timerDecision = ScheduleTimerDecision.SignalTimer(_scheduleId, _data.TriggerEventId ,timeout);
             return this;
         }
 

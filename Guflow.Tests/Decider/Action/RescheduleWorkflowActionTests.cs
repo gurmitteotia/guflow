@@ -100,7 +100,8 @@ namespace Guflow.Tests.Decider
           
             var decisions = workflow.Decisions(_eventsBuilder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(), TimeSpan.FromSeconds(2)) }));
+            var scheduleId = Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId();
+            Assert.That(decisions, Is.EqualTo(new[] {ScheduleTimerDecision.RescheduleTimer(scheduleId, TimeSpan.FromSeconds(2)) }));
         }
 
         [Test]
