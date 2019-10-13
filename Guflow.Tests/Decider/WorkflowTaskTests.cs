@@ -400,7 +400,7 @@ namespace Guflow.Tests.Decider
         private DecisionTask DecisionTasksWithSignalEvents(string token)
         {
             var signalEvent = _builder.WorkflowSignaledEvent("name", "input");
-            var decisionStartedEvent = _builder.DecisionStartedEvent();
+            var decisionStartedEvent = _builder.DecisionStartedEvent(DateTime.UtcNow);
 
             return new DecisionTask
             {
@@ -417,7 +417,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowStartedEvent = _builder.WorkflowStartedEvent("input");
             var historyEvent = _builder.WorkflowSignaledEvent("name", "input");
-            var decisionStartedEvent = _builder.DecisionStartedEvent();
+            var decisionStartedEvent = _builder.DecisionStartedEvent(DateTime.UtcNow);
 
             return new DecisionTask
             {

@@ -1499,13 +1499,14 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public HistoryEvent DecisionStartedEvent()
+        public HistoryEvent DecisionStartedEvent(DateTime eventTimeStamp)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
                 EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.DecisionTaskStarted,
+                EventTimestamp = eventTimeStamp,
                 DecisionTaskStartedEventAttributes = new DecisionTaskStartedEventAttributes()
                 {
                     Identity = "id"

@@ -34,8 +34,8 @@ namespace Guflow.Decider
             var allBranches = new List<WorkflowBranch>();
 
             var childBranch = new WorkflowBranch(workflow, startItem);
-            if (childBranch.Childs().Any())
-                foreach (var child in childBranch.Childs())
+            if (childBranch.Children().Any())
+                foreach (var child in childBranch.Children())
                     allBranches.Add(childBranch.Add(child));
             else
                 allBranches.Add(childBranch);
@@ -49,7 +49,7 @@ namespace Guflow.Decider
                 .SelectMany(p=>ParentBranches(p,_workflow));
         }
 
-        private IEnumerable<WorkflowBranch> Childs()
+        private IEnumerable<WorkflowBranch> Children()
         {
             return _workflowItems.Last().Children()
                 .SelectMany(i=>ChildBranches(i,_workflow));

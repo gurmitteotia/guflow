@@ -26,11 +26,6 @@ namespace Guflow.Decider
             return workflow.WorkflowAction(this);
         }
 
-        internal bool IsCancelledEventFor(long cancelRequestedEventId)
-        {
-            return _eventAttributes.LatestCancelRequestedEventId == cancelRequestedEventId;
-        }
-
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
         {
             return defaultActions.CancelWorkflow(Details);
