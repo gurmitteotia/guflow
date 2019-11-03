@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -23,7 +24,7 @@ namespace Guflow.Tests.Decider
         {
             var recordMarkerDecision = WorkflowAction.RecordMarker("name", "detail");
 
-            var workflowDecisions = recordMarkerDecision.Decisions();
+            var workflowDecisions = recordMarkerDecision.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(workflowDecisions,Is.EquivalentTo(new []{ new RecordMarkerWorkflowDecision("name","detail")}));
         }

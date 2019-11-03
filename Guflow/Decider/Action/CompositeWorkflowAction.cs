@@ -15,14 +15,14 @@ namespace Guflow.Decider
         }
         internal override bool ReadyToScheduleChildren => _left.ReadyToScheduleChildren || _right.ReadyToScheduleChildren;
 
-        internal override bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
+        internal override bool CanScheduleAny(IWorkflow workflow, IEnumerable<WorkflowItem> workflowItems)
         {
-            return _left.CanScheduleAny(workflowItems) || _right.CanScheduleAny(workflowItems);
+            return _left.CanScheduleAny(workflow,workflowItems) || _right.CanScheduleAny(workflow, workflowItems);
         }
 
-        internal override IEnumerable<WorkflowDecision> Decisions()
+        internal override IEnumerable<WorkflowDecision> Decisions(IWorkflow workflow)
         {
-            return _left.Decisions().Concat(_right.Decisions());
+            return _left.Decisions(workflow).Concat(_right.Decisions(workflow));
         }
 
         internal override IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent()

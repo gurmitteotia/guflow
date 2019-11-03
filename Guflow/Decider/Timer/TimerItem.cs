@@ -209,7 +209,7 @@ namespace Guflow.Decider
                 if (!_invokedTimerCancelAction && IsActive)
                 {
                     _invokedTimerCancelAction = true;
-                    cancelDecisions = _timerCancelAction(this).Decisions();
+                    cancelDecisions = _timerCancelAction(this).Decisions(Workflow);
                 }
 
                 return new []{new CancelTimerDecision(ScheduleId)}.Concat(cancelDecisions);

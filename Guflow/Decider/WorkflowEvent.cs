@@ -10,9 +10,11 @@ namespace Guflow.Decider
     /// </summary>
     public abstract class WorkflowEvent : IComparable<WorkflowEvent>
     {
+        private readonly HistoryEvent _historyEvent;
+
         protected WorkflowEvent(HistoryEvent historyEvent)
         {
-            EventId = historyEvent.EventId;
+            _historyEvent = historyEvent;
         }
 
         internal virtual WorkflowAction Interpret(IWorkflow workflow)
@@ -24,7 +26,9 @@ namespace Guflow.Decider
         {
             throw new NotSupportedException($"DefaultAction is not supported {this.GetType().Name}.");
         }
-        internal long EventId { get; }
+
+        internal long EventId => _historyEvent.EventId;
+        internal DateTime Timestamp => _historyEvent.EventTimestamp;
         public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();
     
         public int CompareTo(WorkflowEvent other)

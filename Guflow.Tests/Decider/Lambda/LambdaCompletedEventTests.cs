@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -59,7 +60,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_schedule_custom_action()
         {
-            var decisions = _event.Interpret(new WorkflowWithCustomAction(WorkflowAction.CompleteWorkflow("result"))).Decisions();
+            var decisions = _event.Interpret(new WorkflowWithCustomAction(WorkflowAction.CompleteWorkflow("result"))).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result")}));
         }

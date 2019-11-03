@@ -39,7 +39,7 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(Identity.Timer("Somename"), _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EquivalentTo(workflowItem.ScheduleDecisions()));
         }
@@ -51,7 +51,7 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
-            var decisions = workflowAction.Decisions().ToArray();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>()).ToArray();
 
             Assert.That(decisions.Count(), Is.EqualTo(1));
             decisions[0].AssertWorkflowItemTimer(identity.ScheduleId(), TimeSpan.Zero);
@@ -70,7 +70,7 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
-            var decisions = workflowAction.Decisions().ToArray();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>()).ToArray();
 
             Assert.That(decisions.Count(), Is.EqualTo(1));
             decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
@@ -83,7 +83,7 @@ namespace Guflow.Tests.Decider
             var workflowItem = new ActivityItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem).After(TimeSpan.FromSeconds(2));
 
-            var decisions = workflowAction.Decisions().ToArray();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>()).ToArray();
 
             Assert.That(decisions.Count(), Is.EqualTo(1));
             decisions[0].AssertRescheduleTimer(identity.ScheduleId(), TimeSpan.FromSeconds(2));

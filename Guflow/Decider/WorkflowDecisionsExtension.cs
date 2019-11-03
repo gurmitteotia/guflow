@@ -19,11 +19,11 @@ namespace Guflow.Decider
             return compatibleWorkflows;
         }
 
-        private static IEnumerable<WorkflowDecision> FinalDecisions(this IEnumerable<WorkflowClosingDecision> workflowClosingDecisions, IWorkflowClosingActions workflowClosingActions)
+        private static IEnumerable<WorkflowDecision> FinalDecisions(this IEnumerable<WorkflowClosingDecision> workflowClosingDecisions, Workflow workflow)
         {
             var finalClosingDecision = workflowClosingDecisions.OrderByDescending(d => d.Priority).First();
-            var finalWorkflowAction = finalClosingDecision.ProvideFinalActionFrom(workflowClosingActions);
-            return finalWorkflowAction == null ? Enumerable.Empty<WorkflowDecision>() : finalWorkflowAction.Decisions();
+            var finalWorkflowAction = finalClosingDecision.ProvideFinalActionFrom(workflow);
+            return finalWorkflowAction == null ? Enumerable.Empty<WorkflowDecision>() : finalWorkflowAction.Decisions(workflow);
         }
     }
 }

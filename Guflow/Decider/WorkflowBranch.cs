@@ -79,7 +79,7 @@ namespace Guflow.Decider
                 return false;
 
             var parentItems = parentBranches.SelectMany(b => b._workflowItems);
-            return triggeredAction.CanScheduleAny(parentItems);
+            return triggeredAction.CanScheduleAny(_workflow,parentItems);
         }
 
         public WorkflowItem FindFirstJointItem(WorkflowItem beforeItem)

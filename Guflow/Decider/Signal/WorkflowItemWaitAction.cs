@@ -15,10 +15,12 @@ namespace Guflow.Decider
     {
         private readonly ScheduleId _scheduleId;
         private readonly WaitForSignalData _data;
-        private WorkflowDecision _timerDecision = WorkflowDecision.Empty;
+        private TimeSpan? _timerWait = null;
+        private DateTime _waitingEventTimeStamp;
         internal WorkflowItemWaitAction(WorkflowItemEvent itemEvent, SignalWaitType waitType, params string[] signalNames)
         {
             _scheduleId = itemEvent.ScheduleId;
+            _waitingEventTimeStamp = itemEvent.Timestamp;
             _data = new WaitForSignalData
             {
                 ScheduleId = itemEvent.ScheduleId,
@@ -29,9 +31,9 @@ namespace Guflow.Decider
             };
         }
 
-        internal override IEnumerable<WorkflowDecision> Decisions()
+        internal override IEnumerable<WorkflowDecision> Decisions(IWorkflow workflow)
         {
-            return new[] {new WaitForSignalsDecision(_data), _timerDecision};
+            return new[] {new WaitForSignalsDecision(_data), WaitForSignalTimerDecision(workflow.WorkflowHistoryEvents)};
         }
 
         internal override IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent()
@@ -44,8 +46,8 @@ namespace Guflow.Decider
 
         private void SignalReceived(WaitForSignalsEvent sender, string args)
         {
-            if(!sender.IsExpectingSignals)
-                _timerDecision =  WorkflowDecision.Empty;
+            if (!sender.IsExpectingSignals)
+                _timerWait = null;
         }
 
         private HistoryEvent SimulatedHistoryEvent()
@@ -59,6 +61,16 @@ namespace Guflow.Decider
             historyEvent.MarkerRecordedEventAttributes = attr;
             return historyEvent;
         }
+
+        private WorkflowDecision WaitForSignalTimerDecision(IWorkflowHistoryEvents historyEvents)
+        {
+            if(_timerWait==null) return WorkflowDecision.Empty;
+
+            var timeout = historyEvents.ServerTimeUtc - _waitingEventTimeStamp;
+            if(timeout > _timerWait.Value) return WorkflowDecision.Empty;
+            return ScheduleTimerDecision.SignalTimer(_scheduleId, _data.TriggerEventId, timeout);
+        }
+
 
         /// <summary>
         /// Reschedule the waiting item on receiving the necessary signals.
@@ -77,7 +89,7 @@ namespace Guflow.Decider
         /// <returns></returns>
         public WorkflowItemWaitAction For(TimeSpan timeout)
         {
-            _timerDecision = ScheduleTimerDecision.SignalTimer(_scheduleId, _data.TriggerEventId ,timeout);
+            _timerWait = timeout;
             return this;
         }
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -13,7 +14,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowAction = WorkflowAction.FailWorkflow("reason", "detail") + WorkflowAction.CompleteWorkflow("result");
 
-            var workflowDecisions = workflowAction.Decisions();
+            var workflowDecisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(workflowDecisions,Is.EquivalentTo(new WorkflowDecision []{new FailWorkflowDecision("reason","detail"),new CompleteWorkflowDecision("result")}));
         }
@@ -23,7 +24,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowAction = WorkflowAction.FailWorkflow("reason", "detail").And(WorkflowAction.CompleteWorkflow("result"));
 
-            var workflowDecisions = workflowAction.Decisions();
+            var workflowDecisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(workflowDecisions, Is.EquivalentTo(new WorkflowDecision[] { new FailWorkflowDecision("reason", "detail"), new CompleteWorkflowDecision("result") }));
         }

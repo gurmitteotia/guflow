@@ -23,9 +23,9 @@ namespace Guflow.Decider
             _scheduleAction = ScheduleWorkflowItemAction.ScheduleByIgnoringWhen(jumpToItem);
             _triggeredAction = Default();
         }
-        internal override IEnumerable<WorkflowDecision> Decisions()
+        internal override IEnumerable<WorkflowDecision> Decisions(IWorkflow workflow)
         {
-            return _scheduleAction.Decisions().Concat(_triggeredAction.Decisions());
+            return _scheduleAction.Decisions(workflow).Concat(_triggeredAction.Decisions(workflow));
         }
 
         internal override WorkflowAction WithTriggeredItem(WorkflowItem item)

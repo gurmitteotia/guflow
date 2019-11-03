@@ -8,14 +8,14 @@ namespace Guflow.Decider
 {
     internal abstract class WorkflowItem : IWorkflowItem
     {
-        private readonly IWorkflow _workflow;
+        protected readonly IWorkflow Workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
         protected readonly Identity Identity;
         private readonly Stack<WorkflowItem> _continueItems = new Stack<WorkflowItem>();
         protected WorkflowItem(Identity identity, IWorkflow workflow)
         {
             Identity = identity;
-            _workflow = workflow;
+            Workflow = workflow;
         }
         public IEnumerable<IActivityItem> ParentActivities => _parentItems.OfType<IActivityItem>();
 
@@ -95,7 +95,7 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowItem> Children()
         {
-            return _workflow.GetChildernOf(this);
+            return Workflow.GetChildernOf(this);
         }
 
         public IEnumerable<WorkflowItem> Parents()
@@ -144,48 +144,48 @@ namespace Guflow.Decider
 
         public IEnumerable<WorkflowBranch> ParentBranches()
         {
-            return _parentItems.SelectMany(i=>WorkflowBranch.ParentBranches(i, _workflow));
+            return _parentItems.SelectMany(i=>WorkflowBranch.ParentBranches(i, Workflow));
         }
 
         public IEnumerable<WorkflowBranch> ChildBranches()
         {
-            return Children().SelectMany(c=>WorkflowBranch.ChildBranches(c, _workflow));
+            return Children().SelectMany(c=>WorkflowBranch.ChildBranches(c, Workflow));
         }
         protected void AddParent(Identity identity)
         {
-            var parentItem = _workflow.WorkflowItem(identity);
+            var parentItem = Workflow.WorkflowItem(identity);
             if (parentItem == null)
                 throw new ParentItemMissingException(string.Format(Resources.Schedulable_item_missing, identity));
             if (Equals(parentItem))
                 throw new CyclicDependencyException(string.Format(Resources.Cyclic_dependency, identity));
             _parentItems.Add(parentItem);
         }
-        protected IWorkflowHistoryEvents WorkflowHistoryEvents => _workflow.WorkflowHistoryEvents;
-        protected TimerItem RescheduleTimer(ScheduleId identity) => TimerItem.Reschedule(this, identity, _workflow);
+        protected IWorkflowHistoryEvents WorkflowHistoryEvents => Workflow.WorkflowHistoryEvents;
+        protected TimerItem RescheduleTimer(ScheduleId identity) => TimerItem.Reschedule(this, identity, Workflow);
 
         protected IEnumerable<WorkflowDecision> WorkflowDecisionsOnFalseWhen(WorkflowAction action) =>
-            action.WithTriggeredItem(this).Decisions();
+            action.WithTriggeredItem(this).Decisions(Workflow);
 
         public WorkflowAction DefaultActionOnLastEvent()
         {
-            return LastEvent().DefaultAction(_workflow);
+            return LastEvent().DefaultAction(Workflow);
         }
 
         private WaitForSignalsEvent WaitForSignalsEvent(string signalName)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            return _workflow.WaitForSignalsEvents.FirstOrDefault(this, signalName);
+            return Workflow.WaitForSignalsEvents.FirstOrDefault(this, signalName);
         }
 
         private WaitForSignalsEvent LatestWaitForSignalsEvent()
         {
-            var signalEventsLatestFirst = _workflow.WaitForSignalsEvents.Reverse();
+            var signalEventsLatestFirst = Workflow.WaitForSignalsEvents.Reverse();
             return signalEventsLatestFirst.FirstOrDefault(this);
         }
 
         private long SignalEventId()
         {
-            var e = _workflow.CurrentlyExecutingEvent as WorkflowSignaledEvent;
+            var e = Workflow.CurrentlyExecutingEvent as WorkflowSignaledEvent;
             return e != null ? e.EventId : 0;
         }
 

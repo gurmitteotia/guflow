@@ -2,6 +2,7 @@
 using Guflow.Decider;
 using NUnit.Framework;
 using System.Linq;
+using Moq;
 
 namespace Guflow.Tests.Decider
 {
@@ -28,7 +29,7 @@ namespace Guflow.Tests.Decider
         public void Return_empty_decisions()
         {
             var workflowAction = WorkflowAction.Ignore(null);
-            Assert.That(workflowAction.Decisions(),Is.Empty);
+            Assert.That(workflowAction.Decisions(Mock.Of<IWorkflow>()),Is.Empty);
         }
 
         [Test]
@@ -39,7 +40,7 @@ namespace Guflow.Tests.Decider
 
             var workflowAction = activityCompletedEvent.Interpret(workflow);
 
-            Assert.That(workflowAction.Decisions(), Is.Empty);
+            Assert.That(workflowAction.Decisions(Mock.Of<IWorkflow>()), Is.Empty);
         }
         private ActivityCompletedEvent CreateCompletedActivityEvent(string activityName, string activityVersion)
         {

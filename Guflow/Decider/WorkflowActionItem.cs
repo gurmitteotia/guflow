@@ -26,7 +26,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return _workflowActionFunc(this).Decisions();
+            return _workflowActionFunc(this).Decisions(Workflow);
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)

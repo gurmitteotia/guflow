@@ -40,7 +40,7 @@ namespace Guflow.Tests.Decider
             var timerItem = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(timerItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(Identity.Timer("TimerName").ScheduleId()) }));
         }
@@ -56,7 +56,7 @@ namespace Guflow.Tests.Decider
             var timerItem = TimerItem.New(Identity.Timer("TimerName"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(timerItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(scheduleId) }));
         }
@@ -68,7 +68,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver").ScheduleId()) }));
         }
@@ -79,7 +79,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelActivityDecision(Identity.New("activityName1", "ver").ScheduleId()) }));
         }
@@ -91,7 +91,7 @@ namespace Guflow.Tests.Decider
             var activityItem = new ActivityItem(Identity.New("activityName1", "ver"), _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(activityItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(Identity.New("activityName1", "ver").ScheduleId()) }));
         }
@@ -104,7 +104,7 @@ namespace Guflow.Tests.Decider
             var childWorkflowItem = new ChildWorkflowItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(childWorkflowItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(identity.ScheduleId(), "id")}));
         }
@@ -116,7 +116,7 @@ namespace Guflow.Tests.Decider
             var item = new ChildWorkflowItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(item);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelRequestWorkflowDecision(identity.ScheduleId(), null) }));
         }
@@ -129,7 +129,7 @@ namespace Guflow.Tests.Decider
             var item = new ChildWorkflowItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.Cancel(item);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CancelTimerDecision(identity.ScheduleId()) }));
         }
@@ -187,7 +187,7 @@ namespace Guflow.Tests.Decider
         public void During_timer_cancel_request_user_can_provide_additional_cancel_action_when_timer_is_active()
         {
             var additionalAction = new Mock<WorkflowAction>();
-            additionalAction.Setup(a => a.Decisions()).Returns(new[] {new RecordMarkerWorkflowDecision("result" ,"details"), });
+            additionalAction.Setup(a => a.Decisions(It.IsAny<IWorkflow>())).Returns(new[] {new RecordMarkerWorkflowDecision("result" ,"details"), });
             var workflow = new WorkflowToReturnCustomActionDuringCancel(additionalAction.Object);
             _builder.AddNewEvents(TimerStartedEventGraph(TimerName));
             _builder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
@@ -206,7 +206,7 @@ namespace Guflow.Tests.Decider
         public void During_timer_cancel_request_user_provided_additional_cancel_action_is_ignored_when_timer_not_active()
         {
             var additionalAction = new Mock<WorkflowAction>();
-            additionalAction.Setup(a => a.Decisions()).Returns(new[] { new RecordMarkerWorkflowDecision("result", "details"), });
+            additionalAction.Setup(a => a.Decisions(Mock.Of<IWorkflow>())).Returns(new[] { new RecordMarkerWorkflowDecision("result", "details"), });
             var workflow = new WorkflowToReturnCustomActionDuringCancel(additionalAction.Object);
             _builder.AddNewEvents(CompletedActivityEventGraph(ActivityName, ActivityVersion,
                 PositionalName));

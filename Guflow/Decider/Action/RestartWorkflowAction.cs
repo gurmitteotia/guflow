@@ -61,7 +61,7 @@ namespace Guflow.Decider
             _tags.Add(tag);
         }
 
-        internal override IEnumerable<WorkflowDecision> Decisions()
+        internal override IEnumerable<WorkflowDecision> Decisions(IWorkflow workflow)
         {
             return new[] {new RestartWorkflowDecision(this), };
         }

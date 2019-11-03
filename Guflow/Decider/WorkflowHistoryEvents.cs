@@ -102,6 +102,7 @@ namespace Guflow.Decider
 
         public string WorkflowRunId => _workflowTask.RunId;
         public string WorkflowId => _workflowTask.WorkflowId;
+        public DateTime ServerTimeUtc => _workflowTask.ServerTimeUtc;
 
         public IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem)
         {
