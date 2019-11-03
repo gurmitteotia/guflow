@@ -41,6 +41,8 @@ namespace Guflow.Decider
         public static readonly WorkflowTask Empty = new WorkflowTask();
 
         internal IEnumerable<HistoryEvent> AllEvents => _decisionTask.Events;
+
+        internal IEnumerable<HistoryEvent> AllEventsInAscOrderOfEventId => AllEvents.Reverse();
         internal IEnumerable<HistoryEvent> NewEvents {
             get { return AllEvents.TakeWhile(h => h.EventId > _decisionTask.PreviousStartedEventId).Reverse(); }
     }

@@ -179,7 +179,8 @@ namespace Guflow.Decider
 
         private WaitForSignalsEvent LatestWaitForSignalsEvent()
         {
-            return _workflow.WaitForSignalsEvents.Reverse().FirstOrDefault(this);
+            var signalEventsLatestFirst = _workflow.WaitForSignalsEvents.Reverse();
+            return signalEventsLatestFirst.FirstOrDefault(this);
         }
 
         private long SignalEventId()

@@ -78,7 +78,7 @@ namespace Guflow.Decider
 
         public WorkflowStartedEvent WorkflowStartedEvent()
         {
-            foreach (var historyEvent in _workflowTask.AllEvents.Reverse())
+            foreach (var historyEvent in _workflowTask.AllEventsInAscOrderOfEventId)
             {
                 if(historyEvent.IsWorkflowStartedEvent())
                     return new WorkflowStartedEvent(historyEvent);
@@ -215,7 +215,7 @@ namespace Guflow.Decider
         {
             if (_cachedWaitEvents != null) return _cachedWaitEvents;
             _cachedWaitEvents = new List<WaitForSignalsEvent>();
-            foreach (var historyEvent in _workflowTask.AllEvents.Reverse())
+            foreach (var historyEvent in _workflowTask.AllEventsInAscOrderOfEventId)
             {
                 var waitEvent = historyEvent.WaitForSignalsEvent(_workflowTask.AllEvents);
                 if (waitEvent != null)

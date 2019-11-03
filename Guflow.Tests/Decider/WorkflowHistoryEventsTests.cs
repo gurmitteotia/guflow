@@ -582,8 +582,9 @@ namespace Guflow.Tests.Decider
             var activityScheduled = _builder.ActivityScheduledGraph(Identity.New(ActivityName, ActivityVersion).ScheduleId());
             var timerStarted = _builder.TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(1));
             var childWorfklowStarted = _builder.ChildWorkflowStartedEventGraph(_childWorkflow.ScheduleId(), "rid", "input");
+            var waitForSignalEvents =new []{ _builder.WaitForSignalEvent(Identity.Timer(TimerName).ScheduleId(), 1,new[] {"Event1"}, SignalWaitType.Any)};
             return timerStarted.Concat(activityScheduled)
-                .Concat(activityStarted).Concat(nonInterpretEvent).Concat(childWorfklowStarted).ToArray();
+                .Concat(activityStarted).Concat(nonInterpretEvent).Concat(childWorfklowStarted).Concat(waitForSignalEvents).ToArray();
         }
     }
 }
