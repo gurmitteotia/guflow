@@ -13,7 +13,8 @@ namespace Guflow.Decider
     {
         private readonly WaitForSignalData _data;
         private readonly List<string> _resumedSignals = new List<string>();
-        public event EventHandler<WaitForSignalsEvent, string> SignalReceived; 
+        public event EventHandler<WaitForSignalsEvent, string> SignalReceived;
+        private List<string> _timedoutSignals = new List<string>();
         public WaitForSignalsEvent(HistoryEvent @event, IEnumerable<HistoryEvent> allEvents)
             : base(@event)
         {
@@ -63,6 +64,19 @@ namespace Guflow.Decider
         {
             if (_data.NextAction == SignalNextAction.Continue) return WorkflowAction.ContinueWorkflow(workflowItem);
             return WorkflowAction.Schedule(workflowItem);
+        }
+
+        public WorkflowDecision RecordTimedout(string reason)
+        {
+            //TODO: Write test to ensure it works fine when it is already timedout.
+            if(!IsExpectingSignals) throw new InvalidOperationException("Can't timedout non-active wait for signal event.");
+            _timedoutSignals = WaitingSignals.ToList();
+            return new SignalsTimedoutDecision(ScheduleId, TriggerEventId, WaitingSignals.ToArray(), reason);
+        }
+
+        public bool IsTimedout(string signalName)
+        {
+            return _timedoutSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

@@ -63,9 +63,7 @@ namespace Guflow.Decider
         }
         public bool IsWaitingForAnySignal()
         {
-            var @event = LatestWaitForSignalsEvent();
-            if (@event == null) return false;
-            return @event.WaitingSignals.Any();
+            return LatestWaitForSignals().Any();
         }
         public WorkflowAction SignalResumedAction()
         {
@@ -177,10 +175,22 @@ namespace Guflow.Decider
             return Workflow.WaitForSignalsEvents.FirstOrDefault(this, signalName);
         }
 
+        public WaitForSignalsEvent WaitForSignalsEvent(long triggerEventId)
+        {
+            return Workflow.WaitForSignalsEvents.FirstOrDefault(this,triggerEventId);
+        }
+
         private WaitForSignalsEvent LatestWaitForSignalsEvent()
         {
             var signalEventsLatestFirst = Workflow.WaitForSignalsEvents.Reverse();
             return signalEventsLatestFirst.FirstOrDefault(this);
+        }
+
+        private IEnumerable<string> LatestWaitForSignals()
+        {
+            var @event = LatestWaitForSignalsEvent();
+            if (@event == null) return Enumerable.Empty<string>();
+            return @event.WaitingSignals;
         }
 
         private long SignalEventId()

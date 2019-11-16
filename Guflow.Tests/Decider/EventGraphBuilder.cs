@@ -221,7 +221,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerFiredGraph(ScheduleId timerId, TimeSpan startToFireTimeout, TimerType timerType)
+        public IEnumerable<HistoryEvent> TimerFiredGraph(ScheduleId timerId, TimeSpan startToFireTimeout, TimerType timerType, long signalTriggerEventId=0)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerFiredIds(ref _currentEventId);
@@ -245,7 +245,7 @@ namespace Guflow.Tests.Decider
                 {
                     TimerId = timerId,
                     StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
-                    Control = (new TimerScheduleData() { TimerName = timerId.Name, TimerType = timerType }).ToJson()
+                    Control = (new TimerScheduleData() { TimerName = timerId.Name, TimerType = timerType, SignalTriggerEventId = signalTriggerEventId}).ToJson()
                 }
             });
             return historyEvents;
@@ -400,6 +400,26 @@ namespace Guflow.Tests.Decider
                     TimerId = identity,
                     StartToFireTimeout = ((long)fireAfter.TotalSeconds).ToString(),
                     Control = (new TimerScheduleData() { TimerName = identity.Name, IsARescheduleTimer = isARescheduleTimer }).ToJson()
+                }
+            });
+
+            return historyEvents;
+        }
+
+        public IEnumerable<HistoryEvent> TimerStartedGraph(ScheduleId identity, TimeSpan fireAfter, TimerType timerType, long triggerEventId=0)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.TimerStartedIds(ref _currentEventId);
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerStarted,
+                EventId = eventIds.EventId(EventIds.Started),
+                TimerStartedEventAttributes = new TimerStartedEventAttributes()
+                {
+                    TimerId = identity,
+                    StartToFireTimeout = ((long)fireAfter.TotalSeconds).ToString(),
+                    Control = (new TimerScheduleData() { TimerName = identity.Name, TimerType = timerType, SignalTriggerEventId = triggerEventId}).ToJson()
                 }
             });
 

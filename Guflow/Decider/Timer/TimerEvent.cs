@@ -12,6 +12,8 @@ namespace Guflow.Decider
         private TimeSpan _timeout;
         private long _timerStartedEventId;
         internal TimerType TimerType { get; private set; }
+        internal long SignalTriggerEventId {get; private set; }
+
         protected TimerEvent(HistoryEvent historyEvent)
             : base(historyEvent)
         {
@@ -29,6 +31,7 @@ namespace Guflow.Decider
                     var timerScheduleData = historyEvent.TimerStartedEventAttributes.Control.As<TimerScheduleData>();
                     TimerType = timerScheduleData.TimerType;
                     _timerName = timerScheduleData.TimerName;
+                    SignalTriggerEventId = timerScheduleData.SignalTriggerEventId;
                     foundTimerStartedEvent = true;
                     break;
                 }

@@ -62,12 +62,16 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Returns true if the specific signal is timed out.
+        /// Return true if the current execution is triggered because the given signal is timedout.
         /// </summary>
         /// <returns></returns>
         public bool IsTimedout()
         {
-            return true;
+            var timerFiredEvent = _workflow.CurrentlyExecutingEvent as TimerFiredEvent;
+            if (timerFiredEvent == null|| timerFiredEvent.TimerType!=TimerType.SignalTimer) return false;
+
+            var signaledEvent = _workflow.TimedoutEvent(timerFiredEvent);
+            return signaledEvent.IsTimedout(_signalName);
         }
     }
 }

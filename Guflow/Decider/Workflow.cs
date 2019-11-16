@@ -735,6 +735,11 @@ namespace Guflow.Decider
 
         IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)=> _allWorkflowItems.Childeren(workflowItem);
         WorkflowItem IWorkflow.WorkflowItem(Identity identity)=> _allWorkflowItems.WorkflowItem(identity);
+        WaitForSignalsEvent IWorkflow.TimedoutEvent(TimerFiredEvent timerFiredEvent)
+        {
+            var workflowItem = _allWorkflowItems.WorkflowItem(timerFiredEvent);
+            return workflowItem.WaitForSignalsEvent(timerFiredEvent.SignalTriggerEventId);
+        }
 
         ChildWorkflowItem IWorkflow.ChildWorkflowItem(Identity identity) =>
             _allWorkflowItems.ChildWorkflowItem(identity);

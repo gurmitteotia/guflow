@@ -223,8 +223,21 @@ namespace Guflow.Decider
 
         WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
         {
-            ITimer timer = _rescheduleTimer;
-            return timer.Fired(timerFiredEvent);
+            if (timerFiredEvent.TimerType == TimerType.Reschedule)
+            {
+                ITimer timer = _rescheduleTimer;
+                return timer.Fired(timerFiredEvent);
+            }
+            if (timerFiredEvent.TimerType == TimerType.SignalTimer)
+            {
+                var waitForSignalEvent = WaitForSignalsEvent(timerFiredEvent.SignalTriggerEventId);
+                if (waitForSignalEvent.IsExpectingSignals)
+                {
+                    var signalTimedoutDecision = waitForSignalEvent.RecordTimedout(reason: "TimerFired");
+                    return WorkflowAction.Custom(signalTimedoutDecision) + WorkflowAction.ContinueWorkflow(this);
+                }
+            }
+            throw new InvalidOperationException("Timer fired should be called only for Reschedule and SignalTimer.");
         }
 
         WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
