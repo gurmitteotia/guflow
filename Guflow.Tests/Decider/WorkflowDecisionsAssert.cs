@@ -31,7 +31,8 @@ namespace Guflow.Tests.Decider
             var timerData = swfDecision.StartTimerDecisionAttributes.Control.As<TimerScheduleData>();
             Assert.That(timerData.TimerType, Is.EqualTo(TimerType.SignalTimer));
             Assert.That(timerData.SignalTriggerEventId, Is.EqualTo(triggerId));
-            Assert.That(swfDecision.StartTimerDecisionAttributes.StartToFireTimeout, Is.EqualTo(timeout.TotalSeconds.ToString()));
+            var startToFireTimeout = TimeSpan.FromSeconds(Double.Parse(swfDecision.StartTimerDecisionAttributes.StartToFireTimeout));
+            Assert.That(startToFireTimeout-timeout, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         public static void AssertWaitForSignal(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId,

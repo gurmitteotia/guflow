@@ -28,6 +28,7 @@ namespace Guflow.Tests.Decider
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp:DateTime.UtcNow);
             _builder.AddNewEvents(graph);
+            _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
             var workflow = new UserActivateWorkflow();
 
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
@@ -72,7 +73,29 @@ namespace Guflow.Tests.Decider
             decisions[0].AssertWaitForSignal(_confirmEmailId, lambdaCompletedEventId, SignalWaitType.Any, SignalNextAction.Continue, "Confirmed");
             decisions[1].AssertSignalTimer(_confirmEmailId, lambdaCompletedEventId, TimeSpan.FromHours(1));
         }
-        
+
+
+        [Test]
+        public void Signal_is_ignored_when_it_come_after_timedout()
+        {
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp: DateTime.UtcNow.AddHours(-4));
+            _builder.AddProcessedEvents(graph);
+            var completedEventId = graph.First().EventId;
+            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, completedEventId,new[] {"Confirmed"}, SignalWaitType.Any));
+            _builder.AddProcessedEvents(_graphBuilder.TimerFiredGraph(_confirmEmailId, TimeSpan.FromHours(2),
+                TimerType.SignalTimer, completedEventId));
+            _builder.AddProcessedEvents()
+            _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
+            var workflow = new UserActivateWorkflow();
+
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            var lambdaCompletedEventId = completedEventId;
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            decisions[0].AssertWaitForSignal(_confirmEmailId, lambdaCompletedEventId, SignalWaitType.Any, SignalNextAction.Continue, "Confirmed");
+            decisions[1].AssertSignalTimer(_confirmEmailId, lambdaCompletedEventId, TimeSpan.FromHours(1));
+        }
 
         [Test]
         public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_together_and_signal_after_timeout()

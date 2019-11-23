@@ -66,8 +66,9 @@ namespace Guflow.Decider
         {
             if(_timerWait==null) return WorkflowDecision.Empty;
 
-            var timeout = historyEvents.ServerTimeUtc - _waitingEventTimeStamp;
-            if(timeout > _timerWait.Value) return WorkflowDecision.Empty;
+            var delay = historyEvents.ServerTimeUtc - _waitingEventTimeStamp;
+            if(delay > _timerWait.Value) return WorkflowDecision.Empty;
+            var timeout = _timerWait.Value - delay;
             return ScheduleTimerDecision.SignalTimer(_scheduleId, _data.TriggerEventId, timeout);
         }
 
