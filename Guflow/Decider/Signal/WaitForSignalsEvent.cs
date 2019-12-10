@@ -12,14 +12,14 @@ namespace Guflow.Decider
     internal class WaitForSignalsEvent : WorkflowItemEvent
     {
         private readonly WaitForSignalData _data;
-        private readonly List<string> _resumedSignals = new List<string>();
         public event EventHandler<WaitForSignalsEvent, string> SignalReceived;
-        private List<string> _timedoutSignals = new List<string>();
+        private SignalState _signalState;
         public WaitForSignalsEvent(HistoryEvent @event, IEnumerable<HistoryEvent> allEvents)
             : base(@event)
         {
             _data = @event.MarkerRecordedEventAttributes.Details.As<WaitForSignalData>();
             ScheduleId = ScheduleId.Raw(_data.ScheduleId);
+            _signalState = new WaitingForSignalState(this);
             PopulateResumedSignals(allEvents);
         }
 
@@ -28,55 +28,139 @@ namespace Guflow.Decider
             foreach (var historyEvent in allEvents)
             {
                 if (historyEvent.EventId < EventId) break;
-                var signalResumedEvent = historyEvent.WorkflowItemSignalledEvent();
-                if(signalResumedEvent == null) continue;
-                if(signalResumedEvent.IsFor(this))
-                    _resumedSignals.Add(signalResumedEvent.SignalName);
+
+                if (historyEvent.IsWorkflowItemSignalledEvent())
+                {
+                    var signalResumedEvent = historyEvent.WorkflowItemSignalledEvent();
+                    if (signalResumedEvent.IsFor(this))
+                        _signalState.RecordSignal(signalResumedEvent.SignalName);
+                }
+
+                if (historyEvent.IsWorkflowItemSignalTimedoutEvent())
+                {
+                    var signalTimedoutEvent = historyEvent.WorkflowItemSignalTimedoutEvent();
+                    if (signalTimedoutEvent.IsFor(this))
+                        _signalState.RecordTimedout(signalTimedoutEvent.Reason);
+                }
             }
         }
         public long TriggerEventId => _data.TriggerEventId;
-        public IEnumerable<string> WaitingSignals
-        {
-            get
-            {
-                if (_data.WaitType == SignalWaitType.Any)
-                    return _resumedSignals.Any() ? Enumerable.Empty<string>() : _data.SignalNames;
-                return _data.SignalNames.Except(_resumedSignals, StringComparer.OrdinalIgnoreCase);
-            }
-        }
-        public bool IsExpectingSignals => WaitingSignals.Any();
+        public IEnumerable<string> WaitingSignals => _signalState.WaitingSignals;
+
+        public bool IsExpectingSignals => _signalState.IsExpectingSignals;
         public bool IsWaitingForSignal(string signalName) =>
             WaitingSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
 
         public WorkflowDecision RecordSignal(string signalName, long signalEventId)
         {
-            _resumedSignals.Add(signalName);
+            _signalState.RecordSignal(signalName);
             SignalReceived?.Invoke(this, signalName);
             return new WorkflowItemSignalledDecision(ScheduleId.Raw(_data.ScheduleId), _data.TriggerEventId, signalName, signalEventId);
         }
 
-        public bool HasReceivedSignal(string signalName)
+        public bool HasReceivedSignal(string signalName) => _signalState.HasReceivedSignal(signalName);
+
+
+        public WorkflowAction NextAction(WorkflowItem workflowItem) => _signalState.NextAction(workflowItem);
+
+
+        public WorkflowDecision RecordTimedout(string reason) => _signalState.RecordTimedout(reason);
+
+        public bool IsTimedout(string signalName) => _signalState.IsTimedout(signalName);
+        
+
+
+        private abstract class SignalState
         {
-            return _resumedSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
+            protected readonly List<string> ResumedSignals = new List<string>();
+
+            public bool HasReceivedSignal(string signalName)
+            {
+                return ResumedSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
+            }
+
+            public abstract IEnumerable<string> WaitingSignals { get; }
+            public bool IsExpectingSignals => WaitingSignals.Any();
+
+            public abstract WorkflowAction NextAction(WorkflowItem workflowItem);
+            public abstract WorkflowDecision RecordTimedout(string reason);
+            public abstract void RecordSignal(string signalName);
+            public abstract bool IsTimedout(string signalName);
+
+        }
+        private class WaitingForSignalState : SignalState
+        {
+            private readonly WaitForSignalsEvent _waitForSignalsEvent;
+            private readonly WaitForSignalData _data;
+
+            public WaitingForSignalState(WaitForSignalsEvent waitForSignalsEvent)
+            {
+                _waitForSignalsEvent = waitForSignalsEvent;
+                _data = waitForSignalsEvent._data;
+            }
+
+            public override IEnumerable<string> WaitingSignals
+            {
+                get
+                {
+                    if (_data.WaitType == SignalWaitType.Any)
+                        return ResumedSignals.Any() ? Enumerable.Empty<string>() : _data.SignalNames;
+                    return _data.SignalNames.Except(ResumedSignals, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+
+            public override WorkflowDecision RecordTimedout(string reason)
+            {
+                //TODO: Write test to ensure it works fine when it is already timedout.
+                if (!IsExpectingSignals) throw new InvalidOperationException("Can't timedout non-active wait for signal event.");
+                var timedoutSignals = WaitingSignals.ToList();
+                _waitForSignalsEvent._signalState = new SignalTimedoutState(timedoutSignals);
+                return new SignalsTimedoutDecision(_waitForSignalsEvent.ScheduleId, _waitForSignalsEvent.TriggerEventId, WaitingSignals.ToArray(), reason);
+            }
+
+            public override void RecordSignal(string signalName)
+            {
+                ResumedSignals.Add(signalName);
+            }
+
+            public override bool IsTimedout(string signalName) => false;
+           
+
+            public override WorkflowAction NextAction(WorkflowItem workflowItem)
+            {
+                if (_data.NextAction == SignalNextAction.Continue) return WorkflowAction.ContinueWorkflow(workflowItem);
+                return WorkflowAction.Schedule(workflowItem);
+            }
         }
 
-        public WorkflowAction NextAction(WorkflowItem workflowItem)
+        private class SignalTimedoutState : SignalState
         {
-            if (_data.NextAction == SignalNextAction.Continue) return WorkflowAction.ContinueWorkflow(workflowItem);
-            return WorkflowAction.Schedule(workflowItem);
-        }
+            private readonly List<string> _timedoutSignals;
 
-        public WorkflowDecision RecordTimedout(string reason)
-        {
-            //TODO: Write test to ensure it works fine when it is already timedout.
-            if(!IsExpectingSignals) throw new InvalidOperationException("Can't timedout non-active wait for signal event.");
-            _timedoutSignals = WaitingSignals.ToList();
-            return new SignalsTimedoutDecision(ScheduleId, TriggerEventId, WaitingSignals.ToArray(), reason);
-        }
+            public SignalTimedoutState(List<string> timedoutSignals)
+            {
+                _timedoutSignals = timedoutSignals;
+            }
 
-        public bool IsTimedout(string signalName)
-        {
-            return _timedoutSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
+            public override bool IsTimedout(string signalName)
+            => _timedoutSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
+
+            public override IEnumerable<string> WaitingSignals => Enumerable.Empty<string>();
+
+            public override WorkflowAction NextAction(WorkflowItem workflowItem)
+            {
+                return WorkflowAction.ContinueWorkflow(workflowItem);
+            }
+
+            public override WorkflowDecision RecordTimedout(string reason)
+            {
+                throw new InvalidOperationException("Can't record timedout when the signal is already timedout.");
+            }
+
+            public override void RecordSignal(string signalName)
+            {
+                throw new InvalidOperationException("Can't record signal when it is timedout.");
+            }
         }
     }
 }

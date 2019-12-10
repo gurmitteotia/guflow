@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
 {
+    [TestFixture]
     public class WaitForSignalActionWithTimeoutTests
     {
         private HistoryEventsBuilder _builder;
@@ -84,21 +85,18 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, completedEventId,new[] {"Confirmed"}, SignalWaitType.Any));
             _builder.AddProcessedEvents(_graphBuilder.TimerFiredGraph(_confirmEmailId, TimeSpan.FromHours(2),
                 TimerType.SignalTimer, completedEventId));
-            _builder.AddProcessedEvents()
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalTimedoutEvent(_confirmEmailId, completedEventId, new[]{"Confirmed"}));
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", "input", DateTime.UtcNow));
             _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
             var workflow = new UserActivateWorkflow();
 
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            var lambdaCompletedEventId = completedEventId;
-
-            Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitForSignal(_confirmEmailId, lambdaCompletedEventId, SignalWaitType.Any, SignalNextAction.Continue, "Confirmed");
-            decisions[1].AssertSignalTimer(_confirmEmailId, lambdaCompletedEventId, TimeSpan.FromHours(1));
+            Assert.That(decisions, Is.Empty);
         }
 
         [Test]
-        public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_together_and_signal_after_timeout()
+        public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_together_but_signal_comes_after_timeout()
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp: DateTime.UtcNow.AddHours(-4));
             _builder.AddNewEvents(graph);

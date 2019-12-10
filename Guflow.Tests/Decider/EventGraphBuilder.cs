@@ -1519,6 +1519,28 @@ namespace Guflow.Tests.Decider
         }
 
 
+        public HistoryEvent WorkflowItemSignalTimedoutEvent(ScheduleId scheduleId, long triggerEventId, string[] timedoutSignals, string reason="")
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            var details = new SignalsTimedoutDetails()
+            {
+                ScheduleId = scheduleId.ToString(),
+                TriggerEventId = triggerEventId,
+                TimedoutSignalNames = timedoutSignals,
+                Reason = reason
+            };
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.MarkerRecorded,
+                MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
+                {
+                    MarkerName = InternalMarkerNames.WorkflowItemSignalsTimedout,
+                    Details = details.ToJson()
+                }
+            };
+        }
+
         public HistoryEvent DecisionStartedEvent(DateTime eventTimeStamp)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);

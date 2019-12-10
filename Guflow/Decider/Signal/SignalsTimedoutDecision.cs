@@ -7,7 +7,7 @@ namespace Guflow.Decider
     {
         public string ScheduleId;
         public long TriggerEventId;
-        public string[] SignalNames;
+        public string[] TimedoutSignalNames;
         public string Reason;
     }
     internal sealed class SignalsTimedoutDecision : WorkflowDecision
@@ -35,7 +35,7 @@ namespace Guflow.Decider
             {
                 ScheduleId = _scheduleId.ToString(),
                 TriggerEventId = _signalTriggerEventId,
-                SignalNames = _timedoutSignals,
+                TimedoutSignalNames = _timedoutSignals,
                 Reason = _reason
             };
             var attr = new RecordMarkerDecisionAttributes()
