@@ -233,7 +233,7 @@ namespace Guflow.Decider
                 var waitForSignalEvent = WaitForSignalsEvent(timerFiredEvent.SignalTriggerEventId);
                 if (waitForSignalEvent.IsExpectingSignals)
                 {
-                    var signalTimedoutDecision = waitForSignalEvent.RecordTimedout(reason: "TimerFired");
+                    var signalTimedoutDecision = waitForSignalEvent.RecordTimedout(timerFiredEvent);
                     return WorkflowAction.Custom(signalTimedoutDecision) + WorkflowAction.ContinueWorkflow(this);
                 }
             }

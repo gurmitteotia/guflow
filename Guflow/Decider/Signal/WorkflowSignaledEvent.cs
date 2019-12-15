@@ -48,7 +48,9 @@ namespace Guflow.Decider
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
         {
-            return defaultActions.ResumeOnSignal(SignalName);
+            return defaultActions.ResumeOnSignal(this);
         }
+
+        internal override bool CanTriggerSignalTimeout => true;
     }
 }

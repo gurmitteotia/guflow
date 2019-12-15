@@ -58,9 +58,9 @@ namespace Guflow.Decider
         /// Resume the execution after this workflow item, if it was waiting for given signal. Throws <see cref="InvalidOperationException"/> if this workflow item is not
         /// waiting for given signal.
         /// </summary>
-        /// <param name="signalName"></param>
+        /// <param name="signal"></param>
         /// <returns></returns>
-        WorkflowAction Resume(string signalName);
+        WorkflowAction Resume(WorkflowSignaledEvent signal);
 
         /// <summary>
         /// Returns true if this workflow item has received the given signal.

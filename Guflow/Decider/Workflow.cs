@@ -251,11 +251,11 @@ namespace Guflow.Decider
             return Ignore;
         }
 
-        WorkflowAction IWorkflowDefaultActions.ResumeOnSignal(string signalName)
+        WorkflowAction IWorkflowDefaultActions.ResumeOnSignal(WorkflowSignaledEvent signal)
         {
-            var item = WaitingItem(signalName);
+            var item = WaitingItem(signal.SignalName);
             if (item == null) return Ignore;
-            return item.Resume(signalName);
+            return item.Resume(signal);
         }
         internal void OnCompleted(string workflowId, string workflowRunId, string result)
         {
@@ -735,10 +735,10 @@ namespace Guflow.Decider
 
         IEnumerable<WorkflowItem> IWorkflow.GetChildernOf(WorkflowItem workflowItem)=> _allWorkflowItems.Childeren(workflowItem);
         WorkflowItem IWorkflow.WorkflowItem(Identity identity)=> _allWorkflowItems.WorkflowItem(identity);
-        WaitForSignalsEvent IWorkflow.TimedoutEvent(TimerFiredEvent timerFiredEvent)
+        WaitForSignalsEvent IWorkflow.TimedoutEventTriggerBy(WorkflowEvent workflowEvent)
         {
-            var workflowItem = _allWorkflowItems.WorkflowItem(timerFiredEvent);
-            return workflowItem.WaitForSignalsEvent(timerFiredEvent.SignalTriggerEventId);
+            IWorkflow workflow = this;
+            return workflow.WaitForSignalsEvents.FirstOrDefault(workflowEvent.EventId);
         }
 
         ChildWorkflowItem IWorkflow.ChildWorkflowItem(Identity identity) =>

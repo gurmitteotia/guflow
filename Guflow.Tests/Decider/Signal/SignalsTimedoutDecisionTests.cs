@@ -13,24 +13,24 @@ namespace Guflow.Tests.Decider
         {
             var id1 = Identity.Lambda("l1").ScheduleId();
             var id2 = Identity.Lambda("l2").ScheduleId();
-            Assert.IsTrue(new SignalsTimedoutDecision(id1, 10, new []{"signal1"}, "TimerFired")
-                .Equals(new SignalsTimedoutDecision(id1, 10, new[] { "signal2" }, "TimerFired")));
+            Assert.IsTrue(new WorkflowItemSignalsTimedoutDecision(id1, 10, new []{"signal1"}, 1)
+                .Equals(new WorkflowItemSignalsTimedoutDecision(id1, 10, new[] { "signal2" }, 2)));
 
-            Assert.IsTrue(new SignalsTimedoutDecision(id1, 10, new[] { "signal1" }, "TimerFired")
-                .Equals(new SignalsTimedoutDecision(id1, 10, new[] { "signal1" }, "Timedout")));
+            Assert.IsTrue(new WorkflowItemSignalsTimedoutDecision(id1, 10, new[] { "signal1" }, 1)
+                .Equals(new WorkflowItemSignalsTimedoutDecision(id1, 10, new[] { "signal1" }, 1)));
 
-            Assert.IsFalse(new SignalsTimedoutDecision(id1, 10, new[] { "signal1" }, "TimerFired")
-                .Equals(new SignalsTimedoutDecision(id1, 11, new[] { "signal1" }, "TimerFired")));
+            Assert.IsFalse(new WorkflowItemSignalsTimedoutDecision(id1, 10, new[] { "signal1" }, 1)
+                .Equals(new WorkflowItemSignalsTimedoutDecision(id1, 11, new[] { "signal1" }, 1)));
 
-            Assert.IsFalse(new SignalsTimedoutDecision(id1, 10, new[] { "signal1" }, "TimerFired")
-                .Equals(new SignalsTimedoutDecision(id2, 10, new[] { "signal1" }, "TimerFired")));
+            Assert.IsFalse(new WorkflowItemSignalsTimedoutDecision(id1, 10, new[] { "signal1" }, 1)
+                .Equals(new WorkflowItemSignalsTimedoutDecision(id2, 10, new[] { "signal1" }, 1)));
         }
 
         [Test]
         public void SWF_decision_is_a_record_marker_decision()
         {
             var id = Identity.Lambda("l1").ScheduleId();
-            var decision = new SignalsTimedoutDecision(id, 10, new[] {"signal1"}, "TimerFired");
+            var decision = new WorkflowItemSignalsTimedoutDecision(id, 10, new[] {"signal1"}, 2);
 
             var swfDecision = decision.SwfDecision();
 
@@ -40,8 +40,8 @@ namespace Guflow.Tests.Decider
             var data = attr.Details.AsDynamic();
             Assert.That((string)data.ScheduleId, Is.EqualTo(id.ToString()));
             Assert.That((long)data.TriggerEventId, Is.EqualTo(10));
-            Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(new[] { "signal1" }));
-            Assert.That((string)data.Reason, Is.EqualTo("TimerFired"));
+            Assert.That(data.TimedoutSignalNames.ToObject<string[]>(), Is.EqualTo(new[] { "signal1" }));
+            Assert.That((long)data.TimeoutTriggerEventId, Is.EqualTo(2));
         }
     }
 }

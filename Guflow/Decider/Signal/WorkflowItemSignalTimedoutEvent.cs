@@ -13,7 +13,7 @@ namespace Guflow.Decider
             ScheduleId = ScheduleId.Raw(_details.ScheduleId);
         }
 
-        public string Reason => _details.Reason;
+        public long TimeoutTriggerEventId => _details.TimeoutTriggerEventId;
         public IEnumerable<string> TimedoutTimedoutSignals => _details.TimedoutSignalNames;
         public bool IsFor(WaitForSignalsEvent @event)
         {

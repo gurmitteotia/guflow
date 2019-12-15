@@ -27,12 +27,13 @@ namespace Guflow.Decider
 
 
         /// <summary>
-        /// Return true if the current execution is triggered by specific signal and specific data.
+        /// Return true if the current execution is triggered by the specific signal and specific data.
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
         public bool IsTriggered(Func<string, bool> data)
         {
+            if (IsTimedout()) return false;
             var signaledEvent = _workflow.CurrentlyExecutingEvent as WorkflowSignaledEvent;
             if (signaledEvent == null) return false;
             return string.Equals(signaledEvent.SignalName, _signalName, StringComparison.OrdinalIgnoreCase) &&
@@ -40,7 +41,7 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Returns true if the specific signal is received by this workflow. It will search entire workflow execution history using case insensitive approach.
+        /// Returns true if the specific signal is ever received by this workflow. It will search entire workflow execution history using case insensitive approach.
         /// </summary>
         /// <returns></returns>
         public bool IsReceived() => IsReceived(d => true);
@@ -67,11 +68,10 @@ namespace Guflow.Decider
         /// <returns></returns>
         public bool IsTimedout()
         {
-            var timerFiredEvent = _workflow.CurrentlyExecutingEvent as TimerFiredEvent;
-            if (timerFiredEvent == null|| timerFiredEvent.TimerType!=TimerType.SignalTimer) return false;
-
-            var signaledEvent = _workflow.TimedoutEvent(timerFiredEvent);
-            return signaledEvent.IsTimedout(_signalName);
+            var currentEvent = _workflow.CurrentlyExecutingEvent;
+            if (!currentEvent.CanTriggerSignalTimeout) return false;
+            var signaledEvent = _workflow.TimedoutEventTriggerBy(currentEvent);
+            return signaledEvent!=null && signaledEvent.IsTimedout(_signalName);
         }
     }
 }

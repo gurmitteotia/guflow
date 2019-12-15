@@ -27,6 +27,8 @@ namespace Guflow.Decider
             throw new NotSupportedException($"DefaultAction is not supported {this.GetType().Name}.");
         }
 
+        internal virtual bool CanTriggerSignalTimeout => false;
+
         internal long EventId => _historyEvent.EventId;
         internal DateTime Timestamp => _historyEvent.EventTimestamp;
         public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();

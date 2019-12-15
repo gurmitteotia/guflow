@@ -27,7 +27,8 @@ namespace Guflow.Decider
                 TriggerEventId = itemEvent.EventId,
                 WaitType = waitType,
                 SignalNames = signalNames,
-                NextAction = SignalNextAction.Continue
+                NextAction = SignalNextAction.Continue,
+                TriggerEventCompletionDate = itemEvent.Timestamp
             };
         }
 
@@ -91,6 +92,7 @@ namespace Guflow.Decider
         public WorkflowItemWaitAction For(TimeSpan timeout)
         {
             _timerWait = timeout;
+            _data.Timeout = timeout;
             return this;
         }
 

@@ -83,9 +83,10 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(graph);
             var completedEventId = graph.First().EventId;
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, completedEventId,new[] {"Confirmed"}, SignalWaitType.Any));
-            _builder.AddProcessedEvents(_graphBuilder.TimerFiredGraph(_confirmEmailId, TimeSpan.FromHours(2),
-                TimerType.SignalTimer, completedEventId));
-            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalTimedoutEvent(_confirmEmailId, completedEventId, new[]{"Confirmed"}));
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(_confirmEmailId, TimeSpan.FromHours(2),
+                TimerType.SignalTimer, completedEventId);
+            _builder.AddProcessedEvents(timerFiredGraph);
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalTimedoutEvent(_confirmEmailId, completedEventId, new[]{"Confirmed"}, timerFiredGraph.First().EventId));
             _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", "input", DateTime.UtcNow));
             _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
             var workflow = new UserActivateWorkflow();
@@ -98,7 +99,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_together_but_signal_comes_after_timeout()
         {
-            var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp: DateTime.UtcNow.AddHours(-4));
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result",
+                completedStamp: DateTime.UtcNow.AddHours(-4));
             _builder.AddNewEvents(graph);
             var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "", DateTime.UtcNow.AddHours(-1));
             _builder.AddNewEvents(s);
@@ -109,9 +111,9 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions.Length, Is.EqualTo(3));
 
             var triggerEventId = graph.First().EventId;
-            decisions[0].AssertWaitForSignal(_confirmEmailId, triggerEventId, SignalWaitType.Any, SignalNextAction.Continue, "Confirmed");
+            decisions[0].AssertWaitForSignal(_confirmEmailId, triggerEventId, SignalWaitType.Any,SignalNextAction.Continue, "Confirmed");
             Assert.That(decisions[1], Is.EqualTo(new ScheduleLambdaDecision(_blockAccountId, "")));
-            Assert.That(decisions[2], Is.EqualTo(new WorkflowItemSignalledDecision(_confirmEmailId, triggerEventId, "Confirmed", s.EventId)));
+            decisions[2].AssertSignalTimedout(_confirmEmailId, triggerEventId, new []{"Confirmed"}, s.EventId);
         }
 
         private class UserActivateWorkflow : Workflow

@@ -163,11 +163,12 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new ChildWorkflow();
             _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
-            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(Identity.New(WorkflowName,WorkflowVersion).ScheduleId(), _fireAfter, TimerType.Reschedule).ToArray());
+            var scheduleId = Identity.New(WorkflowName,WorkflowVersion).ScheduleId(ParentWorkflowRunId);
+            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(scheduleId, _fireAfter, TimerType.Reschedule).ToArray());
 
             var workflowAction = workflow.Decisions(_builder.Result());
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(), "input") }));
+            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(scheduleId, "input") }));
         }
 
         [Test]
@@ -188,16 +189,15 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(lambdaId, signalTriggerEventId,new[] {"Signal1"}, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(lambdaId, TimeSpan.FromHours(1),TimerType.SignalTimer, signalTriggerEventId));
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(lambdaId, TimeSpan.FromHours(1),TimerType.SignalTimer, signalTriggerEventId);
+            _builder.AddNewEvents(timerFiredGraph);
 
-            var decisions = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
             var workflowId = Identity.New(WorkflowName, WorkflowVersion).ScheduleId(ParentWorkflowRunId);
-            Assert.That(decisions, Is.EqualTo(new WorkflowDecision[]
-            {
-                new SignalsTimedoutDecision(lambdaId, signalTriggerEventId,new []{"Signal1"}, "TimerFired"),
-                new ScheduleChildWorkflowDecision(workflowId, "input"),
-            }));
+            Assert.That(decisions.Count(), Is.EqualTo(2));
+            decisions[0].AssertSignalTimedout(lambdaId, signalTriggerEventId, new[] { "Signal1" }, timerFiredGraph.First().EventId);
+            Assert.That(decisions[1], Is.EqualTo(new ScheduleChildWorkflowDecision(workflowId, "input")));
         }
 
         private TimerFiredEvent CreateTimerFiredEvent(Identity identity, TimeSpan fireAfter)

@@ -40,7 +40,7 @@ namespace Guflow.Decider
                 {
                     var signalTimedoutEvent = historyEvent.WorkflowItemSignalTimedoutEvent();
                     if (signalTimedoutEvent.IsFor(this))
-                        _signalState.RecordTimedout(signalTimedoutEvent.Reason);
+                        _signalState.RecordTimedout(signalTimedoutEvent.TimeoutTriggerEventId);
                 }
             }
         }
@@ -51,11 +51,11 @@ namespace Guflow.Decider
         public bool IsWaitingForSignal(string signalName) =>
             WaitingSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
 
-        public WorkflowDecision RecordSignal(string signalName, long signalEventId)
+        public WorkflowDecision RecordSignal(WorkflowSignaledEvent signal)
         {
-            _signalState.RecordSignal(signalName);
-            SignalReceived?.Invoke(this, signalName);
-            return new WorkflowItemSignalledDecision(ScheduleId.Raw(_data.ScheduleId), _data.TriggerEventId, signalName, signalEventId);
+            _signalState.RecordSignal(signal.SignalName);
+            SignalReceived?.Invoke(this, signal.SignalName);
+            return new WorkflowItemSignalledDecision(ScheduleId.Raw(_data.ScheduleId), _data.TriggerEventId, signal.SignalName, signal.EventId);
         }
 
         public bool HasReceivedSignal(string signalName) => _signalState.HasReceivedSignal(signalName);
@@ -64,11 +64,19 @@ namespace Guflow.Decider
         public WorkflowAction NextAction(WorkflowItem workflowItem) => _signalState.NextAction(workflowItem);
 
 
-        public WorkflowDecision RecordTimedout(string reason) => _signalState.RecordTimedout(reason);
+        public WorkflowDecision RecordTimedout(WorkflowEvent timeoutEvent) => _signalState.RecordTimedout(timeoutEvent.EventId);
 
         public bool IsTimedout(string signalName) => _signalState.IsTimedout(signalName);
-        
 
+
+        public bool HasTimedout(WorkflowSignaledEvent signal)
+        {
+            return _signalState.HasTimedout(signal);
+        }
+
+        public bool HasTimedoutTriggerId(long timeoutTriggerEventId) =>
+            _signalState.HasTimedoutTriggerId(timeoutTriggerEventId);
+       
 
         private abstract class SignalState
         {
@@ -83,11 +91,13 @@ namespace Guflow.Decider
             public bool IsExpectingSignals => WaitingSignals.Any();
 
             public abstract WorkflowAction NextAction(WorkflowItem workflowItem);
-            public abstract WorkflowDecision RecordTimedout(string reason);
+            public abstract WorkflowDecision RecordTimedout(long timeoutTriggerId);
             public abstract void RecordSignal(string signalName);
             public abstract bool IsTimedout(string signalName);
-
+            public abstract bool HasTimedout(WorkflowSignaledEvent signal);
+            public abstract bool HasTimedoutTriggerId(long timeoutTriggerEventId);
         }
+
         private class WaitingForSignalState : SignalState
         {
             private readonly WaitForSignalsEvent _waitForSignalsEvent;
@@ -109,13 +119,13 @@ namespace Guflow.Decider
                 }
             }
 
-            public override WorkflowDecision RecordTimedout(string reason)
+            public override WorkflowDecision RecordTimedout(long timeoutTriggerId)
             {
                 //TODO: Write test to ensure it works fine when it is already timedout.
                 if (!IsExpectingSignals) throw new InvalidOperationException("Can't timedout non-active wait for signal event.");
                 var timedoutSignals = WaitingSignals.ToList();
-                _waitForSignalsEvent._signalState = new SignalTimedoutState(timedoutSignals);
-                return new SignalsTimedoutDecision(_waitForSignalsEvent.ScheduleId, _waitForSignalsEvent.TriggerEventId, WaitingSignals.ToArray(), reason);
+                _waitForSignalsEvent._signalState = new SignalTimedoutState(timedoutSignals, timeoutTriggerId);
+                return new WorkflowItemSignalsTimedoutDecision(_waitForSignalsEvent.ScheduleId, _waitForSignalsEvent.TriggerEventId, WaitingSignals.ToArray(), timeoutTriggerId);
             }
 
             public override void RecordSignal(string signalName)
@@ -124,7 +134,14 @@ namespace Guflow.Decider
             }
 
             public override bool IsTimedout(string signalName) => false;
-           
+            public override bool HasTimedout(WorkflowSignaledEvent signal)
+            {
+                if (!_data.TriggerEventCompletionDate.HasValue) return false;
+                if (!_data.Timeout.HasValue) return false;
+                return (signal.Timestamp - _data.TriggerEventCompletionDate.Value) >= _data.Timeout.Value;
+            }
+
+            public override bool HasTimedoutTriggerId(long timeoutTriggerEventId) => false;
 
             public override WorkflowAction NextAction(WorkflowItem workflowItem)
             {
@@ -136,15 +153,21 @@ namespace Guflow.Decider
         private class SignalTimedoutState : SignalState
         {
             private readonly List<string> _timedoutSignals;
+            private readonly long _timeoutTriggerId;
 
-            public SignalTimedoutState(List<string> timedoutSignals)
+            public SignalTimedoutState(List<string> timedoutSignals, long timeoutTriggerId)
             {
                 _timedoutSignals = timedoutSignals;
+                _timeoutTriggerId = timeoutTriggerId;
             }
 
             public override bool IsTimedout(string signalName)
             => _timedoutSignals.Contains(signalName, StringComparer.OrdinalIgnoreCase);
 
+            public override bool HasTimedout(WorkflowSignaledEvent signal) => true;
+
+            public override bool HasTimedoutTriggerId(long timeoutTriggerEventId) =>
+                _timeoutTriggerId == timeoutTriggerEventId;
             public override IEnumerable<string> WaitingSignals => Enumerable.Empty<string>();
 
             public override WorkflowAction NextAction(WorkflowItem workflowItem)
@@ -152,7 +175,7 @@ namespace Guflow.Decider
                 return WorkflowAction.ContinueWorkflow(workflowItem);
             }
 
-            public override WorkflowDecision RecordTimedout(string reason)
+            public override WorkflowDecision RecordTimedout(long timeoutTriggerId)
             {
                 throw new InvalidOperationException("Can't record timedout when the signal is already timedout.");
             }

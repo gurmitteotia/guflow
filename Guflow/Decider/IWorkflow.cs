@@ -7,7 +7,7 @@ namespace Guflow.Decider
     {
         IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem workflowItem);
         WorkflowItem WorkflowItem(Identity identity);
-        WaitForSignalsEvent TimedoutEvent(TimerFiredEvent timerFiredEvent);
+        WaitForSignalsEvent TimedoutEventTriggerBy(WorkflowEvent workflowEvent);
         ChildWorkflowItem ChildWorkflowItem(Identity identity);
         IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
         IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents { get; } 

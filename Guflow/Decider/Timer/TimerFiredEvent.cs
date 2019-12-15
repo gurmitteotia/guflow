@@ -21,5 +21,7 @@ namespace Guflow.Decider
         {
             return defaultActions.Continue(this);
         }
+
+        internal override bool CanTriggerSignalTimeout => SignalTriggerEventId != 0;
     }
 }

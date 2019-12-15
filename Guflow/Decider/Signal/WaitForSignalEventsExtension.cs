@@ -48,6 +48,20 @@ namespace Guflow.Decider
 
             return null;
         }
+
+        public static WaitForSignalsEvent FirstOrDefault(this IEnumerable<WaitForSignalsEvent> @events,
+            long timeoutTriggerEventId)
+        {
+            foreach(var waitEvent in @events)
+            {
+                if (waitEvent.HasTimedoutTriggerId(timeoutTriggerEventId))
+                {
+                    return waitEvent;
+                }
+            }
+
+            return null;
+        }
         private static bool IsFor(this WaitForSignalsEvent @event, WorkflowItem item, string signalName)
         {
             return @event.IsWaitingForSignal(signalName) && @event.IsFor(item);

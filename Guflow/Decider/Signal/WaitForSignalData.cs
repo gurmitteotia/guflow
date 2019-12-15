@@ -1,4 +1,6 @@
-﻿namespace Guflow.Decider
+﻿using System;
+
+namespace Guflow.Decider
 {
     internal class WaitForSignalData
     {
@@ -7,6 +9,8 @@
         public string[] SignalNames;
         public SignalWaitType WaitType;
         public SignalNextAction NextAction;
+        public DateTime? TriggerEventCompletionDate;
+        public TimeSpan? Timeout;
     }
 
     internal enum SignalWaitType

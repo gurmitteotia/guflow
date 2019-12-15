@@ -8,9 +8,9 @@ namespace Guflow.Decider
         public string ScheduleId;
         public long TriggerEventId;
         public string[] TimedoutSignalNames;
-        public string Reason;
+        public long TimeoutTriggerEventId;
     }
-    internal sealed class SignalsTimedoutDecision : WorkflowDecision
+    internal sealed class WorkflowItemSignalsTimedoutDecision : WorkflowDecision
     {
         private readonly ScheduleId _scheduleId;
 
@@ -18,15 +18,15 @@ namespace Guflow.Decider
 
         private readonly string[] _timedoutSignals;
 
-        private readonly string _reason;
+        private readonly long _timeoutTriggerId;
 
-        public SignalsTimedoutDecision(ScheduleId scheduleId, long signalTriggerEventId, string[] timedoutSignals, string reason)
+        public WorkflowItemSignalsTimedoutDecision(ScheduleId scheduleId, long signalTriggerEventId, string[] timedoutSignals, long timeoutTriggerId)
             : base(false,false)
         {
             _scheduleId = scheduleId;
             _signalTriggerEventId = signalTriggerEventId;
             _timedoutSignals = timedoutSignals;
-            _reason = reason;
+            _timeoutTriggerId = timeoutTriggerId;
         }
 
         internal override Decision SwfDecision()
@@ -36,7 +36,7 @@ namespace Guflow.Decider
                 ScheduleId = _scheduleId.ToString(),
                 TriggerEventId = _signalTriggerEventId,
                 TimedoutSignalNames = _timedoutSignals,
-                Reason = _reason
+                TimeoutTriggerEventId = _timeoutTriggerId
             };
             var attr = new RecordMarkerDecisionAttributes()
             {
@@ -51,14 +51,14 @@ namespace Guflow.Decider
         }
 
 
-        private bool Equals(SignalsTimedoutDecision other)
+        private bool Equals(WorkflowItemSignalsTimedoutDecision other)
         {
             return _scheduleId.Equals(other._scheduleId) && _signalTriggerEventId == other._signalTriggerEventId;
         }
 
         public override bool Equals(object obj)
         {
-            return ReferenceEquals(this, obj) || obj is SignalsTimedoutDecision other && Equals(other);
+            return ReferenceEquals(this, obj) || obj is WorkflowItemSignalsTimedoutDecision other && Equals(other);
         }
 
         public override int GetHashCode()

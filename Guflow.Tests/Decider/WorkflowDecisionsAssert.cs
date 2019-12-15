@@ -45,5 +45,14 @@ namespace Guflow.Tests.Decider
             Assert.That((SignalWaitType)data.WaitType, Is.EqualTo(waitType));
             Assert.That((SignalNextAction)data.NextAction, Is.EqualTo(nextAction));
         }
+
+        public static void AssertSignalTimedout(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId, string[] signalNames, long timeoutTriggerId)
+        {
+            Assert.That(decision, Is.EqualTo(new WorkflowItemSignalsTimedoutDecision(scheduleId, triggerEventId, signalNames, timeoutTriggerId)));
+            var swfDecision = decision.SwfDecision();
+            var data = swfDecision.RecordMarkerDecisionAttributes.Details.AsDynamic();
+            Assert.That(data.TimedoutSignalNames.ToObject<string[]>(), Is.EqualTo(signalNames));
+            Assert.That((long)data.TimeoutTriggerEventId, Is.EqualTo(timeoutTriggerId));
+        }
     }
 }

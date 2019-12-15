@@ -1519,7 +1519,7 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public HistoryEvent WorkflowItemSignalTimedoutEvent(ScheduleId scheduleId, long triggerEventId, string[] timedoutSignals, string reason="")
+        public HistoryEvent WorkflowItemSignalTimedoutEvent(ScheduleId scheduleId, long triggerEventId, string[] timedoutSignals, long timeoutTriggerId)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             var details = new SignalsTimedoutDetails()
@@ -1527,7 +1527,7 @@ namespace Guflow.Tests.Decider
                 ScheduleId = scheduleId.ToString(),
                 TriggerEventId = triggerEventId,
                 TimedoutSignalNames = timedoutSignals,
-                Reason = reason
+                TimeoutTriggerEventId = timeoutTriggerId
             };
             return new HistoryEvent
             {
