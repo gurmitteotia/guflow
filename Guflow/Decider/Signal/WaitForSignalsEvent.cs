@@ -13,6 +13,7 @@ namespace Guflow.Decider
     {
         private readonly WaitForSignalData _data;
         public event EventHandler<WaitForSignalsEvent, string> SignalReceived;
+        public event EventHandler<WaitForSignalsEvent> SignalTimedout;
         private SignalState _signalState;
         public WaitForSignalsEvent(HistoryEvent @event, IEnumerable<HistoryEvent> allEvents)
             : base(@event)
@@ -64,7 +65,12 @@ namespace Guflow.Decider
         public WorkflowAction NextAction(WorkflowItem workflowItem) => _signalState.NextAction(workflowItem);
 
 
-        public WorkflowDecision RecordTimedout(WorkflowEvent timeoutEvent) => _signalState.RecordTimedout(timeoutEvent.EventId);
+        public WorkflowDecision RecordTimedout(WorkflowEvent timeoutEvent)
+        {
+           var decision=  _signalState.RecordTimedout(timeoutEvent.EventId);
+           SignalTimedout?.Invoke(this, this);
+           return decision;
+        }
 
         public bool IsTimedout(string signalName) => _signalState.IsTimedout(signalName);
 

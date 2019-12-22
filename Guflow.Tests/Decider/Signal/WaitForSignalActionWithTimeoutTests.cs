@@ -25,7 +25,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Returns_the_timer_decision_and_decision_to_wait_for_a_signal()
+        public void Returns_the_timer_decision_and_decision_to_wait_for_a_signal_when_the_lambda_completed_event_is_processed_immediately()
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp:DateTime.UtcNow);
             _builder.AddNewEvents(graph);
@@ -77,7 +77,7 @@ namespace Guflow.Tests.Decider
 
 
         [Test]
-        public void Signal_is_ignored_when_it_come_after_timedout()
+        public void Signal_is_ignored_when_it_come_after_wait_is_timedout_by_signal_timer()
         {
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp: DateTime.UtcNow.AddHours(-4));
             _builder.AddProcessedEvents(graph);
@@ -97,10 +97,9 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Do_not_return_timer_decision_when_signal_and_lambda_completed_events_comes_together_but_signal_comes_after_timeout()
+        public void Mark_wait_as_timedout_and_do_not_return_signal_timer_decision_when_signal_and_lambda_completed_events_comes_together_but_signal_comes_after_timeout()
         {
-            var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result",
-                completedStamp: DateTime.UtcNow.AddHours(-4));
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp: DateTime.UtcNow.AddHours(-4));
             _builder.AddNewEvents(graph);
             var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "", DateTime.UtcNow.AddHours(-1));
             _builder.AddNewEvents(s);
@@ -115,6 +114,24 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions[1], Is.EqualTo(new ScheduleLambdaDecision(_blockAccountId, "")));
             decisions[2].AssertSignalTimedout(_confirmEmailId, triggerEventId, new []{"Confirmed"}, s.EventId);
         }
+
+        [Test]
+        public void Returns_the_timer_decision_to_fire_immediately_and_decision_to_wait_for_a_signal_when_lambda_completed_event_is_processed_after_timeout()
+        {
+            var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result", completedStamp: DateTime.UtcNow.AddHours(-4));
+            _builder.AddNewEvents(graph);
+            _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
+            var workflow = new UserActivateWorkflow();
+
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            var lambdaCompletedEventId = graph.First().EventId;
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            decisions[0].AssertWaitForSignal(_confirmEmailId, lambdaCompletedEventId, SignalWaitType.Any, SignalNextAction.Continue, "Confirmed");
+            decisions[1].AssertSignalTimer(_confirmEmailId, lambdaCompletedEventId, TimeSpan.FromHours(0));
+        }
+
 
         private class UserActivateWorkflow : Workflow
         {

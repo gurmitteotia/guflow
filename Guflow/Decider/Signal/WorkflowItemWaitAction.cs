@@ -42,7 +42,13 @@ namespace Guflow.Decider
             var historyEvent = SimulatedHistoryEvent();
             var @event = new WaitForSignalsEvent(historyEvent, Enumerable.Empty<HistoryEvent>());
             @event.SignalReceived += SignalReceived;
+            @event.SignalTimedout += SignalTimedout;
             return new[]{@event};
+        }
+
+        private void SignalTimedout(object sender, WaitForSignalsEvent e)
+        {
+            _timerWait = null;
         }
 
         private void SignalReceived(WaitForSignalsEvent sender, string args)
@@ -68,7 +74,7 @@ namespace Guflow.Decider
             if(_timerWait==null) return WorkflowDecision.Empty;
 
             var delay = historyEvents.ServerTimeUtc - _waitingEventTimeStamp;
-            if(delay > _timerWait.Value) return WorkflowDecision.Empty;
+            if(delay > _timerWait.Value) return ScheduleTimerDecision.SignalTimer(_scheduleId, _data.TriggerEventId, TimeSpan.Zero);
             var timeout = _timerWait.Value - delay;
             return ScheduleTimerDecision.SignalTimer(_scheduleId, _data.TriggerEventId, timeout);
         }
