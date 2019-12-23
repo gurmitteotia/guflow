@@ -391,22 +391,6 @@ namespace Guflow.Tests.Decider
 
             Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowCompletedEvent(completedEvent.First(), allEventsGraph)));
         }
-
-        [Test]
-        public void Last_event_is_cached()
-        {
-            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var completedEvent = _eventGraphBuilder.ChildWorkflowCompletedGraph(_scheduleIdentity, "runid", "input", "result").ToArray();
-            var allEventsGraph = completedEvent.Concat(failedEventGraph);
-            var childWorkflow = ChildWorkflow(allEventsGraph);
-
-            var lastEvent1 = childWorkflow.LastEvent();
-            var lastEvent2 = childWorkflow.LastEvent();
-
-            Assert.That(ReferenceEquals(lastEvent1, lastEvent2));
-        }
-
-
         [Test]
         public void Last_event_can_return_reschedule_timer_event()
         {

@@ -180,26 +180,6 @@ namespace Guflow.Tests.Decider
             Assert.Throws<IncompatibleWorkflowException>(()=> rescheduleTimer.Interpret(workflow));
         }
 
-        [Test]
-        public void Signal_is_timedout_if_timer_is_fired_before_receiving_the_signal()
-        {
-            var workflow = new WaitForSignalWorkflow();
-            var lambdaId = Identity.Lambda(LambdaName).ScheduleId();
-            var lg = _graphBuilder.LambdaCompletedEventGraph(lambdaId, "i", "r", TimeSpan.FromSeconds(1),DateTime.UtcNow.AddHours(-2));
-            _builder.AddProcessedEvents(lg);
-            var signalTriggerEventId = lg.First().EventId;
-            _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(lambdaId, signalTriggerEventId,new[] {"Signal1"}, SignalWaitType.Any));
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(lambdaId, TimeSpan.FromHours(1),TimerType.SignalTimer, signalTriggerEventId);
-            _builder.AddNewEvents(timerFiredGraph);
-
-            var decisions = workflow.Decisions(_builder.Result()).ToArray();
-
-            var workflowId = Identity.New(WorkflowName, WorkflowVersion).ScheduleId(ParentWorkflowRunId);
-            Assert.That(decisions.Count(), Is.EqualTo(2));
-            decisions[0].AssertSignalTimedout(lambdaId, signalTriggerEventId, new[] { "Signal1" }, timerFiredGraph.First().EventId);
-            Assert.That(decisions[1], Is.EqualTo(new ScheduleChildWorkflowDecision(workflowId, "input")));
-        }
-
         private TimerFiredEvent CreateTimerFiredEvent(Identity identity, TimeSpan fireAfter)
         {
             var timerFiredEventGraph = _graphBuilder.TimerFiredGraph(identity.ScheduleId(), fireAfter);
@@ -252,21 +232,6 @@ namespace Guflow.Tests.Decider
             public ChildWorkflow()
             {
                 ScheduleChildWorkflow(WorkflowName, WorkflowVersion);
-            }
-        }
-
-        private class WaitForSignalWorkflow : Workflow
-        {
-            public WaitForSignalWorkflow()
-            {
-                ScheduleLambda(LambdaName).OnCompletion(e => e.WaitForSignal("Signal1").For(TimeSpan.FromHours(1)));
-
-                ScheduleActivity(ActivityName, ActivityVersion, PositionalName).AfterLambda(LambdaName)
-                    .When(_ => Signal("Signal1").IsTriggered());
-
-                ScheduleChildWorkflow(WorkflowName, WorkflowVersion).AfterLambda(LambdaName)
-                    .When(_ => Signal("Signal1").IsTimedout());
-
             }
         }
     }

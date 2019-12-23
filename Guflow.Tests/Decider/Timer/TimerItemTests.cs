@@ -91,18 +91,6 @@ namespace Guflow.Tests.Decider
 
             Assert.That(latestEvent, Is.EqualTo(new TimerStartedEvent(eventGraph.First(),eventGraph)));
         }
-
-        [Test]
-        public void Last_event_is_cached()
-        {
-            var eventGraph = _graphBuilder.TimerStartedGraph(_timerIdentity.ScheduleId(), TimeSpan.FromSeconds(2));
-            var timerItem = CreateTimerItemFor(eventGraph);
-
-            var latestEvent = timerItem.LastEvent(true);
-
-            Assert.True(ReferenceEquals(latestEvent, timerItem.LastEvent(true)));
-        }
-
         [Test]
         public void Last_event_can_be_timer_fired_event()
         {

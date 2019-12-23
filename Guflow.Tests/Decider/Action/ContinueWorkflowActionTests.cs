@@ -72,8 +72,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_schedule_the_child_when_one_of_its_parent_activity_ignores_the_action_by_keeping_the_branch_active()
         {
+            _eventsBuilder.AddProcessedEvents(CompletedActivityEventGraph(_siblingActivityName, _siblingActivityVersion));
             _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion, _positionalName));
-            _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_siblingActivityName, _siblingActivityVersion));
             
             var workflow = new WorkflowWithAParentIgnoringCompleteEvent();
 
@@ -85,11 +85,11 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_schedule_the_child_when_one_of_its_parent_activity_is_active()
         {
-            _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion, _positionalName));
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
                 .ActivityScheduledGraph(Identity.New(_siblingActivityName, _siblingActivityVersion).ScheduleId())
                 .ToArray());
-
+            _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion, _positionalName));
+            
             var workflow = new WorkflowWithMultipleParents();
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());

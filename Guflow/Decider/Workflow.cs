@@ -16,7 +16,7 @@ namespace Guflow.Decider
         private IWorkflowHistoryEvents _currentWorkflowHistoryEvents;
         private readonly WorkflowEventMethods _workflowEventMethods;
         private WorkflowAction _startupAction;
-        private WorkflowEvent _currentExecutingEvent;
+        
         private WorkflowActions _generatedActions;
         protected Workflow()
         {
@@ -749,7 +749,7 @@ namespace Guflow.Decider
         {
             get
             {
-                var workflowItemEvent = _currentExecutingEvent as WorkflowItemEvent;
+                var workflowItemEvent = _currentWorkflowHistoryEvents.CurrentExecutingEvent as WorkflowItemEvent;
                 if (workflowItemEvent != null)
                     return _allWorkflowItems.WorkflowItem(workflowItemEvent);
 
@@ -776,7 +776,7 @@ namespace Guflow.Decider
             }
         }
 
-        WorkflowEvent IWorkflow.CurrentlyExecutingEvent => _currentExecutingEvent;
+        WorkflowEvent IWorkflow.CurrentlyExecutingEvent => _currentWorkflowHistoryEvents.CurrentExecutingEvent;
 
         internal WorkflowAction StartupAction => _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems));
 
@@ -838,26 +838,31 @@ namespace Guflow.Decider
         internal IEnumerable<WorkflowDecision> Decisions(IWorkflowHistoryEvents historyEvents)
         {
             _generatedActions = new WorkflowActions();
+            var decisions = new List<WorkflowDecision>();
             try
             {
                 _currentWorkflowHistoryEvents = historyEvents;
                 BeforeExecution();
                 foreach (var workflowEvent in historyEvents.NewEvents())
                 {
-                    _currentExecutingEvent = workflowEvent;
-                    _generatedActions.Add(workflowEvent.Interpret(this));
+                    _currentWorkflowHistoryEvents.CurrentExecutingEvent = workflowEvent;
+                    var action = workflowEvent.Interpret(this) ?? WorkflowAction.Empty;
+                    _generatedActions.Add(action);
+                    decisions.AddRange(action.Decisions(this));
+                    _currentWorkflowHistoryEvents.CurrentExecutingEvent = null;
                 }
-                return _generatedActions.CompatibleDecisions(this);
+
+                return decisions.Distinct().CompatibleDecisions(this).Where(d => d != WorkflowDecision.Empty).ToArray();
             }
             finally
             {   
-                //TODO: Following line I'm writing because probably I'm bit paranoid. I could not come up with test to write following line. Cleanup
-                //is handled very well before reaching this point. So this line may not be required. I will come back to again.
+                //Following line may not be required because clean up has handled before it comes here.
                 _allWorkflowItems.ResetContinueItems();
 
                 AfterExecution();
+                _currentWorkflowHistoryEvents.CurrentExecutingEvent = null;
                 _currentWorkflowHistoryEvents = null;
-                _currentExecutingEvent = null;
+
             }
         }
     }

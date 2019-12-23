@@ -639,13 +639,13 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public HistoryEvent WorkflowItemSignalledEvent(ScheduleId id, long eventId, string eventName)
+        public HistoryEvent WorkflowItemSignalledEvent(ScheduleId id, long triggerEventId, string eventName)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             var details = new WorkflowItemSignalledData()
             {
                 ScheduleId = id,
-                TriggerEventId = eventId,
+                TriggerEventId = triggerEventId,
                 SignalName = eventName,
             };
             return new HistoryEvent

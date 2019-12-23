@@ -173,20 +173,6 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Last_event_is_cached()
-        {
-            var eventGraph = _eventGraphBuilder.ActivityStartedGraph(_scheduleId, "id");
-            var workflowHistoryEvents = new WorkflowHistoryEvents(eventGraph);
-            _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(workflowHistoryEvents);
-            var activityItem = new ActivityItem(_activityIdentity, _workflow.Object);
-
-            var latestEvent = activityItem.LastEvent(true);
-            var latestEventCached = activityItem.LastEvent(true);
-
-            Assert.IsTrue(ReferenceEquals(latestEvent, latestEventCached));
-        }
-
-        [Test]
         public void Last_event_can_be_null()
         {
             var workflowHistoryEvents = new WorkflowHistoryEvents(_eventGraphBuilder.WorkflowStartedGraph());

@@ -6,7 +6,7 @@ using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
-    public abstract class WorkflowDecision
+    internal abstract class WorkflowDecision
     {
         private readonly bool _canCloseWorkflow;
         protected readonly bool Proposal;

@@ -351,15 +351,6 @@ namespace Guflow.Tests.Decider
 
             Assert.That(lastEvent, Is.EqualTo(new LambdaStartedEvent(started.First(), started)));
         }
-
-        [Test]
-        public void Last_event_is_cached()
-        {
-            var eventGraph = _builder.LambdaCompletedEventGraph(_scheduleId, "input", "result");
-            var lamdbaItem = CreateLambdaItem(eventGraph);
-
-            Assert.IsTrue(ReferenceEquals(lamdbaItem.LastEvent(true), lamdbaItem.LastEvent(true)));
-        }
         private LambdaItem CreateLambdaItem(IEnumerable<HistoryEvent> allEvents)
         {
             _workflow.SetupGet(w => w.WorkflowHistoryEvents).Returns(new WorkflowHistoryEvents(allEvents));

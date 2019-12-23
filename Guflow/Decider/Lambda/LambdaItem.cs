@@ -47,7 +47,7 @@ namespace Guflow.Decider
         {
             var lambdaEvent = WorkflowHistoryEvents.LastLambdaEvent(this);
             WorkflowItemEvent timerEvent = null;
-            if(includeRescheduleTimerEvents)
+            if (includeRescheduleTimerEvents)
                 timerEvent = WorkflowHistoryEvents.LastTimerEvent(_rescheduleTimer, true);
 
             if (lambdaEvent > timerEvent) return lambdaEvent;
@@ -58,7 +58,7 @@ namespace Guflow.Decider
         {
             var lambdaEvents = WorkflowHistoryEvents.AllLambdaEvents(this);
             var timerEvents = Enumerable.Empty<WorkflowItemEvent>();
-            if(includeRescheduleTimerEvents)
+            if (includeRescheduleTimerEvents)
                 timerEvents = WorkflowHistoryEvents.AllTimerEvents(_rescheduleTimer, true);
 
             return lambdaEvents.Concat(timerEvents).OrderByDescending(i => i, WorkflowEvent.IdComparer);
@@ -231,11 +231,10 @@ namespace Guflow.Decider
             if (timerFiredEvent.TimerType == TimerType.SignalTimer)
             {
                 var waitForSignalEvent = WaitForSignalsEvent(timerFiredEvent.SignalTriggerEventId);
-                if (waitForSignalEvent.IsExpectingSignals)
-                {
-                    var signalTimedoutDecision = waitForSignalEvent.RecordTimedout(timerFiredEvent);
-                    return WorkflowAction.Custom(signalTimedoutDecision) + WorkflowAction.ContinueWorkflow(this);
-                }
+                if (!waitForSignalEvent.IsExpectingSignals) return WorkflowAction.Empty;
+
+                var signalTimedoutDecision = waitForSignalEvent.RecordTimedout(timerFiredEvent);
+                return WorkflowAction.Custom(signalTimedoutDecision) + WorkflowAction.ContinueWorkflow(this);
             }
             throw new InvalidOperationException("Timer fired should be called only for Reschedule and SignalTimer.");
         }
