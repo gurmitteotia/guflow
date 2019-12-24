@@ -44,6 +44,21 @@ namespace Guflow.Tests.Decider
             Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(signalNames));
             Assert.That((SignalWaitType)data.WaitType, Is.EqualTo(waitType));
             Assert.That((SignalNextAction)data.NextAction, Is.EqualTo(nextAction));
+            Assert.That(((DateTime?)data.TriggerEventCompletionDate).HasValue, Is.False);
+            Assert.That(((DateTime?)data.Timeout).HasValue, Is.False);
+        }
+
+        public static void AssertWaitForSignal(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId,
+            SignalWaitType waitType, SignalNextAction nextAction, DateTime triggerDateTime, TimeSpan timeout, params string[] signalNames)
+        {
+            Assert.That(decision, Is.EqualTo(new WaitForSignalsDecision(new WaitForSignalData { ScheduleId = scheduleId, TriggerEventId = triggerEventId })));
+            var swfDecision = decision.SwfDecision();
+            var data = swfDecision.RecordMarkerDecisionAttributes.Details.AsDynamic();
+            Assert.That(data.SignalNames.ToObject<string[]>(), Is.EqualTo(signalNames));
+            Assert.That((SignalWaitType)data.WaitType, Is.EqualTo(waitType));
+            Assert.That((SignalNextAction)data.NextAction, Is.EqualTo(nextAction));
+            Assert.That(((DateTime?)data.TriggerEventCompletionDate).Value, Is.EqualTo(triggerDateTime));
+            Assert.That(((TimeSpan?)data.Timeout).Value, Is.EqualTo(timeout));
         }
 
         public static void AssertSignalTimedout(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId, string[] signalNames, long timeoutTriggerId)

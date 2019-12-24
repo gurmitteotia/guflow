@@ -616,7 +616,7 @@ namespace Guflow.Tests.Decider
         }
 
         public HistoryEvent WaitForSignalEvent(ScheduleId id, long eventId, string[] eventNames,
-            SignalWaitType waitType, SignalNextAction nextAction = SignalNextAction.Continue)
+            SignalWaitType waitType, SignalNextAction nextAction = SignalNextAction.Continue, DateTime? triggerTimestamp=null, TimeSpan? timeout=null)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             var details = new WaitForSignalData()
@@ -625,7 +625,9 @@ namespace Guflow.Tests.Decider
                 TriggerEventId = eventId,
                 WaitType = waitType,
                 SignalNames = eventNames,
-                NextAction = nextAction
+                NextAction = nextAction,
+                TriggerEventCompletionDate = triggerTimestamp,
+                Timeout = timeout
             };
             return new HistoryEvent
             {
