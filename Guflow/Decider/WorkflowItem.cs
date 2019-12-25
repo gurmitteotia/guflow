@@ -12,11 +12,14 @@ namespace Guflow.Decider
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
         protected readonly Identity Identity;
         private readonly Stack<WorkflowItem> _continueItems = new Stack<WorkflowItem>();
+        private ScheduleId _scheduleId = null;
+        private TimerItem _rescheduleTimer = null;
         protected WorkflowItem(Identity identity, IWorkflow workflow)
         {
             Identity = identity;
             Workflow = workflow;
         }
+
         public IEnumerable<IActivityItem> ParentActivities => _parentItems.OfType<IActivityItem>();
 
         public IEnumerable<ITimerItem> ParentTimers => _parentItems.OfType<ITimerItem>();
@@ -121,7 +124,7 @@ namespace Guflow.Decider
         public abstract IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen();
         public abstract IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout);
         public abstract IEnumerable<WorkflowDecision> CancelDecisions();
-        public abstract bool Has(ScheduleId id);
+        public virtual bool Has(ScheduleId id) => ScheduleId == id;
 
         public bool Has(Identity identity)
         {
@@ -165,6 +168,10 @@ namespace Guflow.Decider
         {
             return Children().SelectMany(c=>WorkflowBranch.ChildBranches(c, Workflow));
         }
+
+        protected virtual ScheduleId ScheduleId => _scheduleId??(_scheduleId=Identity.ScheduleId());
+        protected virtual TimerItem RescheduleTimer =>  _rescheduleTimer??(_rescheduleTimer=TimerItem.Reschedule(this, ScheduleId, Workflow));
+
         protected void AddParent(Identity identity)
         {
             var parentItem = Workflow.WorkflowItem(identity);
@@ -175,7 +182,6 @@ namespace Guflow.Decider
             _parentItems.Add(parentItem);
         }
         protected IWorkflowHistoryEvents WorkflowHistoryEvents => Workflow.WorkflowHistoryEvents;
-        protected TimerItem RescheduleTimer(ScheduleId identity) => TimerItem.Reschedule(this, identity, Workflow);
 
         protected IEnumerable<WorkflowDecision> WorkflowDecisionsOnFalseWhen(WorkflowAction action) =>
             action.WithTriggeredItem(this).Decisions(Workflow);

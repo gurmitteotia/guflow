@@ -26,9 +26,7 @@ namespace Guflow.Decider
         private Func<IChildWorkflowItem, IEnumerable<string>> _tags;
         private Func<IChildWorkflowItem, bool> _when;
         private Func<IChildWorkflowItem, WorkflowAction> _onWhenFalseAction;
-        private ScheduleId ScheduleId => Identity.ScheduleId(WorkflowHistoryEvents.WorkflowRunId);
-        private TimerItem RescheduleTimer => RescheduleTimer(ScheduleId);
-
+        
         public ChildWorkflowItem(Identity identity, IWorkflow workflow) : base(identity, workflow)
         {
             Initialize(workflow);
@@ -71,6 +69,7 @@ namespace Guflow.Decider
        
         public string Version => Identity.Version;
         public string PositionalName => Identity.PositionalName;
+        protected override ScheduleId ScheduleId=> Identity.ScheduleId(WorkflowHistoryEvents.WorkflowRunId);
 
         public override WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false)
         {
@@ -129,9 +128,6 @@ namespace Guflow.Decider
 
             return new[] { new CancelRequestWorkflowDecision(ScheduleId, (lastEvent as ChildWorkflowEvent)?.RunId), };
         }
-
-        public override bool Has(ScheduleId id) => ScheduleId == id;
-
         public IFluentChildWorkflowItem AfterTimer(string name)
         {
             Ensure.NotNullAndEmpty(name, nameof(name));
