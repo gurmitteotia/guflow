@@ -6,7 +6,7 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
-    internal sealed class ActivityItem : WorkflowItem, IFluentActivityItem, IActivityItem, ITimer, IActivity
+    internal sealed class ActivityItem : WorkflowItem, IFluentActivityItem, IActivityItem, IActivity
     {
         private Func<ActivityCompletedEvent, WorkflowAction> _onCompletionAction;
         private Func<ActivityFailedEvent, WorkflowAction> _onFailedAction;
@@ -186,22 +186,6 @@ namespace Guflow.Decider
             _timeoutsFunc = timeouts;
             return this;
         }
-        WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
-        {
-            ITimer timer = RescheduleTimer;
-            return timer.Fired(timerFiredEvent);
-        }
-        WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
-        {
-            ITimer timer = RescheduleTimer;
-            return timer.StartFailed(timerStartFailedEvent);
-        }
-        WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
-        {
-            ITimer timer = RescheduleTimer;
-            return timer.CancellationFailed(timerCancellationFailedEvent);
-        }
-
         WorkflowAction IActivity.Completed(ActivityCompletedEvent activityCompletedEvent)
         {
             return _onCompletionAction(activityCompletedEvent);

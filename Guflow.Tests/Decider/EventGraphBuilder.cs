@@ -14,7 +14,7 @@ namespace Guflow.Tests.Decider
     internal class EventGraphBuilder
     {
         private long _currentEventId = 0;
-        public IEnumerable<HistoryEvent> ActivityCompletedGraph(ScheduleId activityIdentity, string workerIdentity, string result, string input = "")
+        public IEnumerable<HistoryEvent> ActivityCompletedGraph(ScheduleId activityIdentity, string workerIdentity, string result, string input = "", DateTime? completedStamp=null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -27,7 +27,9 @@ namespace Guflow.Tests.Decider
                     Result = result,
                     StartedEventId = eventIds.EventId(EventIds.Started),
                     ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
-                }
+                },
+                EventTimestamp = completedStamp??DateTime.UtcNow
+                
             });
 
             historyEvents.Add(new HistoryEvent()

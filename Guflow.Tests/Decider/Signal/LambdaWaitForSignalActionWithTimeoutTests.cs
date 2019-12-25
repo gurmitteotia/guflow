@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace Guflow.Tests.Decider
 {
     [TestFixture]
-    public class WaitForSignalActionWithTimeoutTests
+    public class LambdaWaitForSignalActionWithTimeoutTests
     {
         private HistoryEventsBuilder _builder;
         private EventGraphBuilder _graphBuilder;

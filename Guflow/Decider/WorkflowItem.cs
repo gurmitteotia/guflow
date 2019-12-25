@@ -6,7 +6,7 @@ using Guflow.Properties;
 
 namespace Guflow.Decider
 {
-    internal abstract class WorkflowItem : IWorkflowItem
+    internal abstract class WorkflowItem : IWorkflowItem, ITimer
     {
         protected readonly IWorkflow Workflow;
         private readonly HashSet<WorkflowItem> _parentItems = new HashSet<WorkflowItem>();
@@ -219,5 +219,36 @@ namespace Guflow.Decider
         public void PushContinueItem(WorkflowItem item) => _continueItems.Push(item);
         public void PopContinueItem()=> _continueItems.Pop();
         public void ResetContinueItems() => _continueItems.Clear();
+
+        public virtual WorkflowAction Fired(TimerFiredEvent timerFiredEvent)
+        {
+            if (timerFiredEvent.TimerType == TimerType.Reschedule)
+            {
+                ITimer timer = RescheduleTimer;
+                return timer.Fired(timerFiredEvent);
+            }
+            if (timerFiredEvent.TimerType == TimerType.SignalTimer)
+            {
+                var waitForSignalEvent = WaitForSignalsEvent(timerFiredEvent.SignalTriggerEventId);
+                if (!waitForSignalEvent.IsExpectingSignals) return WorkflowAction.Empty;
+
+                var signalTimedoutDecision = waitForSignalEvent.RecordTimedout(timerFiredEvent);
+                return WorkflowAction.Custom(signalTimedoutDecision) + WorkflowAction.ContinueWorkflow(this);
+            }
+            throw new InvalidOperationException("Timer fired should be called only for Reschedule and SignalTimer.");
+        }
+
+        public virtual WorkflowAction StartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        {
+            ITimer timer = RescheduleTimer;
+            return timer.StartFailed(timerStartFailedEvent);
+        }
+
+
+        public virtual WorkflowAction CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        {
+            ITimer timer = RescheduleTimer;
+            return timer.CancellationFailed(timerCancellationFailedEvent);
+        }
     }
 }

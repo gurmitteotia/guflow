@@ -7,7 +7,7 @@ using Guflow.Worker;
 namespace Guflow.Decider
 {
     //TODO: Move out RescheduleTimer out of TimerItem. RescheduleTimer can be a decorator on Timer.
-    internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem, ITimer
+    internal sealed class TimerItem : WorkflowItem, IFluentTimerItem, ITimerItem
     {
         private TimeSpan _fireAfter= new TimeSpan();
         private Func<ITimerItem, TimeSpan> _fireAfterFunc;
@@ -161,7 +161,7 @@ namespace Guflow.Decider
             return this;
         }
 
-        WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
+        public override WorkflowAction  Fired(TimerFiredEvent timerFiredEvent)
         {
             if (timerFiredEvent.TimerType==TimerType.Reschedule)
                 return RescheduleTimer._firedAction(timerFiredEvent);
@@ -169,12 +169,12 @@ namespace Guflow.Decider
             return _firedAction(timerFiredEvent);
         }
 
-        WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
+        public override WorkflowAction StartFailed(TimerStartFailedEvent timerStartFailedEvent)
         {
             return _startFailureAction(timerStartFailedEvent);
         }
 
-        WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
+        public override WorkflowAction CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
         {
             return _cancellationFailedAction(timerCancellationFailedEvent);
         }

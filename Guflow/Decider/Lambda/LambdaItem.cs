@@ -7,7 +7,7 @@ using Guflow.Worker;
 
 namespace Guflow.Decider
 {
-    internal class LambdaItem : WorkflowItem, IFluentLambdaItem, ILambdaItem, ITimer
+    internal class LambdaItem : WorkflowItem, IFluentLambdaItem, ILambdaItem
     {
         private Func<ILambdaItem, object> _input;
         private Func<ILambdaItem, TimeSpan?> _timeout;
@@ -213,36 +213,6 @@ namespace Guflow.Decider
         public WorkflowAction StartFailedWorkflowAction(LambdaStartFailedEvent @event)
         {
             return _startFailedAction(@event);
-        }
-
-        WorkflowAction ITimer.Fired(TimerFiredEvent timerFiredEvent)
-        {
-            if (timerFiredEvent.TimerType == TimerType.Reschedule)
-            {
-                ITimer timer = RescheduleTimer;
-                return timer.Fired(timerFiredEvent);
-            }
-            if (timerFiredEvent.TimerType == TimerType.SignalTimer)
-            {
-                var waitForSignalEvent = WaitForSignalsEvent(timerFiredEvent.SignalTriggerEventId);
-                if (!waitForSignalEvent.IsExpectingSignals) return WorkflowAction.Empty;
-
-                var signalTimedoutDecision = waitForSignalEvent.RecordTimedout(timerFiredEvent);
-                return WorkflowAction.Custom(signalTimedoutDecision) + WorkflowAction.ContinueWorkflow(this);
-            }
-            throw new InvalidOperationException("Timer fired should be called only for Reschedule and SignalTimer.");
-        }
-
-        WorkflowAction ITimer.StartFailed(TimerStartFailedEvent timerStartFailedEvent)
-        {
-            ITimer timer = RescheduleTimer;
-            return timer.StartFailed(timerStartFailedEvent);
-        }
-
-        WorkflowAction ITimer.CancellationFailed(TimerCancellationFailedEvent timerCancellationFailedEvent)
-        {
-            ITimer timer = RescheduleTimer;
-            return timer.CancellationFailed(timerCancellationFailedEvent);
         }
     }
 }

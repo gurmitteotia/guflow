@@ -55,7 +55,7 @@ namespace Guflow.Decider
         }
         public ITimer Timer(WorkflowItemEvent workflowItemEvent)
         {
-            var timer = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor) as ITimer;
+            var timer = _workflowItems.FirstOrDefault(workflowItemEvent.IsFor);
 
             if (timer == null)
                 throw new IncompatibleWorkflowException($"Can not find timer for event {workflowItemEvent}");
