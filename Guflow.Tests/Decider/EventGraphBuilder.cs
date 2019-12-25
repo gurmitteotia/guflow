@@ -223,7 +223,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> TimerFiredGraph(ScheduleId timerId, TimeSpan startToFireTimeout, TimerType timerType, long signalTriggerEventId=0)
+        public IEnumerable<HistoryEvent> TimerFiredGraph(ScheduleId timerId, TimeSpan startToFireTimeout, TimerType timerType, long signalTriggerEventId=0, DateTime? timerFiredDateTime=null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.TimerFiredIds(ref _currentEventId);
@@ -232,6 +232,7 @@ namespace Guflow.Tests.Decider
             {
                 EventType = EventType.TimerFired,
                 EventId = eventIds.EventId(EventIds.TimerFired),
+                EventTimestamp = timerFiredDateTime??DateTime.UtcNow,
                 TimerFiredEventAttributes = new TimerFiredEventAttributes()
                 {
                     StartedEventId = eventIds.EventId(EventIds.Started),
@@ -999,7 +1000,7 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(ScheduleId identity, string runId, object input, object result)
+        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(ScheduleId identity, string runId, object input, object result, DateTime?completionStamp=null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -1009,6 +1010,7 @@ namespace Guflow.Tests.Decider
             {
                 EventId = eventIds.EventId(EventIds.Completion),
                 EventType = EventType.ChildWorkflowExecutionCompleted,
+                EventTimestamp = completionStamp??DateTime.UtcNow,
                 ChildWorkflowExecutionCompletedEventAttributes = new ChildWorkflowExecutionCompletedEventAttributes()
                 {
                     Result = result.ToAwsString(),
