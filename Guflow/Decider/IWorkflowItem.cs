@@ -81,6 +81,13 @@ namespace Guflow.Decider
         /// </summary>
         /// <returns></returns>
         bool IsWaitingForAnySignal();
+
+        /// <summary>
+        /// Returns true the given signal has timed out for the workflow item.
+        /// </summary>
+        /// <param name="signalName"></param>
+        /// <returns></returns>
+        bool IsSignalTimedout(string signalName);
     }
 
     internal interface ITimer

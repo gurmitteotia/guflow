@@ -86,6 +86,15 @@ namespace Guflow.Decider
             return waitEvent.HasReceivedSignal(signalName);
         }
 
+        public bool IsSignalTimedout(string signalName)
+        {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            var waitEvent = LatestWaitForSignalsEvent();
+            if (waitEvent == null) return false;
+            return waitEvent.IsSignalTimedout(signalName);
+        }
+
+
         public abstract WorkflowItemEvent LastEvent(bool includeRescheduleTimerEvents = false);
         public abstract IEnumerable<WorkflowItemEvent> AllEvents(bool includeRescheduleTimerEvents = false);
 

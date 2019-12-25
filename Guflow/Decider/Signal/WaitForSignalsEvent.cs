@@ -72,7 +72,7 @@ namespace Guflow.Decider
            return decision;
         }
 
-        public bool IsTimedout(string signalName) => _signalState.IsTimedout(signalName);
+        public bool IsSignalTimedout(string signalName) => _signalState.IsTimedout(signalName);
 
 
         public bool HasTimedout(WorkflowSignaledEvent signal)

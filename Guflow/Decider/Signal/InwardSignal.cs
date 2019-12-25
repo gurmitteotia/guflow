@@ -71,7 +71,7 @@ namespace Guflow.Decider
             var currentEvent = _workflow.CurrentlyExecutingEvent;
             if (!currentEvent.CanTriggerSignalTimeout) return false;
             var signaledEvent = _workflow.TimedoutEventTriggerBy(currentEvent);
-            return signaledEvent!=null && signaledEvent.IsTimedout(_signalName);
+            return signaledEvent!=null && signaledEvent.IsSignalTimedout(_signalName);
         }
     }
 }
