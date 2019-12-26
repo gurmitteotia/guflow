@@ -61,7 +61,7 @@ namespace Guflow.Tests.Decider
             Assert.That(((TimeSpan?)data.Timeout).Value, Is.EqualTo(timeout));
         }
 
-        public static void AssertWaitForSignal(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId,
+        public static void AssertWaitAnyForSignal(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId,
                                             DateTime triggerDateTime, TimeSpan timeout, params string[] signalNames)
         {
            decision.AssertWaitForSignal(scheduleId, triggerEventId, SignalWaitType.Any, SignalNextAction.Continue, triggerDateTime, timeout, signalNames);

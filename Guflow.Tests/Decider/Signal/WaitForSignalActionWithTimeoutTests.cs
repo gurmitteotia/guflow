@@ -42,7 +42,7 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitAnyForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, completedEventId, TimeSpan.FromHours(2));
         }
 
@@ -61,7 +61,7 @@ namespace Guflow.Tests.Decider
 
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitAnyForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, completedEventId, TimeSpan.FromHours(1));
         }
 
@@ -80,7 +80,7 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitAnyForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, completedEventId, TimeSpan.FromHours(0));
         }
 
@@ -147,7 +147,7 @@ namespace Guflow.Tests.Decider
         }
 
         [TestCaseSource(nameof(TestCaseData))]
-        public void Return_timer_decision_and_continue_execution_with_signal_triggered_when_signal_and_activity_completed_events_comes_together_and_signal_come_before_timeout(
+        public void Return_timer_decision_and_continue_execution_with_signal_triggered_when_signal_and_workflow_item_completed_events_comes_together_and_signal_come_before_timeout(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
             var currentTime = DateTime.UtcNow;
@@ -161,14 +161,14 @@ namespace Guflow.Tests.Decider
 
             var triggerEventId = graph.First().EventId;
             Assert.That(decisions.Length, Is.EqualTo(4));
-            decisions[0].AssertWaitForSignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitAnyForSignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, triggerEventId, TimeSpan.FromHours(1));
             Assert.That(decisions[2], Is.EqualTo(new ScheduleLambdaDecision(_activateUserId, "")));
             Assert.That(decisions[3], Is.EqualTo(new WorkflowItemSignalledDecision(confirmEmailId, triggerEventId, "Confirmed", s.EventId)));
         }
 
         [TestCaseSource(nameof(TestCaseData))]
-        public void Return_timer_decision_and_continue_execution_with_signal_timedout_when_signal_and_activity_completed_events_comes_together_but_signal_comes_after_timeout(
+        public void Return_timer_decision_and_continue_execution_with_signal_timedout_when_signal_and_workflow_item_completed_events_comes_together_but_signal_comes_after_timeout(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
             var completedStamp = DateTime.UtcNow.AddHours(-4);
@@ -184,7 +184,7 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions.Length, Is.EqualTo(4));
 
             var triggerEventId = graph.First().EventId;
-            decisions[0].AssertWaitForSignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitAnyForSignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, triggerEventId, TimeSpan.FromHours(1));
             Assert.That(decisions[2], Is.EqualTo(new ScheduleLambdaDecision(_blockAccountId, "")));
             decisions[3].AssertSignalTimedout(confirmEmailId, triggerEventId, new[] { "Confirmed" }, s.EventId);
