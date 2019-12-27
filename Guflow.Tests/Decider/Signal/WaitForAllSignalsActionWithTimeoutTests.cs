@@ -15,10 +15,12 @@ namespace Guflow.Tests.Decider
         private ScheduleId _promotionConfirmed;
         private ScheduleId _hrApprovalTimedout;
         private ScheduleId _managerApprovalTimedout;
-        private const string PromotoEmployee = "PromotoEmployee";
+        private ScheduleId _promotionTimedout;
+        private const string PromoteEmployee = "PromoteEmployee";
         private const string PromotionConfirmed = "PromotionConfirmed";
         private const string HRApprovalTimedout = "HRApprovalTimedout";
         private const string ManagerApprovalTimedout = "ManagerApprovalTimedout";
+        private const string PromotionTimedout = "PromotionTimedout";
         private const string WorkflowRunId = "id";
         private string[] _waitingSignals = {"HRApproved", "ManagerApproved"};
         [SetUp]
@@ -29,6 +31,7 @@ namespace Guflow.Tests.Decider
             _promotionConfirmed = Identity.Lambda(PromotionConfirmed).ScheduleId();
             _hrApprovalTimedout = Identity.Lambda(HRApprovalTimedout).ScheduleId();
             _managerApprovalTimedout = Identity.Lambda(ManagerApprovalTimedout).ScheduleId();
+            _promotionTimedout = Identity.Lambda(PromotionTimedout).ScheduleId();
             _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
             _builder.AddWorkflowRunId(WorkflowRunId);
         }
@@ -386,7 +389,33 @@ namespace Guflow.Tests.Decider
             decisions[0].AssertSignalTimedout(promoteEmployee, signalTriggerEventId, new[] { "ManagerApproved" }, timerFiredGraph.First().EventId);
             Assert.That(decisions[1], Is.EqualTo(new ScheduleLambdaDecision(_managerApprovalTimedout, "")));
         }
-       
+
+        [Test]
+        public void Continue_with_manager_approval_timeout_when_hrapproval_is_received_and_processed_before_timeout_and_signal_timer_is_fired_and_using_any_signal_api()
+        {
+            var promoteEmployee = Identity.Lambda(PromoteEmployee).ScheduleId();
+
+            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var lg = LambdaCompletedEventGraph(promoteEmployee, completedStamp);
+            _builder.AddProcessedEvents(lg);
+            var signalTriggerEventId = lg.First().EventId;
+            _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(promoteEmployee, signalTriggerEventId, "HRApproved"));
+
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, DateTime.UtcNow);
+
+            _builder.AddNewEvents(timerFiredGraph);
+
+            var workflow = new PromoteWorkflowWithLambdaUsingAnySignalIsTriggeredAndTimedoutAPI();
+
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            decisions[0].AssertSignalTimedout(promoteEmployee, signalTriggerEventId, new[] { "ManagerApproved" }, timerFiredGraph.First().EventId);
+            Assert.That(decisions[1], Is.EqualTo(new ScheduleLambdaDecision(_promotionTimedout, "")));
+        }
+
         private static HistoryEvent[] LambdaCompletedEventGraph(ScheduleId id, DateTime completeDateTime)
         {
             return _graphBuilder.LambdaCompletedEventGraph(id, "input", "res", completedStamp: completeDateTime)
@@ -405,7 +434,7 @@ namespace Guflow.Tests.Decider
         private static IEnumerable<TestCaseData> TestCaseData()
         {
 
-            var lambdaId = Identity.Lambda(PromotoEmployee).ScheduleId();
+            var lambdaId = Identity.Lambda(PromoteEmployee).ScheduleId();
             var l = new CompletedEventGraph(e => LambdaCompletedEventGraph(lambdaId, e));
             yield return new TestCaseData(typeof(PromoteWorkflowWithLambda), lambdaId, l);
             yield return new TestCaseData(typeof(PromoteWorkflowWithLambdaUsingAPI), lambdaId, l);
@@ -416,16 +445,16 @@ namespace Guflow.Tests.Decider
         {
             public PromoteWorkflowWithLambda()
             {
-                ScheduleLambda(PromotoEmployee)
+                ScheduleLambda(PromoteEmployee)
                     .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromHours(2)));
 
-                ScheduleLambda(PromotionConfirmed).AfterLambda(PromotoEmployee)
+                ScheduleLambda(PromotionConfirmed).AfterLambda(PromoteEmployee)
                     .When(_ => Signal("HRApproved").IsTriggered()|| Signal("ManagerApproved").IsTriggered());
 
-                ScheduleLambda(HRApprovalTimedout).AfterLambda(PromotoEmployee)
+                ScheduleLambda(HRApprovalTimedout).AfterLambda(PromoteEmployee)
                     .When(_ => Signal("HRApproved").IsTimedout());
 
-                ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromotoEmployee)
+                ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromoteEmployee)
                     .When(_ => Signal("ManagerApproved").IsTimedout());
             }
         }
@@ -434,16 +463,16 @@ namespace Guflow.Tests.Decider
         {
             public PromoteWorkflowWithLambdaUsingAPI()
             {
-                ScheduleLambda(PromotoEmployee)
+                ScheduleLambda(PromoteEmployee)
                     .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromHours(2)));
 
-                ScheduleLambda(PromotionConfirmed).AfterLambda(PromotoEmployee)
+                ScheduleLambda(PromotionConfirmed).AfterLambda(PromoteEmployee)
                     .When(l => l.ParentLambda().IsSignalled("HRApproved") && l.ParentLambda().IsSignalled("ManagerApproved"));
 
-                ScheduleLambda(HRApprovalTimedout).AfterLambda(PromotoEmployee)
+                ScheduleLambda(HRApprovalTimedout).AfterLambda(PromoteEmployee)
                     .When(l => l.ParentLambda().IsSignalTimedout("HRApproved"));
 
-                ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromotoEmployee)
+                ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromoteEmployee)
                     .When(l => l.ParentLambda().IsSignalTimedout("ManagerApproved"));
             }
         }
@@ -452,17 +481,32 @@ namespace Guflow.Tests.Decider
         {
             public PromoteWorkflowWithLambdaUsingAnySignalIsTriggeredAPI()
             {
-                ScheduleLambda(PromotoEmployee)
+                ScheduleLambda(PromoteEmployee)
                     .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromHours(2)));
 
-                ScheduleLambda(PromotionConfirmed).AfterLambda(PromotoEmployee)
+                ScheduleLambda(PromotionConfirmed).AfterLambda(PromoteEmployee)
                     .When(_ => AnySignal("HRApproved","ManagerApproved").IsTriggered());
 
-                ScheduleLambda(HRApprovalTimedout).AfterLambda(PromotoEmployee)
+                ScheduleLambda(HRApprovalTimedout).AfterLambda(PromoteEmployee)
                     .When(_ => Signal("HRApproved").IsTimedout());
 
-                ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromotoEmployee)
+                ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromoteEmployee)
                     .When(_ => Signal("ManagerApproved").IsTimedout());
+            }
+        }
+
+        private class PromoteWorkflowWithLambdaUsingAnySignalIsTriggeredAndTimedoutAPI : Workflow
+        {
+            public PromoteWorkflowWithLambdaUsingAnySignalIsTriggeredAndTimedoutAPI()
+            {
+                ScheduleLambda(PromoteEmployee)
+                    .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromHours(2)));
+
+                ScheduleLambda(PromotionConfirmed).AfterLambda(PromoteEmployee)
+                    .When(_ => AnySignal("HRApproved", "ManagerApproved").IsTriggered());
+
+                ScheduleLambda(PromotionTimedout).AfterLambda(PromoteEmployee)
+                    .When(_ => AnySignal("HRApproved", "ManagerApproved").IsTimedout());
             }
         }
 
