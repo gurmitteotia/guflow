@@ -387,29 +387,10 @@ namespace Guflow.Tests.Decider
             decisions[0].AssertSignalTimedout(promoteEmployee, signalTriggerEventId, new[] { "ManagerApproved" }, timerFiredGraph.First().EventId);
             Assert.That(decisions[1], Is.EqualTo(new ScheduleLambdaDecision(_managerApprovalTimedout, "")));
         }
-
-
-        private static HistoryEvent[] ActivityCompletedEventGraph(ScheduleId id, DateTime completeDateTime)
-        {
-            return _graphBuilder.ActivityCompletedGraph(id, "input", "res", completedStamp: completeDateTime)
-                .ToArray();
-        }
-
+       
         private static HistoryEvent[] LambdaCompletedEventGraph(ScheduleId id, DateTime completeDateTime)
         {
             return _graphBuilder.LambdaCompletedEventGraph(id, "input", "res", completedStamp: completeDateTime)
-                .ToArray();
-        }
-
-        private static HistoryEvent[] ChildWorkflowCompletedEventGraph(ScheduleId id, DateTime completeDateTime)
-        {
-            return _graphBuilder.ChildWorkflowCompletedGraph(id, "rid", "input", "res", completionStamp: completeDateTime)
-                .ToArray();
-        }
-
-        private static HistoryEvent[] TimerFiredEventGraph(ScheduleId id, DateTime completeDateTime)
-        {
-            return _graphBuilder.TimerFiredGraph(id, TimeSpan.FromSeconds(10), TimerType.WorkflowItem, timerFiredDateTime: completeDateTime)
                 .ToArray();
         }
 
@@ -429,24 +410,6 @@ namespace Guflow.Tests.Decider
             var l = new CompletedEventGraph(e => LambdaCompletedEventGraph(lambdaId, e));
             yield return new TestCaseData(typeof(PromoteWorkflowWithLambda), lambdaId, l);
             yield return new TestCaseData(typeof(PromoteWorkflowWithLambdaUsingAPI), lambdaId, l);
-
-            //yield return new TestCaseData(typeof(ApprovalWorkflowWithLambdaAndApprovedTimedoutCheckUsingAPI), lambdaId, l);
-            //yield return new TestCaseData(typeof(ApprovalWorkflowWithLambdaAndRejectedTimedoutCheckUsingAPI), lambdaId, l);
-
-            //var activityId = Identity.New(PromotoEmployee, Version).ScheduleId();
-            //var a = new WaitForAnySignalActionWithTimeoutTests.CompletedEventGraph(e => ActivityCompletedEventGraph(activityId, e));
-            //yield return new TestCaseData(typeof(ApprovalWorkflowWithActivityAndApprovedTimedoutCheck), activityId, a);
-            //yield return new TestCaseData(typeof(ApprovalWorkflowWithActivityAndRejectedTimedoutCheckUsingApi), activityId, a);
-
-            //var workflowId = Identity.New(PromotoEmployee, Version).ScheduleId(WorkflowRunId);
-            //var c = new WaitForAnySignalActionWithTimeoutTests.CompletedEventGraph(e => ChildWorkflowCompletedEventGraph(workflowId, e));
-            //yield return new TestCaseData(typeof(ApprovalWorkflowWithChildWorkflowAndApprovedTimeoutCheck), workflowId, c);
-            //yield return new TestCaseData(typeof(ApprovalWorkflowWithChildWorkflowAndRejectedTimeoutCheckUsingAPI), workflowId, c);
-
-            //var timerId = Identity.Timer(PromotoEmployee).ScheduleId();
-            //var t = new WaitForAnySignalActionWithTimeoutTests.CompletedEventGraph(e => TimerFiredEventGraph(timerId, e));
-            //yield return new TestCaseData(typeof(ApproveWorkflowWithTimerAndApprovedTimeoutCheck), timerId, t);
-            //yield return new TestCaseData(typeof(ApproveWorkflowWithTimerAndRejectedTimeoutCheckUsingAPI), timerId, t);
         }
 
         private class PromoteWorkflowWithLambda : Workflow
