@@ -290,6 +290,106 @@ namespace Guflow.Tests.Decider
         }
 
 
+        [TestCaseSource(nameof(TestCaseData))]
+        public void Continue_with_manager_approval_timeout_when_hrapproval_is_received_before_timeout_and_manager_approval_is_received_after_timeout_and_both_signals_are_processed_togather(
+            Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
+        {
+            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var lg = completedGraph(completedStamp);
+            _builder.AddProcessedEvents(lg);
+            var signalTriggerEventId = lg.First().EventId;
+            _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
+            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1));
+            _builder.AddNewEvents(hrSignal);
+            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: DateTime.UtcNow);
+            _builder.AddNewEvents(managerSignal);
+           
+            var workflow = (Workflow)Activator.CreateInstance(workflowType);
+
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(3));
+            Assert.That(decisions[0], Is.EqualTo(new WorkflowItemSignalledDecision(promoteEmployee, signalTriggerEventId, "HRApproved", hrSignal.EventId)));
+            Assert.That(decisions[1], Is.EqualTo(new ScheduleLambdaDecision(_managerApprovalTimedout, "")));
+            decisions[2].AssertSignalTimedout(promoteEmployee, signalTriggerEventId, new[] { "ManagerApproved" }, managerSignal.EventId);
+        }
+
+        [TestCaseSource(nameof(TestCaseData))]
+        public void Continue_with_manager_approval_timeout_when_hrapproval_is_already_received_and_processed_before_timeout_and_manager_approval_is_received_after_timeout(
+            Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
+        {
+            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var lg = completedGraph(completedStamp);
+            _builder.AddProcessedEvents(lg);
+            var signalTriggerEventId = lg.First().EventId;
+            _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(promoteEmployee, signalTriggerEventId, "HRApproved"));
+            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: DateTime.UtcNow);
+            _builder.AddNewEvents(managerSignal);
+
+            var workflow = (Workflow)Activator.CreateInstance(workflowType);
+
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            Assert.That(decisions[0], Is.EqualTo(new ScheduleLambdaDecision(_managerApprovalTimedout, "")));
+            decisions[1].AssertSignalTimedout(promoteEmployee, signalTriggerEventId, new[] { "ManagerApproved" }, managerSignal.EventId);
+        }
+
+        [TestCaseSource(nameof(TestCaseData))]
+        public void Continue_with_manager_approval_timeout_when_hrapproval_is_received_before_timeout_and_signal_timer_is_fired_and_both_signal_and_signal_timer_are_processed_togather(
+            Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
+        {
+            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var lg = completedGraph(completedStamp);
+            _builder.AddProcessedEvents(lg);
+            var signalTriggerEventId = lg.First().EventId;
+            _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
+            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1));
+            _builder.AddNewEvents(hrSignal);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, DateTime.UtcNow);
+
+            _builder.AddNewEvents(timerFiredGraph);
+
+            var workflow = (Workflow)Activator.CreateInstance(workflowType);
+
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(3));
+            Assert.That(decisions[0], Is.EqualTo(new WorkflowItemSignalledDecision(promoteEmployee, signalTriggerEventId, "HRApproved", hrSignal.EventId)));
+            decisions[1].AssertSignalTimedout(promoteEmployee, signalTriggerEventId, new[] { "ManagerApproved" }, timerFiredGraph.First().EventId);
+            Assert.That(decisions[2], Is.EqualTo(new ScheduleLambdaDecision(_managerApprovalTimedout, "")));
+        }
+
+
+        [TestCaseSource(nameof(TestCaseData))]
+        public void Continue_with_manager_approval_timeout_when_hrapproval_is_received_and_processed_before_timeout_and_signal_timer_is_fired(
+            Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
+        {
+            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var lg = completedGraph(completedStamp);
+            _builder.AddProcessedEvents(lg);
+            var signalTriggerEventId = lg.First().EventId;
+            _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(promoteEmployee, signalTriggerEventId, "HRApproved"));
+
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, DateTime.UtcNow);
+
+            _builder.AddNewEvents(timerFiredGraph);
+
+            var workflow = (Workflow)Activator.CreateInstance(workflowType);
+
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            decisions[0].AssertSignalTimedout(promoteEmployee, signalTriggerEventId, new[] { "ManagerApproved" }, timerFiredGraph.First().EventId);
+            Assert.That(decisions[1], Is.EqualTo(new ScheduleLambdaDecision(_managerApprovalTimedout, "")));
+        }
+
+
+
         private static HistoryEvent[] ActivityCompletedEventGraph(ScheduleId id, DateTime completeDateTime)
         {
             return _graphBuilder.ActivityCompletedGraph(id, "input", "res", completedStamp: completeDateTime)
