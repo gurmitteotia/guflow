@@ -389,7 +389,6 @@ namespace Guflow.Tests.Decider
         }
 
 
-
         private static HistoryEvent[] ActivityCompletedEventGraph(ScheduleId id, DateTime completeDateTime)
         {
             return _graphBuilder.ActivityCompletedGraph(id, "input", "res", completedStamp: completeDateTime)
@@ -429,7 +428,7 @@ namespace Guflow.Tests.Decider
             var lambdaId = Identity.Lambda(PromotoEmployee).ScheduleId();
             var l = new CompletedEventGraph(e => LambdaCompletedEventGraph(lambdaId, e));
             yield return new TestCaseData(typeof(PromoteWorkflowWithLambda), lambdaId, l);
-            //yield return new TestCaseData(typeof(ApprovalWorkflowWithLambdaAndRejectedTimedoutCheck), lambdaId, l);
+            yield return new TestCaseData(typeof(PromoteWorkflowWithLambdaUsingAPI), lambdaId, l);
 
             //yield return new TestCaseData(typeof(ApprovalWorkflowWithLambdaAndApprovedTimedoutCheckUsingAPI), lambdaId, l);
             //yield return new TestCaseData(typeof(ApprovalWorkflowWithLambdaAndRejectedTimedoutCheckUsingAPI), lambdaId, l);
@@ -468,167 +467,23 @@ namespace Guflow.Tests.Decider
             }
         }
 
-        private class ApprovalWorkflowWithLambdaAndRejectedTimedoutCheck : Workflow
+        private class PromoteWorkflowWithLambdaUsingAPI : Workflow
         {
-            public ApprovalWorkflowWithLambdaAndRejectedTimedoutCheck()
+            public PromoteWorkflowWithLambdaUsingAPI()
             {
                 ScheduleLambda(PromotoEmployee)
-                    .OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
+                    .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromHours(2)));
 
                 ScheduleLambda(PromotionConfirmed).AfterLambda(PromotoEmployee)
-                    .When(_ => Signal("Approved").IsTriggered());
+                    .When(l => l.ParentLambda().IsSignalled("HRApproved") && l.ParentLambda().IsSignalled("ManagerApproved"));
 
                 ScheduleLambda(HRApprovalTimedout).AfterLambda(PromotoEmployee)
-                    .When(_ => Signal("Rejected").IsTriggered());
+                    .When(l => l.ParentLambda().IsSignalTimedout("HRApproved"));
 
                 ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromotoEmployee)
-                    .When(_ => Signal("Rejected").IsTimedout());
+                    .When(l => l.ParentLambda().IsSignalTimedout("ManagerApproved"));
             }
         }
-
-        private class ApprovalWorkflowWithLambdaAndApprovedTimedoutCheckUsingAPI : Workflow
-        {
-            public ApprovalWorkflowWithLambdaAndApprovedTimedoutCheckUsingAPI()
-            {
-                ScheduleLambda(PromotoEmployee)
-                    .OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
-
-                ScheduleLambda(PromotionConfirmed).AfterLambda(PromotoEmployee)
-                    .When(_ => Signal("Approved").IsTriggered());
-
-                ScheduleLambda(HRApprovalTimedout).AfterLambda(PromotoEmployee)
-                    .When(_ => Signal("Rejected").IsTriggered());
-
-                ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromotoEmployee)
-                    .When(l => l.ParentLambda().IsSignalTimedout("Approved"));
-            }
-        }
-
-        private class ApprovalWorkflowWithLambdaAndRejectedTimedoutCheckUsingAPI : Workflow
-        {
-            public ApprovalWorkflowWithLambdaAndRejectedTimedoutCheckUsingAPI()
-            {
-                ScheduleLambda(PromotoEmployee)
-                    .OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
-
-                ScheduleLambda(PromotionConfirmed).AfterLambda(PromotoEmployee)
-                    .When(_ => Signal("Approved").IsTriggered());
-
-                ScheduleLambda(HRApprovalTimedout).AfterLambda(PromotoEmployee)
-                    .When(_ => Signal("Rejected").IsTriggered());
-
-                ScheduleLambda(ManagerApprovalTimedout).AfterLambda(PromotoEmployee)
-                    .When(l => l.ParentLambda().IsSignalTimedout("Rejected"));
-            }
-        }
-
-        private class ApprovalWorkflowWithActivityAndApprovedTimedoutCheck : Workflow
-        {
-            public ApprovalWorkflowWithActivityAndApprovedTimedoutCheck()
-            {
-                ScheduleActivity(PromotoEmployee, Version)
-                    .OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
-
-                ScheduleLambda(PromotionConfirmed).AfterActivity(PromotoEmployee, Version)
-                    .When(_ => Signal("Approved").IsTriggered());
-
-                ScheduleLambda(HRApprovalTimedout).AfterActivity(PromotoEmployee, Version)
-                    .When(_ => Signal("Rejected").IsTriggered());
-
-                ScheduleLambda(ManagerApprovalTimedout).AfterActivity(PromotoEmployee, Version)
-                    .When(_ => Signal("Approved").IsTimedout());
-            }
-        }
-
-        private class ApprovalWorkflowWithActivityAndRejectedTimedoutCheckUsingApi : Workflow
-        {
-            public ApprovalWorkflowWithActivityAndRejectedTimedoutCheckUsingApi()
-            {
-                ScheduleActivity(PromotoEmployee, Version)
-                    .OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
-
-                ScheduleLambda(PromotionConfirmed).AfterActivity(PromotoEmployee, Version)
-                    .When(_ => Signal("Approved").IsTriggered());
-
-                ScheduleLambda(HRApprovalTimedout).AfterActivity(PromotoEmployee, Version)
-                    .When(_ => Signal("Rejected").IsTriggered());
-
-                ScheduleLambda(ManagerApprovalTimedout).AfterActivity(PromotoEmployee, Version)
-                    .When(l => l.ParentActivity().IsSignalTimedout("Rejected"));
-            }
-        }
-
-        private class ApprovalWorkflowWithChildWorkflowAndApprovedTimeoutCheck : Workflow
-        {
-            public ApprovalWorkflowWithChildWorkflowAndApprovedTimeoutCheck()
-            {
-                ScheduleChildWorkflow(PromotoEmployee, Version)
-                    .OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
-
-                ScheduleLambda(PromotionConfirmed).AfterChildWorkflow(PromotoEmployee, Version)
-                    .When(_ => Signal("Approved").IsTriggered());
-
-                ScheduleLambda(HRApprovalTimedout).AfterChildWorkflow(PromotoEmployee, Version)
-                    .When(_ => Signal("Rejected").IsTriggered());
-
-                ScheduleLambda(ManagerApprovalTimedout).AfterActivity(PromotoEmployee, Version)
-                    .When(l => l.ParentChildWorkflow().IsSignalTimedout("Approved"));
-            }
-        }
-
-        private class ApprovalWorkflowWithChildWorkflowAndRejectedTimeoutCheckUsingAPI : Workflow
-        {
-            public ApprovalWorkflowWithChildWorkflowAndRejectedTimeoutCheckUsingAPI()
-            {
-                ScheduleChildWorkflow(PromotoEmployee, Version)
-                    .OnCompletion(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
-
-                ScheduleLambda(PromotionConfirmed).AfterChildWorkflow(PromotoEmployee, Version)
-                    .When(_ => Signal("Approved").IsTriggered());
-
-                ScheduleLambda(HRApprovalTimedout).AfterChildWorkflow(PromotoEmployee, Version)
-                    .When(_ => Signal("Rejected").IsTriggered());
-
-                ScheduleLambda(ManagerApprovalTimedout).AfterActivity(PromotoEmployee, Version)
-                    .When(l => l.ParentChildWorkflow().IsSignalTimedout("Rejected"));
-            }
-        }
-
-
-        private class ApproveWorkflowWithTimerAndApprovedTimeoutCheck : Workflow
-        {
-            public ApproveWorkflowWithTimerAndApprovedTimeoutCheck()
-            {
-                ScheduleTimer(PromotoEmployee).FireAfter(TimeSpan.FromSeconds(10))
-                    .OnFired(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
-
-                ScheduleLambda(PromotionConfirmed).AfterTimer(PromotoEmployee)
-                    .When(_ => Signal("Approved").IsTriggered());
-
-                ScheduleLambda(HRApprovalTimedout).AfterTimer(PromotoEmployee)
-                    .When(_ => Signal("Rejected").IsTriggered());
-
-                ScheduleLambda(ManagerApprovalTimedout).AfterTimer(PromotoEmployee)
-                    .When(_ => Signal("Approved").IsTimedout());
-            }
-        }
-
-        private class ApproveWorkflowWithTimerAndRejectedTimeoutCheckUsingAPI : Workflow
-        {
-            public ApproveWorkflowWithTimerAndRejectedTimeoutCheckUsingAPI()
-            {
-                ScheduleTimer(PromotoEmployee).FireAfter(TimeSpan.FromSeconds(10))
-                    .OnFired(e => e.WaitForAnySignal("Approved", "Rejected").For(TimeSpan.FromHours(2)));
-
-                ScheduleLambda(PromotionConfirmed).AfterTimer(PromotoEmployee)
-                    .When(_ => Signal("Approved").IsTriggered());
-
-                ScheduleLambda(HRApprovalTimedout).AfterTimer(PromotoEmployee)
-                    .When(_ => Signal("Rejected").IsTriggered());
-
-                ScheduleLambda(ManagerApprovalTimedout).AfterTimer(PromotoEmployee)
-                    .When(l => l.ParentTimer().IsSignalTimedout("Rejected"));
-            }
-        }
+       
     }
 }
