@@ -32,7 +32,7 @@ namespace Guflow.Tests.Decider
             Assert.That(timerData.TimerType, Is.EqualTo(TimerType.SignalTimer));
             Assert.That(timerData.SignalTriggerEventId, Is.EqualTo(triggerId));
             var startToFireTimeout = TimeSpan.FromSeconds(Double.Parse(swfDecision.StartTimerDecisionAttributes.StartToFireTimeout));
-            Assert.That(startToFireTimeout-timeout, Is.LessThan(TimeSpan.FromSeconds(1)));
+            Assert.That((startToFireTimeout-timeout).Duration(), Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         public static void AssertWaitForSignal(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId,
@@ -61,10 +61,16 @@ namespace Guflow.Tests.Decider
             Assert.That(((TimeSpan?)data.Timeout).Value, Is.EqualTo(timeout));
         }
 
-        public static void AssertWaitAnyForSignal(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId,
+        public static void AssertWaitForAnySignal(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId,
                                             DateTime triggerDateTime, TimeSpan timeout, params string[] signalNames)
         {
            decision.AssertWaitForSignal(scheduleId, triggerEventId, SignalWaitType.Any, SignalNextAction.Continue, triggerDateTime, timeout, signalNames);
+        }
+
+        public static void AssertWaitForAllSignals(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId,
+            DateTime triggerDateTime, TimeSpan timeout, params string[] signalNames)
+        {
+            decision.AssertWaitForSignal(scheduleId, triggerEventId, SignalWaitType.All, SignalNextAction.Continue, triggerDateTime, timeout, signalNames);
         }
 
         public static void AssertSignalTimedout(this WorkflowDecision decision, ScheduleId scheduleId, long triggerEventId, string[] signalNames, long timeoutTriggerId)

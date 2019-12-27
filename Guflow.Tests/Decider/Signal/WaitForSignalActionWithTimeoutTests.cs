@@ -42,7 +42,7 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitAnyForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitForAnySignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, completedEventId, TimeSpan.FromHours(2));
         }
 
@@ -61,7 +61,7 @@ namespace Guflow.Tests.Decider
 
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitAnyForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitForAnySignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, completedEventId, TimeSpan.FromHours(1));
         }
 
@@ -80,7 +80,7 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitAnyForSignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitForAnySignal(confirmEmailId, completedEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, completedEventId, TimeSpan.FromHours(0));
         }
 
@@ -161,7 +161,7 @@ namespace Guflow.Tests.Decider
 
             var triggerEventId = graph.First().EventId;
             Assert.That(decisions.Length, Is.EqualTo(4));
-            decisions[0].AssertWaitAnyForSignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[0].AssertWaitForAnySignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
             decisions[1].AssertSignalTimer(confirmEmailId, triggerEventId, TimeSpan.FromHours(1));
             Assert.That(decisions[2], Is.EqualTo(new ScheduleLambdaDecision(_activateUserId, "")));
             Assert.That(decisions[3], Is.EqualTo(new WorkflowItemSignalledDecision(confirmEmailId, triggerEventId, "Confirmed", s.EventId)));
@@ -184,8 +184,8 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions.Length, Is.EqualTo(4));
 
             var triggerEventId = graph.First().EventId;
-            decisions[0].AssertWaitAnyForSignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
-            decisions[1].AssertSignalTimer(confirmEmailId, triggerEventId, TimeSpan.FromHours(1));
+            decisions[0].AssertWaitForAnySignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[1].AssertSignalTimer(confirmEmailId, triggerEventId, TimeSpan.FromHours(0));
             Assert.That(decisions[2], Is.EqualTo(new ScheduleLambdaDecision(_blockAccountId, "")));
             decisions[3].AssertSignalTimedout(confirmEmailId, triggerEventId, new[] { "Confirmed" }, s.EventId);
         }

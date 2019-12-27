@@ -47,7 +47,7 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitAnyForSignal(approveExpenses, completedEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
+            decisions[0].AssertWaitForAnySignal(approveExpenses, completedEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
             decisions[1].AssertSignalTimer(approveExpenses, completedEventId, TimeSpan.FromHours(2));
         }
 
@@ -66,7 +66,7 @@ namespace Guflow.Tests.Decider
 
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitAnyForSignal(approveExpenses, completedEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
+            decisions[0].AssertWaitForAnySignal(approveExpenses, completedEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
             decisions[1].AssertSignalTimer(approveExpenses, completedEventId, TimeSpan.FromHours(1));
         }
 
@@ -85,7 +85,7 @@ namespace Guflow.Tests.Decider
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
             Assert.That(decisions.Length, Is.EqualTo(2));
-            decisions[0].AssertWaitAnyForSignal(approveExpenses, completedEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
+            decisions[0].AssertWaitForAnySignal(approveExpenses, completedEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
             decisions[1].AssertSignalTimer(approveExpenses, completedEventId, TimeSpan.FromHours(0));
         }
 
@@ -166,7 +166,7 @@ namespace Guflow.Tests.Decider
 
             var triggerEventId = graph.First().EventId;
             Assert.That(decisions.Length, Is.EqualTo(4));
-            decisions[0].AssertWaitAnyForSignal(approveExpenses, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
+            decisions[0].AssertWaitForAnySignal(approveExpenses, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
             decisions[1].AssertSignalTimer(approveExpenses, triggerEventId, TimeSpan.FromHours(1));
             Assert.That(decisions[2], Is.EqualTo(new ScheduleLambdaDecision(_sendBackToEmployee, "")));
             Assert.That(decisions[3], Is.EqualTo(new WorkflowItemSignalledDecision(approveExpenses, triggerEventId, "Rejected", s.EventId)));
@@ -189,8 +189,8 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions.Length, Is.EqualTo(4));
 
             var triggerEventId = graph.First().EventId;
-            decisions[0].AssertWaitAnyForSignal(approveExpenses, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
-            decisions[1].AssertSignalTimer(approveExpenses, triggerEventId, TimeSpan.FromHours(1));
+            decisions[0].AssertWaitForAnySignal(approveExpenses, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Approved", "Rejected");
+            decisions[1].AssertSignalTimer(approveExpenses, triggerEventId, TimeSpan.FromHours(0));
             Assert.That(decisions[2], Is.EqualTo(new ScheduleLambdaDecision(_approvalTimedout, "")));
             decisions[3].AssertSignalTimedout(approveExpenses, triggerEventId, new[] { "Approved", "Rejected" }, s.EventId);
         }
