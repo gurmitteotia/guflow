@@ -56,7 +56,7 @@ namespace Guflow.Decider
         public WorkflowItemWaitAction WaitForAnySignal(string signalName, params string[] signalNames)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            return new WorkflowItemWaitAction(this, SignalWaitType.Any, ValidEventNames(signalName, signalNames));
+            return new WorkflowItemWaitAction(this, SignalWaitType.Any, signalName.CombinedValidEventNames(signalNames));
         }
 
         /// <summary>
@@ -69,10 +69,7 @@ namespace Guflow.Decider
         public WorkflowItemWaitAction WaitForAllSignals(string signalName, params string[] signalNames)
         {
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
-            return new WorkflowItemWaitAction(this, SignalWaitType.All, ValidEventNames(signalName, signalNames));
+            return new WorkflowItemWaitAction(this, SignalWaitType.All, signalName.CombinedValidEventNames(signalNames));
         }
-
-        private static string[] ValidEventNames(string name,params string[] names)
-            => new[]{ name }.Concat(names).Where(n=>!string.IsNullOrEmpty(n)).ToArray();
     }
 }

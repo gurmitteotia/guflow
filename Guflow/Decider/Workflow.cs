@@ -687,6 +687,20 @@ namespace Guflow.Decider
             Ensure.NotNullAndEmpty(signalName, nameof(signalName));
             return new InwardSignal(signalName, this);
         }
+
+        /// <summary>
+        /// Represent any inward signals.
+        /// </summary>
+        /// <param name="signalName">Required signal name</param>
+        /// <param name="optionalSignalNames">Optional signal names</param>
+        /// <returns></returns>
+        protected AnyInwardSignals AnySignal(string signalName, params string[] optionalSignalNames)
+        {
+            Ensure.NotNullAndEmpty(signalName, nameof(signalName));
+            var eventNames = signalName.CombinedValidEventNames(optionalSignalNames);
+            return new AnyInwardSignals(eventNames, this);
+        }
+
         /// <summary>
         /// Return workflow input as dynamic object. If workflow input is JSON data then you can directly access its properties. e.g. Input.OrderId.
         /// </summary>
