@@ -1006,6 +1006,145 @@ namespace Guflow.Tests.Decider
             }));
         }
 
+        [Test]
+        public void Schedule_joint_with_timedout_condition_when_other_branch_has_become_inactive_because_immediate_parent_signal_has_timedout()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            var currentTimeStamp = DateTime.UtcNow;
+            var cs = LambdaCompletedGraph(ChooseSeatLambda, currentTimeStamp.AddHours(-2));
+            var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
+            _builder.AddProcessedEvents(cs);
+            _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" },
+                SignalWaitType.Any,SignalNextAction.Continue,currentTimeStamp.AddHours(-2), TimeSpan.FromHours(2)));
+            var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "input", currentTimeStamp);
+            _builder.AddProcessedEvents(s);
+            _builder.AddProcessedEvents(_graph.WorkflowItemSignalTimedoutEvent(csId, cs.First().EventId, new []{"SeatConfirmed"},s.EventId));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new ImmediateParentWaitOnSignalWithTimeout().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(SendEmailLambda).ScheduleId(), "input")
+            }));
+        }
+
+        [Test]
+        public void Schedule_joint_without_timedout_condition_when_other_branch_has_become_inactive_because_immediate_parent_received_signal()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            var currentTimeStamp = DateTime.UtcNow;
+            var cs = LambdaCompletedGraph(ChooseSeatLambda, currentTimeStamp.AddHours(-1));
+            var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
+            _builder.AddProcessedEvents(cs);
+            _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" },
+                SignalWaitType.Any, SignalNextAction.Continue, currentTimeStamp.AddHours(-2), TimeSpan.FromHours(2)));
+            var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "input", currentTimeStamp);
+            _builder.AddProcessedEvents(s);
+            _builder.AddProcessedEvents(_graph.WorkflowItemSignalledEvent(csId, cs.First().EventId,  "SeatConfirmed"));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new ImmediateParentWaitOnSignalWithTimeout().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input")
+            }));
+        }
+
+        [Test]
+        public void Schedule_joint_with_timedout_condition_when_other_branch_has_become_inactive_because_immediate_parent_signal_has_timedout_can_not_reschedule()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            var currentTimeStamp = DateTime.UtcNow;
+            var cs = LambdaCompletedGraph(ChooseSeatLambda, currentTimeStamp.AddHours(-2));
+            var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
+            _builder.AddProcessedEvents(cs);
+            _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" },
+                SignalWaitType.Any, SignalNextAction.Continue, currentTimeStamp.AddHours(-2), TimeSpan.FromHours(2)));
+            var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "input", currentTimeStamp);
+            _builder.AddProcessedEvents(s);
+            _builder.AddProcessedEvents(_graph.WorkflowItemSignalTimedoutEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" }, s.EventId));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new ImmediateParentWaitOnSignalWithTimeoutAndReschedule().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EquivalentTo(new WorkflowDecision[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(SendEmailLambda).ScheduleId(), "input")
+            }));
+        }
+
+        [Test]
+        public void Does_not_schedule_joint_when_other_branch_is_active_because_immediate_parent_received_signal_to_reschedule()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            var currentTimeStamp = DateTime.UtcNow;
+            var cs = LambdaCompletedGraph(ChooseSeatLambda, currentTimeStamp.AddHours(-1));
+            var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
+            _builder.AddProcessedEvents(cs);
+            _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" },
+                SignalWaitType.Any, SignalNextAction.Reschedule, currentTimeStamp.AddHours(-1), TimeSpan.FromHours(2)));
+            var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "input", currentTimeStamp);
+            _builder.AddProcessedEvents(s);
+            _builder.AddProcessedEvents(_graph.WorkflowItemSignalledEvent(csId, cs.First().EventId, "SeatConfirmed"));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new ImmediateParentWaitOnSignalWithTimeoutAndReschedule().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.Empty);
+        }
+
+        [Test]
+        public void Schedule_joint_with_timedout_condition_when_current_branch_has_become_inactive_because_immediate_parent_signal_has_timedout_and_other_branch_is_already_inactive()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+            var currentTimeStamp = DateTime.UtcNow;
+            var cs = LambdaCompletedGraph(ChooseSeatLambda, currentTimeStamp.AddHours(-2));
+            var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
+            _builder.AddProcessedEvents(cs);
+            _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" },
+                SignalWaitType.Any, SignalNextAction.Continue, currentTimeStamp.AddHours(-2), TimeSpan.FromHours(2)));
+            var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "input", currentTimeStamp);
+            _builder.AddNewEvents(s);
+            
+
+            var decisions = new ImmediateParentWaitOnSignalWithTimeout().Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            Assert.That(decisions[0], Is.EqualTo(new ScheduleLambdaDecision(Identity.Lambda(SendEmailLambda).ScheduleId(), "input")));
+            decisions[1].AssertSignalTimedout(csId, cs.First().EventId, new []{"SeatConfirmed"}, s.EventId);
+        }
+
+        [Test]
+        public void Schedule_joint_without_timedout_condition_when_current_branch_has_become_inactive_because_immediate_parent_has_receive_the_signal_and_other_branch_is_already_inactive()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+            var currentTimeStamp = DateTime.UtcNow;
+            var cs = LambdaCompletedGraph(ChooseSeatLambda, currentTimeStamp.AddHours(-1));
+            var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
+            _builder.AddProcessedEvents(cs);
+            _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" },
+                SignalWaitType.Any, SignalNextAction.Continue, currentTimeStamp.AddHours(-1), TimeSpan.FromHours(2)));
+            var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "input", currentTimeStamp);
+            _builder.AddNewEvents(s);
+
+
+            var decisions = new ImmediateParentWaitOnSignalWithTimeout().Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            Assert.That(decisions[0], Is.EqualTo(new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input")));
+            Assert.That(decisions[1],Is.EqualTo( new WorkflowItemSignalledDecision(csId, cs.First().EventId, "SeatConfirmed", s.EventId)));
+        }
+
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
         {
             return _graph.ActivityCompletedGraph(Identity.New(activityName, Version).ScheduleId(), "id", "result").ToArray();
@@ -1014,9 +1153,9 @@ namespace Guflow.Tests.Decider
         {
             return _graph.ActivityStartedGraph(Identity.New(activityName, Version).ScheduleId(), "id").ToArray();
         }
-        private HistoryEvent[] LambdaCompletedGraph(string lambdaName)
+        private HistoryEvent[] LambdaCompletedGraph(string lambdaName, DateTime? completedTime=null)
         {
-            return _graph.LambdaCompletedEventGraph(Identity.Lambda(lambdaName).ScheduleId(), "id", "result").ToArray();
+            return _graph.LambdaCompletedEventGraph(Identity.Lambda(lambdaName).ScheduleId(), "id", "result", completedStamp:completedTime).ToArray();
         }
         private HistoryEvent[] LambdaStartedGraph(string lambdaName)
         {
@@ -1858,6 +1997,46 @@ namespace Guflow.Tests.Decider
                     
 
                 ScheduleLambda(SendEmailLambda).AfterLambda(ChargeCustomerLambda);
+            }
+        }
+
+        private class ImmediateParentWaitOnSignalWithTimeout : Workflow
+        {
+            public ImmediateParentWaitOnSignalWithTimeout()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda)
+                    .OnCompletion(e => e.WaitForSignal("SeatConfirmed").For(TimeSpan.FromHours(2)));
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .When(l => l.ParentLambda(ChooseSeatLambda).IsSignalled("SeatConfirmed"));
+
+                ScheduleLambda(SendEmailLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .When(l => l.ParentLambda(ChooseSeatLambda).IsSignalTimedout("SeatConfirmed"));
+
+            }
+        }
+
+        private class ImmediateParentWaitOnSignalWithTimeoutAndReschedule : Workflow
+        {
+            public ImmediateParentWaitOnSignalWithTimeoutAndReschedule()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda)
+                    .OnCompletion(e => e.WaitForSignal("SeatConfirmed").For(TimeSpan.FromHours(2)).ToReschedule());
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .When(l => l.ParentLambda(ChooseSeatLambda).IsSignalled("SeatConfirmed"));
+
+                ScheduleLambda(SendEmailLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .When(l => l.ParentLambda(ChooseSeatLambda).IsSignalTimedout("SeatConfirmed"));
+
             }
         }
 
