@@ -323,7 +323,7 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Signal_IsReceived_API_returns_false_when_signal_is_received_after_current_active_event()
+        public void Signal_IsReceived_API_returns_true_when_signal_is_received_after_current_active_event()
         {
             _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
             _builder.AddNewEvents(_graphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "result"));
@@ -332,7 +332,7 @@ namespace Guflow.Tests.Decider
             var w = new WorkflowIsSignalReceivedAPI("s1");
             w.Decisions(_builder.Result());
 
-            Assert.That(w.IsSignalReceived, Is.False);
+            Assert.That(w.IsSignalReceived, Is.True);
         }
         [Test]
         public void Signal_IsReceived_is_false_when_no_signal_is_received_before_curent_active_event()

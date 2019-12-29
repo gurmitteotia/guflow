@@ -16,7 +16,7 @@ namespace Guflow.Decider
         private IWorkflowHistoryEvents _currentWorkflowHistoryEvents;
         private readonly WorkflowEventMethods _workflowEventMethods;
         private WorkflowAction _startupAction;
-        
+        private Stack<WorkflowEvent> _executingEvents;
         private WorkflowActions _generatedActions;
         protected Workflow()
         {
@@ -221,6 +221,16 @@ namespace Guflow.Decider
         {
             var childWorkflowItem = _allWorkflowItems.ChildWorkflowItem(startedEvent);
             return childWorkflowItem.StartedAction(startedEvent);
+        }
+
+        void IWorkflow.PushNewExecutingEvent(WorkflowEvent @event)
+        {
+            _executingEvents.Push(@event);
+        }
+
+        void IWorkflow.PopExecutingEvent()
+        {
+            _executingEvents.Pop();
         }
 
         private WorkflowAction Handle(EventName eventName, WorkflowEvent workflowEvent)
@@ -763,7 +773,8 @@ namespace Guflow.Decider
         {
             get
             {
-                var workflowItemEvent = _currentWorkflowHistoryEvents.CurrentExecutingEvent as WorkflowItemEvent;
+                IWorkflow workflow = this;
+                var workflowItemEvent = workflow.CurrentlyExecutingEvent as WorkflowItemEvent;
                 if (workflowItemEvent != null)
                     return _allWorkflowItems.WorkflowItem(workflowItemEvent);
 
@@ -790,7 +801,7 @@ namespace Guflow.Decider
             }
         }
 
-        WorkflowEvent IWorkflow.CurrentlyExecutingEvent => _currentWorkflowHistoryEvents.CurrentExecutingEvent;
+        WorkflowEvent IWorkflow.CurrentlyExecutingEvent => _executingEvents.Peek();
 
         internal WorkflowAction StartupAction => _startupAction ?? (_startupAction = WorkflowAction.StartWorkflow(_allWorkflowItems));
 
@@ -852,6 +863,8 @@ namespace Guflow.Decider
         internal IEnumerable<WorkflowDecision> Decisions(IWorkflowHistoryEvents historyEvents)
         {
             _generatedActions = new WorkflowActions();
+            _executingEvents = new Stack<WorkflowEvent>();
+            IWorkflow workflow = this;
             var decisions = new List<WorkflowDecision>();
             try
             {
@@ -859,11 +872,19 @@ namespace Guflow.Decider
                 BeforeExecution();
                 foreach (var workflowEvent in historyEvents.NewEvents())
                 {
-                    _currentWorkflowHistoryEvents.CurrentExecutingEvent = workflowEvent;
-                    var action = workflowEvent.Interpret(this) ?? WorkflowAction.Empty;
-                    _generatedActions.Add(action);
-                    decisions.AddRange(action.Decisions(this));
-                    _currentWorkflowHistoryEvents.CurrentExecutingEvent = null;
+                    
+                    workflow.PushNewExecutingEvent(workflowEvent);
+
+                    try
+                    {
+                        var action = workflowEvent.Interpret(this) ?? WorkflowAction.Empty;
+                        _generatedActions.Add(action);
+                        decisions.AddRange(action.Decisions(this));
+                    }
+                    finally
+                    {
+                        workflow.PopExecutingEvent();
+                    }
                 }
 
                 return decisions.Distinct().CompatibleDecisions(this).Where(d => d != WorkflowDecision.Empty).ToArray();
@@ -874,9 +895,8 @@ namespace Guflow.Decider
                 _allWorkflowItems.ResetContinueItems();
 
                 AfterExecution();
-                _currentWorkflowHistoryEvents.CurrentExecutingEvent = null;
+                _executingEvents = new Stack<WorkflowEvent>();
                 _currentWorkflowHistoryEvents = null;
-
             }
         }
     }

@@ -61,9 +61,6 @@ namespace Guflow.Decider
             }
             return events;
         }
-
-        public WorkflowEvent CurrentExecutingEvent { get; set; }
-
         public WorkflowStartedEvent WorkflowStartedEvent()
         {
             foreach (var historyEvent in _workflowTask.AllEventsInAscOrderOfEventId)
@@ -206,23 +203,9 @@ namespace Guflow.Decider
 
         public long LatestEventId => _workflowTask.AllEvents.First().EventId;
 
-        private IEnumerable<HistoryEvent> AllEventsInDescOrderOfEventId
-        {
-            get
-            {
-                long executingEventId = CurrentExecutingEvent != null ? CurrentExecutingEvent.EventId : long.MaxValue;
-                return _workflowTask.AllEvents.SkipWhile(h => h.EventId >executingEventId);
-            }
-        }
+        private IEnumerable<HistoryEvent> AllEventsInDescOrderOfEventId => _workflowTask.AllEvents;
+        private IEnumerable<HistoryEvent> AllEventsInAscOrderOfEventId => _workflowTask.AllEventsInAscOrderOfEventId;
 
-        private IEnumerable<HistoryEvent> AllEventsInAscOrderOfEventId
-        {
-            get
-            {
-                long executingEventId = CurrentExecutingEvent != null ? CurrentExecutingEvent.EventId : long.MaxValue;
-                return _workflowTask.AllEventsInAscOrderOfEventId.TakeWhile(h => h.EventId <= executingEventId);
-            }
-        }
         private static bool IsRescheduleTimerEvent(WorkflowItemEvent @event)
         {
             var timerEvent = @event as TimerEvent;

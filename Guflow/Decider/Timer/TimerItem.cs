@@ -163,10 +163,15 @@ namespace Guflow.Decider
 
         public override WorkflowAction  Fired(TimerFiredEvent timerFiredEvent)
         {
-            if (timerFiredEvent.TimerType == TimerType.WorkflowItem)
-                return _firedAction(timerFiredEvent);
-
-            return base.Fired(timerFiredEvent);
+            switch (timerFiredEvent.TimerType)
+            {
+                case TimerType.WorkflowItem:
+                    return _firedAction(timerFiredEvent);
+                case TimerType.Reschedule:
+                    return RescheduleTimer._firedAction(timerFiredEvent);
+                default:
+                    return base.Fired(timerFiredEvent);
+            }
         }
 
         public override WorkflowAction StartFailed(TimerStartFailedEvent timerStartFailedEvent)
