@@ -76,21 +76,20 @@ namespace Guflow.Decider
             {
                 _workflow.PushNewExecutingEvent(latestEvent);
                 action = latestEvent.Interpret(_workflow);
-                
+                var triggeredAction = action.TriggeredAction(latestEventItem);
+
+                var immediateParent = _workflowItems.First();
+                if (latestEvent.IsFor(immediateParent) && triggeredAction.ReadyToScheduleChildren)
+                    return false;
+
+                var parentItems = parentBranches.SelectMany(b => b._workflowItems);
+                return triggeredAction.CanScheduleAny(_workflow, parentItems);
+
             }
             finally
             {
                 _workflow.PopExecutingEvent();
             }
-            var triggeredAction = action.TriggeredAction(latestEventItem);
-
-            var immediateParent = _workflowItems.First();
-            if (latestEvent.IsFor(immediateParent) && triggeredAction.ReadyToScheduleChildren)
-                return false;
-
-            var parentItems = parentBranches.SelectMany(b => b._workflowItems);
-            return triggeredAction.CanScheduleAny(_workflow, parentItems);
-
         }
 
         public WorkflowItem FindFirstJointItem(WorkflowItem beforeItem)

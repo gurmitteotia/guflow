@@ -960,6 +960,52 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions, Is.Empty);
         }
 
+        [Test]
+        public void Schedule_jumped_item_when_joint_item_jump_to_an_item_in_parent_branch_on_its_when_clause_false_action()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(ChooseSeatLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new JumpToParentBranchFromFalseWhenClausOfJoinItem().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleLambdaDecision(Identity.Lambda(BookFlightLambda).ScheduleId(), "input") }));
+        }
+
+        [Test]
+        public void Schedule_joint_item_when_parent_item_of_joint_item_schedule_action_to_jump_to_parent_item()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(ChooseSeatLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new JumpToParentBranchFromScheduleAction().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
+            }));
+        }
+
+        [Test]
+        public void Schedule_joint_item_and_jumped_item_when_parent_item_of_joint_item_schedule_action_to_jump_to_parent_item()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(ChooseSeatLambda));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new JumpToParentBranchFromScheduleAction().Decisions(_builder.Result());
+
+            Assert.That(decisions, Is.EqualTo(new[]
+            {
+                new ScheduleLambdaDecision(Identity.Lambda(BookFlightLambda).ScheduleId(), "input"),
+                new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input"),
+            }));
+        }
+
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
         {
             return _graph.ActivityCompletedGraph(Identity.New(activityName, Version).ScheduleId(), "id", "result").ToArray();
@@ -1777,6 +1823,41 @@ namespace Guflow.Tests.Decider
 
                 ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookAirportTaxyLambda)
                     .AfterLambda(BookSubwayTicketLambda);
+            }
+        }
+
+        private class JumpToParentBranchFromFalseWhenClausOfJoinItem : Workflow
+        {
+            public JumpToParentBranchFromFalseWhenClausOfJoinItem()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda)
+                    .When(_ => false, _ => Jump.ToLambda(BookFlightLambda));
+
+                ScheduleLambda(SendEmailLambda).AfterLambda(ChargeCustomerLambda);
+            }
+        }
+
+        private class JumpToParentBranchFromScheduleAction : Workflow
+        {
+            public JumpToParentBranchFromScheduleAction()
+            {
+                ScheduleLambda(BookHotelLambda);
+                ScheduleLambda(BookHotelDinnerLambda).AfterLambda(BookHotelLambda);
+
+                ScheduleLambda(BookFlightLambda);
+                ScheduleLambda(ChooseSeatLambda).AfterLambda(BookFlightLambda);
+                ScheduleAction(_ => Jump.ToLambda(BookFlightLambda)).AfterLambda(ChooseSeatLambda);
+
+                ScheduleLambda(ChargeCustomerLambda).AfterLambda(BookHotelDinnerLambda).AfterLambda(ChooseSeatLambda);
+                    
+
+                ScheduleLambda(SendEmailLambda).AfterLambda(ChargeCustomerLambda);
             }
         }
 
