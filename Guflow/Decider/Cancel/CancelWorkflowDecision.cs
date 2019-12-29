@@ -7,11 +7,11 @@ namespace Guflow.Decider
     internal sealed class CancelWorkflowDecision : WorkflowClosingDecision
     {
         private readonly string _details;
-        private const int _mediumHigh = 15;
+        private const int MediumHigh = 15;
         public CancelWorkflowDecision(string details)
         {
             _details = details;
-            Priority = _mediumHigh;
+            Priority = MediumHigh;
         }
 
         public override bool Equals(object other)

@@ -8,12 +8,12 @@ namespace Guflow.Decider
     {
         private readonly string _reason;
         private readonly string _details;
-        private const int _high = 20;
+        private const int High = 20;
         public FailWorkflowDecision(string reason, string details)
         {
             _reason = reason;
             _details = details;
-            Priority = _high;
+            Priority = High;
         }
 
         public override bool Equals(object other)
