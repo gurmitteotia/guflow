@@ -234,7 +234,7 @@ namespace Guflow.Decider
             if (!IsActive)
                 throw new InvalidOperationException(
                     $"Can not reset the timer {this}. It should be already active for it be reset.");
-            var lastTimerEvent = (TimerEvent) LastEvent();
+            var lastTimerEvent = (TimerEvent) LastEvent(true);
             var rescheduleId = RescheduleId(lastTimerEvent.Id);
             return WorkflowAction.Custom(new CancelTimerDecision(lastTimerEvent.Id),
                  ScheduleTimerDecision.WorkflowItem(rescheduleId, timeout ?? lastTimerEvent.Timeout));

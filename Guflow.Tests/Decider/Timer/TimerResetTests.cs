@@ -20,6 +20,8 @@ namespace Guflow.Tests.Decider
         {
             _eventGraphBuilder = new EventGraphBuilder();
             _eventsBuilder = new HistoryEventsBuilder();
+            _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
+
         }
 
         [Test]
@@ -28,7 +30,6 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
                 .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4)).ToArray());
-            _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
             var decisions = new TimerResetWorkflow().Decisions(_eventsBuilder.Result()).ToArray();
@@ -45,7 +46,6 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
                 .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4)).ToArray());
-            _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
             var decisions = new TimerResetWithTimeoutWithOldApiWorkflow().Decisions(_eventsBuilder.Result()).ToArray();
@@ -62,7 +62,6 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
                 .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4)).ToArray());
-            _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
             var decisions = new TimerResetWithTimeoutWithNewApiWorkflow().Decisions(_eventsBuilder.Result()).ToArray();
@@ -79,7 +78,6 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
                 .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId + "Reset"), TimeSpan.FromMinutes(4)).ToArray());
-            _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
             var decisions = new TimerResetWorkflow().Decisions(_eventsBuilder.Result()).ToArray();
@@ -97,7 +95,6 @@ namespace Guflow.Tests.Decider
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
                 .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId + "Reset"), TimeSpan.FromMinutes(4)).ToArray());
-            _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
             var decisions = new TimerResetWithTimeoutWithNewApiWorkflow().Decisions(_eventsBuilder.Result()).ToArray();
@@ -122,10 +119,28 @@ namespace Guflow.Tests.Decider
         public void Resechedule_throws_exception_when_timer_is_not_active()
         {
             _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
-               _eventsBuilder.AddWorkflowRunId(ParentWorkflowRunId);
             _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
 
             Assert.Throws<InvalidOperationException>(() => new TimerResetWithTimeoutWithNewApiWorkflow().Decisions(_eventsBuilder.Result()));
+        }
+
+        [Test]
+        public void Current_reschedule_timer_is_reset_with_new_timeout()
+        {
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder.WorkflowStartedEvent());
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
+                .TimerFiredGraph(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromMinutes(4)).ToArray());
+
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
+                .TimerStartedGraph(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId + "Reset"), TimeSpan.FromMinutes(4), true).ToArray());
+            _eventsBuilder.AddNewEvents(_eventGraphBuilder.WorkflowSignaledEvent("ChangeTimer", ""));
+
+            var decisions = new TimerResetWithTimeoutWithNewApiWorkflow().Decisions(_eventsBuilder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(2));
+            Assert.That(decisions[0], Is.EqualTo(new CancelTimerDecision(Identity.Timer(TimerName).ScheduleId(ParentWorkflowRunId + "Reset"))));
+            var scheduleId = Identity.Timer(TimerName).ScheduleId();
+            decisions[1].AssertWorkflowItemTimer(scheduleId, TimeSpan.FromMinutes(10));
         }
 
         private class TimerResetWorkflow : Workflow
