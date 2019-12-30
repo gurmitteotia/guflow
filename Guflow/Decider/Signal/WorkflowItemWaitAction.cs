@@ -90,7 +90,7 @@ namespace Guflow.Decider
             return this;
         }
         /// <summary>
-        /// Wait for the signal for the given duration, if the signal are not received by the given duration workflow execution will resume. Signal APIs can be used to determine if
+        /// Wait for the signal(s) for the given duration, if the signal(s) are not received by the given duration workflow execution will resume. Signal APIs can be used to determine if
         /// workflow execution is resumed because of the signal or the timeout.
         /// </summary>
         /// <param name="timeout"></param>

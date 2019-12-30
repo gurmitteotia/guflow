@@ -69,6 +69,42 @@ namespace Guflow.IntegrationTests
             Assert.That(result, Is.EqualTo("Charged"));
         }
 
+        [Test]
+        public async Task Wait_for_a_signal_with_a_timeout_and_continue_on_receiving_the_signal()
+        {
+            var @event = new AutoResetEvent(false);
+            var timeout = TimeSpan.FromSeconds(4);
+            var workflow = new UserActivateWorkflowWithTimeout(@event, timeout);
+            string result = null;
+            workflow.Completed += (s, e) => { result = e.Result; @event.Set(); };
+            _workflowHost = await HostAsync(workflow);
+
+            var workflowId = await _domain.StartWorkflow<UserActivateWorkflow>("input", _taskListName);
+            @event.WaitOne();
+
+            await _domain.SendSignal(workflowId, "EmailConfirmed", "");
+            @event.WaitOne();
+
+            Assert.That(result, Is.EqualTo("Activated"));
+        }
+
+        [Test]
+        public async Task Wait_for_a_signal_with_a_timeout_and_continue_on_timing_out_the_signal()
+        {
+            var @event = new AutoResetEvent(false);
+            var timeout = TimeSpan.FromSeconds(3);
+            var workflow = new UserActivateWorkflowWithTimeout(@event, timeout);
+            string reason = null;
+            workflow.Failed += (s, e) => { reason = e.Reason; @event.Set(); };
+            _workflowHost = await HostAsync(workflow);
+
+            var workflowId = await _domain.StartWorkflow<UserActivateWorkflow>("input", _taskListName);
+            @event.WaitOne();
+            @event.WaitOne(timeout.Add(TimeSpan.FromSeconds(2)));
+
+            Assert.That(reason, Is.EqualTo("Signal_timeout"));
+        }
+
         private async Task<WorkflowHost> HostAsync(params Workflow[] workflows)
         {
             var hostedWorkflows = await _domain.Host(workflows);
@@ -108,6 +144,38 @@ namespace Guflow.IntegrationTests
                     .AfterActivity<ActivateUser>();
             }
         }
+
+        [WorkflowDescription(Names.Workflow.Test.Version, Name = Names.Workflow.Test.Name, DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
+            DefaultTaskPriority = 10, DefaultTaskStartToCloseTimeoutInSeconds = 900, Description = "Empty workflow")]
+        private class UserActivateWorkflowWithTimeout : Workflow
+        {
+            private readonly AutoResetEvent _event;
+
+            public UserActivateWorkflowWithTimeout(AutoResetEvent @event, TimeSpan timeout)
+            {
+                _event = @event;
+                ScheduleActivity<EmailConfirmActivity>()
+                    .OnTaskList(a => _taskListName)
+                    .OnCompletion(e =>
+                    {
+                        _event.Set();
+                        return e.WaitForSignal("EmailConfirmed").For(timeout);
+                    });
+
+                ScheduleActivity<ActivateUser>()
+                    .OnTaskList(a => _taskListName)
+                    .AfterActivity<EmailConfirmActivity>()
+                    .When(_ => Signal("EmailConfirmed").IsTriggered());
+
+                ScheduleAction(_ => FailWorkflow("Signal_timeout", "")).AfterActivity<EmailConfirmActivity>()
+                    .When(_ => Signal("EmailConfirmed").IsTimedout());
+
+                ScheduleAction(i => CompleteWorkflow(i.ParentActivity<ActivateUser>().Result()))
+                    .AfterActivity<ActivateUser>();
+            }
+        }
+
+
 
         [ActivityDescription(Names.Activity.EmailConfirm.Version, Name = Names.Activity.EmailConfirm.Name, DefaultTaskListName = "DefaultTaskList", DefaultTaskPriority = 10, Description = "some activity",
            DefaultHeartbeatTimeoutInSeconds = 10, DefaultScheduleToStartTimeoutInSeconds = 10, DefaultStartToCloseTimeoutInSeconds = 10, DefaultScheduleToCloseTimeoutInSeconds = 20)]

@@ -49,6 +49,44 @@ namespace Guflow.IntegrationTests
             Assert.That(result, Is.EqualTo("\"AccountDone\""));
         }
 
+        [Test]
+        public async Task Wait_for_all_signals_with_timeout_and_continue_on_all_signals()
+        {
+            var @event = new AutoResetEvent(false);
+            var workflow = new ExpenseAnySignalWorkflowWithTimeout(@event,TimeSpan.FromSeconds(3));
+            string result = null;
+            workflow.Completed += (s, e) => { result = e.Result; @event.Set(); };
+            _workflowHost = await HostAsync(workflow);
+
+            var workflowId = await _domain.StartWorkflow<ExpenseAnySignalWorkflowWithTimeout>("input", _taskListName, _configuration["LambdaRole"]);
+            @event.WaitOne();
+
+            await _domain.SendSignal(workflowId, "HRApproved", "");
+            await _domain.SendSignal(workflowId, "ManagerApproved", "");
+            @event.WaitOne();
+
+            Assert.That(result, Is.EqualTo("\"AccountDone\""));
+        }
+
+        [Test]
+        public async Task Wait_for_all_signals_with_timeout_and_continue_with_timeout()
+        {
+            var @event = new AutoResetEvent(false);
+            var timeout = TimeSpan.FromSeconds(3);
+            var workflow = new ExpenseAnySignalWorkflowWithTimeout(@event, timeout);
+            string result = null;
+            workflow.Failed += (s, e) => { result = e.Reason; @event.Set(); };
+            _workflowHost = await HostAsync(workflow);
+
+            var workflowId = await _domain.StartWorkflow<ExpenseAnySignalWorkflowWithTimeout>("input", _taskListName, _configuration["LambdaRole"]);
+            @event.WaitOne();
+            await _domain.SendSignal(workflowId, "HRApproved", "");
+            
+            @event.WaitOne(timeout.Add(TimeSpan.FromSeconds(2)));
+
+            Assert.That(result, Is.EqualTo("Signal_timedout"));
+        }
+
 
         private async Task<WorkflowHost> HostAsync(params Workflow[] workflows)
         {
@@ -77,6 +115,29 @@ namespace Guflow.IntegrationTests
                                l.ParentLambda().IsSignalled("ManagerApproved"));
 
                 ScheduleAction(i => CompleteWorkflow(i.ParentLambda().Result())).AfterLambda("SubmitToAccount");
+            }
+        }
+
+        [WorkflowDescription(Names.Workflow.Test.Version, Name = Names.Workflow.Test.Name, DefaultChildPolicy = ChildPolicy.Abandon, DefaultExecutionStartToCloseTimeoutInSeconds = 900, DefaultTaskListName = "DefaultTaskList",
+            DefaultTaskPriority = 10, DefaultTaskStartToCloseTimeoutInSeconds = 900, Description = "Empty workflow")]
+        private class ExpenseAnySignalWorkflowWithTimeout : Workflow
+        {
+            public ExpenseAnySignalWorkflowWithTimeout(AutoResetEvent @event, TimeSpan timeout)
+            {
+                ScheduleLambda("ExpenseApproval").WithInput(_ => new { Id })
+                    .OnCompletion(e =>
+                    {
+                        @event.Set();
+                        return e.WaitForAllSignals("HRApproved", "ManagerApproved").For(timeout);
+                    });
+
+                ScheduleLambda("SubmitToAccount").AfterLambda("ExpenseApproval")
+                    .When(l => AnySignal("HRApproved", "ManagerApproved").IsTriggered());
+
+                ScheduleAction(i => CompleteWorkflow(i.ParentLambda().Result())).AfterLambda("SubmitToAccount");
+
+                ScheduleAction(_ => FailWorkflow("Signal_timedout", "")).AfterLambda("ExpenseApproval")
+                    .When(_ => AnySignal("HRApproved", "ManagerApproved").IsTimedout());
             }
         }
     }

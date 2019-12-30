@@ -70,7 +70,7 @@ namespace Guflow.Decider
         bool IsSignalled(string signalName);
 
         /// <summary>
-        /// Returns true if this workflow item is waiting for given signal.
+        /// Returns true if this workflow item is waiting for the given signal.
         /// </summary>
         /// <param name="signalName"></param>
         /// <returns></returns>
