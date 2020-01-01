@@ -1145,6 +1145,30 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions[1],Is.EqualTo( new WorkflowItemSignalledDecision(csId, cs.First().EventId, "SeatConfirmed", s.EventId)));
         }
 
+        [Test]
+        public void Schedule_joint_timedout_when_immediate_parent_in_other_branch_has_recevied_the_signal_to_continue_and_its_signal_timer_is_active()
+        {
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelLambda));
+            _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
+            var currentTimeStamp = DateTime.UtcNow;
+            var cs = LambdaCompletedGraph(ChooseSeatLambda, currentTimeStamp.AddHours(-1));
+            var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
+            _builder.AddProcessedEvents(cs);
+            _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" },
+                SignalWaitType.Any, SignalNextAction.Continue, currentTimeStamp.AddHours(-1), TimeSpan.FromHours(2)));
+            _builder.AddProcessedEvents(_graph.TimerStartedGraph(csId, TimeSpan.FromHours(1), TimerType.SignalTimer,
+                cs.First().EventId));
+            var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "input", currentTimeStamp);
+            _builder.AddProcessedEvents(s);
+            _builder.AddProcessedEvents(_graph.WorkflowItemSignalledEvent(csId, cs.First().EventId, "SeatConfirmed"));
+            _builder.AddNewEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
+
+            var decisions = new ImmediateParentWaitOnSignalWithTimeout().Decisions(_builder.Result()).ToArray();
+
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            Assert.That(decisions[0], Is.EqualTo(new ScheduleLambdaDecision(Identity.Lambda(ChargeCustomerLambda).ScheduleId(), "input")));
+        }
+
         private HistoryEvent[] ActivityCompletedGraph(string activityName)
         {
             return _graph.ActivityCompletedGraph(Identity.New(activityName, Version).ScheduleId(), "id", "result").ToArray();

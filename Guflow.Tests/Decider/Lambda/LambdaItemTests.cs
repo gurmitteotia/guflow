@@ -286,6 +286,25 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
+        public void All_events_filter_out_signal_timer_events()
+        {
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_scheduleId, "input", "reason", "details");
+            var rescheduleTimerFiredGraph = _builder.TimerFiredGraph(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(1), true);
+            var signalTimerStartedGraph = _builder.TimerStartedGraph(_lambdaIdentity.ScheduleId(),
+                TimeSpan.FromHours(1), TimerType.SignalTimer);
+            var allEvents = rescheduleTimerFiredGraph.Concat(failedEventGraph).Concat(signalTimerStartedGraph);
+            var lamdbaItem = CreateLambdaItem(allEvents);
+
+            var lambdaEvents = lamdbaItem.AllEvents(true);
+
+            Assert.That(lambdaEvents, Is.EqualTo(new WorkflowItemEvent[]
+            {
+                new TimerFiredEvent(rescheduleTimerFiredGraph.First(), allEvents), 
+                new LambdaFailedEvent(failedEventGraph.First(), allEvents),
+            }));
+        }
+
+        [Test]
         public void All_events_by_default_filters_out_reschedule_timer_events()
         {
             var failedEventGraph = _builder.LambdaFailedEventGraph(_scheduleId, "input", "reason", "details");
@@ -338,6 +357,28 @@ namespace Guflow.Tests.Decider
             var lastEvent = lamdbaItem.LastEvent();
 
             Assert.That(lastEvent, Is.EqualTo(new LambdaFailedEvent(failedEventGraph.First(), failedEventGraph)));
+        }
+
+        [Test]
+        public void IsActive_returns_false_when_only_signal_timer_is_active()
+        {
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_scheduleId, "input", "reason", "details");
+            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(1), TimerType.SignalTimer);
+            var allEvents = startedEventGraph.Concat(failedEventGraph);
+            var lamdbaItem = CreateLambdaItem(allEvents);
+
+            Assert.IsFalse(lamdbaItem.IsActive);
+        }
+
+        [Test]
+        public void IsActive_returns_true_when_reschedule_timer_is_active()
+        {
+            var failedEventGraph = _builder.LambdaFailedEventGraph(_scheduleId, "input", "reason", "details");
+            var startedEventGraph = _builder.TimerStartedGraph(_lambdaIdentity.ScheduleId(), TimeSpan.FromSeconds(1), TimerType.Reschedule);
+            var allEvents = startedEventGraph.Concat(failedEventGraph);
+            var lamdbaItem = CreateLambdaItem(allEvents);
+
+            Assert.IsTrue(lamdbaItem.IsActive);
         }
 
         [Test]

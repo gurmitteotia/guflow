@@ -113,10 +113,11 @@ namespace Guflow.Decider
                 if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
-                    if(!includeRescheduleTimerEvents && IsRescheduleTimerEvent(workflowItemEvent))
-                        continue;
-                    allEvents.Add(workflowItemEvent);
-                    yield return workflowItemEvent;
+                    if (includeRescheduleTimerEvents && IsRescheduleTimerEvent(workflowItemEvent))
+                    {
+                        allEvents.Add(workflowItemEvent);
+                        yield return workflowItemEvent;
+                    }
                 }
             }
         }
