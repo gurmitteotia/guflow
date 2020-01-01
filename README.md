@@ -1,5 +1,5 @@
 ### Guflow
-A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Workflow Service ), lets you coordinate the execution of serverless AWS Lambda functions, activities, child workflows and timers with ease.
+A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Workflow Service ), lets you write distributive and scalable workflows using serverless AWS Lambda functions, activities, child workflows and timers with ease.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/gurmitteotia/guflow?svg=true)](https://ci.appveyor.com/project/gurmitteotia/guflow/branch/master)
 ### Installation
@@ -9,8 +9,9 @@ A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Wo
  dotnet add package Guflow
  ```
  ### Description
- Guflow provides high level and easy to use APIs to program [Amazon SWF](https://aws.amazon.com/swf/). In Guflow you can write-
+In Guflow you can write-
 * Elastic and scalable workflows to orchestrate the scheduling of lambda functions, activities, child workflows and timers
+* 
 * Activities to carry out the task.
 
 Guflow, supporting all the features of [Amazon SWF](https://aws.amazon.com/swf/), is an alternative to Amazon Step functions and the Amazon Flow framework and it provides simplicity and flexbility in one place.
@@ -22,8 +23,7 @@ Guflow:
 * Supports fork and join of [workflow branches](https://github.com/gurmitteotia/guflow/wiki/Workflow-branches)
 * Supports recursion around an individual item (lambda function, activity, child workflow and timer) or whole execution branch
 * Provides equal supports for scheduling the activities written in other framework/language
-* Provides robust [signal APIs](https://github.com/gurmitteotia/guflow/wiki/Workflow-signals) to easily implement manual approvals using serverless lambda functions.
-* Encourage the development of worker using AWS lambda functions.
+* Provides intuitive [signal APIs](https://github.com/gurmitteotia/guflow/wiki/Workflow-signals) to easily implement human approvals using serverless lambda functions.
 * Supports async/sync activity method
 * Supports activity throttling
 * Supported by behavioural unit tests and continuously released.
@@ -40,7 +40,7 @@ Guflow:
 
 
 ### Example 1
-Following example shows BookHolidays workflow using AWS Lambda functions:
+Following example starts two parallel branches which later joins to execute the workflow in a single branch.
      
 ```cs
         BookFlight          BookHotel
@@ -76,20 +76,22 @@ Following example shows BookHolidays workflow using AWS Lambda functions:
     }             
           
 ```
+Above example is discussed in more details in [workflow branching](wiki/Workflow-branches).
+
 
 ### Example 2
-In the following example, workflow execution will pause after ApproveExpense lambda is completed and continue when either of Accepted or Rejected signal is received.
+In the following example, workflow execution will pause after ApproveExpense lambda is completed and it will wait for either "Accepted" or "Rejected" signal for 5 days.
 ```cs
              ApproveExpense          
                   |
                   |
                   v
-         |````````````````````|
-    <Accepted>            <Rejected>
-         |                    |
-         |                    |
-         v                    v
-    SubmitToAccount     SendRejectEmail              
+         |````````````````````|``````````````````
+    <Accepted>            <Rejected>         <Timedout> 
+         |                    |					 |
+         |                    |					 |
+         v                    v					 v	
+    SubmitToAccount     SendRejectEmail     EscalateExpense         
             
               
     [WorkflowDescription("1.0")]
@@ -98,14 +100,17 @@ In the following example, workflow execution will pause after ApproveExpense lam
         public ExpenseWorkflow()
         {
             ScheduleLambda("ApproveExpense")
-              .OnCompletion(e=>e.WaitForAnySignal("Accepted", "Rejected"))
+              .OnCompletion(e=>e.WaitForAnySignal("Accepted", "Rejected").For(TimeSpan.FromDays(5))
               .WithInput(_=>new{Id});  //Send workflow id to lambda functions to send signals to this workflow.
          
             ScheduleLambda("SubmitToAccount").AfterLambda("ApproveExpense")
               .When(_=>Signal("Accepted").IsTriggered());
 
             ScheduleLambda("SendRejectEmail").AfterLambda("ApproveExpense")
-              .When(_=>Signal("Accepted").IsTriggered());
+              .When(_=>Signal("Rejected").IsTriggered());
+
+			ScheduleLambda("EscalateExpense").AfterLambda("ApproveExpenses")
+			  .When(_=>AnySignal("Accepted","Rejected").IsTimedout())
         }
     }             
           
@@ -144,11 +149,8 @@ In following example, workflow execution will pause when "ReserveItem" is failed
     }             
           
 ```
-You can read about signal APIs [here](https://github.com/gurmitteotia/guflow/wiki/Workflow-signals) and find more examples about manual approvals in [sample](https://github.com/gurmitteotia/guflow-samples/tree/master/ServerlessManualApproval) project.
-
-
-[Query APIs](https://github.com/gurmitteotia/guflow/wiki/Query-apis), [workflow actions](https://github.com/gurmitteotia/guflow/wiki/Workflow-actions) and flexible [branching](https://github.com/gurmitteotia/guflow/wiki/Workflow-branches) support will allow you to create challanging workflows.
-Though Guflow supports all the features of Amazon SWF but it continues to add useful APIs, manual intervention and timer reset are examples of it and many
+You can use the [signal APIs](https://github.com/gurmitteotia/guflow/wiki/Workflow-signals) along with AWS lambda functions to implement human approvals/signals. You will no more need to use self hosted activities for getting the human signals in your workflows.
+A good number of examples involving manual approvals are provided in the [example](https://github.com/gurmitteotia/guflow-samples/tree/master/ServerlessManualApproval) project.
 
 
 **Features in pipeline:** Please look at [project board](https://github.com/gurmitteotia/guflow/projects/1) to see what is is coming next. If you want some feature to be included in Guflow library or something is not working for you please file an [issue](https://github.com/gurmitteotia/guflow/issues). Your ideas, suggestion and collorbation will greatly help this library and its users.
@@ -160,7 +162,7 @@ Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tu
 dotnet standard 1.3 onwards
 
 ### Hosting
-Guflow is a light weight and performant library, you should start with not so powerfull EC2 instance or docker container to host the Guflow decider.
+You need to self host workflows in either a EC2 intance or a docker container. However for 
 
 ### Getting help
 Enable the [logging](https://github.com/gurmitteotia/guflow/wiki/Logging) to look for any obvious error and if problem persist then please raise an [issue](https://github.com/gurmitteotia/guflow/issues) in github
