@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Guflow")]
-[assembly: AssemblyDescription("C#.Net library to program all features of Amazon SWF (Simple Workflow Service)")]
+[assembly: AssemblyDescription("A C#.NET library to write elastic and scalable workflows on AWS stack.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Guflow")]
-[assembly: AssemblyCopyright("Gurmit Teotia, Copyright ©  2019")]
+[assembly: AssemblyCopyright("Gurmit Teotia, Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

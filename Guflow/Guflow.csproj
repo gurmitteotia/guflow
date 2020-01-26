@@ -4,7 +4,7 @@
     <RootNamespace>Guflow</RootNamespace>
     <AssemblyName>Guflow</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <PackageLicenseUrl>https://github.com/gurmitteotia/guflow/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/gurmitteotia/guflow</PackageProjectUrl>
     <Authors>Gurmit Teotia</Authors>
     <PackageTags>Amazon SWF C# Guflow .Net Simple Workflow Service</PackageTags>
@@ -14,6 +14,7 @@
     <IsPackable>true</IsPackable>
     <PackageReleaseNotes>https://github.com/gurmitteotia/guflow/releases</PackageReleaseNotes>
     <PackageIconUrl>https://github.com/gurmitteotia/guflow/blob/master/logo.jpg</PackageIconUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>.\bin\Debug</OutputPath>
@@ -24,8 +25,8 @@
     <DocumentationFile>.\bin\Release\Guflow.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleWorkflow" Version="3.3.0.75" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="AWSSDK.SimpleWorkflow" Version="3.3.101.85" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
@@ -39,5 +40,11 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 </Project>
