@@ -113,11 +113,20 @@ namespace Guflow.Decider
                 if (workflowItemEvent == null) continue;
                 if (workflowItemEvent.IsFor(timerItem) && !workflowItemEvent.InChainOf(allEvents))
                 {
-                    if (includeRescheduleTimerEvents && IsRescheduleTimerEvent(workflowItemEvent))
+                    if(IsSignalTimerEvent(workflowItemEvent))
+                        continue;
+                    
+                    if (IsRescheduleTimerEvent(workflowItemEvent))
                     {
-                        allEvents.Add(workflowItemEvent);
-                        yield return workflowItemEvent;
+                        if (includeRescheduleTimerEvents)
+                        {
+                            allEvents.Add(workflowItemEvent);
+                            yield return workflowItemEvent;
+                        }
+                        continue;
                     }
+                    allEvents.Add(workflowItemEvent);
+                    yield return workflowItemEvent;
                 }
             }
         }
@@ -213,7 +222,13 @@ namespace Guflow.Decider
             return timerEvent != null && timerEvent.TimerType==TimerType.Reschedule;
         }
 
-        
+        private static bool IsSignalTimerEvent(WorkflowItemEvent @event)
+        {
+            var timerEvent = @event as TimerEvent;
+            return timerEvent != null && timerEvent.TimerType == TimerType.SignalTimer;
+        }
+
+
 
         private class LastEventFilters
         {

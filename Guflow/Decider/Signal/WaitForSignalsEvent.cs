@@ -144,7 +144,7 @@ namespace Guflow.Decider
             {
                 if (!_data.TriggerEventCompletionDate.HasValue) return false;
                 if (!_data.Timeout.HasValue) return false;
-                return (signal.Timestamp - _data.TriggerEventCompletionDate.Value) >= _data.Timeout.Value;
+                return (signal.Timestamp - _data.TriggerEventCompletionDate.Value) > _data.Timeout.Value;
             }
 
             public override bool HasTimedoutTriggerId(long timeoutTriggerEventId) => false;

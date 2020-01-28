@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
 {
+    [TestFixture]
     public class WaitForSignalActionWithTimeoutTests
     {
         private HistoryEventsBuilder _builder;
@@ -88,15 +88,16 @@ namespace Guflow.Tests.Decider
         public void Signal_is_ignored_when_it_come_after_wait_is_timedout_by_signal_timer(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
-            var completionDate = DateTime.UtcNow.AddHours(-4);
+            var currentTime = DateTime.UtcNow;
+            var completionDate = currentTime.AddHours(-2);
             var graph = completedGraph(completionDate);
             _builder.AddProcessedEvents(graph);
             var completedEventId = graph.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(confirmEmailId, completedEventId, completionDate, "Confirmed"));
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(2), TimerType.SignalTimer, completedEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(2), TimerType.SignalTimer, completedEventId, currentTime);
             _builder.AddProcessedEvents(timerFiredGraph);
             _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalTimedoutEvent(confirmEmailId, completedEventId, new[] { "Confirmed" }, timerFiredGraph.First().EventId));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", "input", DateTime.UtcNow));
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", "input", currentTime.AddMinutes(1)));
             _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
 
@@ -109,12 +110,13 @@ namespace Guflow.Tests.Decider
         public void Wait_for_signal_is_timedout_when_timer_is_fired_before_receiving_the_signal(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(confirmEmailId, signalTriggerEventId, completedStamp, "Confirmed"));
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
             _builder.AddNewEvents(timerFiredGraph);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
 
@@ -129,14 +131,15 @@ namespace Guflow.Tests.Decider
         public void Signal_timer_is_ignored_when_it_is_fired_after_receiving_the_signal(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(confirmEmailId, signalTriggerEventId, completedStamp, "Confirmed"));
-            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", "input", completedTime:currentTime.AddHours(-1)));
             _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(confirmEmailId, signalTriggerEventId, "Confirmed"));
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
 
             _builder.AddNewEvents(timerFiredGraph);
@@ -168,13 +171,35 @@ namespace Guflow.Tests.Decider
         }
 
         [TestCaseSource(nameof(TestCaseData))]
+        public void Return_timer_decision_and_continue_execution_with_signal_triggered_when_signal_and_workflow_item_completed_events_comes_together_and_signal_come_just_on_timeout(
+            Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
+        {
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
+            var graph = completedGraph(completedStamp);
+            _builder.AddNewEvents(graph);
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "", currentTime);
+            _builder.AddNewEvents(s);
+            var workflow = (Workflow)Activator.CreateInstance(workflowType);
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            var triggerEventId = graph.First().EventId;
+            Assert.That(decisions.Length, Is.EqualTo(4));
+            decisions[0].AssertWaitForAnySignal(confirmEmailId, triggerEventId, completedStamp, TimeSpan.FromHours(2), "Confirmed");
+            decisions[1].AssertSignalTimer(confirmEmailId, triggerEventId, TimeSpan.FromHours(0));
+            Assert.That(decisions[2], Is.EqualTo(new ScheduleLambdaDecision(_activateUserId, "")));
+            Assert.That(decisions[3], Is.EqualTo(new WorkflowItemSignalledDecision(confirmEmailId, triggerEventId, "Confirmed", s.EventId)));
+        }
+
+        [TestCaseSource(nameof(TestCaseData))]
         public void Return_timer_decision_and_continue_execution_with_signal_timedout_when_signal_and_workflow_item_completed_events_comes_together_but_signal_comes_after_timeout(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-4);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-4);
             var graph = completedGraph(completedStamp);
             _builder.AddNewEvents(graph);
-            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "", DateTime.UtcNow.AddHours(-1));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "", currentTime.AddHours(-1));
             _builder.AddNewEvents(s);
             _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
@@ -194,14 +219,15 @@ namespace Guflow.Tests.Decider
         public void Signal_timer_is_ignored_when_it_is_fired_after_receiving_the_signal_and_signal_timer_and_signal_are_processed_together(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
-            var completeDateTime = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completeDateTime = currentTime.AddHours(-2);
             var lg = completedGraph(completeDateTime);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(confirmEmailId, signalTriggerEventId, completeDateTime, "Confirmed"));
-            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "input", completedTime: DateTime.UtcNow.AddHours(-1));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "input", completedTime: currentTime.AddHours(-1));
             _builder.AddNewEvents(s);
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId,currentTime);
 
             _builder.AddNewEvents(timerFiredGraph);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
@@ -218,16 +244,17 @@ namespace Guflow.Tests.Decider
         public void Signal_is_ignored_when_it_is_received_after_signal_timer_and_signal_timer_and_signal_are_processed_together(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
-            var completeDateTime = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completeDateTime = currentTime.AddHours(-2);
             var lg = completedGraph(completeDateTime);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(confirmEmailId, signalTriggerEventId, completeDateTime, "Confirmed"));
 
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
             _builder.AddNewEvents(timerFiredGraph);
 
-            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "input", completedTime: DateTime.UtcNow.AddHours(-1));
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "input", completedTime: currentTime);
             _builder.AddNewEvents(s);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
 
@@ -243,14 +270,15 @@ namespace Guflow.Tests.Decider
         public void Signal_timer_is_ignored_when_it_is_fired_after_receiving_the_signal_and_signal_timer_and_signal_are_processed_together_also_signal_was_received_after_timedout(
             Type workflowType, ScheduleId confirmEmailId, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddMinutes(-121);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(confirmEmailId, signalTriggerEventId, completedStamp, "Confirmed"));
-            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "input", completedTime: DateTime.UtcNow);
+            var s = _graphBuilder.WorkflowSignaledEvent("Confirmed", "input", completedTime: currentTime);
             _builder.AddNewEvents(s);
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(confirmEmailId, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
 
             _builder.AddNewEvents(timerFiredGraph);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);

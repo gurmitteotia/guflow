@@ -78,7 +78,8 @@ namespace Guflow.Tests.Decider
         public void Returns_the_timer_decision_to_fire_immediately_and_decision_to_wait_for_a_signal_when_workflow_item_completed_event_is_processed_after_timeout(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-4);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-4);
             var graph = completedGraph(completedStamp);
             _builder.AddNewEvents(graph);
             _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
@@ -96,16 +97,17 @@ namespace Guflow.Tests.Decider
         public void Signals_are_ignored_when_they_come_after_wait_is_timedout_by_signal_timer(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completionDate = DateTime.UtcNow.AddHours(-4);
+            var currentTime = DateTime.UtcNow;
+            var completionDate = currentTime.AddHours(-4);
             var graph = completedGraph(completionDate);
             _builder.AddProcessedEvents(graph);
             var completedEventId = graph.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, completedEventId, completionDate, _waitingSignals));
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(2), TimerType.SignalTimer, completedEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(2), TimerType.SignalTimer, completedEventId, currentTime.AddHours(-2));
             _builder.AddProcessedEvents(timerFiredGraph);
             _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalTimedoutEvent(promoteEmployee, completedEventId, _waitingSignals, timerFiredGraph.First().EventId));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", DateTime.UtcNow));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", DateTime.UtcNow));
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", currentTime));
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", currentTime));
             _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
 
@@ -118,12 +120,13 @@ namespace Guflow.Tests.Decider
         public void Wait_for_signal_is_timedout_when_timer_is_fired_before_receiving_the_signal(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
             _builder.AddNewEvents(timerFiredGraph);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
 
@@ -139,17 +142,18 @@ namespace Guflow.Tests.Decider
         public void Signal_timer_is_ignored_when_it_is_fired_after_receiving_the_signal(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
-            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddHours(-1)));
             _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(promoteEmployee, signalTriggerEventId, "HRApproved"));
-            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: currentTime.AddHours(-1)));
             _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(promoteEmployee, signalTriggerEventId, "ManagerApproved"));
 
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId,currentTime);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
 
             _builder.AddNewEvents(timerFiredGraph);
@@ -189,12 +193,13 @@ namespace Guflow.Tests.Decider
         public void Return_timer_decision_and_continue_execution_with_signal_timedout_when_signal_and_workflow_item_completed_events_comes_together_but_signals_comes_after_timeout(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-4);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-4);
             var graph = completedGraph(completedStamp);
             _builder.AddNewEvents(graph);
-            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "", DateTime.UtcNow.AddHours(-1));
+            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "", currentTime.AddHours(-1));
             _builder.AddNewEvents(hrSignal);
-            var managerApproved = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "", DateTime.UtcNow.AddHours(-1));
+            var managerApproved = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "", currentTime.AddHours(-1));
             _builder.AddNewEvents(managerApproved);
             _builder.AddNewEvents(_graphBuilder.DecisionStartedEvent(DateTime.UtcNow));
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
@@ -215,17 +220,18 @@ namespace Guflow.Tests.Decider
         public void Signal_timer_is_ignored_when_it_is_fired_after_receiving_the_signals_and_signal_timer_and_signals_are_processed_together(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completeDateTime = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completeDateTime = currentTime.AddHours(-2);
             var lg = completedGraph(completeDateTime);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completeDateTime, _waitingSignals));
-            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1));
+            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddHours(-1));
             _builder.AddNewEvents(hrSignal);
-            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1));
+            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: currentTime.AddHours(-1));
             _builder.AddNewEvents(managerSignal);
 
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
 
             _builder.AddNewEvents(timerFiredGraph);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
@@ -243,17 +249,18 @@ namespace Guflow.Tests.Decider
         public void Signals_are_ignored_when_they_are_received_after_signal_timer_and_signal_timer_and_signals_are_processed_together(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completeDateTime = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completeDateTime = currentTime.AddHours(-2);
             var lg = completedGraph(completeDateTime);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completeDateTime, _waitingSignals));
 
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, DateTime.UtcNow.AddHours(-2));
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
             _builder.AddNewEvents(timerFiredGraph);
 
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-2)));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: DateTime.UtcNow.AddHours(-2)));
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddSeconds(1)));
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: currentTime.AddSeconds(1)));
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
 
             var decisions = workflow.Decisions(_builder.Result()).ToArray();
@@ -269,16 +276,17 @@ namespace Guflow.Tests.Decider
         public void Signal_timer_is_ignored_when_it_is_fired_after_receiving_the_signals_and_signal_timer_and_signals_are_processed_together_also_signal_was_received_after_timedout(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
-            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow);
+            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddMinutes(1));
             _builder.AddNewEvents(hrSignal);
-            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: DateTime.UtcNow);
+            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: currentTime.AddMinutes(1));
             _builder.AddNewEvents(managerSignal);
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, DateTime.UtcNow);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime.AddMinutes(1));
 
             _builder.AddNewEvents(timerFiredGraph);
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
@@ -296,14 +304,15 @@ namespace Guflow.Tests.Decider
         public void Continue_with_manager_approval_timeout_when_hrapproval_is_received_before_timeout_and_manager_approval_is_received_after_timeout_and_both_signals_are_processed_togather(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddMinutes(-121);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
-            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1));
+            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddHours(-1));
             _builder.AddNewEvents(hrSignal);
-            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: DateTime.UtcNow);
+            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: currentTime);
             _builder.AddNewEvents(managerSignal);
            
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
@@ -320,14 +329,15 @@ namespace Guflow.Tests.Decider
         public void Continue_with_manager_approval_timeout_when_hrapproval_is_already_received_and_processed_before_timeout_and_manager_approval_is_received_after_timeout(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddMinutes(-121);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
-            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddHours(-1)));
             _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(promoteEmployee, signalTriggerEventId, "HRApproved"));
-            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: DateTime.UtcNow);
+            var managerSignal = _graphBuilder.WorkflowSignaledEvent("ManagerApproved", "input", completedTime: currentTime);
             _builder.AddNewEvents(managerSignal);
 
             var workflow = (Workflow)Activator.CreateInstance(workflowType);
@@ -343,14 +353,15 @@ namespace Guflow.Tests.Decider
         public void Continue_with_manager_approval_timeout_when_hrapproval_is_received_before_timeout_and_signal_timer_is_fired_and_both_signal_and_signal_timer_are_processed_togather(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
-            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1));
+            var hrSignal = _graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddHours(-1));
             _builder.AddNewEvents(hrSignal);
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, DateTime.UtcNow);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
 
             _builder.AddNewEvents(timerFiredGraph);
 
@@ -369,15 +380,16 @@ namespace Guflow.Tests.Decider
         public void Continue_with_manager_approval_timeout_when_hrapproval_is_received_and_processed_before_timeout_and_signal_timer_is_fired(
             Type workflowType, ScheduleId promoteEmployee, CompletedEventGraph completedGraph)
         {
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
             var lg = completedGraph(completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
-            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddHours(-1)));
             _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(promoteEmployee, signalTriggerEventId, "HRApproved"));
 
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, DateTime.UtcNow);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
 
             _builder.AddNewEvents(timerFiredGraph);
 
@@ -394,16 +406,16 @@ namespace Guflow.Tests.Decider
         public void Continue_with_manager_approval_timeout_when_hrapproval_is_received_and_processed_before_timeout_and_signal_timer_is_fired_and_using_any_signal_api()
         {
             var promoteEmployee = Identity.Lambda(PromoteEmployee).ScheduleId();
-
-            var completedStamp = DateTime.UtcNow.AddHours(-2);
+            var currentTime = DateTime.UtcNow;
+            var completedStamp = currentTime.AddHours(-2);
             var lg = LambdaCompletedEventGraph(promoteEmployee, completedStamp);
             _builder.AddProcessedEvents(lg);
             var signalTriggerEventId = lg.First().EventId;
             _builder.AddProcessedEvents(WaitForSignalEvent(promoteEmployee, signalTriggerEventId, completedStamp, _waitingSignals));
-            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: DateTime.UtcNow.AddHours(-1)));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("HRApproved", "input", completedTime: currentTime.AddHours(-1)));
             _builder.AddProcessedEvents(_graphBuilder.WorkflowItemSignalledEvent(promoteEmployee, signalTriggerEventId, "HRApproved"));
 
-            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, DateTime.UtcNow);
+            var timerFiredGraph = _graphBuilder.TimerFiredGraph(promoteEmployee, TimeSpan.FromHours(1), TimerType.SignalTimer, signalTriggerEventId, currentTime);
 
             _builder.AddNewEvents(timerFiredGraph);
 

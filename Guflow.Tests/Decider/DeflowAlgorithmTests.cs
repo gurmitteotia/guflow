@@ -1106,11 +1106,12 @@ namespace Guflow.Tests.Decider
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookFlightLambda));
             _builder.AddProcessedEvents(LambdaCompletedGraph(BookHotelDinnerLambda));
             var currentTimeStamp = DateTime.UtcNow;
-            var cs = LambdaCompletedGraph(ChooseSeatLambda, currentTimeStamp.AddHours(-2));
+            var completedTime = currentTimeStamp.AddHours(-3);
+            var cs = LambdaCompletedGraph(ChooseSeatLambda, completedTime);
             var csId = Identity.Lambda(ChooseSeatLambda).ScheduleId();
             _builder.AddProcessedEvents(cs);
             _builder.AddProcessedEvents(_graph.WaitForSignalEvent(csId, cs.First().EventId, new[] { "SeatConfirmed" },
-                SignalWaitType.Any, SignalNextAction.Continue, currentTimeStamp.AddHours(-2), TimeSpan.FromHours(2)));
+                SignalWaitType.Any, SignalNextAction.Continue, completedTime, TimeSpan.FromHours(2)));
             var s = _graph.WorkflowSignaledEvent("SeatConfirmed", "input", currentTimeStamp);
             _builder.AddNewEvents(s);
             
