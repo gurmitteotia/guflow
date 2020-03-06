@@ -36,7 +36,7 @@ namespace Guflow.Decider
         /// <param name="allHistoryEvents"></param>
         /// <param name="startedEventId"></param>
         /// <param name="scheduledEventId"></param>
-        protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
+        protected void PopulateAttributes(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
         {
             bool foundActivityScheduledEvent=false;
             _startedEventId = startedEventId;

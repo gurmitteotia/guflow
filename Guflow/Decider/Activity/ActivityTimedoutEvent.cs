@@ -14,15 +14,15 @@ namespace Guflow.Decider
             : base(activityTimedoutEvent)
         {
             _eventAttributes = activityTimedoutEvent.ActivityTaskTimedOutEventAttributes;
-            PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
+            PopulateAttributes(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
         /// <summary>
-        /// Returns reason, why activity has timedout.
+        /// Returns the reason why activity has timedout.
         /// </summary>
         public string TimeoutType => _eventAttributes.TimeoutType;
 
         /// <summary>
-        /// Returns last heartbeat reported details.
+        /// Returns last reported details reported by heartbeat.
         /// </summary>
         public string Details => _eventAttributes.Details;
 
