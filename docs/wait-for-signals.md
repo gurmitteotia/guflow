@@ -83,9 +83,30 @@ Good to know:
   }
 
   ```
-  Note: In above example you can also use
+    Note: In above example you can also use Signal("Accepted"/"Rejected").IsTimedout() and reason is when WaitForAnySignal is timedout all of provided signals are timedout. e.g.
+    ```cs
+  public class ExpenseWorkflow : Workflow
+  {
+     public ExpenseWorkflow()
+     {
+        ScheduleLambda("ApproveExpenses").WithInput(_=>new {Id})
+          .OnCompletion(e => e.WaitForAnySignal("Accepted", "Rejected").For(TimeSpan.FromDays(2)));
 
-* **WaitForAllSignals**: Pause the workflow execution and wait for all the specific signals to continue the execution. 
+        ScheduleLambda("SendToAccount").AfterLambda("ApproveExpenses")
+          .When(_ => Signal("Accepted").IsTriggered());
+
+        ScheduleLambda("SendBackToEmp").AfterLambda("ApproveExpenses")
+          .When(_ => Signal("Rejected").IsTriggered());
+        
+        ScheduleLambda("Escalate").AfterLambda("ApproveExpenses")
+          .When(_ => Signal("Accepted").IsTimedout()); //Or .When(_ => Signal("Rejected").IsTimedout());
+     }
+  }
+
+  ```
+
+* **WaitForAllSignals**: Pause the workflow execution and wait for all the specific signals to continue the execution.
+
 In the following example workflow will pause the execution after the execution of the "PromoteEmployee" lambda function and will continue when "HRApproved" and "ManagerApproved" signals are received.
 
   ```cs
@@ -109,7 +130,8 @@ In the following example workflow will pause the execution after the execution o
      {
         ScheduleLambda("PromoteEmployee").WithInput(_=>new{Id})
           .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromDays(2)));
-        ScheduleLambda("Promoted").AfterLambda("PromoteEmployee");
+        ScheduleLambda("Promoted").AfterLambda("PromoteEmployee")
+          .When(_=>AnySignal("HRApproved", "ManagerApproved").IsTriggered());
         ScheduleLambda("SendForReviewToHR").AfterLambda("Promoted");
         ScheduleLambda("EscalateApproval").AfterLambda("PromoteEmployee")
           .When(_=>AnySignal("HRApproved", "ManagerApproved").IsTimedout());
