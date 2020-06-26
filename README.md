@@ -17,7 +17,7 @@ Guflow not only supports all the features of [Amazon SWF](https://aws.amazon.com
 
 ### Features:
 Guflow:
-* Allows you to create complex workflows with ease and [flexibility](wiki/flexibility)
+* Allows you to create complex workflows with ease and flexibility
 * Supports parallel execution of the Lambda functions, activities, child workflows and timers in the workflow
 * Supports fork and join of [workflow branches](wiki/Workflow-branches)
 * Supports recursion around an individual workflow item or an execution branch
