@@ -1,4 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 
 namespace Guflow.Decider
@@ -13,6 +15,7 @@ namespace Guflow.Decider
         long LatestEventId { get; }
         string WorkflowRunId { get; }
         string WorkflowId { get;}
+        DateTime ServerTimeUtc { get; }
         IEnumerable<WorkflowItemEvent> AllActivityEvents(ActivityItem activityItem);
         IEnumerable<WorkflowItemEvent> AllTimerEvents(TimerItem timerItem, bool includeRescheduleTimerEvents);
         IEnumerable<MarkerRecordedEvent> AllMarkerRecordedEvents();

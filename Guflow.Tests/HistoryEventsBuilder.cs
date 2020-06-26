@@ -41,14 +41,16 @@ namespace Guflow.Tests
             var decisionTask = new DecisionTask()
             {
                 Events = totalEvents,
-                WorkflowExecution = new WorkflowExecution() { RunId = _workflowRunId, WorkflowId = _workflowId}
+                WorkflowExecution = new WorkflowExecution() { RunId = _workflowRunId, WorkflowId = _workflowId},
+                TaskToken = "dummy token"
+
             };
             if (_newEvents.Count > 0)
             {
-                decisionTask.PreviousStartedEventId = _newEvents.Last().EventId - 1;
+                decisionTask.PreviousStartedEventId = _newEvents.Last().EventId -1 ;
                 decisionTask.StartedEventId = _newEvents.First().EventId;
             }
-            return new WorkflowHistoryEvents(decisionTask);
+            return new WorkflowHistoryEvents(WorkflowTask.Create(decisionTask));
         }
 
         public HistoryEventsBuilder AddWorkflowRunId(string runId)

@@ -25,11 +25,11 @@ namespace Guflow
         /// </summary>
         public static readonly ReadHistoryEvents ReadFirstPage = (d,q,p,t) => ReadFirstPageAsync(d, q, p,t);
         private readonly ILog _log = Log.GetLogger<TaskList>();
+
         /// <summary>
         /// Create a new instance of TaskList.
         /// </summary>
         /// <param name="taskListName"></param>
-        /// <param name="pollingIdentity"></param>
         public TaskList(string taskListName)
         {
             Ensure.NotNullAndEmpty(taskListName,()=>new ArgumentException(Resources.TaskListName_required, nameof(taskListName)));
@@ -55,12 +55,11 @@ namespace Guflow
         internal async Task<WorkflowTask> PollForWorkflowTaskAsync(Domain domain, string pollingIdentity, CancellationToken token)
         {
             _log.Debug($"Polling for new decisions on {this} under {domain}");
-            var decisionTask = await ReadStrategy(domain, this, pollingIdentity, token);
-            if (AreDecisionsReturned(decisionTask))
-                return WorkflowTask.CreateFor(decisionTask, domain);
-
-            _log.Debug($"No new decisions are returned on {this} under {domain}");
-            return WorkflowTask.Empty;
+            var workflowTask = await ReadStrategy(domain, this, pollingIdentity, token);
+            if(workflowTask==WorkflowTask.Empty)
+                _log.Debug($"No new decisions are returned on {this} under {domain}");
+            workflowTask.Validate();
+            return workflowTask;
         }
 
         internal async Task<WorkerTask> PollForWorkerTaskAsync(Domain domain, string pollingIdentity, CancellationToken cancellationToken)
@@ -77,15 +76,16 @@ namespace Guflow
             return !string.IsNullOrEmpty(activityTask?.TaskToken);
         }
 
-        private static async Task<DecisionTask> ReadAllEventsAsync(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken=null)
+        private static async Task<WorkflowTask> ReadAllEventsAsync(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken=null)
         {
             var decisionTask = await domain.PollForDecisionTaskAsync(taskList, pollingIdentity , token, nextPageToken);
+            var workflowTask = WorkflowTask.Create(decisionTask);
             if (HasMoreEventsToRead(decisionTask))
             {
                 var nextDecisionTasks = await ReadAllEventsAsync(domain, taskList, pollingIdentity,token ,decisionTask.NextPageToken);
-                decisionTask.Events.AddRange(nextDecisionTasks.Events);
+                workflowTask.Append(nextDecisionTasks);
             }
-            return decisionTask;
+            return workflowTask;
         }
         private static bool AreDecisionsReturned(DecisionTask decision)
         {
@@ -97,9 +97,10 @@ namespace Guflow
             return !string.IsNullOrEmpty(decisionTask?.NextPageToken);
         }
 
-        private static async Task<DecisionTask> ReadFirstPageAsync(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken= null)
+        private static async Task<WorkflowTask> ReadFirstPageAsync(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token, string nextPageToken= null)
         {
-            return await domain.PollForDecisionTaskAsync(taskList,pollingIdentity ,token,nextPageToken);
+            var decisionTask = await domain.PollForDecisionTaskAsync(taskList,pollingIdentity ,token,nextPageToken);
+            return WorkflowTask.Create(decisionTask);
         }
 
         internal PollForDecisionTaskRequest DecisionTaskPollingRequest(string domain, string pollingIdentity, string nextPageToken = null)
@@ -130,5 +131,5 @@ namespace Guflow
             return $"TaskList {_taskListName}";
         }
     }
-    public delegate Task<DecisionTask> ReadHistoryEvents(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token);
+    public delegate Task<WorkflowTask> ReadHistoryEvents(Domain domain, TaskList taskList, string pollingIdentity, CancellationToken token);
 }

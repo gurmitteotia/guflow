@@ -391,22 +391,6 @@ namespace Guflow.Tests.Decider
 
             Assert.That(lastEvent, Is.EqualTo(new ChildWorkflowCompletedEvent(completedEvent.First(), allEventsGraph)));
         }
-
-        [Test]
-        public void Last_event_is_cached()
-        {
-            var failedEventGraph = _eventGraphBuilder.ChildWorkflowFailedEventGraph(_scheduleIdentity, "runid", "input", "reason", "detail").ToArray();
-            var completedEvent = _eventGraphBuilder.ChildWorkflowCompletedGraph(_scheduleIdentity, "runid", "input", "result").ToArray();
-            var allEventsGraph = completedEvent.Concat(failedEventGraph);
-            var childWorkflow = ChildWorkflow(allEventsGraph);
-
-            var lastEvent1 = childWorkflow.LastEvent();
-            var lastEvent2 = childWorkflow.LastEvent();
-
-            Assert.That(ReferenceEquals(lastEvent1, lastEvent2));
-        }
-
-
         [Test]
         public void Last_event_can_return_reschedule_timer_event()
         {
@@ -478,9 +462,10 @@ namespace Guflow.Tests.Decider
         public void Reschedule_decision_is_timer_schedule_decision_for_child_workflow_item()
         {
             var item = new ChildWorkflowItem(_identity, _workflow.Object);
-            var decisions = item.RescheduleDecisions(TimeSpan.FromSeconds(20));
+            var decisions = item.RescheduleDecisions(TimeSpan.FromSeconds(20)).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new[]{new ScheduleTimerDecision(_scheduleIdentity, TimeSpan.FromSeconds(20), true)}));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(_scheduleIdentity, TimeSpan.FromSeconds(20));
         }
 
         [Test]

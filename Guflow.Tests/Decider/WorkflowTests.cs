@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using Moq;
 using NUnit.Framework;
@@ -16,6 +17,7 @@ namespace Guflow.Tests.Decider
         private HistoryEventsBuilder _builder;
         private Workflow _workflow;
 
+        private const string LambdaName = "Lambda";
         [SetUp]
         public void Setup()
         {
@@ -308,10 +310,12 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Signal_IsReceived_is_true()
+        public void Signal_IsReceived_API_returns_true_when_signal_is_received_before_current_active_event()
         {
-            _builder.AddNewEvents(_graphBuilder.WorkflowStartedEvent());
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("S1", "input"));
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowSignaledEvent("S1", "input"));
+            _builder.AddNewEvents(_graphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(),"input", "result"));
+            
             var w = new WorkflowIsSignalReceivedAPI("s1");
             w.Decisions(_builder.Result());
 
@@ -319,10 +323,23 @@ namespace Guflow.Tests.Decider
         }
 
         [Test]
-        public void Signal_IsReceived_is_false()
+        public void Signal_IsReceived_API_returns_true_when_signal_is_received_after_current_active_event()
         {
-            _builder.AddNewEvents(_graphBuilder.WorkflowStartedEvent());
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
+            _builder.AddNewEvents(_graphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "result"));
             _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("S1", "input"));
+
+            var w = new WorkflowIsSignalReceivedAPI("s1");
+            w.Decisions(_builder.Result());
+
+            Assert.That(w.IsSignalReceived, Is.True);
+        }
+        [Test]
+        public void Signal_IsReceived_is_false_when_no_signal_is_received_before_curent_active_event()
+        {
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
+            _builder.AddNewEvents(_graphBuilder.LambdaCompletedEventGraph(Identity.Lambda(LambdaName).ScheduleId(), "input", "result"));
+
             var w = new WorkflowIsSignalReceivedAPI("s2");
             w.Decisions(_builder.Result());
 
@@ -347,7 +364,7 @@ namespace Guflow.Tests.Decider
             return new WorkflowDecision[]
             {
                 new ScheduleActivityDecision(Identity.New("id", "1.0").ScheduleId()),
-                new ScheduleTimerDecision(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2)),
+                ScheduleTimerDecision.WorkflowItem(Identity.Timer("timer").ScheduleId(), TimeSpan.FromSeconds(2)),
                 new CancelActivityDecision(Identity.New("newid", "1.0").ScheduleId()),
                 new CancelTimerDecision(Identity.Timer("first").ScheduleId()),
                 new ScheduleLambdaDecision(Identity.Lambda("name").ScheduleId(),"input" ),
@@ -377,7 +394,7 @@ namespace Guflow.Tests.Decider
             public WorkflowToReturnCustomActionOnClosing(WorkflowDecision workflowDecision)
             {
                 _customAction = new Mock<WorkflowAction>();
-                _customAction.Setup(w => w.Decisions()).Returns(new[] { workflowDecision });
+                _customAction.Setup(w => w.Decisions(It.IsAny<IWorkflow>())).Returns(new[] { workflowDecision });
             }
             protected override WorkflowAction DuringCompletion(string result)
             {
@@ -407,7 +424,8 @@ namespace Guflow.Tests.Decider
         {
             private readonly WorkflowDecision _decision;
 
-            public TestEvent(WorkflowDecision decision) : base(0)
+            public TestEvent(WorkflowDecision decision) 
+                : base(new HistoryEvent(){EventId = 0, EventTimestamp = DateTime.UtcNow})
             {
                 _decision = decision;
             }
@@ -537,14 +555,12 @@ namespace Guflow.Tests.Decider
             public WorkflowIsSignalReceivedAPI(string signalName)
             {
                 _signalName = signalName;
+                ScheduleLambda(LambdaName).OnCompletion(e =>
+                {
+                    IsSignalReceived = Signal(_signalName).IsReceived();
+                    return DefaultAction(e);
+                });
             }
-            [WorkflowEvent(EventName.WorkflowStarted)]
-            public WorkflowAction Started()
-            {
-                IsSignalReceived = Signal(_signalName).IsReceived();
-                return Ignore;
-            }
-
             public bool IsSignalReceived;
         }
 

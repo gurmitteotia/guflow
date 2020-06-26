@@ -12,7 +12,8 @@ namespace Guflow.Decider
         private long _scheduledEventId;
         private string _name;
         private string _positionalName;
-        protected LambdaEvent(long eventId) : base(eventId)
+        protected LambdaEvent(HistoryEvent historyEvent) 
+            : base(historyEvent)
         {
         }
 

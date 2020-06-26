@@ -6,7 +6,8 @@ namespace Guflow.Decider
     public class WorkflowSignalFailedEvent : WorkflowEvent
     {
         private readonly SignalExternalWorkflowExecutionFailedEventAttributes _eventAttributes;
-        internal WorkflowSignalFailedEvent(HistoryEvent workflowSignalFailedEvent): base(workflowSignalFailedEvent.EventId)
+        internal WorkflowSignalFailedEvent(HistoryEvent workflowSignalFailedEvent)
+            : base(workflowSignalFailedEvent)
         {
             _eventAttributes = workflowSignalFailedEvent.SignalExternalWorkflowExecutionFailedEventAttributes;
         }

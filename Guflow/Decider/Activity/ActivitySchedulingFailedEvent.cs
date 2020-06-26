@@ -7,7 +7,8 @@ namespace Guflow.Decider
     {
         private readonly ScheduleActivityTaskFailedEventAttributes _eventAttributes;
 
-        internal ActivitySchedulingFailedEvent(HistoryEvent schedulingFailedEvent) : base(schedulingFailedEvent.EventId)
+        internal ActivitySchedulingFailedEvent(HistoryEvent schedulingFailedEvent) 
+            : base(schedulingFailedEvent)
         {
             _eventAttributes = schedulingFailedEvent.ScheduleActivityTaskFailedEventAttributes;
             ScheduleId = ScheduleId.Raw(_eventAttributes.ActivityId);

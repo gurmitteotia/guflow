@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System;
 using System.Collections.Generic;
+using Amazon.SimpleWorkflow.Model;
 
 namespace Guflow.Decider
 {
@@ -9,9 +10,11 @@ namespace Guflow.Decider
     /// </summary>
     public abstract class WorkflowEvent : IComparable<WorkflowEvent>
     {
-        protected WorkflowEvent(long eventId)
+        private readonly HistoryEvent _historyEvent;
+
+        protected WorkflowEvent(HistoryEvent historyEvent)
         {
-            EventId = eventId;
+            _historyEvent = historyEvent;
         }
 
         internal virtual WorkflowAction Interpret(IWorkflow workflow)
@@ -23,7 +26,11 @@ namespace Guflow.Decider
         {
             throw new NotSupportedException($"DefaultAction is not supported {this.GetType().Name}.");
         }
-        internal long EventId { get; }
+
+        internal virtual bool CanTriggerSignalTimeout => false;
+
+        internal long EventId => _historyEvent.EventId;
+        internal DateTime Timestamp => _historyEvent.EventTimestamp;
         public static readonly IComparer<WorkflowEvent> IdComparer = new EventIdComparer();
     
         public int CompareTo(WorkflowEvent other)

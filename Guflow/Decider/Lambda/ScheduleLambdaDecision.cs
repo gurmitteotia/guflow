@@ -10,13 +10,13 @@ namespace Guflow.Decider
     {
         private readonly ScheduleId _id;
         private readonly object _input;
-        private readonly TimeSpan? _timout;
+        private readonly TimeSpan? _timeout;
 
-        internal ScheduleLambdaDecision(ScheduleId id, object input, TimeSpan? timout = null) : base(canCloseWorkflow:false, proposal: false)
+        internal ScheduleLambdaDecision(ScheduleId id, object input, TimeSpan? timeout = null) : base(canCloseWorkflow:false, proposal: false)
         {
             _id = id;
             _input = input;
-            _timout = timout;
+            _timeout = timeout;
         }
 
         internal override bool IsFor(WorkflowItem workflowItem)
@@ -34,16 +34,14 @@ namespace Guflow.Decider
                     Id = _id,
                     Name = _id.Name,
                     Input = _input.ToLambdaInput(),
-                    StartToCloseTimeout = _timout.Seconds(),
+                    StartToCloseTimeout = _timeout.Seconds(),
                     Control = new ScheduleData() { PN = _id.PositionalName}.ToJson()
                 }
             };
         }
         public override bool Equals(object obj)
         {
-            var decision = obj as ScheduleLambdaDecision;
-            return decision != null && _id.Equals(decision._id);
-
+            return obj is ScheduleLambdaDecision decision && _id.Equals(decision._id);
         }
         public override int GetHashCode()
         {

@@ -206,6 +206,15 @@ namespace Guflow.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DecisionTaskStarted event is missing..
+        /// </summary>
+        public static string DecisionTaskStarted_event_is_missing {
+            get {
+                return ResourceManager.GetString("DecisionTaskStarted_event_is_missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default task list is missing. Please either provide default task list in description or pass the one explicitly to begin the execution.
         /// </summary>
         public static string Default_task_list_is_missing {

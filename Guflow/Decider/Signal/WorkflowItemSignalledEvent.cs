@@ -7,7 +7,8 @@ namespace Guflow.Decider
     internal class WorkflowItemSignalledEvent : WorkflowItemEvent
     {
         private readonly WorkflowItemSignalledData _data;
-        public WorkflowItemSignalledEvent(HistoryEvent @event) : base(@event.EventId)
+        public WorkflowItemSignalledEvent(HistoryEvent @event) 
+            : base(@event)
         {
             _data = @event.MarkerRecordedEventAttributes.Details.As<WorkflowItemSignalledData>();
             ScheduleId = ScheduleId.Raw(_data.ScheduleId);

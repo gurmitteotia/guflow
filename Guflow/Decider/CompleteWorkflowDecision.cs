@@ -7,12 +7,12 @@ namespace Guflow.Decider
     internal sealed class CompleteWorkflowDecision : WorkflowClosingDecision
     {
         private readonly string _result;
-        private const int _veryLow = 5;
-        private const int _low = 10;
+        private const int VeryLow = 5;
+        private const int Low = 10;
         public CompleteWorkflowDecision(string result, bool proposal=false):base(proposal)
         {
             _result = result;
-            Priority = proposal ? _veryLow : _low;
+            Priority = proposal ? VeryLow : Low;
         }
         internal override Decision SwfDecision()
         {

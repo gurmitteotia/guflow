@@ -1,6 +1,7 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -27,7 +28,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_fails_workflow()
         {
-            var decisions = _failedEvent.Interpret(new EmptyWorkflow()).Decisions();
+            var decisions = _failedEvent.Interpret(new EmptyWorkflow()).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[]{new FailWorkflowDecision("FAILED_TO_RESTART_WORKFLOW", "cause")}));
         }
@@ -35,7 +36,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Can_return_custom_action()
         {
-            var decisions = _failedEvent.Interpret(new WorkflowWithCompleteAction("result")).Decisions();
+            var decisions = _failedEvent.Interpret(new WorkflowWithCompleteAction("result")).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result") }));
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -48,15 +49,18 @@ namespace Guflow.Tests.Decider
             const string runId = "runid";
             _builder.AddWorkflowRunId(runId);
             _builder.AddNewEvents(_eventGraph.ToArray());
-            var decisions = new WorkflowWithLambda().Decisions(_builder.Result());
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("timer_name").ScheduleId(), TimeSpan.Zero) }));
+            var decisions = new WorkflowWithLambda().Decisions(_builder.Result()).ToArray();
+
+            var scheduleId = Identity.Timer("timer_name").ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]
         public void Can_schedule_custom_action()
         {
-            var decisions = _event.Interpret(new WorkflowWithCustomAction(WorkflowAction.CompleteWorkflow("result"))).Decisions();
+            var decisions = _event.Interpret(new WorkflowWithCustomAction(WorkflowAction.CompleteWorkflow("result"))).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new[] { new CompleteWorkflowDecision("result")}));
         }

@@ -26,7 +26,7 @@ namespace Guflow.Decider
 
         public override IEnumerable<WorkflowDecision> ScheduleDecisionsByIgnoringWhen()
         {
-            return _workflowActionFunc(this).Decisions();
+            return _workflowActionFunc(this).Decisions(Workflow);
         }
 
         public override IEnumerable<WorkflowDecision> RescheduleDecisions(TimeSpan timeout)
@@ -39,7 +39,6 @@ namespace Guflow.Decider
             return Enumerable.Empty<WorkflowDecision>();
         }
 
-        public override bool Has(ScheduleId id) => false;
         private static Identity RandomIdentity()
         {
             return Identity.New(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());

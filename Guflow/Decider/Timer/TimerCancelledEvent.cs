@@ -9,7 +9,8 @@ namespace Guflow.Decider
     /// </summary>
     public class TimerCancelledEvent : TimerEvent
     {
-        internal TimerCancelledEvent(HistoryEvent timerCancelledEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerCancelledEvent.EventId)
+        internal TimerCancelledEvent(HistoryEvent timerCancelledEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+            :base(timerCancelledEvent)
         {
             var eventAttributes = timerCancelledEvent.TimerCanceledEventAttributes;
             PopulateProperties(eventAttributes.StartedEventId, allHistoryEvents);

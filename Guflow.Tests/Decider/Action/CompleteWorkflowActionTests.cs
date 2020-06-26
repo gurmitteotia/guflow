@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
 using System.Linq;
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -24,7 +25,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowAction = WorkflowAction.CompleteWorkflow("result");
 
-            var decision = workflowAction.Decisions();
+            var decision = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decision,Is.EquivalentTo(new []{new CompleteWorkflowDecision("result")}));
         }
@@ -34,7 +35,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowAction = WorkflowAction.CompleteWorkflow(new {Id =10, Name = "hello"});
 
-            var decision = workflowAction.Decisions();
+            var decision = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decision, Is.EquivalentTo(new[] { new CompleteWorkflowDecision(@"{""Id"":10,""Name"":""hello""}")}));
         }
@@ -47,7 +48,7 @@ namespace Guflow.Tests.Decider
             var completedActivityEventGraph = _builder.ActivityCompletedGraph(activityIdentity, "id", "res");
             var completedActivityEvent = new ActivityCompletedEvent(completedActivityEventGraph.First(), completedActivityEventGraph);
 
-            var decisions = completedActivityEvent.Interpret(workflow).Decisions();
+            var decisions = completedActivityEvent.Interpret(workflow).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new []{new CompleteWorkflowDecision("result")}));
         }

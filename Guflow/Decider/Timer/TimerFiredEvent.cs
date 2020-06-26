@@ -6,7 +6,8 @@ namespace Guflow.Decider
 {
     public class TimerFiredEvent :TimerEvent
     {
-        internal TimerFiredEvent(HistoryEvent timerFiredEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(timerFiredEvent.EventId)
+        internal TimerFiredEvent(HistoryEvent timerFiredEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+            :base(timerFiredEvent)
         {
             var eventAttributes =timerFiredEvent.TimerFiredEventAttributes;
             PopulateProperties(eventAttributes.StartedEventId, allHistoryEvents);
@@ -20,5 +21,7 @@ namespace Guflow.Decider
         {
             return defaultActions.Continue(this);
         }
+
+        internal override bool CanTriggerSignalTimeout => SignalTriggerEventId != 0;
     }
 }

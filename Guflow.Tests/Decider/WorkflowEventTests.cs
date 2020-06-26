@@ -1,4 +1,7 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System;
+using Amazon.SimpleWorkflow.Model;
 using Guflow.Decider;
 using NUnit.Framework;
 
@@ -66,7 +69,8 @@ namespace Guflow.Tests.Decider
 
         private class TestWorkflowEvent : WorkflowEvent
         {
-            public TestWorkflowEvent(long eventId) : base(eventId)
+            public TestWorkflowEvent(long eventId) 
+                : base(new HistoryEvent(){ EventId = eventId, EventTimestamp = DateTime.UtcNow})
             {
             }
             internal override WorkflowAction Interpret(IWorkflow workflow)

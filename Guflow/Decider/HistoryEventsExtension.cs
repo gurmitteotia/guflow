@@ -181,16 +181,29 @@ namespace Guflow.Decider
             return historyEvent.EventType == EventType.ScheduleLambdaFunctionFailed;
         }
 
-        private static bool IsWorkflowItemSignalledEvent(this HistoryEvent historyEvent)
+        public static bool IsWorkflowItemSignalledEvent(this HistoryEvent historyEvent)
         {
             return historyEvent.EventType == EventType.MarkerRecorded &&
                    historyEvent.MarkerRecordedEventAttributes.MarkerName == InternalMarkerNames.WorkflowItemSignalled;
+        }
+
+        public static bool IsWorkflowItemSignalTimedoutEvent(this HistoryEvent historyEvent)
+        {
+            return historyEvent.EventType == EventType.MarkerRecorded &&
+                   historyEvent.MarkerRecordedEventAttributes.MarkerName == InternalMarkerNames.WorkflowItemSignalsTimedout;
         }
 
         public static WorkflowItemSignalledEvent WorkflowItemSignalledEvent(this HistoryEvent historyEvent)
         {
             if(historyEvent.IsWorkflowItemSignalledEvent())
                 return new WorkflowItemSignalledEvent(historyEvent);
+            return null;
+        }
+
+        public static WorkflowItemSignalTimedoutEvent WorkflowItemSignalTimedoutEvent(this HistoryEvent historyEvent)
+        {
+            if (historyEvent.IsWorkflowItemSignalTimedoutEvent())
+                return new WorkflowItemSignalTimedoutEvent(historyEvent);
             return null;
         }
 

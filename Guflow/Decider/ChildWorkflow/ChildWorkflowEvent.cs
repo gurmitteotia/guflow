@@ -1,5 +1,6 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow.Model;
@@ -12,7 +13,8 @@ namespace Guflow.Decider
         protected string WorkflowVersion;
         protected string PositionalName;
         private long _initiatedEventId;
-        protected ChildWorkflowEvent(long eventId) : base(eventId)
+        protected ChildWorkflowEvent(HistoryEvent historyEvent) 
+            : base(historyEvent)
         {
         }
         /// <summary>

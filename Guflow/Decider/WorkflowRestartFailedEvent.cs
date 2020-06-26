@@ -9,7 +9,8 @@ namespace Guflow.Decider
     /// </summary>
     public sealed class WorkflowRestartFailedEvent : WorkflowEvent
     {
-        internal WorkflowRestartFailedEvent(HistoryEvent @event) : base(@event.EventId)
+        internal WorkflowRestartFailedEvent(HistoryEvent @event) 
+            : base(@event)
         {
             var attr = @event.ContinueAsNewWorkflowExecutionFailedEventAttributes;
             Cause = attr.Cause;

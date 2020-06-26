@@ -13,7 +13,7 @@ namespace Guflow.Decider
 
         public WorkflowDecision[] CompatibleDecisions(Workflow workflow)
         {
-            var decisions = _actions.Where(w => w != null).SelectMany(a => a.Decisions()).Distinct();
+            var decisions = _actions.Where(w => w != null).SelectMany(a => a.Decisions(workflow)).Distinct();
             return decisions.CompatibleDecisions(workflow).Where(d => d != WorkflowDecision.Empty).ToArray(); 
         }
 

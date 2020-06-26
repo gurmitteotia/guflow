@@ -37,7 +37,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_signal_workflow_action()
         {
-            var decisions = _signal.ForWorkflow("id", "runid").Decisions();
+            var decisions = _signal.ForWorkflow("id", "runid").Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision(SignalName, SignalInput, "id", "runid")}));
         }
@@ -47,7 +47,7 @@ namespace Guflow.Tests.Decider
         {
             var receivedSignalEvent = new WorkflowSignaledEvent(_eventGraphBuilder.WorkflowSignaledEvent("someName","input1","rid","wid"));
 
-            var decisions = _signal.ReplyTo(receivedSignalEvent).Decisions();
+            var decisions = _signal.ReplyTo(receivedSignalEvent).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision(SignalName, SignalInput, "wid", "rid")}));
         }

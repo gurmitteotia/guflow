@@ -10,7 +10,8 @@ namespace Guflow.Decider
     /// </summary>
     public class LambdaFailedEvent : LambdaEvent
     {
-        internal LambdaFailedEvent(HistoryEvent failedEvent, IEnumerable<HistoryEvent> allEvents) : base(failedEvent.EventId)
+        internal LambdaFailedEvent(HistoryEvent failedEvent, IEnumerable<HistoryEvent> allEvents) 
+            : base(failedEvent)
         {
             var attr = failedEvent.LambdaFunctionFailedEventAttributes;
             Reason = attr.Reason;

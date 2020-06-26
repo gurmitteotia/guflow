@@ -13,7 +13,7 @@ namespace Guflow.Decider
         private readonly ChildWorkflowExecutionTimedOutEventAttributes _attr;
 
         internal ChildWorkflowTimedoutEvent(HistoryEvent timedoutEvent, IEnumerable<HistoryEvent> allEvents)
-            : base(timedoutEvent.EventId)
+            : base(timedoutEvent)
         {
             _attr = timedoutEvent.ChildWorkflowExecutionTimedOutEventAttributes;
             PopulateProperties(_attr.WorkflowExecution.RunId, _attr.InitiatedEventId, allEvents);

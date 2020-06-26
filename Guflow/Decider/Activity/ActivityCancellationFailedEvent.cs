@@ -10,7 +10,8 @@ namespace Guflow.Decider
     public class ActivityCancellationFailedEvent : WorkflowItemEvent
     {
         private readonly RequestCancelActivityTaskFailedEventAttributes _eventAttributes;
-        internal ActivityCancellationFailedEvent(HistoryEvent activityCancellationFailedEvent) : base(activityCancellationFailedEvent.EventId)
+        internal ActivityCancellationFailedEvent(HistoryEvent activityCancellationFailedEvent) 
+            : base(activityCancellationFailedEvent)
         {
             _eventAttributes = activityCancellationFailedEvent.RequestCancelActivityTaskFailedEventAttributes;
             ScheduleId = ScheduleId.Raw(_eventAttributes.ActivityId);

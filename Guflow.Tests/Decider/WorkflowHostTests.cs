@@ -16,6 +16,7 @@ namespace Guflow.Tests.Decider
         private Domain _domain;
         private Mock<IAmazonSimpleWorkflow> _simpleWorkflow;
         private const string TaskList = "dlist";
+        private const string Identity = "id";
 
         [SetUp]
         public void Setup()
@@ -38,8 +39,8 @@ namespace Guflow.Tests.Decider
             var hostedWorkflow2 = new TestWorkflow2();
             var hostedWorkflows = new WorkflowHost(_domain, new Workflow[] { hostedWorkflow1, hostedWorkflow2 });
 
-            Assert.That(hostedWorkflows.FindBy("TestWorkflow1", "2.0"), Is.EqualTo(hostedWorkflow1));
-            Assert.That(hostedWorkflows.FindBy("TestWorkflow2", "1.0"), Is.EqualTo(hostedWorkflow2));
+            Assert.That(hostedWorkflows.Workflow("TestWorkflow1", "2.0"), Is.EqualTo(hostedWorkflow1));
+            Assert.That(hostedWorkflows.Workflow("TestWorkflow2", "1.0"), Is.EqualTo(hostedWorkflow2));
         }
 
         [Test]
@@ -48,7 +49,7 @@ namespace Guflow.Tests.Decider
             var hostedWorkflow = new TestWorkflow1();
             var hostedWorkflows = new WorkflowHost(_domain, new[] { hostedWorkflow });
 
-            Assert.Throws<WorkflowNotHostedException>(() => hostedWorkflows.FindBy("TestWorkflow2", "2.0"));
+            Assert.Throws<WorkflowNotHostedException>(() => hostedWorkflows.Workflow("TestWorkflow2", "2.0"));
         }
 
         [Test]
@@ -108,27 +109,26 @@ namespace Guflow.Tests.Decider
             var @pollingEvent = PollingEvent();
             using (var host = new WorkflowHost(_domain, new Workflow[] {new TestWorkflow2(), new TestWorkflow3()}))
             {
-                host.PollingIdentity = TaskList;
+                host.PollingIdentity = Identity;
                 host.StartExecution();
                 @pollingEvent.WaitOne();
             }
 
-            AssertThatSWFIsPolledWithDefaultTaskList();
+            AssertThatSwfIsPolledWithDefaultTaskList();
         }
         private ManualResetEvent PollingEvent()
         {
             var @event = new ManualResetEvent(false);
-            Func<PollForDecisionTaskRequest, bool> request = (r) => r.Identity == TaskList;
-            _simpleWorkflow.Setup(s => s.PollForDecisionTaskAsync(It.Is<PollForDecisionTaskRequest>(r => request(r))
+            _simpleWorkflow.Setup(s => s.PollForDecisionTaskAsync(It.IsAny<PollForDecisionTaskRequest>()
                     , It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new PollForDecisionTaskResponse())
                 .Callback(() => @event.Set());
             return @event;
         }
 
-        private void AssertThatSWFIsPolledWithDefaultTaskList()
+        private void AssertThatSwfIsPolledWithDefaultTaskList()
         {
-            Func<PollForDecisionTaskRequest, bool> request = (r) => r.Identity == TaskList;
+            Func<PollForDecisionTaskRequest, bool> request = (r) => r.Identity == Identity;
             _simpleWorkflow.Verify(s => s.PollForDecisionTaskAsync(It.Is<PollForDecisionTaskRequest>(r => request(r))
                 , It.IsAny<CancellationToken>()));
         }

@@ -10,7 +10,8 @@ namespace Guflow.Decider
     /// </summary>
     public sealed class ChildWorkflowStartedEvent : ChildWorkflowEvent
     {
-        internal ChildWorkflowStartedEvent(HistoryEvent startedEvent, IEnumerable<HistoryEvent> allEvents) : base(startedEvent.EventId)
+        internal ChildWorkflowStartedEvent(HistoryEvent startedEvent, IEnumerable<HistoryEvent> allEvents) 
+            : base(startedEvent)
         {
             var attr = startedEvent.ChildWorkflowExecutionStartedEventAttributes;
             PopulateProperties(attr.WorkflowExecution.RunId, attr.InitiatedEventId, allEvents);

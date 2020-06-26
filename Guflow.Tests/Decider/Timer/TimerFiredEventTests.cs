@@ -19,6 +19,7 @@ namespace Guflow.Tests.Decider
         private const string LambdaName = "Lambda";
         private const string WorkflowName = "Workflow";
         private const string WorkflowVersion = "1.0";
+        private const string ParentWorkflowRunId = "pid";
         private readonly TimeSpan _fireAfter = TimeSpan.FromSeconds(20);
         private EventGraphBuilder _graphBuilder;
         private HistoryEventsBuilder _builder;
@@ -30,6 +31,7 @@ namespace Guflow.Tests.Decider
             _graphBuilder = new EventGraphBuilder();
             _builder = new HistoryEventsBuilder();
             _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent("input"));
+            _builder.AddWorkflowRunId(ParentWorkflowRunId);
             _identity = Identity.Timer(TimerName);
 
             _timerFiredEvent = CreateTimerFiredEvent(_identity, _fireAfter);
@@ -91,12 +93,27 @@ namespace Guflow.Tests.Decider
             Assert.That(decisions,Is.EqualTo(new[]{new CompleteWorkflowDecision("result")}));
         }
 
+
+        [Test]
+        public void Returns_schedule_activity_decision_if_timer_is_fired_to_reschedule_an_activity_item_using_old_data_object()
+        {
+            var workflow = new SingleActivityWorkflow();
+            _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
+            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(), _fireAfter, true).ToArray());
+
+            var workflowAction = workflow.Decisions(_builder.Result());
+
+            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleActivityDecision(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId()) }));
+        }
+
+
+
         [Test]
         public void Returns_schedule_activity_decision_if_timer_is_fired_to_reschedule_an_activity_item()
         {
             var workflow = new SingleActivityWorkflow();
             _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
-            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(), _fireAfter, true).ToArray());
+            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(Identity.New(ActivityName, ActivityVersion, PositionalName).ScheduleId(), _fireAfter, TimerType.Reschedule).ToArray());
 
             var workflowAction = workflow.Decisions(_builder.Result());
 
@@ -107,11 +124,26 @@ namespace Guflow.Tests.Decider
         public void Returns_schedule_timer_decision_if_timer_is_fired_to_reschedule_a_timer_item()
         {
             var workflow = new WorkflowWithTimer();
+            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(_identity.ScheduleId(), _fireAfter, TimerType.Reschedule).ToArray());
+
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
+
+            var scheduleId = Identity.Timer(TimerName).ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
+        }
+
+        [Test]
+        public void Returns_schedule_timer_decision_if_timer_is_fired_to_reschedule_a_timer_item_using_old_data_object()
+        {
+            var workflow = new WorkflowWithTimer();
             _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(_identity.ScheduleId(), _fireAfter, true).ToArray());
 
-            var workflowAction = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(workflowAction, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.Zero) }));
+            var scheduleId = Identity.Timer(TimerName).ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]
@@ -119,7 +151,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleLambdaWorkflow();
             _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
-            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(Identity.Lambda(LambdaName).ScheduleId(), _fireAfter, true).ToArray());
+            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(Identity.Lambda(LambdaName).ScheduleId(), _fireAfter, TimerType.Reschedule).ToArray());
 
             var workflowAction = workflow.Decisions(_builder.Result());
 
@@ -131,11 +163,12 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new ChildWorkflow();
             _builder.AddProcessedEvents(_graphBuilder.WorkflowStartedEvent());
-            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(Identity.New(WorkflowName,WorkflowVersion).ScheduleId(), _fireAfter, true).ToArray());
+            var scheduleId = Identity.New(WorkflowName,WorkflowVersion).ScheduleId(ParentWorkflowRunId);
+            _builder.AddNewEvents(_graphBuilder.TimerFiredGraph(scheduleId, _fireAfter, TimerType.Reschedule).ToArray());
 
             var workflowAction = workflow.Decisions(_builder.Result());
 
-            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(Identity.New(WorkflowName, WorkflowVersion).ScheduleId(), "input") }));
+            Assert.That(workflowAction, Is.EqualTo(new[] { new ScheduleChildWorkflowDecision(scheduleId, "input") }));
         }
 
         [Test]

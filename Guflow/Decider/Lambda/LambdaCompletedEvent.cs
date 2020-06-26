@@ -10,7 +10,8 @@ namespace Guflow.Decider
     /// </summary>
     public class LambdaCompletedEvent : LambdaEvent
     {
-        internal LambdaCompletedEvent(HistoryEvent completedEvent, IEnumerable<HistoryEvent> eventGraph) : base(completedEvent.EventId)
+        internal LambdaCompletedEvent(HistoryEvent completedEvent, IEnumerable<HistoryEvent> eventGraph) 
+            : base(completedEvent)
         {
             var attributes = completedEvent.LambdaFunctionCompletedEventAttributes;
             Result = attributes.Result;

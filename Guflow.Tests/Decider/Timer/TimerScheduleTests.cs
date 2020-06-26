@@ -20,6 +20,7 @@ namespace Guflow.Tests.Decider
         private const string ChildWorkflowName = "Cname";
         private const string ChildWorkflowVersion = "1.0";
 
+        private ScheduleId _timerScheduleId;
         private EventGraphBuilder _eventGraphBuilder;
         private HistoryEventsBuilder _eventsBuilder;
         [SetUp]
@@ -27,33 +28,37 @@ namespace Guflow.Tests.Decider
         {
             _eventGraphBuilder = new EventGraphBuilder();
             _eventsBuilder = new HistoryEventsBuilder();
+            _timerScheduleId = Identity.Timer(TimerName).ScheduleId();
         }
 
         [Test]
         public void Timer_can_be_scheduled_after_activity()
         {
             var eventGraph = ActivityEventGraph();
-            var decision = new TimerAfterActivityWorkflow().Decisions(eventGraph);
+            var decisions = new TimerAfterActivityWorkflow().Decisions(eventGraph).ToArray();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerScheduleId, TimeSpan.FromSeconds(0));
         }
 
         [Test]
         public void Timer_can_be_scheduled_after_timer()
         {
             var eventGraph = TimerCompletedEventGraph();
-            var decision = new TimerAfterTimerWorkflow().Decisions(eventGraph);
+            var decisions = new TimerAfterTimerWorkflow().Decisions(eventGraph).ToArray();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerScheduleId, TimeSpan.FromSeconds(0));
         }
 
         [Test]
         public void Timer_can_be_scheduled_after_lambda()
         {
             var eventGraph = LambdaCompletedEventGraph();
-            var decision = new TimerAfterLambdaWorkflow().Decisions(eventGraph);
+            var decisions = new TimerAfterLambdaWorkflow().Decisions(eventGraph).ToArray();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerScheduleId, TimeSpan.FromSeconds(0));
         }
 
 
@@ -61,9 +66,10 @@ namespace Guflow.Tests.Decider
         public void Timer_can_be_scheduled_after_child_workflow()
         {
             var eventGraph = ChildWorkflowCompletedEventGraph();
-            var decision = new TimerAfterChildWorkflow().Decisions(eventGraph);
+            var decisions = new TimerAfterChildWorkflow().Decisions(eventGraph).ToArray();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerScheduleId, TimeSpan.FromSeconds(0));
         }
 
 
@@ -71,9 +77,10 @@ namespace Guflow.Tests.Decider
         public void Timer_can_be_scheduled_after_child_workflow_using_generic_type_api()
         {
             var eventGraph = ChildWorkflowCompletedEventGraph();
-            var decision = new TimerAfterChildWorkflowUsingGenericApi().Decisions(eventGraph);
+            var decisions = new TimerAfterChildWorkflowUsingGenericApi().Decisions(eventGraph).ToArray();
 
-            Assert.That(decision, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer(TimerName).ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(_timerScheduleId, TimeSpan.FromSeconds(0));
         }
 
         private WorkflowHistoryEvents ActivityEventGraph()

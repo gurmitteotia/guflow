@@ -7,6 +7,7 @@ namespace Guflow.Decider
     {
         IEnumerable<WorkflowItem> GetChildernOf(WorkflowItem workflowItem);
         WorkflowItem WorkflowItem(Identity identity);
+        WaitForSignalsEvent TimedoutEventTriggerBy(WorkflowEvent workflowEvent);
         ChildWorkflowItem ChildWorkflowItem(Identity identity);
         IWorkflowHistoryEvents WorkflowHistoryEvents { get; }
         IEnumerable<WaitForSignalsEvent> WaitForSignalsEvents { get; } 
@@ -43,5 +44,7 @@ namespace Guflow.Decider
         WorkflowAction WorkflowAction(ChildWorkflowStartFailedEvent startFailed);
         WorkflowAction WorkflowAction(WorkflowRestartFailedEvent failedEvent);
         WorkflowAction WorkflowAction(ChildWorkflowStartedEvent startedEvent);
+        void PushNewExecutingEvent(WorkflowEvent @event);
+        void PopExecutingEvent();
     }
 }

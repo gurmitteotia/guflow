@@ -9,7 +9,8 @@ namespace Guflow.Decider
     public class WorkflowSignaledEvent : WorkflowEvent
     {
         private readonly WorkflowExecutionSignaledEventAttributes _eventAttributes;
-        internal WorkflowSignaledEvent(HistoryEvent signaledEvent) : base(signaledEvent.EventId)
+        internal WorkflowSignaledEvent(HistoryEvent signaledEvent) 
+            : base(signaledEvent)
         {
             _eventAttributes = signaledEvent.WorkflowExecutionSignaledEventAttributes;
         }
@@ -47,7 +48,9 @@ namespace Guflow.Decider
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)
         {
-            return defaultActions.ResumeOnSignal(SignalName);
+            return defaultActions.ResumeOnSignal(this);
         }
+
+        internal override bool CanTriggerSignalTimeout => true;
     }
 }

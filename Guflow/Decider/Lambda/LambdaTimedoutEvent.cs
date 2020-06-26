@@ -10,7 +10,8 @@ namespace Guflow.Decider
     /// </summary>
     public class LambdaTimedoutEvent : LambdaEvent
     {
-        internal LambdaTimedoutEvent(HistoryEvent timedoutEvent, IEnumerable<HistoryEvent> allEvents) : base(timedoutEvent.EventId)
+        internal LambdaTimedoutEvent(HistoryEvent timedoutEvent, IEnumerable<HistoryEvent> allEvents) 
+            : base(timedoutEvent)
         {
             var attr = timedoutEvent.LambdaFunctionTimedOutEventAttributes;
             TimedoutType = attr.TimeoutType;

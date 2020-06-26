@@ -14,7 +14,7 @@ namespace Guflow.Tests.Decider
     internal class EventGraphBuilder
     {
         private long _currentEventId = 0;
-        public IEnumerable<HistoryEvent> ActivityCompletedGraph(ScheduleId activityIdentity, string workerIdentity, string result, string input = "")
+        public IEnumerable<HistoryEvent> ActivityCompletedGraph(ScheduleId activityIdentity, string workerIdentity, string result, string input = "", DateTime? completedStamp=null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -27,7 +27,9 @@ namespace Guflow.Tests.Decider
                     Result = result,
                     StartedEventId = eventIds.EventId(EventIds.Started),
                     ScheduledEventId = eventIds.EventId(EventIds.Scheduled)
-                }
+                },
+                EventTimestamp = completedStamp??DateTime.UtcNow
+                
             });
 
             historyEvents.Add(new HistoryEvent()
@@ -221,6 +223,37 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
+        public IEnumerable<HistoryEvent> TimerFiredGraph(ScheduleId timerId, TimeSpan startToFireTimeout, TimerType timerType, long signalTriggerEventId=0, DateTime? timerFiredDateTime=null)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.TimerFiredIds(ref _currentEventId);
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerFired,
+                EventId = eventIds.EventId(EventIds.TimerFired),
+                EventTimestamp = timerFiredDateTime??DateTime.UtcNow,
+                TimerFiredEventAttributes = new TimerFiredEventAttributes()
+                {
+                    StartedEventId = eventIds.EventId(EventIds.Started),
+                    TimerId = timerId
+                },
+            });
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerStarted,
+                EventId = eventIds.EventId(EventIds.Started),
+                TimerStartedEventAttributes = new TimerStartedEventAttributes()
+                {
+                    TimerId = timerId,
+                    StartToFireTimeout = ((long)startToFireTimeout.TotalSeconds).ToString(),
+                    Control = (new TimerScheduleData() { TimerName = timerId.Name, TimerType = timerType, SignalTriggerEventId = signalTriggerEventId}).ToJson()
+                }
+            });
+            return historyEvents;
+        }
+
         public IEnumerable<HistoryEvent> TimerCancelledGraph(ScheduleId timerId, TimeSpan startToFireTimeout, bool isARescheduleTimer = false)
         {
             var historyEvents = new List<HistoryEvent>();
@@ -376,6 +409,26 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
+        public IEnumerable<HistoryEvent> TimerStartedGraph(ScheduleId identity, TimeSpan fireAfter, TimerType timerType, long triggerEventId=0)
+        {
+            var historyEvents = new List<HistoryEvent>();
+            var eventIds = EventIds.TimerStartedIds(ref _currentEventId);
+
+            historyEvents.Add(new HistoryEvent()
+            {
+                EventType = EventType.TimerStarted,
+                EventId = eventIds.EventId(EventIds.Started),
+                TimerStartedEventAttributes = new TimerStartedEventAttributes()
+                {
+                    TimerId = identity,
+                    StartToFireTimeout = ((long)fireAfter.TotalSeconds).ToString(),
+                    Control = (new TimerScheduleData() { TimerName = identity.Name, TimerType = timerType, SignalTriggerEventId = triggerEventId}).ToJson()
+                }
+            });
+
+            return historyEvents;
+        }
+
         public IEnumerable<HistoryEvent> ActivitySchedulingFailedGraph(ScheduleId activityIdentity, string cause)
         {
             var historyEvents = new List<HistoryEvent>();
@@ -416,7 +469,7 @@ namespace Guflow.Tests.Decider
             return historyEvents;
         }
 
-        public IEnumerable<HistoryEvent> ActivityStartedGraph(ScheduleId activityIdentity, string identity)
+        public IEnumerable<HistoryEvent> ActivityStartedGraph(ScheduleId scheduleId, string identity)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.StartedIds(ref _currentEventId);
@@ -438,9 +491,9 @@ namespace Guflow.Tests.Decider
                 EventId = eventIds.EventId(EventIds.Scheduled),
                 ActivityTaskScheduledEventAttributes = new ActivityTaskScheduledEventAttributes()
                 {
-                    ActivityType = new ActivityType() { Name = activityIdentity.Name, Version = activityIdentity.Version },
-                    Control = (new ScheduleData() { PN = activityIdentity.PositionalName }).ToJson(),
-                    ActivityId = activityIdentity
+                    ActivityType = new ActivityType() { Name = scheduleId.Name, Version = scheduleId.Version },
+                    Control = (new ScheduleData() { PN = scheduleId.PositionalName }).ToJson(),
+                    ActivityId = scheduleId
                 }
             });
             return historyEvents;
@@ -503,13 +556,14 @@ namespace Guflow.Tests.Decider
                 }
             };
         }
-        public HistoryEvent WorkflowSignaledEvent(string signalName, string input)
+        public HistoryEvent WorkflowSignaledEvent(string signalName, string input, DateTime? completedTime=null)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             return new HistoryEvent
             {
                 EventId = eventIds.EventId(EventIds.Generic),
                 EventType = EventType.WorkflowExecutionSignaled,
+                EventTimestamp = completedTime??DateTime.UtcNow,
                 WorkflowExecutionSignaledEventAttributes = new WorkflowExecutionSignaledEventAttributes()
                 {
                     SignalName = signalName,
@@ -565,7 +619,7 @@ namespace Guflow.Tests.Decider
         }
 
         public HistoryEvent WaitForSignalEvent(ScheduleId id, long eventId, string[] eventNames,
-            SignalWaitType waitType, SignalNextAction nextAction = SignalNextAction.Continue)
+            SignalWaitType waitType, SignalNextAction nextAction = SignalNextAction.Continue, DateTime? triggerTimestamp=null, TimeSpan? timeout=null)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             var details = new WaitForSignalData()
@@ -574,7 +628,9 @@ namespace Guflow.Tests.Decider
                 TriggerEventId = eventId,
                 WaitType = waitType,
                 SignalNames = eventNames,
-                NextAction = nextAction
+                NextAction = nextAction,
+                TriggerEventCompletionDate = triggerTimestamp,
+                Timeout = timeout
             };
             return new HistoryEvent
             {
@@ -588,13 +644,13 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public HistoryEvent WorkflowItemSignalledEvent(ScheduleId id, long eventId, string eventName)
+        public HistoryEvent WorkflowItemSignalledEvent(ScheduleId id, long triggerEventId, string eventName)
         {
             var eventIds = EventIds.GenericEventIds(ref _currentEventId);
             var details = new WorkflowItemSignalledData()
             {
                 ScheduleId = id,
-                TriggerEventId = eventId,
+                TriggerEventId = triggerEventId,
                 SignalName = eventName,
             };
             return new HistoryEvent
@@ -711,7 +767,7 @@ namespace Guflow.Tests.Decider
             };
         }
 
-        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(ScheduleId identity, object input, object result, TimeSpan? startToClose = null)
+        public IEnumerable<HistoryEvent> LambdaCompletedEventGraph(ScheduleId identity, object input, object result, TimeSpan? startToClose = null, DateTime? completedStamp=null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -719,6 +775,7 @@ namespace Guflow.Tests.Decider
             {
                 EventId = eventIds.EventId(EventIds.Completion),
                 EventType = EventType.LambdaFunctionCompleted,
+                EventTimestamp = completedStamp ?? DateTime.UtcNow,
                 LambdaFunctionCompletedEventAttributes = new LambdaFunctionCompletedEventAttributes()
                 {
                     Result = result.ToAwsString(),
@@ -943,7 +1000,7 @@ namespace Guflow.Tests.Decider
         }
 
 
-        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(ScheduleId identity, string runId, object input, object result)
+        public IEnumerable<HistoryEvent> ChildWorkflowCompletedGraph(ScheduleId identity, string runId, object input, object result, DateTime?completionStamp=null)
         {
             var historyEvents = new List<HistoryEvent>();
             var eventIds = EventIds.CompletedIds(ref _currentEventId);
@@ -953,6 +1010,7 @@ namespace Guflow.Tests.Decider
             {
                 EventId = eventIds.EventId(EventIds.Completion),
                 EventType = EventType.ChildWorkflowExecutionCompleted,
+                EventTimestamp = completionStamp??DateTime.UtcNow,
                 ChildWorkflowExecutionCompletedEventAttributes = new ChildWorkflowExecutionCompletedEventAttributes()
                 {
                     Result = result.ToAwsString(),
@@ -1462,6 +1520,44 @@ namespace Guflow.Tests.Decider
                 ContinueAsNewWorkflowExecutionFailedEventAttributes = new ContinueAsNewWorkflowExecutionFailedEventAttributes()
                 {
                     Cause = cause,
+                }
+            };
+        }
+
+
+        public HistoryEvent WorkflowItemSignalTimedoutEvent(ScheduleId scheduleId, long triggerEventId, string[] timedoutSignals, long timeoutTriggerId)
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            var details = new SignalsTimedoutDetails()
+            {
+                ScheduleId = scheduleId.ToString(),
+                TriggerEventId = triggerEventId,
+                TimedoutSignalNames = timedoutSignals,
+                TimeoutTriggerEventId = timeoutTriggerId
+            };
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.MarkerRecorded,
+                MarkerRecordedEventAttributes = new MarkerRecordedEventAttributes()
+                {
+                    MarkerName = InternalMarkerNames.WorkflowItemSignalsTimedout,
+                    Details = details.ToJson()
+                }
+            };
+        }
+
+        public HistoryEvent DecisionStartedEvent(DateTime eventTimeStamp)
+        {
+            var eventIds = EventIds.GenericEventIds(ref _currentEventId);
+            return new HistoryEvent
+            {
+                EventId = eventIds.EventId(EventIds.Generic),
+                EventType = EventType.DecisionTaskStarted,
+                EventTimestamp = eventTimeStamp,
+                DecisionTaskStartedEventAttributes = new DecisionTaskStartedEventAttributes()
+                {
+                    Identity = "id"
                 }
             };
         }

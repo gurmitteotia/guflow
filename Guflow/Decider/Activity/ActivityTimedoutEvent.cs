@@ -10,18 +10,19 @@ namespace Guflow.Decider
     public class ActivityTimedoutEvent : ActivityEvent
     {
         private readonly ActivityTaskTimedOutEventAttributes _eventAttributes;
-        internal ActivityTimedoutEvent(HistoryEvent activityTimedoutEvent, IEnumerable<HistoryEvent> allHistoryEvents) : base(activityTimedoutEvent.EventId)
+        internal ActivityTimedoutEvent(HistoryEvent activityTimedoutEvent, IEnumerable<HistoryEvent> allHistoryEvents) 
+            : base(activityTimedoutEvent)
         {
             _eventAttributes = activityTimedoutEvent.ActivityTaskTimedOutEventAttributes;
-            PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
+            PopulateAttributes(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
         /// <summary>
-        /// Returns reason, why activity has timedout.
+        /// Returns the reason why activity has timedout.
         /// </summary>
         public string TimeoutType => _eventAttributes.TimeoutType;
 
         /// <summary>
-        /// Returns last heartbeat reported details.
+        /// Returns last reported details reported by heartbeat.
         /// </summary>
         public string Details => _eventAttributes.Details;
 

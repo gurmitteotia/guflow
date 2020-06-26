@@ -6,9 +6,10 @@ namespace Guflow.Decider
 {
     public class ActivityScheduledEvent : ActivityEvent
     {
-        internal ActivityScheduledEvent(HistoryEvent scheduledActivityEvent,IEnumerable<HistoryEvent> allHistoryEvents) : base(scheduledActivityEvent.EventId)
+        internal ActivityScheduledEvent(HistoryEvent scheduledActivityEvent,IEnumerable<HistoryEvent> allHistoryEvents) 
+            : base(scheduledActivityEvent)
         {
-            PopulateActivityFrom(allHistoryEvents, 0, scheduledActivityEvent.EventId);
+            PopulateAttributes(allHistoryEvents, 0, scheduledActivityEvent.EventId);
             IsActive = true;
         }
     }

@@ -126,7 +126,7 @@ namespace Guflow.Tests.Decider
         {
             var workflowSignaledEvent = new WorkflowSignaledEvent(_graphBuilder.WorkflowSignaledEvent("name", "input","runid","wid"));
 
-            var decisions = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput")).Decisions();
+            var decisions = workflowSignaledEvent.Interpret(new WorkflowToReplyToSignalEvent("newSignal","newInput")).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EqualTo(new []{new SignalWorkflowDecision("newSignal","newInput",workflowSignaledEvent.ExternalWorkflowId,workflowSignaledEvent.ExternalWorkflowRunid)}));
         }

@@ -1,5 +1,6 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow;
@@ -8,33 +9,52 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Cause the workflow item to wait for given signals.
+    /// Cause the workflow item to wait for the given signal(s).
     /// </summary>
     public class WorkflowItemWaitAction : WorkflowAction
     {
+        private readonly ScheduleId _scheduleId;
         private readonly WaitForSignalData _data;
-
-        internal WorkflowItemWaitAction(ScheduleId scheduleId, long triggerEventId, SignalWaitType waitType, params string[] signalNames)
+        private TimeSpan? _timerWait = null;
+        private DateTime _waitingEventTimeStamp;
+        internal WorkflowItemWaitAction(WorkflowItemEvent itemEvent, SignalWaitType waitType, params string[] signalNames)
         {
+            _scheduleId = itemEvent.ScheduleId;
+            _waitingEventTimeStamp = itemEvent.Timestamp;
             _data = new WaitForSignalData
             {
-                ScheduleId = scheduleId,
-                TriggerEventId = triggerEventId,
+                ScheduleId = itemEvent.ScheduleId,
+                TriggerEventId = itemEvent.EventId,
                 WaitType = waitType,
                 SignalNames = signalNames,
-                NextAction = SignalNextAction.Continue
+                NextAction = SignalNextAction.Continue,
+                TriggerEventCompletionDate = itemEvent.Timestamp
             };
         }
 
-        internal override IEnumerable<WorkflowDecision> Decisions()
+        internal override IEnumerable<WorkflowDecision> Decisions(IWorkflow workflow)
         {
-            return new[] {new WaitForSignalsDecision(_data)};
+            return new[] {new WaitForSignalsDecision(_data), WaitForSignalTimerDecision(workflow.WorkflowHistoryEvents)};
         }
 
         internal override IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent()
         {
             var historyEvent = SimulatedHistoryEvent();
-            return new[]{new WaitForSignalsEvent(historyEvent, Enumerable.Empty<HistoryEvent>())};
+            var @event = new WaitForSignalsEvent(historyEvent, Enumerable.Empty<HistoryEvent>());
+            @event.SignalReceived += SignalReceived;
+            @event.SignalTimedout += SignalTimedout;
+            return new[]{@event};
+        }
+
+        private void SignalTimedout(object sender, WaitForSignalsEvent e)
+        {
+            _timerWait = null;
+        }
+
+        private void SignalReceived(WaitForSignalsEvent sender, string args)
+        {
+            if (!sender.IsExpectingSignals)
+                _timerWait = null;
         }
 
         private HistoryEvent SimulatedHistoryEvent()
@@ -49,6 +69,17 @@ namespace Guflow.Decider
             return historyEvent;
         }
 
+        private WorkflowDecision WaitForSignalTimerDecision(IWorkflowHistoryEvents historyEvents)
+        {
+            if(_timerWait==null) return WorkflowDecision.Empty;
+
+            var delay = historyEvents.ServerTimeUtc - _waitingEventTimeStamp;
+            if(delay > _timerWait.Value) return ScheduleTimerDecision.SignalTimer(_scheduleId, _data.TriggerEventId, TimeSpan.Zero);
+            var timeout = _timerWait.Value - delay;
+            return ScheduleTimerDecision.SignalTimer(_scheduleId, _data.TriggerEventId, timeout);
+        }
+
+
         /// <summary>
         /// Reschedule the waiting item on receiving the necessary signals.
         /// </summary>
@@ -56,6 +87,18 @@ namespace Guflow.Decider
         public WorkflowItemWaitAction ToReschedule()
         {
             _data.NextAction = SignalNextAction.Reschedule;
+            return this;
+        }
+        /// <summary>
+        /// Wait for the signal(s) for the given duration, if the signal(s) are not received by the given duration workflow execution will resume. Signal APIs can be used to determine if
+        /// workflow execution is resumed because of the signal or the timeout.
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        public WorkflowItemWaitAction For(TimeSpan timeout)
+        {
+            _timerWait = timeout;
+            _data.Timeout = timeout;
             return this;
         }
 

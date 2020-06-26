@@ -5,15 +5,16 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Raised when activity is cancelled.
+    /// Raised when activity is cancelled. By default workflow will cancel the workflow on processing the <see cref="ActivityCancelledEvent"/>.
     /// </summary>
     public class ActivityCancelledEvent : ActivityEvent
     {
         private readonly ActivityTaskCanceledEventAttributes _eventAttributes;
-        internal ActivityCancelledEvent(HistoryEvent cancelledActivityEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(cancelledActivityEvent.EventId)
+        internal ActivityCancelledEvent(HistoryEvent cancelledActivityEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+            :base(cancelledActivityEvent)
         {
             _eventAttributes = cancelledActivityEvent.ActivityTaskCanceledEventAttributes;
-            PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
+            PopulateAttributes(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
         /// <summary>
         /// Returns last details status of reported by activity heartbeat.
@@ -23,11 +24,6 @@ namespace Guflow.Decider
         internal override WorkflowAction Interpret(IWorkflow workflow)
         {
             return workflow.WorkflowAction(this);
-        }
-
-        internal bool IsCancelledEventFor(long cancelRequestedEventId)
-        {
-            return _eventAttributes.LatestCancelRequestedEventId == cancelRequestedEventId;
         }
 
         internal override WorkflowAction DefaultAction(IWorkflowDefaultActions defaultActions)

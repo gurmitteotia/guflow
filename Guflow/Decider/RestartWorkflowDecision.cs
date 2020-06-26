@@ -8,11 +8,11 @@ namespace Guflow.Decider
     internal sealed class RestartWorkflowDecision : WorkflowClosingDecision
     {
         private readonly RestartWorkflowAction _restartWorkflowAction;
-        private const int _medium = 12;
+        private const int Medium = 12;
         public RestartWorkflowDecision(RestartWorkflowAction restartWorkflowAction)
         {
             _restartWorkflowAction = restartWorkflowAction;
-            Priority = _medium;
+            Priority = Medium;
         }
 
         internal override Decision SwfDecision()

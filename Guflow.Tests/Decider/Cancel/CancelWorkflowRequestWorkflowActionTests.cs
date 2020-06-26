@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -22,7 +23,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Returns_cancel_request_workflow_decision()
         {
-            var workflowDecisions = WorkflowAction.CancelWorkflowRequest("wid", "rid").Decisions();
+            var workflowDecisions = WorkflowAction.CancelWorkflowRequest("wid", "rid").Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(workflowDecisions,Is.EqualTo(new[]{new CancelRequestWorkflowDecision("wid","rid")}));
         }

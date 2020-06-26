@@ -2,6 +2,7 @@
 
 using System.Linq;
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -33,7 +34,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_fails_the_workflow()
         {
-            var decision = _event.Interpret(new WorkflowWithLambda()).Decisions();
+            var decision = _event.Interpret(new WorkflowWithLambda()).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decision, Is.EqualTo(new[]{new FailWorkflowDecision("reason", "details")}));
         }

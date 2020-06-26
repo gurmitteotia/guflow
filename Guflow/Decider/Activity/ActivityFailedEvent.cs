@@ -11,18 +11,19 @@ namespace Guflow.Decider
     {
         private readonly ActivityTaskFailedEventAttributes _eventAttributes;
 
-        internal ActivityFailedEvent(HistoryEvent activityFailedHistoryEvent, IEnumerable<HistoryEvent> allHistoryEvents) : base(activityFailedHistoryEvent.EventId)
+        internal ActivityFailedEvent(HistoryEvent activityFailedHistoryEvent, IEnumerable<HistoryEvent> allHistoryEvents) 
+            : base(activityFailedHistoryEvent)
         {
             _eventAttributes = activityFailedHistoryEvent.ActivityTaskFailedEventAttributes;
-            PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
+            PopulateAttributes(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
 
         /// <summary>
-        /// Returns reason why activity has failed.
+        /// Returns the reason why activity has failed.
         /// </summary>
         public string Reason => _eventAttributes.Reason;
         /// <summary>
-        /// Returns details for activity failure.
+        /// Returns the details for activity failure.
         /// </summary>
         public string Details => _eventAttributes.Details;
 

@@ -9,7 +9,8 @@ namespace Guflow.Decider
     /// </summary>
     public class LambdaSchedulingFailedEvent : WorkflowItemEvent
     {
-        internal LambdaSchedulingFailedEvent(HistoryEvent failedEvent) : base(failedEvent.EventId)
+        internal LambdaSchedulingFailedEvent(HistoryEvent failedEvent)
+            : base(failedEvent)
         {
             var attr = failedEvent.ScheduleLambdaFunctionFailedEventAttributes;
             ScheduleId = ScheduleId.Raw(attr.Id);

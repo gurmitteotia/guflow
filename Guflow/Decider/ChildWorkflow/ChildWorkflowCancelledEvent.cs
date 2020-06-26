@@ -12,7 +12,7 @@ namespace Guflow.Decider
     {
         private readonly ChildWorkflowExecutionCanceledEventAttributes _attr;
         internal ChildWorkflowCancelledEvent(HistoryEvent cancelledEvent, IEnumerable<HistoryEvent> allEvents)
-            : base(cancelledEvent.EventId)
+            : base(cancelledEvent)
         {
             _attr = cancelledEvent.ChildWorkflowExecutionCanceledEventAttributes;
             PopulateProperties(_attr.WorkflowExecution.RunId, _attr.InitiatedEventId, allEvents);

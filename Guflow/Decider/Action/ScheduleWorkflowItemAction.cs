@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Guflow.Decider
 {
+    /// <summary>
+    /// Cause a workflow item to schedule.
+    /// </summary>
     public sealed class ScheduleWorkflowItemAction : WorkflowAction
     {
         private readonly WorkflowItem _workflowItem;
@@ -27,7 +30,7 @@ namespace Guflow.Decider
         }
 
         /// <summary>
-        /// Cause the item to reschedule after a given timeout.
+        /// Cause the item to schedule after a given timeout.
         /// </summary>
         /// <param name="timeout"></param>
         /// <returns></returns>
@@ -37,7 +40,7 @@ namespace Guflow.Decider
             return this;
         }
         /// <summary>
-        /// Limit the rescheduling. Once the limit is reached, Guflow returns the default WorkflowAction for event.
+        /// Limit the scheduling. Once the limit is reached, Guflow returns the default WorkflowAction for event.
         /// </summary>
         /// <param name="times"></param>
         /// <returns></returns>
@@ -48,9 +51,9 @@ namespace Guflow.Decider
                 _scheduleWorkflowAction = _workflowItem.DefaultActionOnLastEvent();
             return this;
         }
-        internal override IEnumerable<WorkflowDecision> Decisions()
+        internal override IEnumerable<WorkflowDecision> Decisions(IWorkflow workflow)
         {
-            return _scheduleWorkflowAction.Decisions();
+            return _scheduleWorkflowAction.Decisions(workflow);
         }
     }
 }

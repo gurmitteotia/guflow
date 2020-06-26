@@ -28,6 +28,16 @@ namespace Guflow.Decider
             return null;
         }
 
+        public static WaitForSignalsEvent FirstOrDefault(this IEnumerable<WaitForSignalsEvent> events, WorkflowItem workflowItem, long triggerEventId)
+        {
+            foreach (var waitEvent in events)
+            {
+                if (waitEvent.IsFor(workflowItem, triggerEventId))
+                    return waitEvent;
+            }
+            return null;
+        }
+
         public static WaitForSignalsEvent FirstOrDefault(this IEnumerable<WaitForSignalsEvent> events, WorkflowItem workflowItem)
         {
             foreach (var waitEvent in events)
@@ -38,9 +48,28 @@ namespace Guflow.Decider
 
             return null;
         }
+
+        public static WaitForSignalsEvent FirstOrDefault(this IEnumerable<WaitForSignalsEvent> @events,
+            long timeoutTriggerEventId)
+        {
+            foreach(var waitEvent in @events)
+            {
+                if (waitEvent.HasTimedoutTriggerId(timeoutTriggerEventId))
+                {
+                    return waitEvent;
+                }
+            }
+
+            return null;
+        }
         private static bool IsFor(this WaitForSignalsEvent @event, WorkflowItem item, string signalName)
         {
             return @event.IsWaitingForSignal(signalName) && @event.IsFor(item);
+        }
+
+        private static bool IsFor(this WaitForSignalsEvent @event, WorkflowItem item, long triggerEventId)
+        {
+            return @event.TriggerEventId==triggerEventId && @event.IsFor(item);
         }
     }
 }

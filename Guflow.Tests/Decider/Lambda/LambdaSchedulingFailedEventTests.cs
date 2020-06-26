@@ -1,6 +1,7 @@
 ﻿// /Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root folder for license information.
 
 using Guflow.Decider;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -30,7 +31,7 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_fails_the_workflow()
         {
-            var decision = _event.Interpret(new WorkflowWithLambda()).Decisions();
+            var decision = _event.Interpret(new WorkflowWithLambda()).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decision, Is.EqualTo(new[] { new FailWorkflowDecision("LAMBDA_FUNCTION_SCHEDULING_FAILED", "reason") }));
         }

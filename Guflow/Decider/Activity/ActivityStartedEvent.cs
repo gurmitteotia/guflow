@@ -9,9 +9,10 @@ namespace Guflow.Decider
     /// </summary>
     public class ActivityStartedEvent : ActivityEvent
     {
-        internal ActivityStartedEvent(HistoryEvent activityStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents) : base(activityStartedEvent.EventId)
+        internal ActivityStartedEvent(HistoryEvent activityStartedEvent, IEnumerable<HistoryEvent> allHistoryEvents) 
+            : base(activityStartedEvent)
         {
-            PopulateActivityFrom(allHistoryEvents,activityStartedEvent.EventId,activityStartedEvent.ActivityTaskStartedEventAttributes.ScheduledEventId);
+            PopulateAttributes(allHistoryEvents,activityStartedEvent.EventId,activityStartedEvent.ActivityTaskStartedEventAttributes.ScheduledEventId);
             IsActive = true;
         }
     }

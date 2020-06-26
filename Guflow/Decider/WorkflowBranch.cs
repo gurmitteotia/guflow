@@ -34,8 +34,8 @@ namespace Guflow.Decider
             var allBranches = new List<WorkflowBranch>();
 
             var childBranch = new WorkflowBranch(workflow, startItem);
-            if (childBranch.Childs().Any())
-                foreach (var child in childBranch.Childs())
+            if (childBranch.Children().Any())
+                foreach (var child in childBranch.Children())
                     allBranches.Add(childBranch.Add(child));
             else
                 allBranches.Add(childBranch);
@@ -49,7 +49,7 @@ namespace Guflow.Decider
                 .SelectMany(p=>ParentBranches(p,_workflow));
         }
 
-        private IEnumerable<WorkflowBranch> Childs()
+        private IEnumerable<WorkflowBranch> Children()
         {
             return _workflowItems.Last().Children()
                 .SelectMany(i=>ChildBranches(i,_workflow));
@@ -71,15 +71,25 @@ namespace Guflow.Decider
             var latestEvent = sortedLastEvents.First();
 
             var latestEventItem = _workflowItems.First(i => latestEvent.IsFor(i));
-            var action = latestEvent.Interpret(_workflow);
-            var triggeredAction = action.TriggeredAction(latestEventItem);
+            WorkflowAction action;
+            try
+            {
+                _workflow.PushNewExecutingEvent(latestEvent);
+                action = latestEvent.Interpret(_workflow);
+                var triggeredAction = action.TriggeredAction(latestEventItem);
 
-            var immediateParent = _workflowItems.First();
-            if (latestEvent.IsFor(immediateParent) && triggeredAction.ReadyToScheduleChildren)
-                return false;
+                var immediateParent = _workflowItems.First();
+                if (latestEvent.IsFor(immediateParent) && triggeredAction.ReadyToScheduleChildren)
+                    return false;
 
-            var parentItems = parentBranches.SelectMany(b => b._workflowItems);
-            return triggeredAction.CanScheduleAny(parentItems);
+                var parentItems = parentBranches.SelectMany(b => b._workflowItems);
+                return triggeredAction.CanScheduleAny(_workflow, parentItems);
+
+            }
+            finally
+            {
+                _workflow.PopExecutingEvent();
+            }
         }
 
         public WorkflowItem FindFirstJointItem(WorkflowItem beforeItem)

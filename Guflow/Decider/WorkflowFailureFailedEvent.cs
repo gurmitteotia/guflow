@@ -9,7 +9,8 @@ namespace Guflow.Decider
     public class WorkflowFailureFailedEvent: WorkflowEvent
     {
         private readonly FailWorkflowExecutionFailedEventAttributes _eventAttributes;
-        internal WorkflowFailureFailedEvent(HistoryEvent workflowFailureFailedEvent) :base(workflowFailureFailedEvent.EventId)
+        internal WorkflowFailureFailedEvent(HistoryEvent workflowFailureFailedEvent) 
+            :base(workflowFailureFailedEvent)
         {
             _eventAttributes = workflowFailureFailedEvent.FailWorkflowExecutionFailedEventAttributes;
         }

@@ -11,7 +11,7 @@ namespace Guflow.Decider
     public sealed class ChildWorkflowTerminatedEvent : ChildWorkflowEvent
     {
         internal ChildWorkflowTerminatedEvent(HistoryEvent terminatedEvent, IEnumerable<HistoryEvent> allEvents)
-            : base(terminatedEvent.EventId)
+            : base(terminatedEvent)
         {
             var attr = terminatedEvent.ChildWorkflowExecutionTerminatedEventAttributes;
             PopulateProperties(attr.WorkflowExecution.RunId, attr.InitiatedEventId, allEvents);

@@ -77,7 +77,7 @@ namespace Guflow.Tests.Decider
             var graph = _graphBuilder.LambdaCompletedEventGraph(_confirmEmailId, "input", "result");
             _builder.AddProcessedEvents(graph);
             _builder.AddProcessedEvents(_graphBuilder.WaitForSignalEvent(_confirmEmailId, graph.First().EventId, new[] { "Confirmed" }, SignalWaitType.Any));
-            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("Confirmed", ""));
+            _builder.AddNewEvents(_graphBuilder.WorkflowSignaledEvent("UnexpectedSignal", ""));
 
             var workflow = new UserActivateWorkflowWithUnexpectedSignal();
             Assert.Throws<SignalResumeException>(() => workflow.Decisions(_builder.Result()));
@@ -476,7 +476,10 @@ namespace Guflow.Tests.Decider
             }
 
             [SignalEvent]
-            public WorkflowAction Confirmed() => Lambda("ConfirmEmail").Resume("UnexpectedSignal");
+            public WorkflowAction UnexpectedSignal(WorkflowSignaledEvent signal)
+            {
+                return Lambda("ConfirmEmail").Resume(signal);
+            } 
         }
 
         private class NonWaitingUserActivateWorkflow : Workflow
@@ -488,7 +491,7 @@ namespace Guflow.Tests.Decider
             }
 
             [SignalEvent]
-            public WorkflowAction Confirmed(string signalName) => Lambda("ConfirmEmail").Resume(signalName);
+            public WorkflowAction Confirmed(WorkflowSignaledEvent signal) => Lambda("ConfirmEmail").Resume(signal);
         }
         private class UserActivateWorkflowWithCustomResume : Workflow
         {
@@ -500,10 +503,10 @@ namespace Guflow.Tests.Decider
             }
 
             [SignalEvent]
-            public WorkflowAction Confirmed(string signalName)
+            public WorkflowAction Confirmed(WorkflowSignaledEvent signal, string signalName)
             {
                 if (Lambda("ConfirmEmail").IsWaitingForSignal(signalName))
-                    return Lambda("ConfirmEmail").Resume(signalName);
+                    return Lambda("ConfirmEmail").Resume(signal);
                 return Ignore;
             }
         }
@@ -537,12 +540,12 @@ namespace Guflow.Tests.Decider
             }
 
             [SignalEvent]
-            public WorkflowAction Confirmed(string signalName)
+            public WorkflowAction Confirmed(WorkflowSignaledEvent signal, string signalName)
             {
                 WorkflowAction result = Ignore;
                 foreach (var item in WaitingItems(signalName))
                 {
-                    result += item.Resume(signalName);
+                    result += item.Resume(signal);
                 }
 
                 return result;

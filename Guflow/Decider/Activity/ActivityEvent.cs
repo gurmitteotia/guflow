@@ -1,4 +1,6 @@
 ﻿// Copyright (c) Gurmit Teotia. Please see the LICENSE file in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.SimpleWorkflow.Model;
@@ -24,8 +26,8 @@ namespace Guflow.Decider
         /// Returns the input activity was scheduled with.
         /// </summary>
         public string Input { get; private set; }
-        protected ActivityEvent(long eventId)
-            : base(eventId)
+        protected ActivityEvent(HistoryEvent historyEvent)
+            : base(historyEvent)
         {
         }
         /// <summary>
@@ -34,7 +36,7 @@ namespace Guflow.Decider
         /// <param name="allHistoryEvents"></param>
         /// <param name="startedEventId"></param>
         /// <param name="scheduledEventId"></param>
-        protected void PopulateActivityFrom(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
+        protected void PopulateAttributes(IEnumerable<HistoryEvent> allHistoryEvents, long startedEventId, long scheduledEventId)
         {
             bool foundActivityScheduledEvent=false;
             _startedEventId = startedEventId;

@@ -72,8 +72,8 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_schedule_the_child_when_one_of_its_parent_activity_ignores_the_action_by_keeping_the_branch_active()
         {
+            _eventsBuilder.AddProcessedEvents(CompletedActivityEventGraph(_siblingActivityName, _siblingActivityVersion));
             _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion, _positionalName));
-            _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_siblingActivityName, _siblingActivityVersion));
             
             var workflow = new WorkflowWithAParentIgnoringCompleteEvent();
 
@@ -85,11 +85,11 @@ namespace Guflow.Tests.Decider
         [Test]
         public void Does_not_schedule_the_child_when_one_of_its_parent_activity_is_active()
         {
-            _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion, _positionalName));
-            _eventsBuilder.AddNewEvents(_eventGraphBuilder
+            _eventsBuilder.AddProcessedEvents(_eventGraphBuilder
                 .ActivityScheduledGraph(Identity.New(_siblingActivityName, _siblingActivityVersion).ScheduleId())
                 .ToArray());
-
+            _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion, _positionalName));
+            
             var workflow = new WorkflowWithMultipleParents();
 
             var decisions = workflow.Decisions(_eventsBuilder.Result());
@@ -153,10 +153,12 @@ namespace Guflow.Tests.Decider
             var childTimeout = TimeSpan.FromSeconds(2);
             var workflow = new WorkflowWithParentChildTimers(parentTimer, childTimer,childTimeout);
             _eventsBuilder.AddNewEvents(TimerFiredEventGraph(parentTimer));
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_eventsBuilder.Result()).ToArray();
 
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(childTimer).ScheduleId(), childTimeout) }));
+            var scheduleId = Identity.Timer(childTimer).ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, childTimeout);
         }
 
         [Test]
@@ -177,9 +179,11 @@ namespace Guflow.Tests.Decider
             const string timerName = "timer";
             var workflow = new WorkflowWithParentActivityAndChildTimers(timerName);
             _eventsBuilder.AddNewEvents(CompletedActivityEventGraph(_activityName, _activityVersion, _positionalName));
-            var decisions = workflow.Decisions(_eventsBuilder.Result());
+            var decisions = workflow.Decisions(_eventsBuilder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.Timer(timerName).ScheduleId(),new TimeSpan())}));
+            var scheduleId = Identity.Timer(timerName).ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, new TimeSpan());
         }
 
         [Test]

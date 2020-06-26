@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using Guflow.Decider;
 using Guflow.Tests.TestWorkflows;
+using Moq;
 using NUnit.Framework;
 
 namespace Guflow.Tests.Decider
@@ -54,15 +55,17 @@ namespace Guflow.Tests.Decider
         [Test]
         public void By_default_schedule_children()
         {
-            var decisions = new ChildWorkflow().Decisions(_builder.Result());
+            var decisions = new ChildWorkflow().Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new []{new ScheduleTimerDecision(Identity.Timer("TimerName").ScheduleId(), TimeSpan.Zero)}));
+            var scheduleId = Identity.Timer("TimerName").ScheduleId();
+            Assert.That(decisions.Length, Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]
         public void Throws_exception_when_child_workflow_item_is_not_found_in_workflow()
         {
-           Assert.Throws<IncompatibleWorkflowException>(()=> _event.Interpret(new EmptyWorkflow()).Decisions());
+           Assert.Throws<IncompatibleWorkflowException>(()=> _event.Interpret(new EmptyWorkflow()).Decisions(Mock.Of<IWorkflow>()));
         }
 
         [Test]

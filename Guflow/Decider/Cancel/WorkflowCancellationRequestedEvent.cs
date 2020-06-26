@@ -11,7 +11,7 @@ namespace Guflow.Decider
         private readonly WorkflowExecutionCancelRequestedEventAttributes _eventAttributes;
 
         internal WorkflowCancellationRequestedEvent(HistoryEvent cancellationRequestedEvent)
-            : base(cancellationRequestedEvent.EventId)
+            : base(cancellationRequestedEvent)
         {
             _eventAttributes = cancellationRequestedEvent.WorkflowExecutionCancelRequestedEventAttributes;
         }

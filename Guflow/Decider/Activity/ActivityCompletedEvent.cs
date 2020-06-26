@@ -5,15 +5,16 @@ using Amazon.SimpleWorkflow.Model;
 namespace Guflow.Decider
 {
     /// <summary>
-    /// Represent an activity completed event.
+    /// Represent an activity completed event. By default workflow execution will continue in processing the <see cref="ActivityCompletedEvent"/>.
     /// </summary>
     public class ActivityCompletedEvent : ActivityEvent
     {
         private readonly ActivityTaskCompletedEventAttributes _eventAttributes;
-        internal ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents):base(activityCompletedEvent.EventId)
+        internal ActivityCompletedEvent(HistoryEvent activityCompletedEvent, IEnumerable<HistoryEvent> allHistoryEvents)
+            :base(activityCompletedEvent)
         {
             _eventAttributes = activityCompletedEvent.ActivityTaskCompletedEventAttributes;
-            PopulateActivityFrom(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
+            PopulateAttributes(allHistoryEvents, _eventAttributes.StartedEventId, _eventAttributes.ScheduledEventId);
         }
 
         /// <summary>

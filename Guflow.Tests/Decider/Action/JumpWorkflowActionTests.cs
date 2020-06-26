@@ -39,7 +39,7 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(Identity.Timer("Somename"), _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions, Is.EquivalentTo(workflowItem.ScheduleDecisions()));
         }
@@ -51,9 +51,10 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>()).ToArray();
 
-            Assert.That(decisions, Is.EquivalentTo(new[]{new ScheduleTimerDecision(identity.ScheduleId(),TimeSpan.Zero) }));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(identity.ScheduleId(), TimeSpan.Zero);
         }
 
         [Test]
@@ -69,20 +70,23 @@ namespace Guflow.Tests.Decider
             var workflowItem = TimerItem.New(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem);
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>()).ToArray();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(scheduleId, TimeSpan.Zero) }));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(scheduleId, TimeSpan.Zero);
         }
 
         [Test]
         public void Returns_timer_decision_when_jumped_after_a_timeout()
         {
-            var workflowItem = new ActivityItem(Identity.New("name", "ver", "pos"), _workflow.Object);
+            var identity = Identity.New("name", "ver", "pos");
+            var workflowItem = new ActivityItem(identity, _workflow.Object);
             var workflowAction = WorkflowAction.JumpTo(null, workflowItem).After(TimeSpan.FromSeconds(2));
 
-            var decisions = workflowAction.Decisions();
+            var decisions = workflowAction.Decisions(Mock.Of<IWorkflow>()).ToArray();
 
-            Assert.That(decisions, Is.EquivalentTo(new[] { new ScheduleTimerDecision(Identity.New("name", "ver", "pos").ScheduleId(), TimeSpan.FromSeconds(2), true) }));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertRescheduleTimer(identity.ScheduleId(), TimeSpan.FromSeconds(2));
         }
 
         [Test]
@@ -102,9 +106,10 @@ namespace Guflow.Tests.Decider
             _builder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new WorkflowToReturnScheduleTimerAction();
 
-            var decisions = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new []{ new ScheduleTimerDecision(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0))}));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0));
         }
 
         [Test]
@@ -113,9 +118,10 @@ namespace Guflow.Tests.Decider
             _builder.AddNewEvents(CompletedActivityGraph(ActivityName, ActivityVersion, PositionalName));
             var workflow = new JumpToTimerWithItsWhenClauseToBeAlwaysFalse();
 
-            var decisions = workflow.Decisions(_builder.Result());
+            var decisions = workflow.Decisions(_builder.Result()).ToArray();
 
-            Assert.That(decisions, Is.EqualTo(new[] { new ScheduleTimerDecision(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0)) }));
+            Assert.That(decisions.Count(), Is.EqualTo(1));
+            decisions[0].AssertWorkflowItemTimer(Identity.Timer("SomeTimer").ScheduleId(), TimeSpan.FromSeconds(0));
         }
 
         [Test]

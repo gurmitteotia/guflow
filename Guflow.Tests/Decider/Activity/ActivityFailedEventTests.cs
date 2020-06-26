@@ -51,7 +51,7 @@ namespace Guflow.Tests.Decider
         {
             var workflow = new SingleActivityWorkflow();
 
-            var decisions = _activityFailedEvent.Interpret(workflow).Decisions();
+            var decisions = _activityFailedEvent.Interpret(workflow).Decisions(Mock.Of<IWorkflow>());
 
             Assert.That(decisions,Is.EqualTo(new []{new FailWorkflowDecision(Reason,Detail)}));
         }

@@ -23,7 +23,7 @@ namespace Guflow.Decider
         protected WorkflowAction():this(Enumerable.Empty<WorkflowDecision>())
         {
         }
-        internal virtual IEnumerable<WorkflowDecision> Decisions()
+        internal virtual IEnumerable<WorkflowDecision> Decisions(IWorkflow workflow)
         {
             return _workflowDecisions;
         }
@@ -33,9 +33,9 @@ namespace Guflow.Decider
 
         internal virtual WorkflowAction WithTriggeredItem(WorkflowItem item) => this;
 
-        internal virtual bool CanScheduleAny(IEnumerable<WorkflowItem> workflowItems)
+        internal virtual bool CanScheduleAny(IWorkflow workflow, IEnumerable<WorkflowItem> workflowItems)
         {
-             return Decisions().Any(d => workflowItems.Any(d.IsFor));
+             return Decisions(workflow).Any(d => workflowItems.Any(d.IsFor));
         }
 
         internal virtual IEnumerable<WaitForSignalsEvent> WaitForSignalsEvent() => Enumerable.Empty<WaitForSignalsEvent>();

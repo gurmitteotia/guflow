@@ -11,7 +11,8 @@ namespace Guflow.Decider
     public sealed class ChildWorkflowFailedEvent : ChildWorkflowEvent
     {
         private readonly ChildWorkflowExecutionFailedEventAttributes _attr;
-        internal ChildWorkflowFailedEvent(HistoryEvent failedEvent, IEnumerable<HistoryEvent> allEvents) : base(failedEvent.EventId)
+        internal ChildWorkflowFailedEvent(HistoryEvent failedEvent, IEnumerable<HistoryEvent> allEvents) 
+            : base(failedEvent)
         {
             _attr = failedEvent.ChildWorkflowExecutionFailedEventAttributes;
             PopulateProperties(_attr.WorkflowExecution.RunId, _attr.InitiatedEventId, allEvents);

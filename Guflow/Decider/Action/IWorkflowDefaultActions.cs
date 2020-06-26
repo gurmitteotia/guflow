@@ -8,6 +8,6 @@ namespace Guflow.Decider
         WorkflowAction FailWorkflow(string reason, string details);
         WorkflowAction CancelWorkflow(string details);
         WorkflowAction Ignore();
-        WorkflowAction ResumeOnSignal(string signalName);
+        WorkflowAction ResumeOnSignal(WorkflowSignaledEvent signal);
     }
 }

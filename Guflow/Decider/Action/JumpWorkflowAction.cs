@@ -23,9 +23,9 @@ namespace Guflow.Decider
             _scheduleAction = ScheduleWorkflowItemAction.ScheduleByIgnoringWhen(jumpToItem);
             _triggeredAction = Default();
         }
-        internal override IEnumerable<WorkflowDecision> Decisions()
+        internal override IEnumerable<WorkflowDecision> Decisions(IWorkflow workflow)
         {
-            return _scheduleAction.Decisions().Concat(_triggeredAction.Decisions());
+            return _scheduleAction.Decisions(workflow).Concat(_triggeredAction.Decisions(workflow));
         }
 
         internal override WorkflowAction WithTriggeredItem(WorkflowItem item)
@@ -54,27 +54,9 @@ namespace Guflow.Decider
         {
             return _scheduleAction.After(timeout);
         }
-        private bool Equals(JumpWorkflowAction other)
-        {
-            return _scheduleAction.Equals(other._scheduleAction);
-        }
-
         private WorkflowAction Default()
         {
             return _triggerItem != null ? new TriggerActions(_triggerItem).FirstJoint(_jumpToItem) : Empty;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((JumpWorkflowAction)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return _scheduleAction.GetHashCode();
         }
     }
   }
