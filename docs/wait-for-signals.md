@@ -1,170 +1,149 @@
 You can implement the human interactions in the workflow using following three signal APIs:
-```
-Good to know:
-1. Signal name is case insensitive.
-2. The signal is ignored if there is no waiting item
-3. All the wait for signals APIs supports timeout
-```
-* **WaitForSignal**: Pause the workflow execution and wait for the specific signal to continue. 
 
-    In the following example, workflow execution will be paused indefinitely on the completion of the Lambda function "SendEmail" and will continue on receiving the "EmailConfirmed" signal.
+1. **WaitForSignal**: Pause the workflow execution and wait for the specific signal to continue. In the following example, workflow execution will be paused indefinitely on the completion of the Lambda function "SendEmail" and will continue on receiving the "EmailConfirmed" signal.
 
-  ```cs
-  public class UserActivateWorkflow: Workflow
-  {
-    public UserActivateWorkflow()
-    {
-       ScheduleLambda("SendEmail").WithInput(_=>new{Id})
-        .OnCompletion(e => e.WaitForSignal("EmailConfirmed"));
-       ScheduleLambda("ActivateUser").AfterLambda("SendEmail");
-    }
-  }
-  ```
-
-    **Note:** In above example Workflow.Id is passed as input to the "SendEmail" Lambda function because Amazon SWF does not automatically pass the workflow Id and RunId to the Lambda function like it does with activities. Inside the "SendEmail" Lambda function you will store the workflow Id and later on use it to send the signal back to workflow. This [example](https://github.com/gurmitteotia/guflow-samples/tree/master/ServerlessManualApproval) can give you further ideas on how to implement the signal APIs.
-
-    In the following example, workflow execution will be paused for 12 hours and will continue on either receiving the "EmailConfirmed" signal or signal being timedout.
-
-  ```cs
-  public class UserActivateWorkflow: Workflow
-  {
-    public UserActivateWorkflow()
-    {
-       ScheduleLambda("SendEmail").WithInput(_=>new{Id})
-        .OnCompletion(e => e.WaitForSignal("EmailConfirmed").For(TimeSpan.FromHours(12)));
-       
-       ScheduleLambda("ActivateUser").AfterLambda("SendEmail")
-        .When(_=>Signal("EmailConfirmed").IsTriggered());
-       
-       ScheduleLambda("FailActivation").AfterLambda("SendEmail")
-        .When(_=>Signal("EmailConfirmed").IsTimedout());
-    }
-  }
-  ```
-
-* **WaitForAnySignal**: Pause the workflow execution until one of the specific signal is received. 
-
-    In the following example ExpenseWorkflow will be paused indefinitely after the execution of the Lambda function- "ApproveExpenses" and will continue on receiving either "Accepted" or "Rejected" signal and it will selectively schedule the Lambda functions based on the received signal.
-
-  ```cs
-  public class ExpenseWorkflow : Workflow
-  {
-     public ExpenseWorkflow()
-     {
-        ScheduleLambda("ApproveExpenses").WithInput(_=>new {Id})
-          .OnCompletion(e => e.WaitForAnySignal("Accepted", "Rejected"));
-
-        ScheduleLambda("SendToAccount").AfterLambda("ApproveExpenses")
-          .When(_ => Signal("Accepted").IsTriggered());
-        ScheduleLambda("SendBackToEmp").AfterLambda("ApproveExpenses")
-          .When(_ => Signal("Rejected").IsTriggered());
-     }
-  }
-  ```
-
-  In the following examples workflow will wait for either "Accepted" or "Rejected" signal for 2 days.
-
-  ```cs
-  public class ExpenseWorkflow : Workflow
-  {
-     public ExpenseWorkflow()
-     {
-        ScheduleLambda("ApproveExpenses").WithInput(_=>new {Id})
-          .OnCompletion(e => e.WaitForAnySignal("Accepted", "Rejected").For(TimeSpan.FromDays(2)));
-
-        ScheduleLambda("SendToAccount").AfterLambda("ApproveExpenses")
-          .When(_ => Signal("Accepted").IsTriggered());
-
-        ScheduleLambda("SendBackToEmp").AfterLambda("ApproveExpenses")
-          .When(_ => Signal("Rejected").IsTriggered());
-        
-        ScheduleLambda("Escalate").AfterLambda("ApproveExpenses")
-          .When(_ => AnySignal("Accepted", "Rejected").IsTimedout());
-     }
-  }
-
-  ```
-    Note: In above example you can also use Signal("Accepted"/"Rejected").IsTimedout() because all the signals provided in WaitForAnySignal API are timedout when the timeout occurs. e.g.
     ```cs
-  public class ExpenseWorkflow : Workflow
-  {
-     public ExpenseWorkflow()
+	public class UserActivateWorkflow: Workflow
+	{
+	  public UserActivateWorkflow()
+	  {
+	    ScheduleLambda("SendEmail").WithInput(_=>new{Id})
+		   .OnCompletion(e => e.WaitForSignal("EmailConfirmed"));
+	    ScheduleLambda("ActivateUser").AfterLambda("SendEmail");
+	  }
+	}
+    ```
+ 
+    **Note:** In above example Workflow.Id is passed as input to the "SendEmail" Lambda function because Amazon SWF does not automatically pass the workflow Id and RunId to the Lambda function like it does with activities. Inside the "SendEmail" Lambda function you will store the workflow Id and later on use it to send the signal back to workflow. 
+
+
+    **Timeout:** In the following example, workflow execution will be paused for 12 hours and will continue on either receiving the "EmailConfirmed" signal or signal being timedout.
+
+      ```cs
+	   public class UserActivateWorkflow: Workflow
+	   {
+	      public UserActivateWorkflow()
+	      {
+	          ScheduleLambda("SendEmail").WithInput(_=>new{Id})
+		       .OnCompletion(e => e.WaitForSignal("EmailConfirmed").For(TimeSpan.FromHours(12)));
+		      ScheduleLambda("ActivateUser").AfterLambda("SendEmail")
+		       .When(_=>Signal("EmailConfirmed").IsTriggered());
+		      ScheduleLambda("FailActivation").AfterLambda("SendEmail")
+		       .When(_=>Signal("EmailConfirmed").IsTimedout());
+	      }
+	  }
+     ```
+
+2. **WaitForAnySignal**: Pause the workflow execution until one of the specific signal is received. In the following example ExpenseWorkflow will be paused indefinitely after the execution of the Lambda function- "ApproveExpenses" and will continue on receiving either "Accepted" or "Rejected" signal and it will selectively schedule the Lambda functions based on the received signal.
+
+    ```cs
+	public class ExpenseWorkflow : Workflow
+	{
+		public ExpenseWorkflow()
+		{
+		   ScheduleLambda("ApproveExpenses").WithInput(_=>new {Id})
+			 .OnCompletion(e => e.WaitForAnySignal("Accepted", "Rejected"));
+		   ScheduleLambda("SendToAccount").AfterLambda("ApproveExpenses")
+			 .When(_ => Signal("Accepted").IsTriggered());
+    	   ScheduleLambda("SendBackToEmp").AfterLambda("ApproveExpenses")
+			 .When(_ => Signal("Rejected").IsTriggered());
+		}
+	}
+    ```
+
+    **Timeout:** In the following examples workflow will wait for either "Accepted" or "Rejected" signal for 2 days.
+
+    ```cs
+	public class ExpenseWorkflow : Workflow
+	{
+		public ExpenseWorkflow()
+		{
+		  ScheduleLambda("ApproveExpenses").WithInput(_=>new {Id})
+			.OnCompletion(e => e.WaitForAnySignal("Accepted", "Rejected").For(TimeSpan.FromDays(2)));
+	  	ScheduleLambda("SendToAccount").AfterLambda("ApproveExpenses")
+			.When(_ => Signal("Accepted").IsTriggered());
+	  	ScheduleLambda("SendBackToEmp").AfterLambda("ApproveExpenses")
+			.When(_ => Signal("Rejected").IsTriggered());
+		  ScheduleLambda("Escalate").AfterLambda("ApproveExpenses")
+			.When(_ => AnySignal("Accepted", "Rejected").IsTimedout());
+		}
+	}
+    ```
+    **Note:** In above example you can also use Signal("Accepted"/"Rejected").IsTimedout() because all the signals provided in WaitForAnySignal API are timedout when the timeout occurs. e.g.
+    ```cs
+	public class ExpenseWorkflow : Workflow
+	{
+		public ExpenseWorkflow()
+		{
+  		  ScheduleLambda("ApproveExpenses").WithInput(_=>new {Id})
+			 .OnCompletion(e => e.WaitForAnySignal("Accepted", "Rejected").For(TimeSpan.FromDays(2)));
+	  	  ScheduleLambda("SendToAccount").AfterLambda("ApproveExpenses")
+			 .When(_ => Signal("Accepted").IsTriggered());
+		  ScheduleLambda("SendBackToEmp").AfterLambda("ApproveExpenses")
+			 .When(_ => Signal("Rejected").IsTriggered());
+  		  ScheduleLambda("Escalate").AfterLambda("ApproveExpenses")
+			 .When(_ => Signal("Accepted").IsTimedout()); //Or .When(_ => Signal("Rejected").IsTimedout());
+		}
+	}
+    ```
+
+3. **WaitForAllSignals**: Pause the workflow execution and wait for all the specific signals to continue the execution. In the following example workflow will pause the execution after the execution of the "PromoteEmployee" Lambda function and will continue when "HRApproved" and "ManagerApproved" signals are received.
+
+    ```cs
+   public class PromotionWorkflow : Workflow
+   {
+      public PromotionWorkflow()
+      {
+         ScheduleLambda("PromoteEmployee").WithInput(_=>new{Id})
+           .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved"));
+         ScheduleLambda("Promoted").AfterLambda("PromoteEmployee");
+         ScheduleLambda("SendForReviewToHR").AfterLambda("Promoted");
+      }
+   }
+    ```
+    **Timeout**: In this following examples workflow will wait for both signals- HRApproved and ManagerApproved for 2 days:
+
+    ```cs
+     public class PromotionWorkflow : Workflow
      {
-        ScheduleLambda("ApproveExpenses").WithInput(_=>new {Id})
-          .OnCompletion(e => e.WaitForAnySignal("Accepted", "Rejected").For(TimeSpan.FromDays(2)));
-
-        ScheduleLambda("SendToAccount").AfterLambda("ApproveExpenses")
-          .When(_ => Signal("Accepted").IsTriggered());
-
-        ScheduleLambda("SendBackToEmp").AfterLambda("ApproveExpenses")
-          .When(_ => Signal("Rejected").IsTriggered());
-        
-        ScheduleLambda("Escalate").AfterLambda("ApproveExpenses")
-          .When(_ => Signal("Accepted").IsTimedout()); //Or .When(_ => Signal("Rejected").IsTimedout());
+        public PromotionWorkflow()
+        {
+           ScheduleLambda("PromoteEmployee").WithInput(_=>new{Id})
+             .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromDays(2)));
+           ScheduleLambda("Promoted").AfterLambda("PromoteEmployee")
+             .When(_=>AnySignal("HRApproved", "ManagerApproved").IsTriggered());
+           ScheduleLambda("SendForReviewToHR").AfterLambda("Promoted");
+           ScheduleLambda("EscalateApproval").AfterLambda("PromoteEmployee")
+             .When(_=>AnySignal("HRApproved", "ManagerApproved").IsTimedout());
+        }
      }
-  }
+    ```
 
-  ```
-
-* **WaitForAllSignals**: Pause the workflow execution and wait for all the specific signals to continue the execution.
-
-In the following example workflow will pause the execution after the execution of the "PromoteEmployee" Lambda function and will continue when "HRApproved" and "ManagerApproved" signals are received.
-
-  ```cs
-  public class PromotionWorkflow : Workflow
-  {
-     public PromotionWorkflow()
-     {
-        ScheduleLambda("PromoteEmployee").WithInput(_=>new{Id})
-          .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved"));
-        ScheduleLambda("Promoted").AfterLambda("PromoteEmployee");
-        ScheduleLambda("SendForReviewToHR").AfterLambda("Promoted");
-     }
-  }
-  ```
-  In this following examples workflow will wait for both signals- HRApproved and ManagerApproved for 2 days:
-
-  ```cs
-  public class PromotionWorkflow : Workflow
-  {
-     public PromotionWorkflow()
-     {
-        ScheduleLambda("PromoteEmployee").WithInput(_=>new{Id})
-          .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromDays(2)));
-        ScheduleLambda("Promoted").AfterLambda("PromoteEmployee")
-          .When(_=>AnySignal("HRApproved", "ManagerApproved").IsTriggered());
-        ScheduleLambda("SendForReviewToHR").AfterLambda("Promoted");
-        ScheduleLambda("EscalateApproval").AfterLambda("PromoteEmployee")
-          .When(_=>AnySignal("HRApproved", "ManagerApproved").IsTimedout());
-     }
-  }
-  ```
-
-  Note:  It quite possible that when timeout occurs some of the signals of "WaitForAllSignals" APIs are already received and ss shown in the following example you can differentiate which specific signals are timedout:
+    **Note:**  It quite possible that some the signals of "WaitForAllSignals" APIs are already received when timedout occured. You can, as shown in the following example,take different action based on the timeout of a specific signal.
   
-  ```cs
-  public class PromotionWorkflow : Workflow
-  {
-     public PromotionWorkflow()
-     {
-        ScheduleLambda("PromoteEmployee").WithInput(_=>new{Id})
-          .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromDays(2)));
+    ```cs
+    public class PromotionWorkflow : Workflow
+    {
+       public PromotionWorkflow()
+       {
+          ScheduleLambda("PromoteEmployee").WithInput(_=>new{Id})
+            .OnCompletion(e => e.WaitForAllSignals("HRApproved", "ManagerApproved").For(TimeSpan.FromDays(2)));
 
-        ScheduleLambda("Promoted").AfterLambda("PromoteEmployee")
-          .When(_=>AnySignal("HRApproved", "ManagerApproved").IsTriggered());
-        ScheduleLambda("SendForReviewToHR").AfterLambda("Promoted");
-        
-        ScheduleLambda("EscalateApprovalToHR").AfterLambda("PromoteEmployee")
-          .When(_=>Signal("HRApproved").IsTimedout());
-        
-        ScheduleLambda("EscalateApprovalToManager").AfterLambda("PromoteEmployee")
-          .When(_=>Signal("ManagerApproved").IsTimedout());
-     }
-  }
-  ```
+          ScheduleLambda("Promoted").AfterLambda("PromoteEmployee")
+            .When(_=>AnySignal("HRApproved", "ManagerApproved").IsTriggered());
+          ScheduleLambda("SendForReviewToHR").AfterLambda("Promoted");
 
+          ScheduleLambda("EscalateApprovalToHR").AfterLambda("PromoteEmployee")
+            .When(_=>Signal("HRApproved").IsTimedout());
 
-  You can call all of above three "WaitForSignal" APIs anywhere, except [workflow event handler](Workflow-events), in the workflow In the following example workflow waits for the signals after completion of the child workflow:
+          ScheduleLambda("EscalateApprovalToManager").AfterLambda("PromoteEmployee")
+            .When(_=>Signal("ManagerApproved").IsTimedout());
+       }
+    }
+    ```
+
+**Call anywhere in the workflow**: You can call all of above three "wait for signal" APIs anywhere in the workflow. In the following example workflow waits for the signals after completion of the child workflow:
+
 
   ```cs
   public class PromotionWorkflow : Workflow
@@ -209,9 +188,11 @@ In the following example workflow will pause the execution after the execution o
        ScheduleLambda("ShipItem").AfterLambda("ChargeCustomer");
   }   
   ```
+
 <a name="customization">
 **Customization**: 
 </a>
+
 Following sets of APIs should give you enough flexibility to implement the complex workflows. These APIs are also used internally to support the default signal behaviour.:
   * **IWorkflowItem.IsWaitingForSignal**: You can use it to determine if the target workflow item is waiting for the specific signal.
   * **IWorkflowItem.IsWaitingForAnySignal**: You can use it to determine if the target workflow item is waiting for any signal at all.
@@ -222,7 +203,7 @@ Following sets of APIs should give you enough flexibility to implement the compl
   * **Workflow.WaitingItem**: Returns one of the workflow item which will resume the execution on receiving the given signal. If there are multiple workflow items waiting for the specific signal (can happen in parallel branches) then it will return the one, waiting for the longest period.
 
 
-   Following examples will clarify the usage of these APIs:
+   Following examples will clarify the usage of above custom APIs:
 
   **Example 1:** Following example does what workflow will do by default on receiving the signal.
 
@@ -269,8 +250,9 @@ Following sets of APIs should give you enough flexibility to implement the compl
    }
   }
   ``` 
- 
+<a name="alternative">
 **Signal("name").IsTriggered/IsTimedout vs IWorkflowItem.IsSignalled/IsSignalTimedout**:
+</a>
 
 Signal("name").IsTriggered and Signal("name").IsTimedout are handy APIs and are supposed to be used immediately after waiting item. In the following example Signal("name").IsTriggered or Signal("name").IsTimedout does not make sense because these APIs are not used immediately after the WaitForSignal API.
 
@@ -296,7 +278,7 @@ public class UserActivateWorkflow: Workflow
 
 ```
 
-However IWorkflowItem.IsSignalled and IWorkflowItem.IsSignalTimedout APIs can be used anywhere, including [workflow event handler](workflow-event), in the workflow and offer you more flexibility and sometime let you handle [complex scenarios](https://github.com/gurmitteotia/guflow-samples/blob/master/ServerlessManualApproval/Workflows/PermitIssueWorkflow.cs) which are otherwise not possible with former APIs.  Following example shows that IWorkflowItem.IsSignalled/IsSignalTimedout APIs can be used anywhere in the workflow:
+However IWorkflowItem.IsSignalled and IWorkflowItem.IsSignalTimedout APIs can be used anywhere in the workflow and offer you more flexibility and sometime let you handle [complex scenarios](https://github.com/gurmitteotia/guflow-samples/blob/master/ServerlessManualApproval/Workflows/PermitIssueWorkflow.cs) which are otherwise not possible with former APIs.  Following example shows that IWorkflowItem.IsSignalled/IsSignalTimedout APIs can be used anywhere in the workflow:
 
 ```cs
 public class UserActivateWorkflow: Workflow
@@ -308,6 +290,7 @@ public class UserActivateWorkflow: Workflow
 
        ScheduleLambda("RecordAttempt").AfterLambda("SendEmail");
        
+       //ActivateUser Lambda function is not immediate child of SendEmail Lambda function.
        ScheduleLambda("ActivateUser").AfterLambda("RecordAttempt")
         .When(_=>Lambda("SendEmail").IsSignalled("EmailConfirmed"));
        

@@ -176,7 +176,7 @@ Primarily while using Guflow you will pay for:
 Other costs may involve the usage of the Lambda functions, EC2 or docker container for running self hosted activites or any other AWS service (database, S3) you're using to support the workflows. This [document](wiki/Choosing-between-Lambda-functions-and-activities) can help you to choose between Lamdba functions and self hosted activites for your workers.
 
 ### Alternatives
-On AWS stack alternatives are: Amazon [Step functions](step-functions) and Amazon [Flow framework](flow-framework)
+On AWS stack alternatives are: Amazon [Step functions](https://aws.amazon.com/step-functions/) and Amazon [Flow framework](https://docs.aws.amazon.com/amazonswf/latest/awsflowguide/welcome.html)
 
 ### Getting help
 Enable the [logging](wiki/Logging) to look for any obvious error and if problem persist then please raise an [issue](https://github.com/gurmitteotia/guflow/issues) in github
