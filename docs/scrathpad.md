@@ -162,4 +162,8 @@ public class UserActivateWorkflow: Workflow
 Also shown in this [example](https://github.com/gurmitteotia/guflow-samples/blob/master/ServerlessManualApproval/Workflows/PermitIssueWorkflow.cs) certain scenarios can be handled only using IWorkflowItem.IsSignalled/IsSignalTimedout APIs.
 
 
+
+Readme->Hosting.
+ Because workflow state is maintained in [Amazon SWF](https://aws.amazon.com/swf/) you can downsize or upsize the workflow host machine in production.
+
  

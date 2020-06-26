@@ -1,5 +1,5 @@
 ### Guflow
-A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Workflow Service ), lets you write distributive, fault tolerant and scalable workflows using Lambda functions, activities, child workflows and timers with ease.
+A C#.NET library, built on [Amazon SWF](https://aws.amazon.com/swf/) ( Simple Workflow Service ), lets you write distributive, fault tolerant and scalable workflows using Lambda functions and self hosted activities with ease.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/github/gurmitteotia/guflow?svg=true)](https://ci.appveyor.com/project/gurmitteotia/guflow/branch/master)
 ### Installation
@@ -13,16 +13,17 @@ In Guflow you can write-
 * Workflows to orchestrate the scheduling of Lambda functions, activities, child workflows and timers
 * Activities to carry out the task.
 
-Guflow, supporting all the features of [Amazon SWF](https://aws.amazon.com/swf/), is an alternative to Amazon Step functions and the Amazon Flow framework and it provides simplicity and flexbility in one place.
+Guflow not only supports all the features of [Amazon SWF](https://aws.amazon.com/swf/) but also continue to add its own custom APIs to take care of real world requirments with ease.
 
 ### Features:
 Guflow:
-* Allows you to create complex workflows with ease and flexibility
+* Allows you to create complex workflows with ease and [flexibility](wiki/flexibility)
 * Supports parallel execution of the Lambda functions, activities, child workflows and timers in the workflow
 * Supports fork and join of [workflow branches](wiki/Workflow-branches)
-* Supports recursion around an individual item (Lambda function, activity, child workflow and timer) or an execution branch
+* Supports recursion around an individual workflow item or an execution branch
 * Provides equal supports for scheduling the activities written in other framework/language
-* Provides intuitive [signal APIs](wiki/Workflow-signals) to implement human approvals using serverless Lambda functions.
+* Provides rich [signal APIs](wiki/Workflow-signals) to cater for varied requirments including [human approval](wiki/Wait-for-signals)
+* Supports child workflow.
 * Supports async/sync [activity method](wiki/Activity-method)
 * Supports activity throttling
 * Supports activity [heartbeat and cancellation](wiki/Activity-heartbeat-and-cancellation)
@@ -65,7 +66,7 @@ Following example starts two parallel branches which later join to execute the w
     }             
           
 ```
-Above example is discussed in more details in [workflow branching](wiki/Workflow-branches).
+Above example is further evolved in [workflow branching](wiki/Workflow-branches).
 
 
 ### Example 2
@@ -156,8 +157,6 @@ In following example, "ProcessLog" Lambda function is executed recursively withi
           
 ```
 
-
-
 **Features in pipeline:** Please look at [project board](https://github.com/gurmitteotia/guflow/projects/1) to see what is is coming next. If you want some feature to be included in Guflow library or something is not working for you please file an [issue](https://github.com/gurmitteotia/guflow/issues). Your ideas, suggestion and collorbation will greatly help this library and its users.
 
 ### Documentation
@@ -167,14 +166,14 @@ Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tu
 dotnet standard 1.3 onwards
 
 ### Hosting
-You will host workflows execution in either an EC2 intance or in a docker container and for the workers you will either use Lambda functions or self hosted activities. You don't need a high spec machine (docker or EC2 instance) to execute workflows. It is worth to start with lower end machine (docker or EC2 instance) for executing the workflows. You should also explore the option to host the workflow execution on a shared machine instead of a dedicated machine.
+You will host workflows execution in either an EC2 intance or in a docker container and for the workers you will either use Lambda functions or self hosted activities. You don't need a high spec machine (docker or EC2 instance) to execute workflows. It is worth to start with lower end machine (docker or EC2 instance) for executing the workflows. You should also explore the option to host the workflow execution on a shared machine instead of a dedicated machine to keep the cost down.
 
 ### Costs
 Primarily while using Guflow you will pay for:
 1. The usage of [Amazon SWF](https://aws.amazon.com/swf/pricing/)
 1. The docker container or EC2 instance for hosting the workflow executions
 
-Other costs may involve the usage of the Lambda functions, EC2 or docker container for running self hosted activites or any other AWS service (database, S3) you're using to support the workflows. This [document](wiki/Choosing-between-Lambda-functions-and-activities)  help you to decide whether to use Lamdba functions to self hosted activites for your workers.
+Other costs may involve the usage of the Lambda functions, EC2 or docker container for running self hosted activites or any other AWS service (database, S3) you're using to support the workflows. This [document](wiki/Choosing-between-Lambda-functions-and-activities) can help you to choose between Lamdba functions and self hosted activites for your workers.
 
 ### Alternatives
 On AWS stack alternatives are: Amazon [Step functions](step-functions) and Amazon [Flow framework](flow-framework)
