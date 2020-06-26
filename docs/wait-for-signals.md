@@ -1,4 +1,4 @@
-You can implement the human interactions in the workflow using signal APIs. Following three APIs will allow you to implement the human interaction for various requirments:
+You can implement the human interactions in the workflow using following three signal APIs:
 ```
 Good to know:
 1. Signal name is case insensitive.
@@ -209,8 +209,9 @@ In the following example workflow will pause the execution after the execution o
        ScheduleLambda("ShipItem").AfterLambda("ChargeCustomer");
   }   
   ```
+<a name="customization">
 **Customization**: 
-
+</a>
 Following sets of APIs should give you enough flexibility to implement the complex workflows. These APIs are also used internally to support the default signal behaviour.:
   * **IWorkflowItem.IsWaitingForSignal**: You can use it to determine if the target workflow item is waiting for the specific signal.
   * **IWorkflowItem.IsWaitingForAnySignal**: You can use it to determine if the target workflow item is waiting for any signal at all.

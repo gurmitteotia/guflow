@@ -18,14 +18,14 @@ Guflow, supporting all the features of [Amazon SWF](https://aws.amazon.com/swf/)
 ### Features:
 Guflow:
 * Allows you to create complex workflows with ease and flexibility
-* Supports parallel execution of Lambda functions, activities, child workflow and timers in the workflow
-* Supports fork and join of [workflow branches](https://github.com/gurmitteotia/guflow/wiki/Workflow-branches)
-* Supports recursion around an individual item (Lambda function, activity, child workflow and timer) or whole execution branch
+* Supports parallel execution of the Lambda functions, activities, child workflows and timers in the workflow
+* Supports fork and join of [workflow branches](wiki/Workflow-branches)
+* Supports recursion around an individual item (Lambda function, activity, child workflow and timer) or an execution branch
 * Provides equal supports for scheduling the activities written in other framework/language
-* Provides intuitive [signal APIs](https://github.com/gurmitteotia/guflow/wiki/Workflow-signals) to implement human approvals using serverless Lambda functions.
+* Provides intuitive [signal APIs](wiki/Workflow-signals) to implement human approvals using serverless Lambda functions.
 * Supports async/sync [activity method](wiki/Activity-method)
 * Supports activity throttling
-* Supports all the features of Amazon SWF.
+* Supports activity [heartbeat and cancellation](wiki/Activity-heartbeat-and-cancellation)
 
 
 ### Example 1
@@ -138,7 +138,7 @@ In following example, workflow execution will pause when "ReserveItem" is failed
     }             
           
 ```
-You can use the [signal APIs](https://github.com/gurmitteotia/guflow/wiki/Workflow-signals) along with AWS Lambda functions to implement human approvals in your workflows.  A good number of examples involving manual approvals are provided in the [example](https://github.com/gurmitteotia/guflow-samples/tree/master/ServerlessManualApproval) project.
+You can use the [signal APIs](wiki/Workflow-signals) along with AWS Lambda functions to implement human approvals in your workflows.  A good number of examples involving manual approvals are provided in the [example](https://github.com/gurmitteotia/guflow-samples/tree/master/ServerlessManualApproval) project.
 
 ### Example 4
 In following example, "ProcessLog" Lambda function is executed recursively within 1 hour of interval and up to 100 times.
@@ -167,7 +167,7 @@ Guflow is supported by [tutorial](https://github.com/gurmitteotia/guflow/wiki/Tu
 dotnet standard 1.3 onwards
 
 ### Hosting
-You will host workflows execution in either an EC2 intance or a docker container and for the workers you will either use Lambda functions or self hosted activities. You don't need a high spec machine (docker or EC2 instance) to execute workflows. It is worth to start with lower end machine (docker or EC2 instance) for executing the workflows. You should also explore the option to host the workflow execution on a shared machine instead of a dedicated machine.
+You will host workflows execution in either an EC2 intance or in a docker container and for the workers you will either use Lambda functions or self hosted activities. You don't need a high spec machine (docker or EC2 instance) to execute workflows. It is worth to start with lower end machine (docker or EC2 instance) for executing the workflows. You should also explore the option to host the workflow execution on a shared machine instead of a dedicated machine.
 
 ### Costs
 Primarily while using Guflow you will pay for:
@@ -180,4 +180,4 @@ Other costs may involve the usage of the Lambda functions, EC2 or docker contain
 On AWS stack alternatives are: Amazon [Step functions](step-functions) and Amazon [Flow framework](flow-framework)
 
 ### Getting help
-Enable the [logging](https://github.com/gurmitteotia/guflow/wiki/Logging) to look for any obvious error and if problem persist then please raise an [issue](https://github.com/gurmitteotia/guflow/issues) in github
+Enable the [logging](wiki/Logging) to look for any obvious error and if problem persist then please raise an [issue](https://github.com/gurmitteotia/guflow/issues) in github
