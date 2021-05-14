@@ -22,11 +22,11 @@ Guflow:
 * Supports fork and join of [workflow branches](../../wiki/Workflow-branches)
 * Supports recursion around an individual workflow item or an execution branch
 * Provides equal supports for scheduling the activities written in other framework/language
-* Provides rich [signal APIs](wiki/Workflow-signals) to cater for varied requirments including [human approval](wiki/Wait-for-signals)
+* Provides rich [signal APIs](../../wiki/Workflow-signals) to cater for varied requirments including [human approval](../../wiki/Wait-for-signals)
 * Supports child workflow.
-* Supports async/sync [activity method](wiki/Activity-method)
+* Supports async/sync [activity method](../../wiki/Activity-method)
 * Supports activity throttling
-* Supports activity [heartbeat and cancellation](wiki/Activity-heartbeat-and-cancellation)
+* Supports activity [heartbeat and cancellation](../../wiki/Activity-heartbeat-and-cancellation)
 
 
 ### Example 1
@@ -66,7 +66,7 @@ Following example starts two parallel branches which later join to execute the w
     }             
           
 ```
-Above example is further evolved in [workflow branching](wiki/Workflow-branches).
+Above example is further evolved in [workflow branching](../../wiki/Workflow-branches).
 
 
 ### Example 2
@@ -139,7 +139,7 @@ In following example, workflow execution will pause when "ReserveItem" is failed
     }             
           
 ```
-You can use the [signal APIs](wiki/Workflow-signals) along with AWS Lambda functions to implement human approvals in your workflows.  A good number of examples involving manual approvals are provided in the [example](https://github.com/gurmitteotia/guflow-samples/tree/master/ServerlessManualApproval) project.
+You can use the [signal APIs](../../wiki/Workflow-signals) along with AWS Lambda functions to implement human approvals in your workflows.  A good number of examples involving manual approvals are provided in the [example](https://github.com/gurmitteotia/guflow-samples/tree/master/ServerlessManualApproval) project.
 
 ### Example 4
 In following example, "ProcessLog" Lambda function is executed recursively within 1 hour of interval and up to 100 times.
@@ -173,10 +173,10 @@ Primarily while using Guflow you will pay for:
 1. The usage of [Amazon SWF](https://aws.amazon.com/swf/pricing/)
 1. The docker container or EC2 instance for hosting the workflow executions
 
-Other costs may involve the usage of the Lambda functions, EC2 or docker container for running self hosted activites or any other AWS service (database, S3) you're using to support the workflows. This [document](wiki/Choosing-between-Lambda-functions-and-activities) can help you to choose between Lamdba functions and self hosted activites for your workers.
+Other costs may involve the usage of the Lambda functions, EC2 or docker container for running self hosted activites or any other AWS service (database, S3) you're using to support the workflows. This [document](../../wiki/Choosing-between-Lambda-functions-and-activities) can help you to choose between Lamdba functions and self hosted activites for your workers.
 
 ### Alternatives
 On AWS stack alternatives are: Amazon [Step functions](https://aws.amazon.com/step-functions/) and Amazon [Flow framework](https://docs.aws.amazon.com/amazonswf/latest/awsflowguide/welcome.html)
 
 ### Getting help
-Enable the [logging](wiki/Logging) to look for any obvious error and if problem persist then please raise an [issue](https://github.com/gurmitteotia/guflow/issues) in github
+Enable the [logging](../../wiki/Logging) to look for any obvious error and if problem persist then please raise an [issue](https://github.com/gurmitteotia/guflow/issues) in github
